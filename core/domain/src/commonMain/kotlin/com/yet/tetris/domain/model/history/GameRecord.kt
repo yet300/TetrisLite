@@ -1,8 +1,9 @@
 package com.yet.tetris.domain.model.history
 
 import com.yet.tetris.domain.model.game.Difficulty
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import kotlinx.serialization.Serializable
+import kotlin.time.ExperimentalTime
 
 @Serializable
 data class GameRecord(
@@ -12,6 +13,7 @@ data class GameRecord(
     val difficulty: Difficulty,
     val timestamp: Long
 ) {
+    @OptIn(ExperimentalTime::class)
     fun getFormattedDate(): String {
         val instant = Instant.fromEpochMilliseconds(timestamp)
         return instant.toString()
