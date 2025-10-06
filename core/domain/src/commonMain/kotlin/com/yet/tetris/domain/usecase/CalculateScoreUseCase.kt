@@ -1,9 +1,12 @@
 package com.yet.tetris.domain.usecase
 
+import jakarta.inject.Singleton
+
 /**
  * Use case for calculating score based on the number of lines cleared simultaneously.
  * Implements standard Tetris scoring rules.
  */
+@Singleton
 class CalculateScoreUseCase {
     
     /**

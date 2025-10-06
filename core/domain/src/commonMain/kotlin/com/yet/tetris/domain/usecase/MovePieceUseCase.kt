@@ -2,11 +2,13 @@ package com.yet.tetris.domain.usecase
 
 import com.yet.tetris.domain.model.game.GameState
 import com.yet.tetris.domain.model.game.Position
+import jakarta.inject.Singleton
 
 /**
  * Use case for moving the current tetromino in different directions.
  * Validates moves using collision detection before applying them.
  */
+@Singleton
 class MovePieceUseCase(
     private val checkCollision: CheckCollisionUseCase
 ) {

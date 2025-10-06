@@ -4,11 +4,13 @@ import com.yet.tetris.domain.model.game.GameBoard
 import com.yet.tetris.domain.model.game.GameState
 import com.yet.tetris.domain.model.game.Position
 import com.yet.tetris.domain.model.settings.GameSettings
+import jakarta.inject.Singleton
 
 /**
  * Use case for initializing a new game.
  * Sets up the initial game state with an empty board and first two pieces.
  */
+@Singleton
 class StartGameUseCase(
     private val generateTetromino: GenerateTetrominoUseCase
 ) {

@@ -2,12 +2,14 @@ package com.yet.tetris.domain.usecase
 
 import com.yet.tetris.domain.model.game.GameState
 import com.yet.tetris.domain.model.settings.SwipeSensitivity
+import jakarta.inject.Singleton
 import kotlin.math.abs
 
 /**
  * Use case for handling swipe gestures on mobile platforms.
  * Interprets swipe direction and velocity to determine the appropriate game action.
  */
+@Singleton
 class HandleSwipeInputUseCase(
     private val movePiece: MovePieceUseCase,
     private val hardDrop: HardDropUseCase

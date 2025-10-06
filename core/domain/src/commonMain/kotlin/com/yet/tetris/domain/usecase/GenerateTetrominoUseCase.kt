@@ -2,6 +2,7 @@ package com.yet.tetris.domain.usecase
 
 import com.yet.tetris.domain.model.game.Tetromino
 import com.yet.tetris.domain.model.game.TetrominoType
+import jakarta.inject.Singleton
 import kotlin.random.Random
 
 /**
@@ -9,6 +10,7 @@ import kotlin.random.Random
  * This ensures fair distribution of pieces - all 7 pieces appear once before any repeat.
  * This is the standard algorithm used in modern Tetris implementations.
  */
+@Singleton
 class GenerateTetrominoUseCase {
     
     private val bag = mutableListOf<TetrominoType>()
