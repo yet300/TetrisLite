@@ -1,5 +1,6 @@
 package com.yet.tetris.di
 
+import com.app.common.di.CommonModule
 import com.yet.tetris.data.di.DataModule
 import com.yet.tetris.domain.di.DomainModule
 import org.koin.core.context.startKoin
@@ -14,7 +15,7 @@ import kotlin.js.JsExport
 fun initKoin(config: KoinAppDeclaration? = null) {
     startKoin {
         modules(
-            DomainModule().module, DataModule().module
+            DomainModule().module, DataModule().module, CommonModule().module
         )
         config?.invoke(this)
     }
