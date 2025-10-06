@@ -1,4 +1,4 @@
-package com.app.plugins
+package com.yet.plugins
 
 import libs
 import org.gradle.api.Plugin

@@ -6,16 +6,16 @@ gradlePlugin {
     plugins {
         register("kotlinMultiplatform") {
             id = "com.plugins.kotlinMultiplatformPlugin"
-            implementationClass = "com.app.plugins.KotlinMultiplatformPlugin"
+            implementationClass = "com.yet.plugins.KotlinMultiplatformPlugin"
         }
         register("composeMultiplatform") {
             id = "com.plugins.composeMultiplatform"
-            implementationClass = "com.app.plugins.ComposeMultiplatformPlugin"
+            implementationClass = "com.yet.plugins.ComposeMultiplatformPlugin"
         }
     }
 }
 
-group = "com.app.buildlogic"
+group = "com.yet.buildlogic"
 
 dependencies {
     compileOnly(libs.android.gradlePlugin)
