@@ -117,6 +117,12 @@ mvi = [
     "mvikotlin-extensions-coroutines"
 ]
 reaktive = ["reaktive", "reaktive-coroutines-interop"]
+multiplatform-settings = [
+    "multiplatform-settings",
+    "multiplatform-settings-no-arg",
+    "multiplatform-settings-coroutines",
+    "multiplatform-settings-observable"
+]
 testing = [
     "kotlin-test",
     "kotlin-testJunit",
