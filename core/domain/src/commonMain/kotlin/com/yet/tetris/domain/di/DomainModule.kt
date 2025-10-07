@@ -4,5 +4,5 @@ import org.koin.core.annotation.ComponentScan
 import org.koin.core.annotation.Module
 
 @Module
-@ComponentScan("com.yet.tetris.data.usecase")
+@ComponentScan("com.yet.tetris.domain")
 class DomainModule
