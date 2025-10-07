@@ -21,6 +21,8 @@ kotlin {
             baseName = "Shared"
             isStatic = true
 
+            export(libs.bundles.decompose)
+
             export(projects.feature.root)
             export(projects.feature.settings)
             export(projects.feature.game)
@@ -44,9 +46,9 @@ kotlin {
     
     sourceSets {
         commonMain.dependencies {
-            implementation(projects.core.domain)
             implementation(projects.core.data)
             implementation(projects.core.common)
+            api(projects.core.domain)
 
             api(projects.feature.root)
             api(projects.feature.settings)
@@ -54,6 +56,8 @@ kotlin {
             api(projects.feature.tab.main)
             api(projects.feature.tab.home)
             api(projects.feature.tab.history)
+
+            api(libs.bundles.decompose)
 
             implementation(libs.koin.core)
         }
