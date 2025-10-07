@@ -1,13 +1,12 @@
 package com.yet.tetris.feature.game
 
 import com.arkivanov.decompose.ExperimentalDecomposeApi
-import com.arkivanov.decompose.router.webhistory.WebNavigationOwner
 import com.arkivanov.decompose.value.Value
 import com.yet.tetris.domain.model.game.GameState
 import com.yet.tetris.domain.model.settings.GameSettings
 
 @OptIn(ExperimentalDecomposeApi::class)
-interface GameComponent : WebNavigationOwner.NoOp {
+interface GameComponent  {
     val model: Value<Model>
 
     sealed interface Model {

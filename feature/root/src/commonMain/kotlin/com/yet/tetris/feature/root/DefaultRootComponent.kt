@@ -38,7 +38,7 @@ class DefaultRootComponent(
             childSelector = {
                 when (val child = it.instance) {
                     is RootComponent.Child.Tab -> child.component
-                    is RootComponent.Child.Game -> child.component
+                    is RootComponent.Child.Game -> null
                 }
             },
         )
