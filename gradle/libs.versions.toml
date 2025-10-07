@@ -28,7 +28,7 @@ kotlinxDatetime = "0.7.1-0.6.x-compat"
 kotlinxSerializationJson = "1.9.0"
 
 koin = "4.1.1"
-koin-annotation = "2.2.0-RC4"
+koin-annotation = "2.2.0-RC1"
 
 decompose = "3.4.0"
 essenty = "2.5.0"
@@ -125,11 +125,9 @@ multiplatform-settings = [
 ]
 testing = [
     "kotlin-test",
-    "kotlin-testJunit",
     "kotlin-test-annotations",
     "kotlinx-coroutines-test",
     "turbine",
-    "mockk"
 ]
 
 [plugins]
