@@ -39,3 +39,13 @@ include(":core")
 include(":core:domain")
 include(":core:data")
 include(":core:common")
+
+include(":feature")
+include(":feature:root")
+include(":feature:game")
+include(":feature:settings")
+include(":feature:tab")
+
+include(":feature:tab:main")
+include(":feature:tab:home")
+include(":feature:tab:history")
