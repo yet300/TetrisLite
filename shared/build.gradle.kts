@@ -20,6 +20,13 @@ kotlin {
         iosTarget.binaries.framework {
             baseName = "Shared"
             isStatic = true
+
+            export(projects.feature.root)
+            export(projects.feature.settings)
+            export(projects.feature.game)
+            export(projects.feature.tab.main)
+            export(projects.feature.tab.home)
+            export(projects.feature.tab.history)
         }
     }
     
@@ -40,6 +47,13 @@ kotlin {
             implementation(projects.core.domain)
             implementation(projects.core.data)
             implementation(projects.core.common)
+
+            api(projects.feature.root)
+            api(projects.feature.settings)
+            api(projects.feature.game)
+            api(projects.feature.tab.main)
+            api(projects.feature.tab.home)
+            api(projects.feature.tab.history)
 
             implementation(libs.koin.core)
         }
