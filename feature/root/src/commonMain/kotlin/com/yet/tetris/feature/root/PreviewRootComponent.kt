@@ -7,7 +7,7 @@ import com.arkivanov.decompose.router.stack.ChildStack
 import com.arkivanov.decompose.router.webhistory.WebNavigationOwner
 import com.arkivanov.decompose.value.MutableValue
 import com.arkivanov.decompose.value.Value
-import com.yet.tetris.feature.tab.main.PreviewMainComponent
+import com.yet.tetris.feature.home.PreviewHomeComponent
 
 @OptIn(ExperimentalDecomposeApi::class)
 class PreviewRootComponent :
@@ -17,7 +17,7 @@ class PreviewRootComponent :
         MutableValue(
             ChildStack(
                 configuration = Unit,
-                instance = RootComponent.Child.Tab(PreviewMainComponent()),
+                instance = RootComponent.Child.Home(PreviewHomeComponent()),
             )
         )
 

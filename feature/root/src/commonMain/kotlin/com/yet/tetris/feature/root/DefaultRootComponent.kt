@@ -10,8 +10,8 @@ import com.arkivanov.decompose.router.stack.pop
 import com.arkivanov.decompose.router.stack.push
 import com.arkivanov.decompose.router.webhistory.WebNavigation
 import com.arkivanov.decompose.value.Value
-import com.yet.tetris.feature.tab.main.DefaultMainComponent
 import com.yet.tetris.feature.game.DefaultGameComponent
+import com.yet.tetris.feature.home.DefaultHomeComponent
 import kotlinx.serialization.Serializable
 import org.koin.core.component.KoinComponent
 
@@ -24,7 +24,7 @@ class DefaultRootComponent(
     private val stack = childStack(
         source = navigation,
         serializer = Configuration.serializer(),
-        initialConfiguration = Configuration.TabScreen,
+        initialConfiguration = Configuration.HomeScreen,
         childFactory = ::createChild,
     )
 
@@ -37,7 +37,7 @@ class DefaultRootComponent(
             serializer = Configuration.serializer(),
             childSelector = {
                 when (val child = it.instance) {
-                    is RootComponent.Child.Tab -> child.component
+                    is RootComponent.Child.Home -> null
                     is RootComponent.Child.Game -> null
                 }
             },
@@ -56,10 +56,10 @@ class DefaultRootComponent(
         componentContext: ComponentContext,
     ): RootComponent.Child = when (config) {
 
-        Configuration.TabScreen -> RootComponent.Child.Tab(
-            component = DefaultMainComponent(
+        Configuration.HomeScreen -> RootComponent.Child.Home(
+            component = DefaultHomeComponent(
                 componentContext = componentContext,
-                onGame = { navigation.push(Configuration.GameScreen) },
+                navigateToGame = { navigation.push(Configuration.GameScreen) },
             )
         )
 
@@ -76,7 +76,7 @@ class DefaultRootComponent(
     sealed class Configuration {
 
         @Serializable
-        data object TabScreen : Configuration()
+        data object HomeScreen : Configuration()
 
         @Serializable
         data object GameScreen : Configuration()
