@@ -24,9 +24,7 @@ class DefaultSettingsComponent(
     private val onSettingsSaved: () -> Unit,
     private val onDismiss: () -> Unit
 ) : ComponentContext by componentContext, SettingsComponent, KoinComponent {
-
-    private val settingsStoreFactory: SettingsStoreFactory by inject()
-    private val store = instanceKeeper.getStore { settingsStoreFactory.create() }
+    private val store = instanceKeeper.getStore { SettingsStoreFactory().create() }
 
     init {
         coroutineScope().launch {

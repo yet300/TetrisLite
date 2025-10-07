@@ -11,14 +11,12 @@ import com.yet.tetris.feature.tab.history.store.HistoryStore
 import com.yet.tetris.feature.tab.history.store.HistoryStoreFactory
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+
 
 class DefaultHistoryComponent(
     componentContext: ComponentContext
 ) : ComponentContext by componentContext, HistoryComponent, KoinComponent {
-
-    private val historyStoreFactory: HistoryStoreFactory by inject()
-    private val store = instanceKeeper.getStore { historyStoreFactory.create() }
+    private val store = instanceKeeper.getStore { HistoryStoreFactory().create() }
 
     init {
         coroutineScope().launch {

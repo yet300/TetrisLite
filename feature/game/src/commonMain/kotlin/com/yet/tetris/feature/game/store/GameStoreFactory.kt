@@ -16,25 +16,25 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import org.koin.core.annotation.Factory
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
-@Factory
-internal class GameStoreFactory(
-    private val storeFactory: StoreFactory,
-    private val gameSettingsRepository: GameSettingsRepository,
-    private val gameStateRepository: GameStateRepository,
-    private val gameHistoryRepository: GameHistoryRepository,
-    private val startGameUseCase: StartGameUseCase,
-    private val movePieceUseCase: MovePieceUseCase,
-    private val rotatePieceUseCase: RotatePieceUseCase,
-    private val hardDropUseCase: HardDropUseCase,
-    private val lockPieceUseCase: LockPieceUseCase,
-    private val handleSwipeInputUseCase: HandleSwipeInputUseCase
-) {
+internal class GameStoreFactory : KoinComponent {
+    
+    private val storeFactory: StoreFactory by inject()
+    private val gameSettingsRepository: GameSettingsRepository by inject()
+    private val gameStateRepository: GameStateRepository by inject()
+    private val gameHistoryRepository: GameHistoryRepository by inject()
+    private val startGameUseCase: StartGameUseCase by inject()
+    private val movePieceUseCase: MovePieceUseCase by inject()
+    private val rotatePieceUseCase: RotatePieceUseCase by inject()
+    private val hardDropUseCase: HardDropUseCase by inject()
+    private val lockPieceUseCase: LockPieceUseCase by inject()
+    private val handleSwipeInputUseCase: HandleSwipeInputUseCase by inject()
     
     fun create(): GameStore =
         object : GameStore, Store<GameStore.Intent, GameStore.State, GameStore.Label> by storeFactory.create(

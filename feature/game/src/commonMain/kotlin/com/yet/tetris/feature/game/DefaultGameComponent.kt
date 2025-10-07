@@ -12,7 +12,6 @@ import com.yet.tetris.feature.game.store.GameStore
 import com.yet.tetris.feature.game.store.GameStoreFactory
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 
 
 class DefaultGameComponent(
@@ -20,8 +19,7 @@ class DefaultGameComponent(
     private val navigateBack: () -> Unit,
 ) : ComponentContext by componentContext, GameComponent, KoinComponent {
 
-    private val gameStoreFactory: GameStoreFactory by inject()
-    private val store = instanceKeeper.getStore { gameStoreFactory.create() }
+    private val store = instanceKeeper.getStore { GameStoreFactory().create() }
 
 
     init {

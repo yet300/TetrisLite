@@ -13,15 +13,15 @@ import kotlin.time.Clock
 import kotlin.time.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
-import org.koin.core.annotation.Factory
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import kotlin.time.Duration.Companion.days
 import kotlin.time.ExperimentalTime
 
-@Factory
-internal class HistoryStoreFactory(
-    private val storeFactory: StoreFactory,
-    private val gameHistoryRepository: GameHistoryRepository
-) {
+internal class HistoryStoreFactory : KoinComponent {
+    
+    private val storeFactory: StoreFactory by inject()
+    private val gameHistoryRepository: GameHistoryRepository by inject()
     
     fun create(): HistoryStore =
         object : HistoryStore, Store<HistoryStore.Intent, HistoryStore.State, HistoryStore.Label> by storeFactory.create(

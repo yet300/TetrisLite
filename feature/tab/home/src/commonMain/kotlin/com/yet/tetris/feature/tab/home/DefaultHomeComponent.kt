@@ -12,16 +12,13 @@ import com.yet.tetris.feature.tab.home.store.HomeStore
 import com.yet.tetris.feature.tab.home.store.HomeStoreFactory
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 
 class DefaultHomeComponent(
     componentContext: ComponentContext,
     private val navigateToGame: () -> Unit,
     private val openSettings: () -> Unit
 ) : ComponentContext by componentContext, HomeComponent, KoinComponent {
-
-    private val homeStoreFactory: HomeStoreFactory by inject()
-    private val store = instanceKeeper.getStore { homeStoreFactory.create() }
+    private val store = instanceKeeper.getStore { HomeStoreFactory().create() }
 
 
     init {

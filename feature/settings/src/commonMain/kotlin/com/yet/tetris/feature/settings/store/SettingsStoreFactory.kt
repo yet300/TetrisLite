@@ -8,13 +8,13 @@ import com.arkivanov.mvikotlin.extensions.coroutines.CoroutineExecutor
 import com.yet.tetris.domain.model.settings.GameSettings
 import com.yet.tetris.domain.repository.GameSettingsRepository
 import kotlinx.coroutines.launch
-import org.koin.core.annotation.Factory
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
-@Factory
-internal class SettingsStoreFactory(
-    private val storeFactory: StoreFactory,
-    private val gameSettingsRepository: GameSettingsRepository
-) {
+internal class SettingsStoreFactory : KoinComponent {
+    
+    private val storeFactory: StoreFactory by inject()
+    private val gameSettingsRepository: GameSettingsRepository by inject()
 
     fun create(): SettingsStore =
         object : SettingsStore,
