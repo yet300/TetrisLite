@@ -20,6 +20,9 @@ class KoinAnnotationPlugin : Plugin<Project> {
                 implementation(libs.findLibrary("koin-core").get())
                 implementation(libs.findLibrary("koin-annotation").get())
             }
+            sourceSets.named("commonMain").configure {
+                kotlin.srcDir("build/generated/ksp/metadata/commonMain/kotlin")
+            }
         }
 
         dependencies {
