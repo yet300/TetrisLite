@@ -26,9 +26,8 @@ kotlin {
             export(projects.feature.root)
             export(projects.feature.settings)
             export(projects.feature.game)
-            export(projects.feature.tab.main)
-            export(projects.feature.tab.home)
-            export(projects.feature.tab.history)
+            export(projects.feature.home)
+            export(projects.feature.history)
         }
     }
     
@@ -53,9 +52,8 @@ kotlin {
             api(projects.feature.root)
             api(projects.feature.settings)
             api(projects.feature.game)
-            api(projects.feature.tab.main)
-            api(projects.feature.tab.home)
-            api(projects.feature.tab.history)
+            api(projects.feature.home)
+            api(projects.feature.history)
 
             api(libs.bundles.decompose)
 
