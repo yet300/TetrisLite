@@ -21,6 +21,8 @@ kotlin {
             baseName = "Shared"
             isStatic = true
 
+            export(projects.core.domain)
+
             export(libs.bundles.decompose)
 
             export(projects.feature.root)
