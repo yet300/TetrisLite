@@ -1,4 +1,4 @@
-package com.yet.tetris.ui.game
+package com.yet.tetris.ui.screens.game
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect

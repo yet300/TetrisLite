@@ -1,4 +1,4 @@
-package com.yet.tetris.ui.game
+package com.yet.tetris.ui.screens.game
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
 import com.yet.tetris.domain.model.game.GameState
 import com.yet.tetris.domain.model.game.Position
+import com.yet.tetris.domain.model.game.Tetromino
 import com.yet.tetris.domain.model.game.TetrominoType
 import com.yet.tetris.domain.model.settings.GameSettings
 import com.yet.tetris.domain.model.theme.PieceStyle
@@ -235,7 +236,7 @@ private fun StatItem(label: String, value: String) {
 
 @Composable
 private fun NextPiecePreview(
-    nextPiece: com.yet.tetris.domain.model.game.Tetromino,
+    nextPiece: Tetromino,
     settings: GameSettings
 ) {
     Column(
