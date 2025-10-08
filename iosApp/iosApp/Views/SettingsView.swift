@@ -28,7 +28,6 @@ struct SettingsView: View {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Discard") {
                         component.onDiscard()
-                        dismiss()
                     }
                     .disabled(!model.hasUnsavedChanges)
                 }
@@ -36,7 +35,6 @@ struct SettingsView: View {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Save") {
                         component.onSave()
-                        dismiss()
                     }
                     .disabled(!model.hasUnsavedChanges || model.isSaving)
                 }
