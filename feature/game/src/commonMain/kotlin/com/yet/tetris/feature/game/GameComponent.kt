@@ -9,19 +9,17 @@ import com.yet.tetris.domain.model.settings.GameSettings
 interface GameComponent  {
     val model: Value<Model>
 
-    sealed interface Model {
-        data object Loading : Model
-        data class Playing(
-            val gameState: GameState,
-            val settings: GameSettings,
-            val isPaused: Boolean,
-            val elapsedTime: Long
-        ) : Model
-        data class GameOver(
-            val finalScore: Int,
-            val linesCleared: Int
-        ) : Model
-    }
+    data class Model(
+        val isLoading: Boolean = true,
+        val gameState: GameState? = null,
+        val settings: GameSettings = GameSettings(),
+        val isPaused: Boolean = false,
+        val elapsedTime: Long = 0,
+        val isGameOver: Boolean = false,
+        val finalScore: Int = 0,
+        val finalLinesCleared: Int = 0
+    )
+    
     fun onPause()
     fun onResume()
     fun onQuit()

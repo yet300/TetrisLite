@@ -40,19 +40,16 @@ class DefaultGameComponent(
     }
 
     override val model: Value<GameComponent.Model> = store.asValue().map { state ->
-        when {
-            state.isLoading || state.gameState == null -> GameComponent.Model.Loading
-            state.gameState.isGameOver -> GameComponent.Model.GameOver(
-                finalScore = state.gameState.score,
-                linesCleared = state.gameState.linesCleared
-            )
-            else -> GameComponent.Model.Playing(
-                gameState = state.gameState,
-                settings = state.settings,
-                isPaused = state.isPaused,
-                elapsedTime = state.elapsedTime
-            )
-        }
+        GameComponent.Model(
+            isLoading = state.isLoading || state.gameState == null,
+            gameState = state.gameState,
+            settings = state.settings,
+            isPaused = state.isPaused,
+            elapsedTime = state.elapsedTime,
+            isGameOver = state.gameState?.isGameOver ?: false,
+            finalScore = state.gameState?.score ?: 0,
+            finalLinesCleared = state.gameState?.linesCleared ?: 0
+        )
     }
 
     override fun onPause() {
