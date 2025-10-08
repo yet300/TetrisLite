@@ -27,8 +27,11 @@ import com.yet.tetris.domain.model.game.TetrominoType
 import com.yet.tetris.domain.model.settings.GameSettings
 import com.yet.tetris.domain.model.theme.PieceStyle
 import com.yet.tetris.feature.game.GameComponent
+import com.yet.tetris.feature.game.PreviewGameComponent
 import com.yet.tetris.ui.theme.*
 import com.yet.tetris.uikit.component.button.FrostedGlassButton
+import com.yet.tetris.uikit.theme.TetrisLiteAppTheme
+import org.jetbrains.compose.ui.tooling.preview.Preview
 import kotlin.math.abs
 
 @Composable
@@ -566,4 +569,13 @@ private fun formatTime(milliseconds: Long): String {
     val seconds = (milliseconds / 1000) % 60
     val minutes = (milliseconds / 1000) / 60
     return "${minutes}:${seconds.toString().padStart(2, '0')}"
+}
+
+
+@Composable
+@Preview
+fun GameScreenPreview() {
+    TetrisLiteAppTheme {
+        GameScreen(PreviewGameComponent())
+    }
 }

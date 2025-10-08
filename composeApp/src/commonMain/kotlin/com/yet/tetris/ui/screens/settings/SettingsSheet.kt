@@ -28,10 +28,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
+import com.yet.tetris.feature.settings.PreviewSettingsComponent
 import com.yet.tetris.feature.settings.SettingsComponent
 import com.yet.tetris.uikit.component.button.EnumSegmentedButtonRow
 import com.yet.tetris.uikit.component.chip.EnumFlowRowChips
 import com.yet.tetris.uikit.component.text.TitleText
+import com.yet.tetris.uikit.theme.TetrisLiteAppTheme
+import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 fun SettingsSheet(component: SettingsComponent) {
@@ -252,5 +255,13 @@ private fun SliderRow(
             onValueChange = onValueChange,
             valueRange = 0f..1f
         )
+    }
+}
+
+@Composable
+@Preview
+fun SettingsScreenPreview() {
+    TetrisLiteAppTheme {
+        SettingsSheet(PreviewSettingsComponent())
     }
 }

@@ -37,10 +37,13 @@ import com.arkivanov.decompose.extensions.compose.subscribeAsState
 import com.yet.tetris.domain.model.history.GameRecord
 import com.yet.tetris.feature.history.DateFilter
 import com.yet.tetris.feature.history.HistoryComponent
+import com.yet.tetris.feature.history.PreviewHistoryComponent
 import com.yet.tetris.uikit.component.button.FrostedGlassButton
 import com.yet.tetris.uikit.component.text.TitleText
+import com.yet.tetris.uikit.theme.TetrisLiteAppTheme
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import org.jetbrains.compose.ui.tooling.preview.Preview
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
@@ -219,4 +222,13 @@ private fun formatTimestamp(timestamp: Long): String {
     val instant = Instant.fromEpochMilliseconds(timestamp)
     val dateTime = instant.toLocalDateTime(TimeZone.currentSystemDefault())
     return "${dateTime.date} ${dateTime.hour}:${dateTime.minute.toString().padStart(2, '0')}"
+}
+
+
+@Composable
+@Preview
+fun HistoryScreenPreview() {
+    TetrisLiteAppTheme {
+        HistorySheet(PreviewHistoryComponent())
+    }
 }

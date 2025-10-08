@@ -14,10 +14,13 @@ import androidx.compose.ui.unit.dp
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
 import com.yet.tetris.domain.model.game.Difficulty
 import com.yet.tetris.feature.home.HomeComponent
+import com.yet.tetris.feature.home.PreviewHomeComponent
 import com.yet.tetris.ui.screens.settings.SettingsSheet
 import com.yet.tetris.ui.screens.history.HistorySheet
 import com.yet.tetris.uikit.component.button.FrostedGlassButton
 import com.yet.tetris.uikit.component.sheet.ModalBottomSheet
+import com.yet.tetris.uikit.theme.TetrisLiteAppTheme
+import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -181,5 +184,13 @@ private fun DifficultySelector(
                 }
             }
         }
+    }
+}
+
+@Composable
+@Preview
+fun HomeScreenPreview() {
+    TetrisLiteAppTheme {
+        HomeScreen(PreviewHomeComponent())
     }
 }
