@@ -28,6 +28,9 @@ import com.yet.tetris.domain.model.settings.GameSettings
 import com.yet.tetris.domain.model.theme.PieceStyle
 import com.yet.tetris.feature.game.GameComponent
 import com.yet.tetris.feature.game.PreviewGameComponent
+import org.jetbrains.compose.resources.stringResource
+import tetrislite.composeapp.generated.resources.Res
+import tetrislite.composeapp.generated.resources.*
 import com.yet.tetris.ui.theme.*
 import com.yet.tetris.uikit.component.button.FrostedGlassButton
 import com.yet.tetris.uikit.theme.TetrisLiteAppTheme
@@ -213,9 +216,9 @@ private fun GameStatsRow(
             horizontalArrangement = Arrangement.spacedBy(24.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            StatItem("Score", score.toString())
-            StatItem("Lines", lines.toString())
-            StatItem("Time", formatTime(time))
+            StatItem(stringResource(Res.string.score), score.toString())
+            StatItem(stringResource(Res.string.lines), lines.toString())
+            StatItem(stringResource(Res.string.time), formatTime(time))
         }
     }
 }
@@ -247,7 +250,7 @@ private fun NextPiecePreview(
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         Text(
-            text = "Next",
+            text = stringResource(Res.string.next),
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -388,19 +391,19 @@ private fun GameOverContent(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 Text(
-                    text = "Game Over",
+                    text = stringResource(Res.string.game_over),
                     style = MaterialTheme.typography.displayMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.error
                 )
 
                 Text(
-                    text = "Final Score: $finalScore",
+                    text = stringResource(Res.string.final_score, finalScore),
                     style = MaterialTheme.typography.titleLarge
                 )
 
                 Text(
-                    text = "Lines Cleared: $linesCleared",
+                    text = stringResource(Res.string.lines_cleared, linesCleared),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -409,7 +412,7 @@ private fun GameOverContent(
                     onClick = onQuit,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Back to Home")
+                    Text(stringResource(Res.string.back_to_home))
                 }
             }
         }
@@ -423,16 +426,16 @@ private fun PauseDialog(
 ) {
     AlertDialog(
         onDismissRequest = onResume,
-        title = { Text("Game Paused") },
-        text = { Text("What would you like to do?") },
+        title = { Text(stringResource(Res.string.game_paused)) },
+        text = { Text(stringResource(Res.string.pause_message)) },
         confirmButton = {
             TextButton(onClick = onResume) {
-                Text("Resume")
+                Text(stringResource(Res.string.resume))
             }
         },
         dismissButton = {
             TextButton(onClick = onQuit) {
-                Text("Quit")
+                Text(stringResource(Res.string.quit))
             }
         }
     )

@@ -20,7 +20,10 @@ import com.yet.tetris.ui.screens.history.HistorySheet
 import com.yet.tetris.uikit.component.button.FrostedGlassButton
 import com.yet.tetris.uikit.component.sheet.ModalBottomSheet
 import com.yet.tetris.uikit.theme.TetrisLiteAppTheme
+import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import tetrislite.composeapp.generated.resources.Res
+import tetrislite.composeapp.generated.resources.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -110,7 +113,7 @@ private fun HomeContent(
         verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically)
     ) {
         Text(
-            text = "Tetris Lite",
+            text = stringResource(Res.string.app_title),
             style = MaterialTheme.typography.displayLarge,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.primary
@@ -129,7 +132,7 @@ private fun HomeContent(
                 .fillMaxWidth()
                 .height(56.dp)
         ) {
-            Text("Start New Game", style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(Res.string.start_new_game), style = MaterialTheme.typography.titleMedium)
         }
 
         if (hasSavedGame) {
@@ -139,7 +142,7 @@ private fun HomeContent(
                     .fillMaxWidth()
                     .height(56.dp)
             ) {
-                Text("Resume Game", style = MaterialTheme.typography.titleMedium)
+                Text(stringResource(Res.string.resume_game), style = MaterialTheme.typography.titleMedium)
             }
         }
     }
@@ -162,7 +165,7 @@ private fun DifficultySelector(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text(
-                text = "Difficulty",
+                text = stringResource(Res.string.difficulty),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold
             )

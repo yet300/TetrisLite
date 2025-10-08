@@ -38,6 +38,9 @@ import com.yet.tetris.domain.model.history.GameRecord
 import com.yet.tetris.feature.history.DateFilter
 import com.yet.tetris.feature.history.HistoryComponent
 import com.yet.tetris.feature.history.PreviewHistoryComponent
+import org.jetbrains.compose.resources.stringResource
+import tetrislite.composeapp.generated.resources.Res
+import tetrislite.composeapp.generated.resources.*
 import com.yet.tetris.uikit.component.button.FrostedGlassButton
 import com.yet.tetris.uikit.component.text.TitleText
 import com.yet.tetris.uikit.theme.TetrisLiteAppTheme
@@ -127,12 +130,12 @@ private fun EmptyHistoryState(modifier: Modifier = Modifier) {
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text(
-                text = "No games played yet",
+                text = stringResource(Res.string.no_games_yet),
                 style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Text(
-                text = "Start a new game to see your history",
+                text = stringResource(Res.string.start_game_prompt),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -153,7 +156,7 @@ private fun HistoryList(
     ) {
         item(key = "header") {
             TitleText(
-                text = "Game History",
+                text = stringResource(Res.string.game_history),
             )
         }
         items(games, key = { it.id }) { game ->
@@ -185,17 +188,17 @@ private fun GameRecordCard(
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 Text(
-                    text = "Score: ${game.score}",
+                    text = stringResource(Res.string.score_label, game.score),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = "Lines: ${game.linesCleared}",
+                    text = stringResource(Res.string.lines_label, game.linesCleared),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
-                    text = "Difficulty: ${game.difficulty.name}",
+                    text = stringResource(Res.string.difficulty_label, game.difficulty.name),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

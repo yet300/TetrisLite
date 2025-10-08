@@ -34,7 +34,10 @@ import com.yet.tetris.uikit.component.button.EnumSegmentedButtonRow
 import com.yet.tetris.uikit.component.chip.EnumFlowRowChips
 import com.yet.tetris.uikit.component.text.TitleText
 import com.yet.tetris.uikit.theme.TetrisLiteAppTheme
+import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import tetrislite.composeapp.generated.resources.Res
+import tetrislite.composeapp.generated.resources.*
 
 @Composable
 fun SettingsSheet(component: SettingsComponent) {
@@ -64,7 +67,7 @@ fun SettingsSheet(component: SettingsComponent) {
                     modifier = Modifier.weight(1f),
                     enabled = model.hasUnsavedChanges
                 ) {
-                    Text("Discard")
+                    Text(stringResource(Res.string.discard))
                 }
                 Button(
                     onClick = component::onSave,
@@ -77,7 +80,7 @@ fun SettingsSheet(component: SettingsComponent) {
                             strokeWidth = 2.dp
                         )
                     } else {
-                        Text("Save")
+                        Text(stringResource(Res.string.save))
                     }
                 }
             }
@@ -97,13 +100,13 @@ private fun SettingsScreenContent(
     ) {
         item(key = "header") {
             TitleText(
-                text = "Game Settings",
+                text = stringResource(Res.string.game_settings),
             )
         }
 
         item {
             // Visual Theme
-            SettingsSection(title = "Visual Theme") {
+            SettingsSection(title = stringResource(Res.string.visual_theme)) {
                 EnumFlowRowChips(
                     selectedValue = model.settings.themeConfig.visualTheme,
                     onValueChange = { component.onVisualThemeChanged(it) }
@@ -113,7 +116,7 @@ private fun SettingsScreenContent(
 
         item {
             // Piece Style
-            SettingsSection(title = "Piece Style") {
+            SettingsSection(title = stringResource(Res.string.piece_style)) {
                 EnumFlowRowChips(
                     selectedValue = model.settings.themeConfig.pieceStyle,
                     onValueChange = { component.onPieceStyleChanged(it) }
@@ -123,7 +126,7 @@ private fun SettingsScreenContent(
 
         item {
             // Keyboard Layout (Desktop/Web)
-            SettingsSection(title = "Keyboard Layout") {
+            SettingsSection(title = stringResource(Res.string.keyboard_layout)) {
                 EnumSegmentedButtonRow(
                     selectedValue = model.settings.keyboardLayout,
                     onValueChange = { component.onKeyboardLayoutChanged(it) }
@@ -133,7 +136,7 @@ private fun SettingsScreenContent(
 
         item {
             // Swipe Layout (Mobile)
-            SettingsSection(title = "Swipe Layout") {
+            SettingsSection(title = stringResource(Res.string.swipe_layout)) {
                 EnumSegmentedButtonRow(
                     selectedValue = model.settings.swipeLayout,
                     onValueChange = { component.onSwipeLayoutChanged(it) }
@@ -159,14 +162,14 @@ private fun SettingsScreenContent(
 
         item {
             // Audio Settings
-            SettingsSection(title = "Audio") {
+            SettingsSection(title = stringResource(Res.string.audio)) {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text("Music")
+                        Text(stringResource(Res.string.music))
                         Switch(
                             checked = model.settings.audioSettings.musicEnabled,
                             onCheckedChange = component::onMusicToggled
@@ -175,12 +178,12 @@ private fun SettingsScreenContent(
 
                     if (model.settings.audioSettings.musicEnabled) {
                         SliderRow(
-                            label = "Music Volume",
+                            label = stringResource(Res.string.music_volume),
                             value = model.settings.audioSettings.musicVolume,
                             onValueChange = component::onMusicVolumeChanged
                         )
 
-                        Text("Music Theme", style = MaterialTheme.typography.bodyMedium)
+                        Text(stringResource(Res.string.music_theme), style = MaterialTheme.typography.bodyMedium)
 
                         EnumSegmentedButtonRow(
                             selectedValue = model.settings.audioSettings.selectedMusicTheme,
@@ -193,7 +196,7 @@ private fun SettingsScreenContent(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text("Sound Effects")
+                        Text(stringResource(Res.string.sound_effects))
                         Switch(
                             checked = model.settings.audioSettings.soundEffectsEnabled,
                             onCheckedChange = component::onSoundEffectsToggled
@@ -202,7 +205,7 @@ private fun SettingsScreenContent(
 
                     if (model.settings.audioSettings.soundEffectsEnabled) {
                         SliderRow(
-                            label = "SFX Volume",
+                            label = stringResource(Res.string.sfx_volume),
                             value = model.settings.audioSettings.sfxVolume,
                             onValueChange = component::onSFXVolumeChanged
                         )
