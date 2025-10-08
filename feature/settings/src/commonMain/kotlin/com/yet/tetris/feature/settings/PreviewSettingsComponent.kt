@@ -14,6 +14,8 @@ import com.yet.tetris.domain.model.settings.GameSettings
 import com.yet.tetris.domain.model.settings.KeyboardLayout
 import com.yet.tetris.domain.model.settings.SwipeLayout
 import com.yet.tetris.domain.model.settings.SwipeSensitivity
+import com.yet.tetris.domain.model.theme.PieceStyle
+import com.yet.tetris.domain.model.theme.VisualTheme
 
 @OptIn(ExperimentalDecomposeApi::class)
 class PreviewSettingsComponent :
@@ -33,14 +35,11 @@ class PreviewSettingsComponent :
         TODO("Not yet implemented")
     }
 
-    override fun onTetrominoColorChanged(
-        type: TetrominoType,
-        color: String
-    ) {
+    override fun onVisualThemeChanged(theme: VisualTheme) {
         TODO("Not yet implemented")
     }
 
-    override fun onBackgroundColorChanged(color: String) {
+    override fun onPieceStyleChanged(style: PieceStyle) {
         TODO("Not yet implemented")
     }
 

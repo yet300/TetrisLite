@@ -57,14 +57,12 @@ internal class SettingsStoreFactory : KoinComponent {
                     it.copy(difficulty = intent.difficulty)
                 }
 
-                is SettingsStore.Intent.ChangeTetrominoColor -> updateSettings(getState) {
-                    val updatedColors = it.tetrominoColors.toMutableMap()
-                    updatedColors[intent.type] = intent.color
-                    it.copy(tetrominoColors = updatedColors)
+                is SettingsStore.Intent.ChangeVisualTheme -> updateSettings(getState) {
+                    it.copy(themeConfig = it.themeConfig.copy(visualTheme = intent.theme))
                 }
 
-                is SettingsStore.Intent.ChangeBackgroundColor -> updateSettings(getState) {
-                    it.copy(backgroundColor = intent.color)
+                is SettingsStore.Intent.ChangePieceStyle -> updateSettings(getState) {
+                    it.copy(themeConfig = it.themeConfig.copy(pieceStyle = intent.style))
                 }
 
                 is SettingsStore.Intent.ChangeKeyboardLayout -> updateSettings(getState) {

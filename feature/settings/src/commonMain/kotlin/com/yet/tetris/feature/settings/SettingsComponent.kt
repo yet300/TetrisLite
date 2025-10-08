@@ -3,11 +3,12 @@ package com.yet.tetris.feature.settings
 import com.arkivanov.decompose.value.Value
 import com.yet.tetris.domain.model.audio.MusicTheme
 import com.yet.tetris.domain.model.game.Difficulty
-import com.yet.tetris.domain.model.game.TetrominoType
 import com.yet.tetris.domain.model.settings.GameSettings
 import com.yet.tetris.domain.model.settings.KeyboardLayout
 import com.yet.tetris.domain.model.settings.SwipeLayout
 import com.yet.tetris.domain.model.settings.SwipeSensitivity
+import com.yet.tetris.domain.model.theme.PieceStyle
+import com.yet.tetris.domain.model.theme.VisualTheme
 
 interface SettingsComponent {
     val model: Value<Model>
@@ -19,8 +20,8 @@ interface SettingsComponent {
     )
 
     fun onDifficultyChanged(difficulty: Difficulty)
-    fun onTetrominoColorChanged(type: TetrominoType, color: String)
-    fun onBackgroundColorChanged(color: String)
+    fun onVisualThemeChanged(theme: VisualTheme)
+    fun onPieceStyleChanged(style: PieceStyle)
     fun onKeyboardLayoutChanged(layout: KeyboardLayout)
     fun onSwipeLayoutChanged(layout: SwipeLayout)
     fun onSwipeSensitivityChanged(sensitivity: SwipeSensitivity)

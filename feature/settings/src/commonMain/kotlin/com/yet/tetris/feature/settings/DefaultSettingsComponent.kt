@@ -9,15 +9,15 @@ import com.arkivanov.mvikotlin.core.instancekeeper.getStore
 import com.arkivanov.mvikotlin.extensions.coroutines.labels
 import com.yet.tetris.domain.model.audio.MusicTheme
 import com.yet.tetris.domain.model.game.Difficulty
-import com.yet.tetris.domain.model.game.TetrominoType
 import com.yet.tetris.domain.model.settings.KeyboardLayout
 import com.yet.tetris.domain.model.settings.SwipeLayout
 import com.yet.tetris.domain.model.settings.SwipeSensitivity
+import com.yet.tetris.domain.model.theme.PieceStyle
+import com.yet.tetris.domain.model.theme.VisualTheme
 import com.yet.tetris.feature.settings.store.SettingsStore
 import com.yet.tetris.feature.settings.store.SettingsStoreFactory
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 
 class DefaultSettingsComponent(
     componentContext: ComponentContext,
@@ -56,12 +56,12 @@ class DefaultSettingsComponent(
         store.accept(SettingsStore.Intent.ChangeDifficulty(difficulty))
     }
 
-    override fun onTetrominoColorChanged(type: TetrominoType, color: String) {
-        store.accept(SettingsStore.Intent.ChangeTetrominoColor(type, color))
+    override fun onVisualThemeChanged(theme: VisualTheme) {
+        store.accept(SettingsStore.Intent.ChangeVisualTheme(theme))
     }
 
-    override fun onBackgroundColorChanged(color: String) {
-        store.accept(SettingsStore.Intent.ChangeBackgroundColor(color))
+    override fun onPieceStyleChanged(style: PieceStyle) {
+        store.accept(SettingsStore.Intent.ChangePieceStyle(style))
     }
 
     override fun onKeyboardLayoutChanged(layout: KeyboardLayout) {

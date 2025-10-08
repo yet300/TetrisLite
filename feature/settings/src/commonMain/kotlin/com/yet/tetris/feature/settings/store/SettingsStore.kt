@@ -3,7 +3,6 @@ package com.yet.tetris.feature.settings.store
 import com.arkivanov.mvikotlin.core.store.Store
 import com.yet.tetris.domain.model.audio.MusicTheme
 import com.yet.tetris.domain.model.game.Difficulty
-import com.yet.tetris.domain.model.game.TetrominoType
 import com.yet.tetris.domain.model.settings.GameSettings
 import com.yet.tetris.domain.model.settings.KeyboardLayout
 import com.yet.tetris.domain.model.settings.SwipeLayout
@@ -20,8 +19,8 @@ internal interface SettingsStore :
 
     sealed class Intent {
         data class ChangeDifficulty(val difficulty: Difficulty) : Intent()
-        data class ChangeTetrominoColor(val type: TetrominoType, val color: String) : Intent()
-        data class ChangeBackgroundColor(val color: String) : Intent()
+        data class ChangeVisualTheme(val theme: com.yet.tetris.domain.model.theme.VisualTheme) : Intent()
+        data class ChangePieceStyle(val style: com.yet.tetris.domain.model.theme.PieceStyle) : Intent()
         data class ChangeKeyboardLayout(val layout: KeyboardLayout) : Intent()
         data class ChangeSwipeLayout(val layout: SwipeLayout) : Intent()
         data class ChangeSwipeSensitivity(val sensitivity: SwipeSensitivity) : Intent()
