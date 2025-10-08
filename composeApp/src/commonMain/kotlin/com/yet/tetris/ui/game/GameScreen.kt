@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -23,7 +24,9 @@ import com.yet.tetris.domain.model.game.GameState
 import com.yet.tetris.domain.model.game.Position
 import com.yet.tetris.domain.model.game.TetrominoType
 import com.yet.tetris.domain.model.settings.GameSettings
+import com.yet.tetris.domain.model.theme.PieceStyle
 import com.yet.tetris.feature.game.GameComponent
+import com.yet.tetris.ui.theme.*
 import com.yet.tetris.uikit.component.button.FrostedGlassButton
 import kotlin.math.abs
 
@@ -184,7 +187,8 @@ private fun GamePlayingContent(
                     )
                 },
             gameState = gameState,
-            settings = model.settings
+            settings = model.settings,
+            ghostPieceY = model.ghostPieceY
         )
     }
 }
@@ -266,13 +270,14 @@ private fun NextPiecePreview(
 private fun GameBoardWithBorder(
     modifier: Modifier = Modifier,
     gameState: GameState,
-    settings: GameSettings
+    settings: GameSettings,
+    ghostPieceY: Int?
 ) {
     Canvas(
         modifier = modifier
             .aspectRatio(gameState.board.width.toFloat() / gameState.board.height.toFloat())
             .fillMaxWidth()
-            .background(com.yet.tetris.ui.utils.parseColor(settings.backgroundColor))
+            .background(settings.themeConfig.getBackgroundComposeColor())
             .border(
                 width = 2.dp,
                 color = MaterialTheme.colorScheme.outline,
@@ -280,25 +285,21 @@ private fun GameBoardWithBorder(
     ) {
         val cellSize = size.width / gameState.board.width
 
-        // Calculate ghost piece position
-        val ghostY = gameState.currentPiece?.let { piece ->
-            calculateGhostPosition(gameState, piece)
-        }
-
         // Draw locked blocks
         gameState.board.cells.forEach { (pos, type) ->
             if (pos.y >= 0) {
-                drawRect(
-                    color = getTetrominoColor(type, settings),
+                drawStyledBlock(
+                    type = type,
+                    settings = settings,
                     topLeft = Offset(pos.x * cellSize, pos.y * cellSize),
-                    size = Size(cellSize - 1, cellSize - 1)
+                    cellSize = cellSize
                 )
             }
         }
 
         // Draw ghost piece
         gameState.currentPiece?.let { piece ->
-            ghostY?.let { landingY ->
+            ghostPieceY?.let { landingY ->
                 if (landingY > gameState.currentPosition.y) {
                     piece.blocks.forEach { blockPos ->
                         val absolutePos = Position(
@@ -306,16 +307,15 @@ private fun GameBoardWithBorder(
                             landingY + blockPos.y
                         )
                         if (absolutePos.y >= 0 && absolutePos.y < gameState.board.height) {
-                            drawRect(
-                                color = getTetrominoColor(
-                                    piece.type,
-                                    settings
-                                ).copy(alpha = 0.3f),
+                            drawStyledBlock(
+                                type = piece.type,
+                                settings = settings,
                                 topLeft = Offset(
                                     absolutePos.x * cellSize,
                                     absolutePos.y * cellSize
                                 ),
-                                size = Size(cellSize - 1, cellSize - 1)
+                                cellSize = cellSize,
+                                alpha = 0.3f
                             )
                         }
                     }
@@ -331,13 +331,14 @@ private fun GameBoardWithBorder(
                     gameState.currentPosition.y + blockPos.y
                 )
                 if (absolutePos.y >= 0 && absolutePos.y < gameState.board.height) {
-                    drawRect(
-                        color = getTetrominoColor(piece.type, settings),
+                    drawStyledBlock(
+                        type = piece.type,
+                        settings = settings,
                         topLeft = Offset(
                             absolutePos.x * cellSize,
                             absolutePos.y * cellSize
                         ),
-                        size = Size(cellSize - 1, cellSize - 1)
+                        cellSize = cellSize
                     )
                 }
             }
@@ -433,38 +434,131 @@ private fun PauseDialog(
     )
 }
 
-// Calculate ghost piece position
-private fun calculateGhostPosition(
-    gameState: GameState,
-    piece: com.yet.tetris.domain.model.game.Tetromino
-): Int {
-    var testY = gameState.currentPosition.y
-
-    while (testY < gameState.board.height) {
-        val wouldCollide = piece.blocks.any { blockPos ->
-            val absolutePos = Position(
-                gameState.currentPosition.x + blockPos.x,
-                testY + blockPos.y + 1
-            )
-
-            absolutePos.y >= gameState.board.height ||
-                    absolutePos.x < 0 ||
-                    absolutePos.x >= gameState.board.width ||
-                    gameState.board.cells.containsKey(absolutePos)
-        }
-
-        if (wouldCollide) {
-            return testY
-        }
-        testY++
-    }
-
-    return testY
+private fun getTetrominoColor(type: TetrominoType, settings: GameSettings): Color {
+    return settings.themeConfig.getTetrominoComposeColor(type)
 }
 
-private fun getTetrominoColor(type: TetrominoType, settings: GameSettings): Color {
-    val hexColor = settings.tetrominoColors[type] ?: "#FFFFFF"
-    return com.yet.tetris.ui.utils.parseColor(hexColor)
+private fun DrawScope.drawStyledBlock(
+    type: TetrominoType,
+    settings: GameSettings,
+    topLeft: Offset,
+    cellSize: Float,
+    alpha: Float = 1f
+) {
+    val baseColor = getTetrominoColor(type, settings).copy(alpha = alpha)
+    val lightColor = settings.themeConfig.getTetrominoLightColor(type).copy(alpha = alpha)
+    val darkColor = settings.themeConfig.getTetrominoDarkColor(type).copy(alpha = alpha)
+    val blockSize = Size(cellSize - 1, cellSize - 1)
+    
+    when (settings.themeConfig.pieceStyle) {
+        PieceStyle.SOLID -> {
+            // Simple solid block
+            drawRect(
+                color = baseColor,
+                topLeft = topLeft,
+                size = blockSize
+            )
+        }
+        
+        PieceStyle.BORDERED -> {
+            // Solid block with border
+            drawRect(
+                color = baseColor,
+                topLeft = topLeft,
+                size = blockSize
+            )
+            // Draw border
+            drawRect(
+                color = lightColor,
+                topLeft = topLeft,
+                size = Size(blockSize.width, 2f)
+            )
+            drawRect(
+                color = lightColor,
+                topLeft = topLeft,
+                size = Size(2f, blockSize.height)
+            )
+            drawRect(
+                color = darkColor,
+                topLeft = Offset(topLeft.x, topLeft.y + blockSize.height - 2f),
+                size = Size(blockSize.width, 2f)
+            )
+            drawRect(
+                color = darkColor,
+                topLeft = Offset(topLeft.x + blockSize.width - 2f, topLeft.y),
+                size = Size(2f, blockSize.height)
+            )
+        }
+        
+        PieceStyle.GRADIENT -> {
+            // Gradient effect using multiple rectangles
+            drawRect(
+                color = baseColor,
+                topLeft = topLeft,
+                size = blockSize
+            )
+            // Top-left highlight
+            drawRect(
+                color = lightColor.copy(alpha = alpha * 0.5f),
+                topLeft = topLeft,
+                size = Size(blockSize.width * 0.5f, blockSize.height * 0.5f)
+            )
+            // Bottom-right shadow
+            drawRect(
+                color = darkColor.copy(alpha = alpha * 0.3f),
+                topLeft = Offset(
+                    topLeft.x + blockSize.width * 0.5f,
+                    topLeft.y + blockSize.height * 0.5f
+                ),
+                size = Size(blockSize.width * 0.5f, blockSize.height * 0.5f)
+            )
+        }
+        
+        PieceStyle.RETRO_PIXEL -> {
+            // Pixelated retro style with smaller blocks
+            val pixelSize = cellSize / 4f
+            for (py in 0..3) {
+                for (px in 0..3) {
+                    // Create checkerboard pattern
+                    val isLight = (px + py) % 2 == 0
+                    drawRect(
+                        color = if (isLight) baseColor else darkColor,
+                        topLeft = Offset(
+                            topLeft.x + px * pixelSize,
+                            topLeft.y + py * pixelSize
+                        ),
+                        size = Size(pixelSize - 0.5f, pixelSize - 0.5f)
+                    )
+                }
+            }
+        }
+        
+        PieceStyle.GLASS -> {
+            // Translucent glass effect
+            drawRect(
+                color = baseColor.copy(alpha = alpha * 0.6f),
+                topLeft = topLeft,
+                size = blockSize
+            )
+            // Shine effect on top
+            drawRect(
+                color = Color.White.copy(alpha = alpha * 0.3f),
+                topLeft = topLeft,
+                size = Size(blockSize.width, blockSize.height * 0.3f)
+            )
+            // Border
+            drawRect(
+                color = lightColor.copy(alpha = alpha * 0.8f),
+                topLeft = topLeft,
+                size = Size(blockSize.width, 1f)
+            )
+            drawRect(
+                color = lightColor.copy(alpha = alpha * 0.8f),
+                topLeft = topLeft,
+                size = Size(1f, blockSize.height)
+            )
+        }
+    }
 }
 
 private fun formatTime(milliseconds: Long): String {
