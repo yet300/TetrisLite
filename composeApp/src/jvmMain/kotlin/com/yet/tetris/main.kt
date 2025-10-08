@@ -1,11 +1,13 @@
 package com.yet.tetris
 
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import com.arkivanov.decompose.DefaultComponentContext
 import com.arkivanov.essenty.lifecycle.LifecycleRegistry
 import com.yet.tetris.di.initKoin
 import com.yet.tetris.feature.root.DefaultRootComponent
+import java.awt.Dimension
 import javax.swing.SwingUtilities
 
 fun main() = application {
@@ -24,6 +26,8 @@ fun main() = application {
         onCloseRequest = ::exitApplication,
         title = "TetrisLite",
     ) {
+        window.minimumSize = Dimension(400.dp.value.toInt(), 600.dp.value.toInt())
+
         App(root)
     }
 }
