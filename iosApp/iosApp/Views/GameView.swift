@@ -97,6 +97,19 @@ struct GameView: View {
         .onTapGesture {
             component.onRotate()
         }
+        .keyboardAware { key in
+            switch key.lowercased() {
+            case "a", "directionleft": component.onMoveLeft()
+            case "d", "directionright": component.onMoveRight()
+            case "s", "directiondown": component.onMoveDown()
+            case "w", " ", "directionup": component.onRotate()
+            case "\r": component.onHardDrop()
+            case "\u{1b}", "p": // escape or 'p'
+                component.onPause()
+                showPauseDialog = true
+            default: break
+            }
+        }
     }
     
     private func handleSwipe(value: DragGesture.Value) {

@@ -80,6 +80,14 @@ struct HomeView: View {
                         }
                         .padding(.horizontal, 32)
                         
+                        // Keyboard support hint for iPad/Mac
+                        #if targetEnvironment(macCatalyst) || os(macOS)
+                        Text("Use arrow keys or WASD to play")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                            .padding(.top, 8)
+                        #endif
+                        
                         Spacer()
                     }
                     
