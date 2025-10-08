@@ -50,7 +50,12 @@ struct HomeView: View {
                         
                         // Difficulty Selector
                         DifficultySelector(
-                            selectedDifficulty: content.settings.difficulty,
+                            selectedDifficulty: Binding(
+                                get: { content.settings.difficulty },
+                                set: { newDifficulty in
+                                    component.onDifficultyChanged(difficulty: newDifficulty)
+                                }
+                            ),
                             onSelect: { difficulty in
                                 component.onDifficultyChanged(difficulty: difficulty)
                             }
@@ -154,35 +159,22 @@ struct SheetItem: Identifiable {
 }
 
 struct DifficultySelector: View {
-    let selectedDifficulty: Difficulty
+    @Binding var selectedDifficulty: Difficulty
     let onSelect: (Difficulty) -> Void
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .center, spacing: 12) {
             Text("Difficulty")
                 .font(.headline)
                 .foregroundColor(.secondary)
-            
-            HStack(spacing: 12) {
+
+            Picker("Difficulty", selection: $selectedDifficulty) {
                 ForEach([Difficulty.easy, Difficulty.normal, Difficulty.hard], id: \.self) { difficulty in
-                    Button {
-                        onSelect(difficulty)
-                    } label: {
-                        Text(difficulty.name)
-                            .font(.subheadline.weight(.semibold))
-                            .foregroundColor(selectedDifficulty == difficulty ? .white : .primary)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 12)
-                            .background(
-                                RoundedRectangle(cornerRadius: 12)
-                                    .fill(selectedDifficulty == difficulty ? 
-                                          Color.blue : Color.clear)
-                                    .background(.ultraThinMaterial)
-                                    .clipShape(RoundedRectangle(cornerRadius: 12))
-                            )
-                    }
+                    Text(difficulty.name.capitalized).tag(difficulty)
                 }
             }
+            .pickerStyle(.segmented)
+            .controlSize(.large)
         }
         .padding(.horizontal, 32)
     }
@@ -206,15 +198,38 @@ struct GlassButton: View {
                 Text(title)
                     .font(.headline)
             }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 16)
-            .background(
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(style == .primary ? Color.blue : Color.clear)
-                    .background(.regularMaterial)
-                    .clipShape(RoundedRectangle(cornerRadius: 16))
-            )
             .foregroundColor(style == .primary ? .white : .primary)
+            .padding()
+            .frame(maxWidth: .infinity)
+            .background(
+                ZStack {
+                    if style == .primary {
+                        LinearGradient(
+                            colors: [.blue.opacity(0.5), .purple.opacity(0.4)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    }
+                    LinearGradient(
+                        colors: [.white.opacity(0.25), .white.opacity(0.0)],
+                        startPoint: .topLeading,
+                        endPoint: .bottom
+                    )
+                }
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 24)
+                    .stroke(
+                        LinearGradient(
+                            colors: [.white.opacity(0.4), .white.opacity(0.1)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 2
+                    )
+            )
+            .clipShape(RoundedRectangle(cornerRadius: 24))
+            .shadow(color: .black.opacity(0.2), radius: 10, x: 0, y: 5)
         }
     }
 }
