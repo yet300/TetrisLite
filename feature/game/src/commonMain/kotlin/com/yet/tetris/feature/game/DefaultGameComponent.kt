@@ -48,7 +48,8 @@ class DefaultGameComponent(
             elapsedTime = state.elapsedTime,
             isGameOver = state.gameState?.isGameOver ?: false,
             finalScore = state.gameState?.score ?: 0,
-            finalLinesCleared = state.gameState?.linesCleared ?: 0
+            finalLinesCleared = state.gameState?.linesCleared ?: 0,
+            ghostPieceY = state.ghostPieceY
         )
     }
 

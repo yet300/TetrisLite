@@ -11,7 +11,8 @@ internal interface GameStore : Store<GameStore.Intent, GameStore.State, GameStor
         val settings: GameSettings = GameSettings(),
         val isPaused: Boolean = false,
         val elapsedTime: Long = 0,  // milliseconds
-        val isLoading: Boolean = false
+        val isLoading: Boolean = false,
+        val ghostPieceY: Int? = null
     )
 
     sealed class Intent {
@@ -37,7 +38,7 @@ internal interface GameStore : Store<GameStore.Intent, GameStore.State, GameStor
 
     sealed class Msg {
         data class GameInitialized(val gameState: GameState, val settings: GameSettings) : Msg()
-        data class GameStateUpdated(val gameState: GameState) : Msg()
+        data class GameStateUpdated(val gameState: GameState, val ghostPieceY: Int?) : Msg()
         data class PausedChanged(val isPaused: Boolean) : Msg()
         data class ElapsedTimeUpdated(val elapsedTime: Long) : Msg()
         data class LoadingChanged(val isLoading: Boolean) : Msg()

@@ -17,7 +17,8 @@ interface GameComponent  {
         val elapsedTime: Long = 0,
         val isGameOver: Boolean = false,
         val finalScore: Int = 0,
-        val finalLinesCleared: Int = 0
+        val finalLinesCleared: Int = 0,
+        val ghostPieceY: Int? = null
     )
     
     fun onPause()

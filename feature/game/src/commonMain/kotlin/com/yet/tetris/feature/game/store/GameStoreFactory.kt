@@ -35,6 +35,7 @@ internal class GameStoreFactory : KoinComponent {
     private val hardDropUseCase: HardDropUseCase by inject()
     private val lockPieceUseCase: LockPieceUseCase by inject()
     private val handleSwipeInputUseCase: HandleSwipeInputUseCase by inject()
+    private val calculateGhostPositionUseCase: CalculateGhostPositionUseCase by inject()
     
     fun create(): GameStore =
         object : GameStore, Store<GameStore.Intent, GameStore.State, GameStore.Label> by storeFactory.create(
@@ -54,7 +55,10 @@ internal class GameStoreFactory : KoinComponent {
                     gameState = msg.gameState,
                     settings = msg.settings
                 )
-                is GameStore.Msg.GameStateUpdated -> copy(gameState = msg.gameState)
+                is GameStore.Msg.GameStateUpdated -> copy(
+                    gameState = msg.gameState,
+                    ghostPieceY = msg.ghostPieceY
+                )
                 is GameStore.Msg.PausedChanged -> copy(isPaused = msg.isPaused)
                 is GameStore.Msg.ElapsedTimeUpdated -> copy(elapsedTime = msg.elapsedTime)
                 is GameStore.Msg.LoadingChanged -> copy(isLoading = msg.isLoading)
@@ -126,7 +130,8 @@ internal class GameStoreFactory : KoinComponent {
                         // Auto-move piece down
                         val newState = movePieceUseCase.moveDown(state.gameState)
                         if (newState != null) {
-                            dispatch(GameStore.Msg.GameStateUpdated(newState))
+                            val ghostY = calculateGhostY(newState)
+                            dispatch(GameStore.Msg.GameStateUpdated(newState, ghostY))
                         } else {
                             // Piece can't move down, lock it
                             lockPiece(state)
@@ -179,7 +184,8 @@ internal class GameStoreFactory : KoinComponent {
             state.gameState?.let { gameState ->
                 if (!state.isPaused && !gameState.isGameOver) {
                     movePieceUseCase.moveLeft(gameState)?.let { newState ->
-                        dispatch(GameStore.Msg.GameStateUpdated(newState))
+                        val ghostY = calculateGhostY(newState)
+                        dispatch(GameStore.Msg.GameStateUpdated(newState, ghostY))
                     }
                 }
             }
@@ -189,7 +195,8 @@ internal class GameStoreFactory : KoinComponent {
             state.gameState?.let { gameState ->
                 if (!state.isPaused && !gameState.isGameOver) {
                     movePieceUseCase.moveRight(gameState)?.let { newState ->
-                        dispatch(GameStore.Msg.GameStateUpdated(newState))
+                        val ghostY = calculateGhostY(newState)
+                        dispatch(GameStore.Msg.GameStateUpdated(newState, ghostY))
                     }
                 }
             }
@@ -200,7 +207,8 @@ internal class GameStoreFactory : KoinComponent {
                 if (!state.isPaused && !gameState.isGameOver) {
                     val newState = movePieceUseCase.moveDown(gameState)
                     if (newState != null) {
-                        dispatch(GameStore.Msg.GameStateUpdated(newState))
+                        val ghostY = calculateGhostY(newState)
+                        dispatch(GameStore.Msg.GameStateUpdated(newState, ghostY))
                     } else {
                         lockPiece(state)
                     }
@@ -212,7 +220,8 @@ internal class GameStoreFactory : KoinComponent {
             state.gameState?.let { gameState ->
                 if (!state.isPaused && !gameState.isGameOver) {
                     rotatePieceUseCase(gameState)?.let { newState ->
-                        dispatch(GameStore.Msg.GameStateUpdated(newState))
+                        val ghostY = calculateGhostY(newState)
+                        dispatch(GameStore.Msg.GameStateUpdated(newState, ghostY))
                     }
                 }
             }
@@ -222,7 +231,8 @@ internal class GameStoreFactory : KoinComponent {
             state.gameState?.let { gameState ->
                 if (!state.isPaused && !gameState.isGameOver) {
                     hardDropUseCase(gameState)?.let { droppedState ->
-                        dispatch(GameStore.Msg.GameStateUpdated(droppedState))
+                        val ghostY = calculateGhostY(droppedState)
+                        dispatch(GameStore.Msg.GameStateUpdated(droppedState, ghostY))
                         // Lock the piece immediately after hard drop
                         lockPiece(state.copy(gameState = droppedState))
                     }
@@ -241,7 +251,8 @@ internal class GameStoreFactory : KoinComponent {
                         intent.velocityY,
                         state.settings.swipeSensitivity
                     )?.let { newState ->
-                        dispatch(GameStore.Msg.GameStateUpdated(newState))
+                        val ghostY = calculateGhostY(newState)
+                        dispatch(GameStore.Msg.GameStateUpdated(newState, ghostY))
                         
                         // If it was a hard drop, lock the piece
                         if (intent.velocityY > state.settings.swipeSensitivity.softDropThreshold) {
@@ -256,11 +267,22 @@ internal class GameStoreFactory : KoinComponent {
         private fun lockPiece(state: GameStore.State) {
             state.gameState?.let { gameState ->
                 val newState = lockPieceUseCase(gameState)
-                dispatch(GameStore.Msg.GameStateUpdated(newState))
+                val ghostY = calculateGhostY(newState)
+                dispatch(GameStore.Msg.GameStateUpdated(newState, ghostY))
                 
                 if (newState.isGameOver) {
                     handleGameOver(newState, state.settings)
                 }
+            }
+        }
+        
+        private fun calculateGhostY(gameState: GameState): Int? {
+            return gameState.currentPiece?.let { piece ->
+                calculateGhostPositionUseCase(
+                    gameState = gameState,
+                    piece = piece,
+                    currentPosition = gameState.currentPosition
+                )
             }
         }
         
