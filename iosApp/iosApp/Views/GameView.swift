@@ -179,14 +179,50 @@ struct NextPieceView: View {
                 .font(.caption)
                 .foregroundColor(.secondary)
             
-            // Simple preview - would need proper rendering
-            RoundedRectangle(cornerRadius: 8)
-                .fill(.blue)
-                .frame(width: 60, height: 60)
+            // Render the actual piece
+            Canvas { context, size in
+                let cellSize: CGFloat = 12
+                let blocks = piece.blocks.compactMap { $0 as? Position }
+                
+                // Calculate bounds to center the piece
+                let minX = blocks.map { $0.x }.min() ?? 0
+                let maxX = blocks.map { $0.x }.max() ?? 0
+                let minY = blocks.map { $0.y }.min() ?? 0
+                let maxY = blocks.map { $0.y }.max() ?? 0
+                
+                let pieceWidth = CGFloat(maxX - minX + 1) * cellSize
+                let pieceHeight = CGFloat(maxY - minY + 1) * cellSize
+                
+                let offsetX = (size.width - pieceWidth) / 2 - CGFloat(minX) * cellSize
+                let offsetY = (size.height - pieceHeight) / 2 - CGFloat(minY) * cellSize
+                
+                // Draw each block
+                for block in blocks {
+                    let x = CGFloat(block.x) * cellSize + offsetX
+                    let y = CGFloat(block.y) * cellSize + offsetY
+                    
+                    let rect = CGRect(x: x, y: y, width: cellSize - 1, height: cellSize - 1)
+                    context.fill(Path(rect), with: .color(getTetrominoColor(type: piece.type)))
+                }
+            }
+            .frame(width: 60, height: 60)
         }
         .padding(8)
         .background(.regularMaterial)
         .clipShape(RoundedRectangle(cornerRadius: 12))
+    }
+    
+    private func getTetrominoColor(type: TetrominoType) -> Color {
+        switch type {
+        case .i: return Color(red: 0, green: 0.94, blue: 0.94)
+        case .o: return Color(red: 0.94, green: 0.94, blue: 0)
+        case .t: return Color(red: 0.63, green: 0, blue: 0.94)
+        case .s: return Color(red: 0, green: 0.94, blue: 0)
+        case .z: return Color(red: 0.94, green: 0, blue: 0)
+        case .j: return Color(red: 0, green: 0, blue: 0.94)
+        case .l: return Color(red: 0.94, green: 0.63, blue: 0)
+        default: return .gray
+        }
     }
 }
 
