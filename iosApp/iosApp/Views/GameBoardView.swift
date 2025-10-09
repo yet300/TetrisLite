@@ -111,6 +111,6 @@ struct GameBoardView: View {
     }
     
     private func getBackgroundColor() -> Color {
-        return .black
+        return .black.opacity(0.4)
     }
 }

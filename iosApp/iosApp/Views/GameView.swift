@@ -17,6 +17,13 @@ struct GameView: View {
     
     var body: some View {
         ZStack {
+            LinearGradient(
+                colors: [.purple.opacity(0.6), .blue.opacity(0.6)],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .ignoresSafeArea()
+            
             if model.isLoading {
                 ProgressView()
             } else if model.isGameOver {
@@ -38,10 +45,9 @@ struct GameView: View {
                         } label: {
                             Image(systemName: "pause.fill")
                                 .font(.title2)
-                                .foregroundColor(.primary)
+                                .foregroundColor(.white)
                                 .padding(12)
-                                .background(.ultraThinMaterial)
-                                .clipShape(Circle())
+                                .glassPanelStyle(cornerRadius: 99)
                         }
                         
                         Spacer()
@@ -65,11 +71,8 @@ struct GameView: View {
                         ghostY:  model.ghostPieceY?.int32Value
                     )
                     .aspectRatio(CGFloat(gameState.board.width) / CGFloat(gameState.board.height), contentMode: .fit)
-                    .padding()
-                    .background(
-                        RoundedRectangle(cornerRadius: 20)
-                            .fill(.ultraThinMaterial)
-                    )
+                    .padding(8)
+                    .glassPanelStyle()
                     .padding()
                     
                     Spacer()
@@ -144,7 +147,7 @@ struct GameStatsView: View {
             StatItem(label: "Time", value: formatTime(time))
         }
         .padding(12)
-        .background(.regularMaterial)
+        .glassPanelStyle(cornerRadius: 16)
         .clipShape(RoundedRectangle(cornerRadius: 12))
     }
     
@@ -208,7 +211,7 @@ struct NextPieceView: View {
             .frame(width: 60, height: 60)
         }
         .padding(8)
-        .background(.regularMaterial)
+        .glassPanelStyle(cornerRadius: 16)
         .clipShape(RoundedRectangle(cornerRadius: 12))
     }
     
@@ -235,7 +238,8 @@ struct GameOverView: View {
         VStack(spacing: 24) {
             Text("Game Over")
                 .font(.system(size: 48, weight: .bold))
-                .foregroundColor(.red)
+                .foregroundColor(.white)
+                .shadow(color: .red, radius: 10)
             
             VStack(spacing: 12) {
                 Text("Final Score: \(score)")
@@ -245,22 +249,15 @@ struct GameOverView: View {
                     .foregroundColor(.secondary)
             }
             
-            Button("Back to Home") {
-                onQuit()
-            }
-            .font(.headline)
-            .foregroundColor(.white)
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 16)
-            .background(
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(Color.blue)
+            GlassButton(
+                title: "Back to Home",
+                icon: "",
+                action: onQuit
             )
             .padding(.horizontal, 32)
         }
-        .padding()
-        .background(.regularMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: 24))
+        .padding(32)
+        .glassPanelStyle(cornerRadius: 24)
         .padding()
     }
 }
