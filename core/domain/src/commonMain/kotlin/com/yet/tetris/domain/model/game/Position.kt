@@ -1,8 +1,5 @@
 package com.yet.tetris.domain.model.game
 
-import kotlinx.serialization.Serializable
-
-@Serializable
 data class Position(
     val x: Int,
     val y: Int

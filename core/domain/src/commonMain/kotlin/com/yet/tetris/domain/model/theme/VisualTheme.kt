@@ -1,11 +1,8 @@
 package com.yet.tetris.domain.model.theme
 
-import kotlinx.serialization.Serializable
-
 /**
  * Visual theme for the game including colors and piece styles
  */
-@Serializable
 enum class VisualTheme {
     CLASSIC,        // Modern colorful Tetris
     RETRO_GAMEBOY,  // Game Boy green monochrome
@@ -21,7 +18,6 @@ enum class VisualTheme {
 /**
  * Piece rendering style
  */
-@Serializable
 enum class PieceStyle {
     SOLID,          // Solid filled blocks
     BORDERED,       // Blocks with borders
@@ -33,7 +29,6 @@ enum class PieceStyle {
 /**
  * Theme configuration with colors and style
  */
-@Serializable
 data class ThemeConfig(
     val visualTheme: VisualTheme = VisualTheme.CLASSIC,
     val pieceStyle: PieceStyle = PieceStyle.SOLID

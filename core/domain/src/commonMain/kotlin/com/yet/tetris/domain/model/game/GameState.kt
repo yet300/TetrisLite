@@ -1,8 +1,5 @@
 package com.yet.tetris.domain.model.game
 
-import kotlinx.serialization.Serializable
-
-@Serializable
 data class GameState(
     val board: GameBoard,
     val currentPiece: Tetromino?,

@@ -1,8 +1,5 @@
 package com.yet.tetris.domain.model.game
 
-import kotlinx.serialization.Serializable
-
-@Serializable
 data class Tetromino(
     val type: TetrominoType,
     val blocks: List<Position>,

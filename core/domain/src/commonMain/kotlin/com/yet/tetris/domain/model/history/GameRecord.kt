@@ -2,10 +2,8 @@ package com.yet.tetris.domain.model.history
 
 import com.yet.tetris.domain.model.game.Difficulty
 import kotlin.time.Instant
-import kotlinx.serialization.Serializable
 import kotlin.time.ExperimentalTime
 
-@Serializable
 data class GameRecord(
     val id: String,
     val score: Int,

@@ -1,8 +1,5 @@
 package com.yet.tetris.domain.model.game
 
-import kotlinx.serialization.Serializable
-
-@Serializable
 data class GameBoard(
     val width: Int = 10,
     val height: Int = 20,

@@ -1,11 +1,8 @@
 package com.yet.tetris.domain.model.audio
 
-import kotlinx.serialization.Serializable
-
 /**
  * Audio settings for music and sound effects.
  */
-@Serializable
 data class AudioSettings(
     val musicEnabled: Boolean = true,
     val soundEffectsEnabled: Boolean = true,
@@ -17,7 +14,6 @@ data class AudioSettings(
 /**
  * Available procedurally generated music themes.
  */
-@Serializable
 enum class MusicTheme {
     CLASSIC,    // 8-bit chiptune style, inspired by original Tetris
     MODERN,     // More contemporary electronic sound
