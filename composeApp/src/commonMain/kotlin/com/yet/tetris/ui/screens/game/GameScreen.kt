@@ -29,18 +29,19 @@ import com.yet.tetris.domain.model.settings.GameSettings
 import com.yet.tetris.domain.model.theme.PieceStyle
 import com.yet.tetris.feature.game.GameComponent
 import com.yet.tetris.feature.game.PreviewGameComponent
-import org.jetbrains.compose.resources.stringResource
-import tetrislite.composeapp.generated.resources.Res
-import tetrislite.composeapp.generated.resources.*
+import com.yet.tetris.ui.screens.game.dialog.ErrorDialog
+import com.yet.tetris.ui.screens.game.dialog.GameOverDialog
+import com.yet.tetris.ui.screens.game.dialog.PauseDialog
 import com.yet.tetris.ui.theme.*
 import com.yet.tetris.uikit.component.button.FrostedGlassButton
 import com.yet.tetris.uikit.theme.TetrisLiteAppTheme
+import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import tetrislite.composeapp.generated.resources.*
 
 @Composable
 fun GameScreen(component: GameComponent) {
     val model by component.model.subscribeAsState()
-    var showPauseDialog by remember { mutableStateOf(false) }
 
     Box(
         modifier = Modifier
@@ -53,34 +54,43 @@ fun GameScreen(component: GameComponent) {
                     modifier = Modifier.align(Alignment.Center)
                 )
             }
-
-            model.isGameOver -> {
-                GameOverContent(
-                    finalScore = model.finalScore,
-                    linesCleared = model.finalLinesCleared,
-                    onQuit = component::onQuit
-                )
-            }
-
             model.gameState != null -> {
                 GamePlayingContent(
                     model = model,
                     component = component,
                     onPauseClick = {
                         component.onPause()
-                        showPauseDialog = true
                     }
                 )
 
-                if (showPauseDialog && model.isPaused) {
-                    PauseDialog(
-                        onResume = {
-                            showPauseDialog = false
-                            component.onResume()
-                        },
-                        onQuit = component::onQuit
-                    )
-                }
+                GameSheet(component, model)
+            }
+        }
+    }
+}
+
+@Composable
+fun GameSheet(
+    component: GameComponent,
+    model: GameComponent.Model
+) {
+    val bottomSheetSlot by component.childSlot.subscribeAsState()
+
+    bottomSheetSlot.child?.instance?.let { child ->
+        when (child) {
+            is GameComponent.DialogChild.Pause -> {
+                PauseDialog(component = component)
+            }
+
+            is GameComponent.DialogChild.GameOver -> {
+                GameOverDialog(component = component, model = model)
+            }
+
+            is GameComponent.DialogChild.Error -> {
+                ErrorDialog(
+                    message = child.message,
+                    onDismiss = component::onDismissSheet
+                )
             }
         }
     }
@@ -171,6 +181,7 @@ private fun GamePlayingContent(
 }
 
 @Composable
+
 private fun GameStatsRow(
     score: Int,
     lines: Int,
@@ -211,6 +222,7 @@ private fun StatItem(label: String, value: String) {
 }
 
 @Composable
+
 private fun NextPiecePreview(
     nextPiece: Tetromino,
     settings: GameSettings
@@ -341,76 +353,6 @@ private fun GameBoardWithBorder(
     }
 }
 
-
-@Composable
-private fun GameOverContent(
-    finalScore: Int,
-    linesCleared: Int,
-    onQuit: () -> Unit
-) {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Card(
-            modifier = Modifier.padding(32.dp)
-        ) {
-            Column(
-                modifier = Modifier.padding(32.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                Text(
-                    text = stringResource(Res.string.game_over),
-                    style = MaterialTheme.typography.displayMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.error
-                )
-
-                Text(
-                    text = stringResource(Res.string.final_score, finalScore),
-                    style = MaterialTheme.typography.titleLarge
-                )
-
-                Text(
-                    text = stringResource(Res.string.lines_cleared, linesCleared),
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-
-                Button(
-                    onClick = onQuit,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(stringResource(Res.string.back_to_home))
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun PauseDialog(
-    onResume: () -> Unit,
-    onQuit: () -> Unit
-) {
-    AlertDialog(
-        onDismissRequest = onResume,
-        title = { Text(stringResource(Res.string.game_paused)) },
-        text = { Text(stringResource(Res.string.pause_message)) },
-        confirmButton = {
-            TextButton(onClick = onResume) {
-                Text(stringResource(Res.string.resume))
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onQuit) {
-                Text(stringResource(Res.string.quit))
-            }
-        }
-    )
-}
-
 private fun getTetrominoColor(type: TetrominoType, settings: GameSettings): Color {
     return settings.themeConfig.getTetrominoComposeColor(type)
 }
@@ -426,7 +368,7 @@ private fun DrawScope.drawStyledBlock(
     val lightColor = settings.themeConfig.getTetrominoLightColor(type).copy(alpha = alpha)
     val darkColor = settings.themeConfig.getTetrominoDarkColor(type).copy(alpha = alpha)
     val blockSize = Size(cellSize - 1, cellSize - 1)
-    
+
     when (settings.themeConfig.pieceStyle) {
         PieceStyle.SOLID -> {
             // Simple solid block
@@ -436,7 +378,7 @@ private fun DrawScope.drawStyledBlock(
                 size = blockSize
             )
         }
-        
+
         PieceStyle.BORDERED -> {
             // Solid block with border
             drawRect(
@@ -466,7 +408,7 @@ private fun DrawScope.drawStyledBlock(
                 size = Size(2f, blockSize.height)
             )
         }
-        
+
         PieceStyle.GRADIENT -> {
             // Gradient effect using multiple rectangles
             drawRect(
@@ -490,7 +432,7 @@ private fun DrawScope.drawStyledBlock(
                 size = Size(blockSize.width * 0.5f, blockSize.height * 0.5f)
             )
         }
-        
+
         PieceStyle.RETRO_PIXEL -> {
             // Pixelated retro style with smaller blocks
             val pixelSize = cellSize / 4f
@@ -509,7 +451,7 @@ private fun DrawScope.drawStyledBlock(
                 }
             }
         }
-        
+
         PieceStyle.GLASS -> {
             // Translucent glass effect
             drawRect(
@@ -546,6 +488,7 @@ private fun formatTime(milliseconds: Long): String {
 
 
 @Composable
+
 @Preview
 fun GameScreenPreview() {
     TetrisLiteAppTheme {

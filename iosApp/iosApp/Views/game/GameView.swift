@@ -7,7 +7,9 @@ struct GameView: View {
     @StateValue
     private var model: GameComponentModel
     
-    @State private var showPauseDialog = false
+    @StateValue
+    private var dialog: ChildSlot<AnyObject, GameComponentDialogChild>
+    
     @Environment(\.dismiss) private var dismiss
     
     @State private var lastDragTranslation: CGSize = .zero
@@ -16,6 +18,7 @@ struct GameView: View {
     init(_ component: GameComponent) {
         self.component = component
         _model = StateValue(component.model)
+        _dialog = StateValue(component.childSlot)
     }
     
     var body: some View {
@@ -29,22 +32,12 @@ struct GameView: View {
             
             if model.isLoading {
                 ProgressView()
-            } else if model.isGameOver {
-                GameOverView(
-                    score: model.finalScore,
-                    lines: model.finalLinesCleared,
-                    onQuit: {
-                        component.onQuit()
-                        dismiss()
-                    }
-                )
             } else if let gameState = model.gameState {
                 VStack(spacing: 16) {
                     // Top Bar
                     HStack {
                         Button {
                             component.onPause()
-                            showPauseDialog = true
                         } label: {
                             Image(systemName: "pause.fill")
                                 .font(.title2)
@@ -110,20 +103,16 @@ struct GameView: View {
                     
                     Spacer()
                 }
+                
+                if let child = dialog.child?.instance {
+                    GlassDialogContainer {
+                        DialogView(component: component, model: model, child: child)
+                    }
+                    .transition(.opacity.combined(with: .scale(scale: 0.9)))
+                }
             }
         }
         .navigationBarBackButtonHidden(true)
-        .alert("Game Paused", isPresented: $showPauseDialog) {
-            Button("Resume") {
-                component.onResume()
-            }
-            Button("Quit", role: .destructive) {
-                component.onQuit()
-                dismiss()
-            }
-        } message: {
-            Text("What would you like to do?")
-        }
         .keyboardAware { key in
             switch key.lowercased() {
             case "a", "directionleft": component.onMoveLeft()
@@ -133,12 +122,35 @@ struct GameView: View {
             case "\r": component.onHardDrop()
             case "\u{1b}", "p": // escape or 'p'
                 component.onPause()
-                showPauseDialog = true
             default: break
             }
         }
     }
 }
+
+
+private struct DialogView: View {
+    let component: GameComponent
+    let model: GameComponentModel
+    let child: GameComponentDialogChild
+    
+    var body: some View {
+        switch child {
+        case is GameOverChild:
+            GameOverDialogContent(component: component, model: model)
+        case is PauseChild:
+            PauseDialogContent(component: component)
+        case let child as ErrorChild:
+            ErrorDialogContent(message: child.message, onDismiss: component.onDismissSheet)
+        default:
+            EmptyView()
+        }
+    }
+}
+private typealias GameOverChild = GameComponentDialogChildGameOver
+private typealias PauseChild = GameComponentDialogChildPause
+private typealias ErrorChild = GameComponentDialogChildError
+
 
 struct GameStatsView: View {
     let score: Int32
@@ -231,38 +243,5 @@ struct NextPieceView: View {
         case .l: return Color(red: 0.94, green: 0.63, blue: 0)
         default: return .gray
         }
-    }
-}
-
-struct GameOverView: View {
-    let score: Int32
-    let lines: Int32
-    let onQuit: () -> Void
-    
-    var body: some View {
-        VStack(spacing: 24) {
-            Text("Game Over")
-                .font(.system(size: 48, weight: .bold))
-                .foregroundColor(.white)
-                .shadow(color: .red, radius: 10)
-            
-            VStack(spacing: 12) {
-                Text("Final Score: \(score)")
-                    .font(.title2)
-                Text("Lines Cleared: \(lines)")
-                    .font(.title3)
-                    .foregroundColor(.secondary)
-            }
-            
-            GlassButton(
-                title: "Back to Home",
-                icon: "",
-                action: onQuit
-            )
-            .padding(.horizontal, 32)
-        }
-        .padding(32)
-        .glassPanelStyle(cornerRadius: 24)
-        .padding()
     }
 }

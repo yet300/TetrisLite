@@ -2,6 +2,7 @@ package com.yet.tetris.feature.game
 
 import com.app.common.decompose.PreviewComponentContext
 import com.arkivanov.decompose.ComponentContext
+import com.arkivanov.decompose.router.slot.ChildSlot
 import com.arkivanov.decompose.value.MutableValue
 import com.arkivanov.decompose.value.Value
 
@@ -9,6 +10,20 @@ class PreviewGameComponent : GameComponent,
     ComponentContext by PreviewComponentContext {
     override val model: Value<GameComponent.Model> =
         MutableValue(GameComponent.Model())
+    override val childSlot: Value<ChildSlot<*, GameComponent.DialogChild>>  =
+        MutableValue(ChildSlot<Any, GameComponent.DialogChild>(null))
+
+    override fun onDismissSheet() {
+        TODO("Not yet implemented")
+    }
+
+    override fun onBackClick() {
+        TODO("Not yet implemented")
+    }
+
+    override fun onRetry() {
+        TODO("Not yet implemented")
+    }
 
     override fun onPause() {
         TODO("Not yet implemented")

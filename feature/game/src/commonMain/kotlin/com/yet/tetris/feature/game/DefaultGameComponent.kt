@@ -4,13 +4,21 @@ package com.yet.tetris.feature.game
 import com.app.common.decompose.asValue
 import com.app.common.decompose.coroutineScope
 import com.arkivanov.decompose.ComponentContext
+import com.arkivanov.decompose.router.slot.ChildSlot
+import com.arkivanov.decompose.router.slot.SlotNavigation
+import com.arkivanov.decompose.router.slot.activate
+import com.arkivanov.decompose.router.slot.childSlot
+import com.arkivanov.decompose.router.slot.dismiss
 import com.arkivanov.decompose.value.Value
 import com.arkivanov.decompose.value.operator.map
+import com.arkivanov.decompose.value.subscribe
+import com.arkivanov.essenty.backhandler.BackCallback
 import com.arkivanov.mvikotlin.core.instancekeeper.getStore
 import com.arkivanov.mvikotlin.extensions.coroutines.labels
 import com.yet.tetris.feature.game.store.GameStore
 import com.yet.tetris.feature.game.store.GameStoreFactory
 import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
 import org.koin.core.component.KoinComponent
 
 
@@ -21,19 +29,32 @@ class DefaultGameComponent(
 
     private val store = instanceKeeper.getStore { GameStoreFactory().create() }
 
+    private val sheetNavigation = SlotNavigation<DialogConfig>()
 
     init {
+        val backCallback = BackCallback(isEnabled = isGameActive()) {}
+        backHandler.register(backCallback)
+
+        store.asValue().subscribe(lifecycle) { state ->
+            backCallback.isEnabled = isGameActive()
+        }
+
         coroutineScope().launch {
             // Handle labels
             store.labels.collect {
                 when (it) {
-                    is GameStore.Label.GameOver -> {
-                        // Game over handled in model mapping
-                    }
-                    is GameStore.Label.NavigateBack -> navigateBack()
-                    is GameStore.Label.ShowError -> {
-                        // Handle error
-                    }
+                    is GameStore.Label.GameOver -> sheetNavigation.activate(
+                        DialogConfig.GameOver(
+                            score = store.state.gameState?.score ?: 0,
+                            lines = store.state.gameState?.linesCleared ?: 0
+                        )
+                    )
+
+                    is GameStore.Label.NavigateBack -> onBackClick()
+
+                    is GameStore.Label.ShowError -> sheetNavigation.activate(DialogConfig.Error(it.message))
+
+                    GameStore.Label.GamePaused -> sheetNavigation.activate(DialogConfig.Pause)
                 }
             }
         }
@@ -44,7 +65,6 @@ class DefaultGameComponent(
             isLoading = state.isLoading || state.gameState == null,
             gameState = state.gameState,
             settings = state.settings,
-            isPaused = state.isPaused,
             elapsedTime = state.elapsedTime,
             isGameOver = state.gameState?.isGameOver ?: false,
             finalScore = state.gameState?.score ?: 0,
@@ -53,7 +73,42 @@ class DefaultGameComponent(
         )
     }
 
+    override val childSlot: Value<ChildSlot<*, GameComponent.DialogChild>> =
+        childSlot(
+            source = sheetNavigation,
+            serializer = DialogConfig.serializer(),
+            key = "GameSheet",
+            handleBackButton = true,
+        ) { config, childComponentContext ->
+            when (config) {
+                is DialogConfig.Pause ->
+                    GameComponent.DialogChild.Pause()
+
+                is DialogConfig.GameOver ->
+                    GameComponent.DialogChild.GameOver()
+
+                is DialogConfig.Error -> GameComponent.DialogChild.Error(config.message)
+            }
+        }
+
+    private fun isGameActive(): Boolean {
+        val state = store.state
+        return state.gameState != null && !state.isPaused && !(state.gameState.isGameOver)
+    }
+
+    override fun onDismissSheet() {
+        sheetNavigation.dismiss()
+    }
+
+    override fun onBackClick() = navigateBack()
+
+    override fun onRetry() {
+        sheetNavigation.dismiss()
+        store.accept(GameStore.Intent.RetryGame)
+    }
+
     override fun onPause() {
+        if (store.state.isPaused) return
         store.accept(GameStore.Intent.PauseGame)
     }
 
@@ -103,5 +158,17 @@ class DefaultGameComponent(
 
     override fun onDragEnded() {
         store.accept(GameStore.Intent.DragEnded)
+    }
+
+    @Serializable
+    sealed interface DialogConfig {
+        @Serializable
+        data object Pause : DialogConfig
+
+        @Serializable
+        data class GameOver(val score: Int, val lines: Int) : DialogConfig
+
+        @Serializable
+        data class Error(val message: String) : DialogConfig
     }
 }

@@ -19,6 +19,8 @@ internal interface GameStore : Store<GameStore.Intent, GameStore.State, GameStor
         data object PauseGame : Intent()
         data object ResumeGame : Intent()
         data object QuitGame : Intent()
+        data object RetryGame : Intent()
+
         data object MoveLeft : Intent()
         data object MoveRight : Intent()
         data object MoveDown : Intent()
@@ -38,7 +40,7 @@ internal interface GameStore : Store<GameStore.Intent, GameStore.State, GameStor
     }
 
     sealed interface Action {
-        data object GameLoadStarted : Action
+        data class GameLoadStarted(val forceNewGame: Boolean) : Action
     }
 
     sealed class Msg {
@@ -52,6 +54,8 @@ internal interface GameStore : Store<GameStore.Intent, GameStore.State, GameStor
 
     sealed class Label {
         data class ShowError(val message: String) : Label()
+
+        data object GamePaused : Label()
         data object GameOver : Label()
         data object NavigateBack : Label()
     }

@@ -50,7 +50,7 @@ internal class GameStoreFactory : KoinComponent {
         object : GameStore, Store<GameStore.Intent, GameStore.State, GameStore.Label> by storeFactory.create(
             name = "GameStore",
             initialState = GameStore.State(),
-            bootstrapper = SimpleBootstrapper(GameStore.Action.GameLoadStarted),
+            bootstrapper = SimpleBootstrapper(GameStore.Action.GameLoadStarted(forceNewGame = false)),
             executorFactory = ::ExecutorImpl,
             reducer = ReducerImpl
         ) {}
@@ -61,8 +61,10 @@ internal class GameStoreFactory : KoinComponent {
         override fun GameStore.State.reduce(msg: GameStore.Msg): GameStore.State =
             when (msg) {
                 is GameStore.Msg.GameInitialized -> copy(
+                    isLoading = false,
                     gameState = msg.gameState,
-                    settings = msg.settings
+                    settings = msg.settings,
+                    elapsedTime = 0L
                 )
                 is GameStore.Msg.GameStateUpdated -> copy(
                     gameState = msg.gameState,
@@ -99,7 +101,7 @@ internal class GameStoreFactory : KoinComponent {
 
         override fun executeAction(action: GameStore.Action) {
             when (action) {
-                GameStore.Action.GameLoadStarted ->  initializeGame()
+                is GameStore.Action.GameLoadStarted -> initializeGame(action.forceNewGame)
             }
         }
         override fun executeIntent(intent: GameStore.Intent) {
@@ -108,6 +110,10 @@ internal class GameStoreFactory : KoinComponent {
                 is GameStore.Intent.PauseGame -> pauseGame(getState)
                 is GameStore.Intent.ResumeGame -> resumeGame()
                 is GameStore.Intent.QuitGame -> quitGame(getState)
+                is GameStore.Intent.RetryGame -> {
+                    gameLoopUseCase.stop()
+                    initializeGame(forceNewGame = true)
+                }
                 is GameStore.Intent.MoveLeft -> moveLeft(getState)
                 is GameStore.Intent.MoveRight -> moveRight(getState)
                 is GameStore.Intent.MoveDown -> moveDown(getState)
@@ -130,8 +136,8 @@ internal class GameStoreFactory : KoinComponent {
                 }
             }
         }
-        
-        private fun initializeGame() {
+
+        private fun initializeGame(forceNewGame: Boolean) {
             scope.launch {
                 try {
                     dispatch(GameStore.Msg.LoadingChanged(true))
@@ -140,8 +146,12 @@ internal class GameStoreFactory : KoinComponent {
                     val settings = gameSettingsRepository.getSettings()
                     
                     // Try to load saved game state, otherwise start new game
-                    val gameState = gameStateRepository.loadGameState()
-                        ?: startGameUseCase(settings)
+                    val gameState = if (forceNewGame) {
+                        gameStateRepository.clearGameState()
+                        startGameUseCase(settings)
+                    } else {
+                        gameStateRepository.loadGameState() ?: startGameUseCase(settings)
+                    }
                     
                     dispatch(GameStore.Msg.GameInitialized(gameState, settings))
                     dispatch(GameStore.Msg.LoadingChanged(false))
@@ -180,6 +190,7 @@ internal class GameStoreFactory : KoinComponent {
             scope.launch {
                 state.gameState?.let { gameStateRepository.saveGameState(it) }
             }
+            publish(GameStore.Label.GamePaused)
         }
         
         private fun resumeGame() {
