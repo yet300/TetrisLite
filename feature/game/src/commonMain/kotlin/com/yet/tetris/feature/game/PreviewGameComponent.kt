@@ -51,5 +51,21 @@ class PreviewGameComponent : GameComponent,
         TODO("Not yet implemented")
     }
 
+    override fun onBoardSizeChanged(height: Float) {
+        TODO("Not yet implemented")
+    }
+
+    override fun onDragStarted() {
+        TODO("Not yet implemented")
+    }
+
+    override fun onDragged(deltaX: Float, deltaY: Float) {
+        TODO("Not yet implemented")
+    }
+
+    override fun onDragEnded() {
+        TODO("Not yet implemented")
+    }
+
 }
 

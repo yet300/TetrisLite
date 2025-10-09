@@ -10,6 +10,9 @@ struct GameView: View {
     @State private var showPauseDialog = false
     @Environment(\.dismiss) private var dismiss
     
+    @State private var lastDragTranslation: CGSize = .zero
+    @State private var didStartDragging = false
+    
     init(_ component: GameComponent) {
         self.component = component
         _model = StateValue(component.model)
@@ -64,12 +67,42 @@ struct GameView: View {
                     }
                     .padding(.horizontal)
                     
-                    // Game Board
-                    GameBoardView(
-                        gameState: gameState,
-                        settings: model.settings,
-                        ghostY:  model.ghostPieceY?.int32Value
-                    )
+                    GeometryReader { geometry in
+                        GameBoardView(
+                            gameState: gameState,
+                            settings: model.settings,
+                            ghostY:  model.ghostPieceY?.int32Value
+                        )
+                        .gesture(
+                            TapGesture()
+                                .onEnded {
+                                    component.onRotate()
+                                }
+                                .simultaneously(with: DragGesture(minimumDistance: 0)
+                                    .onChanged { value in
+                                        if !didStartDragging {
+                                            component.onDragStarted()
+                                            didStartDragging = true
+                                        }
+                                        
+                                        let deltaX = value.translation.width - self.lastDragTranslation.width
+                                        let deltaY = value.translation.height - self.lastDragTranslation.height
+                                        self.lastDragTranslation = value.translation
+                                        
+                                        component.onDragged(deltaX: Float(deltaX), deltaY: Float(deltaY))
+                                    }
+                                    .onEnded { _ in
+                                        component.onDragEnded()
+                                        
+                                        self.lastDragTranslation = .zero
+                                        self.didStartDragging = false
+                                    }
+                                )
+                        )
+                        .onAppear {
+                            component.onBoardSizeChanged(height: Float(geometry.size.height))
+                        }
+                    }
                     .aspectRatio(CGFloat(gameState.board.width) / CGFloat(gameState.board.height), contentMode: .fit)
                     .padding(8)
                     .glassPanelStyle()
@@ -91,15 +124,6 @@ struct GameView: View {
         } message: {
             Text("What would you like to do?")
         }
-        .gesture(
-            DragGesture()
-                .onEnded { value in
-                    handleSwipe(value: value)
-                }
-        )
-        .onTapGesture {
-            component.onRotate()
-        }
         .keyboardAware { key in
             switch key.lowercased() {
             case "a", "directionleft": component.onMoveLeft()
@@ -111,25 +135,6 @@ struct GameView: View {
                 component.onPause()
                 showPauseDialog = true
             default: break
-            }
-        }
-    }
-    
-    private func handleSwipe(value: DragGesture.Value) {
-        let horizontalAmount = value.translation.width
-        let verticalAmount = value.translation.height
-        
-        if abs(horizontalAmount) > abs(verticalAmount) {
-            if horizontalAmount < -50 {
-                component.onMoveLeft()
-            } else if horizontalAmount > 50 {
-                component.onMoveRight()
-            }
-        } else {
-            if verticalAmount > 100 {
-                component.onHardDrop()
-            } else if verticalAmount > 50 {
-                component.onMoveDown()
             }
         }
     }

@@ -31,4 +31,8 @@ interface GameComponent  {
     fun onHardDrop()
     fun onSwipe(deltaX: Float, deltaY: Float, velocityX: Float, velocityY: Float)
 
+    fun onBoardSizeChanged(height: Float)
+    fun onDragStarted()
+    fun onDragged(deltaX: Float, deltaY: Float)
+    fun onDragEnded()
 }

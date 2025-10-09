@@ -88,4 +88,20 @@ class DefaultGameComponent(
     override fun onSwipe(deltaX: Float, deltaY: Float, velocityX: Float, velocityY: Float) {
         store.accept(GameStore.Intent.HandleSwipe(deltaX, deltaY, velocityX, velocityY))
     }
+
+    override fun onBoardSizeChanged(height: Float) {
+        store.accept(GameStore.Intent.OnBoardSizeChanged(height))
+    }
+
+    override fun onDragStarted() {
+        store.accept(GameStore.Intent.DragStarted)
+    }
+
+    override fun onDragged(deltaX: Float, deltaY: Float) {
+        store.accept(GameStore.Intent.Dragged(deltaX, deltaY))
+    }
+
+    override fun onDragEnded() {
+        store.accept(GameStore.Intent.DragEnded)
+    }
 }

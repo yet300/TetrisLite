@@ -17,6 +17,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
@@ -35,7 +36,6 @@ import com.yet.tetris.ui.theme.*
 import com.yet.tetris.uikit.component.button.FrostedGlassButton
 import com.yet.tetris.uikit.theme.TetrisLiteAppTheme
 import org.jetbrains.compose.ui.tooling.preview.Preview
-import kotlin.math.abs
 
 @Composable
 fun GameScreen(component: GameComponent) {
@@ -93,8 +93,6 @@ private fun GamePlayingContent(
     onPauseClick: () -> Unit
 ) {
     val gameState = model.gameState ?: return
-    val swipeThreshold = 50f
-    var accumulatedDragX by remember { mutableStateOf(0f) }
 
     Column(
         modifier = Modifier
@@ -142,54 +140,26 @@ private fun GamePlayingContent(
             modifier = Modifier
                 .weight(1f)
                 .widthIn(max = 400.dp)
+                .onSizeChanged { size ->
+                    component.onBoardSizeChanged(size.height.toFloat())
+                }
                 .pointerInput(Unit) {
                     detectTapGestures(
                         onTap = { component.onRotate() }
                     )
                 }
                 .pointerInput(Unit) {
-                    var dragStartTime = 0L
-                    var totalDragDistanceY = 0f
-                    var isHorizontalSwipe = false
-
+                    detectTapGestures(
+                        onTap = { component.onRotate() }
+                    )
+                }
+                .pointerInput(Unit) {
                     detectDragGestures(
-                        onDragStart = { _: Offset ->
-                            accumulatedDragX = 0f
-                            totalDragDistanceY = 0f
-                            dragStartTime = System.currentTimeMillis()
-                            isHorizontalSwipe = false
-                        },
-                        onDragEnd = {
-                            val dragDuration = System.currentTimeMillis() - dragStartTime
-
-                            if (!isHorizontalSwipe && totalDragDistanceY > size.height * 0.25f && dragDuration < 500) {
-                                component.onHardDrop()
-                            }
-
-                            accumulatedDragX = 0f
-                        },
+                        onDragStart = { component.onDragStarted() },
+                        onDragEnd = component::onDragEnded,
                         onDrag = { change, dragAmount ->
                             change.consume()
-
-                            if (!isHorizontalSwipe && abs(dragAmount.x) > abs(dragAmount.y) * 1.5f) {
-                                isHorizontalSwipe = true
-                            }
-
-                            if (isHorizontalSwipe || abs(accumulatedDragX) > abs(totalDragDistanceY)) {
-                                accumulatedDragX += dragAmount.x
-                                if (abs(accumulatedDragX) > swipeThreshold) {
-                                    if (accumulatedDragX > 0) {
-                                        component.onMoveRight()
-                                    } else {
-                                        component.onMoveLeft()
-                                    }
-                                    accumulatedDragX = 0f
-                                }
-                            }
-
-                            if (dragAmount.y > 0) {
-                                totalDragDistanceY += dragAmount.y
-                            }
+                            component.onDragged(dragAmount.x, dragAmount.y)
                         }
                     )
                 },

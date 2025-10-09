@@ -18,6 +18,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import kotlin.math.abs
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 import kotlin.uuid.ExperimentalUuidApi
@@ -62,6 +63,7 @@ internal class GameStoreFactory : KoinComponent {
                 is GameStore.Msg.PausedChanged -> copy(isPaused = msg.isPaused)
                 is GameStore.Msg.ElapsedTimeUpdated -> copy(elapsedTime = msg.elapsedTime)
                 is GameStore.Msg.LoadingChanged -> copy(isLoading = msg.isLoading)
+                is GameStore.Msg.GestureStateUpdated -> copy(gestureState = msg.gestureState)
             }
     }
 
@@ -71,6 +73,8 @@ internal class GameStoreFactory : KoinComponent {
         private var gameLoopJob: Job? = null
         private var timerJob: Job? = null
         private var gameStartTime: Long = 0
+
+        private val swipeThreshold = 50f
 
         override fun executeAction(action: GameStore.Action) {
             when (action) {
@@ -89,6 +93,57 @@ internal class GameStoreFactory : KoinComponent {
                 is GameStore.Intent.Rotate -> rotate(getState)
                 is GameStore.Intent.HardDrop -> hardDrop(getState)
                 is GameStore.Intent.HandleSwipe -> handleSwipe(intent, getState)
+
+                is GameStore.Intent.OnBoardSizeChanged -> dispatch(GameStore.Msg.GestureStateUpdated(GameStore.GestureState(boardHeightPx = intent.height)))
+                is GameStore.Intent.DragStarted -> {
+                    val currentGestureState = getState.gestureState ?: GameStore.GestureState()
+                    dispatch(GameStore.Msg.GestureStateUpdated(currentGestureState.copy(
+                        accumulatedDragX = 0f,
+                        totalDragDistanceY = 0f,
+                        dragStartTime = Clock.System.now().toEpochMilliseconds(),
+                        isHorizontalSwipeDetermined = false
+                    )))
+                }
+                is GameStore.Intent.DragEnded -> {
+                    getState.gestureState?.let { gesture ->
+                        val dragDuration = Clock.System.now().toEpochMilliseconds() - gesture.dragStartTime
+                        // Проверка на Hard Drop
+                        if (!gesture.isHorizontalSwipeDetermined && gesture.totalDragDistanceY > gesture.boardHeightPx * 0.25f && dragDuration < 500) {
+                            hardDrop(getState)
+                        } else if (!gesture.isHorizontalSwipeDetermined && gesture.totalDragDistanceY > swipeThreshold) {
+                            // Простой свайп вниз
+                            moveDown(getState)
+                        }
+                    }
+                    // Сбрасываем состояние жеста после окончания
+                    dispatch(GameStore.Msg.GestureStateUpdated(getState.gestureState?.copy(accumulatedDragX = 0f)))
+                }
+                is GameStore.Intent.Dragged -> {
+                    var gesture = getState.gestureState ?: return
+
+                    var isHorizontal = gesture.isHorizontalSwipeDetermined
+                    // Определяем направление, если еще не определили
+                    if (!isHorizontal && abs(intent.deltaX) > abs(intent.deltaY) * 1.5f) {
+                        isHorizontal = true
+                    }
+
+                    if (isHorizontal) {
+                        val newAccumulatedX = gesture.accumulatedDragX + intent.deltaX
+                        if (abs(newAccumulatedX) > swipeThreshold) {
+                            if (newAccumulatedX > 0) moveRight(getState) else moveLeft(getState)
+                            gesture = gesture.copy(accumulatedDragX = 0f, isHorizontalSwipeDetermined = true)
+                        } else {
+                            gesture = gesture.copy(accumulatedDragX = newAccumulatedX, isHorizontalSwipeDetermined = true)
+                        }
+                    }
+
+                    // Накапливаем вертикальное смещение для Hard Drop
+                    if (intent.deltaY > 0) {
+                        gesture = gesture.copy(totalDragDistanceY = gesture.totalDragDistanceY + intent.deltaY)
+                    }
+
+                    dispatch(GameStore.Msg.GestureStateUpdated(gesture))
+                }
             }
         }
         
