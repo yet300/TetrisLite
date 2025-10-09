@@ -13,15 +13,6 @@ internal interface GameStore : Store<GameStore.Intent, GameStore.State, GameStor
         val elapsedTime: Long = 0,  // milliseconds
         val isLoading: Boolean = false,
         val ghostPieceY: Int? = null,
-        val gestureState: GestureState? = null
-    )
-
-    data class GestureState(
-        val accumulatedDragX: Float = 0f,
-        val totalDragDistanceY: Float = 0f,
-        val dragStartTime: Long = 0L,
-        val isHorizontalSwipeDetermined: Boolean = false,
-        val boardHeightPx: Float = 0f
     )
 
     sealed class Intent {
@@ -56,8 +47,6 @@ internal interface GameStore : Store<GameStore.Intent, GameStore.State, GameStor
         data class PausedChanged(val isPaused: Boolean) : Msg()
         data class ElapsedTimeUpdated(val elapsedTime: Long) : Msg()
         data class LoadingChanged(val isLoading: Boolean) : Msg()
-
-        data class GestureStateUpdated(val gestureState: GestureState?) : Msg()
     }
 
 
