@@ -74,7 +74,11 @@ class GestureHandlingUseCase  {
             }
             is GestureEvent.Dragged -> {
                 var currentState = state ?: return null
-                
+
+                if (event.deltaX == 0f && event.deltaY == 0f) {
+                    return null
+                }
+
                 var isHorizontal = currentState.isHorizontalSwipeDetermined
                 // Determine swipe direction if not already set
                 if (!isHorizontal && abs(event.deltaX) > abs(event.deltaY) * 1.5f) {
