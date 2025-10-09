@@ -11,10 +11,18 @@ import com.yet.tetris.domain.model.settings.GameSettings
 import com.yet.tetris.domain.repository.GameHistoryRepository
 import com.yet.tetris.domain.repository.GameSettingsRepository
 import com.yet.tetris.domain.repository.GameStateRepository
-import com.yet.tetris.domain.usecase.*
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
+import com.yet.tetris.domain.usecase.CalculateGhostPositionUseCase
+import com.yet.tetris.domain.usecase.GameLoopEvent
+import com.yet.tetris.domain.usecase.GameLoopUseCase
+import com.yet.tetris.domain.usecase.GestureEvent
+import com.yet.tetris.domain.usecase.GestureHandlingUseCase
+import com.yet.tetris.domain.usecase.GestureResult
+import com.yet.tetris.domain.usecase.HandleSwipeInputUseCase
+import com.yet.tetris.domain.usecase.HardDropUseCase
+import com.yet.tetris.domain.usecase.LockPieceUseCase
+import com.yet.tetris.domain.usecase.MovePieceUseCase
+import com.yet.tetris.domain.usecase.RotatePieceUseCase
+import com.yet.tetris.domain.usecase.StartGameUseCase
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -67,12 +75,27 @@ internal class GameStoreFactory : KoinComponent {
     }
 
     @OptIn(ExperimentalTime::class, ExperimentalUuidApi::class)
-    private inner class ExecutorImpl : CoroutineExecutor<GameStore.Intent, GameStore.Action, GameStore.State, GameStore.Msg, GameStore.Label>() {
-        
-        private var gameLoopJob: Job? = null
-        private var timerJob: Job? = null
-        private var gameStartTime: Long = 0
+    private inner class ExecutorImpl :
+        CoroutineExecutor<GameStore.Intent, GameStore.Action, GameStore.State, GameStore.Msg, GameStore.Label>() {
+        private val gameLoopUseCase = GameLoopUseCase(scope = this.scope)
 
+        init {
+            scope.launch {
+                gameLoopUseCase.events.collect { event ->
+                    when (event) {
+                        is GameLoopEvent.GameTick -> {
+                            // When the game loop ticks, we trigger the move down logic
+                            autoMoveDown(state())
+                        }
+
+                        is GameLoopEvent.TimerUpdated -> {
+                            // When the timer updates, we dispatch a message to update the state
+                            dispatch(GameStore.Msg.ElapsedTimeUpdated(event.elapsedTime))
+                        }
+                    }
+                }
+            }
+        }
 
         override fun executeAction(action: GameStore.Action) {
             when (action) {
@@ -122,56 +145,35 @@ internal class GameStoreFactory : KoinComponent {
                     
                     dispatch(GameStore.Msg.GameInitialized(gameState, settings))
                     dispatch(GameStore.Msg.LoadingChanged(false))
-                    
-                    // Start game loop and timer
-                    gameStartTime = Clock.System.now().toEpochMilliseconds()
-                    startGameLoop(settings)
-                    startTimer()
-                    
+
+                    // Start the game loop and timer via the UseCase.
+                    gameLoopUseCase.start(settings)
+
                 } catch (e: Exception) {
                     dispatch(GameStore.Msg.LoadingChanged(false))
                     publish(GameStore.Label.ShowError(e.message ?: "Failed to initialize game"))
                 }
             }
         }
-        
-        private fun startGameLoop(settings: GameSettings) {
-            gameLoopJob?.cancel()
-            gameLoopJob = scope.launch {
-                while (isActive) {
-                    delay(settings.difficulty.fallDelayMs)
-                    
-                    val state = state()
-                    if (!state.isPaused && state.gameState != null && !state.gameState.isGameOver) {
-                        // Auto-move piece down
-                        val newState = movePieceUseCase.moveDown(state.gameState)
-                        if (newState != null) {
-                            val ghostY = calculateGhostY(newState)
-                            dispatch(GameStore.Msg.GameStateUpdated(newState, ghostY))
-                        } else {
-                            // Piece can't move down, lock it
-                            lockPiece(state)
-                        }
-                    }
-                }
-            }
-        }
-        
-        private fun startTimer() {
-            timerJob?.cancel()
-            timerJob = scope.launch {
-                while (isActive) {
-                    delay(100)
-                    val state = state()
-                    if (!state.isPaused && state.gameState != null && !state.gameState.isGameOver) {
-                        val elapsed = Clock.System.now().toEpochMilliseconds() - gameStartTime
-                        dispatch(GameStore.Msg.ElapsedTimeUpdated(elapsed))
-                    }
+
+        /**
+         * Handles the auto-move down event from the game loop tick.
+         */
+        private fun autoMoveDown(state: GameStore.State) {
+            if (!state.isPaused && state.gameState != null && !state.gameState.isGameOver) {
+                val newState = movePieceUseCase.moveDown(state.gameState)
+                if (newState != null) {
+                    val ghostY = calculateGhostY(newState)
+                    dispatch(GameStore.Msg.GameStateUpdated(newState, ghostY))
+                } else {
+                    // Piece can't move down, so lock it.
+                    lockPiece(state)
                 }
             }
         }
         
         private fun pauseGame(state: GameStore.State) {
+            gameLoopUseCase.pause()
             dispatch(GameStore.Msg.PausedChanged(true))
             
             // Save game state
@@ -181,15 +183,14 @@ internal class GameStoreFactory : KoinComponent {
         }
         
         private fun resumeGame() {
+            gameLoopUseCase.resume()
             dispatch(GameStore.Msg.PausedChanged(false))
         }
         
         private fun quitGame(state: GameStore.State) {
-            gameLoopJob?.cancel()
-            timerJob?.cancel()
-            
+            gameLoopUseCase.stop()
+            // Save game state before quitting.
             scope.launch {
-                // Save game state before quitting
                 state.gameState?.let { gameStateRepository.saveGameState(it) }
             }
             
@@ -206,7 +207,7 @@ internal class GameStoreFactory : KoinComponent {
                 }
             }
         }
-        
+
         private fun moveRight(state: GameStore.State) {
             state.gameState?.let { gameState ->
                 if (!state.isPaused && !gameState.isGameOver) {
@@ -217,7 +218,7 @@ internal class GameStoreFactory : KoinComponent {
                 }
             }
         }
-        
+
         private fun moveDown(state: GameStore.State) {
             state.gameState?.let { gameState ->
                 if (!state.isPaused && !gameState.isGameOver) {
@@ -304,9 +305,7 @@ internal class GameStoreFactory : KoinComponent {
         
 
         private fun handleGameOver(gameState: GameState, settings: GameSettings) {
-            gameLoopJob?.cancel()
-            timerJob?.cancel()
-            
+            gameLoopUseCase.stop()
             scope.launch {
                 try {
                     // Save game record
@@ -329,6 +328,9 @@ internal class GameStoreFactory : KoinComponent {
             }
         }
 
+        /**
+         * A helper function to process a gesture event and execute the resulting action.
+         */
         private fun handleGestureEvent(event: GestureEvent, state: GameStore.State) {
             val result = gestureHandlingUseCase(event)
             when (result) {
