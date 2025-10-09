@@ -5,7 +5,10 @@
     <string name="cancel">Cancel</string>
     <string name="resume">Resume</string>
     <string name="quit">Quit</string>
-    
+    <string name="retry">Retry</string>
+    <string name="ok">Ok</string>
+    <string name="error_title">An Error Occurred</string>
+
     <!-- Home Screen -->
     <string name="app_title">Tetris Lite</string>
     <string name="start_new_game">Start New Game</string>
