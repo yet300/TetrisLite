@@ -20,12 +20,12 @@ struct GameBoardView: View {
             for (position, type) in gameState.board.cells {
                 if let pos = position as? Position, let tetrominoType = type as? TetrominoType {
                     if pos.y >= 0 {
-                        drawBlock(
-                            context: context,
-                            x: CGFloat(pos.x) * cellSize,
-                            y: CGFloat(pos.y) * cellSize,
-                            size: cellSize - 1,
-                            color: getTetrominoColor(type: tetrominoType)
+                        context.drawStyledBlock(
+                            type: tetrominoType,
+                            settings: settings,
+                            topLeft: CGPoint(x: CGFloat(pos.x) * cellSize, y: CGFloat(pos.y) * cellSize),
+                            cellSize: cellSize,
+                            alpha: 1.0
                         )
                     }
                 }
@@ -41,12 +41,12 @@ struct GameBoardView: View {
                         let absoluteY = landingY + blockPos.y
                         
                         if absoluteY >= 0 && absoluteY < gameState.board.height {
-                            drawBlock(
-                                context: context,
-                                x: CGFloat(absoluteX) * cellSize,
-                                y: CGFloat(absoluteY) * cellSize,
-                                size: cellSize - 1,
-                                color: getTetrominoColor(type: piece.type).opacity(0.3)
+                            context.drawStyledBlock(
+                                type: piece.type,
+                                settings: settings,
+                                topLeft: CGPoint(x: CGFloat(absoluteX) * cellSize, y: CGFloat(absoluteY) * cellSize),
+                                cellSize: cellSize,
+                                alpha: 0.3
                             )
                         }
                     }
@@ -61,12 +61,12 @@ struct GameBoardView: View {
                         let absoluteY = gameState.currentPosition.y + blockPos.y
                         
                         if absoluteY >= 0 && absoluteY < gameState.board.height {
-                            drawBlock(
-                                context: context,
-                                x: CGFloat(absoluteX) * cellSize,
-                                y: CGFloat(absoluteY) * cellSize,
-                                size: cellSize - 1,
-                                color: getTetrominoColor(type: piece.type)
+                            context.drawStyledBlock(
+                                type: piece.type,
+                                settings: settings,
+                                topLeft: CGPoint(x: CGFloat(absoluteX) * cellSize, y: CGFloat(absoluteY) * cellSize),
+                                cellSize: cellSize,
+                                alpha: 1.0
                             )
                         }
                     }
@@ -90,24 +90,6 @@ struct GameBoardView: View {
             )
         }
         .border(Color.secondarySystemFill.opacity(0.5), width: 2)
-    }
-    
-    private func drawBlock(context: GraphicsContext, x: CGFloat, y: CGFloat, size: CGFloat, color: Color) {
-        let rect = CGRect(x: x, y: y, width: size, height: size)
-        context.fill(Path(rect), with: .color(color))
-    }
-    
-    private func getTetrominoColor(type: TetrominoType) -> Color {
-        switch type {
-        case .i: return Color(red: 0, green: 0.94, blue: 0.94)
-        case .o: return Color(red: 0.94, green: 0.94, blue: 0)
-        case .t: return Color(red: 0.63, green: 0, blue: 0.94)
-        case .s: return Color(red: 0, green: 0.94, blue: 0)
-        case .z: return Color(red: 0.94, green: 0, blue: 0)
-        case .j: return Color(red: 0, green: 0, blue: 0.94)
-        case .l: return Color(red: 0.94, green: 0.63, blue: 0)
-        default: return .gray
-        }
     }
     
     private func getBackgroundColor() -> Color {
