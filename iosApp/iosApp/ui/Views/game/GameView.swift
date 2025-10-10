@@ -40,6 +40,8 @@ struct GameView: View {
                             Image(systemName: "pause.fill")
                                 .foregroundColor(textColor)
                                 .frame(width: 32, height: 32)
+                                .padding(12)
+                                .glassPanelStyle(cornerRadius: 99)
                         }
                         .buttonStyle(.plain)
 
