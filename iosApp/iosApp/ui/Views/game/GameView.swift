@@ -11,6 +11,11 @@ struct GameView: View {
     private var dialog: ChildSlot<AnyObject, GameComponentDialogChild>
     
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.colorScheme) var colorScheme
+
+    private var textColor: Color {
+        colorScheme == .dark ? Color.green : Color(red: 0, green: 0.5, blue: 0)
+    }
     
     @State private var lastDragTranslation: CGSize = .zero
     @State private var didStartDragging = false
@@ -23,13 +28,6 @@ struct GameView: View {
     
     var body: some View {
         ZStack {
-            LinearGradient(
-                colors: [.purple.opacity(0.6), .blue.opacity(0.6)],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-            .ignoresSafeArea()
-            
             if model.isLoading {
                 ProgressView()
             } else if let gameState = model.gameState {
@@ -40,12 +38,11 @@ struct GameView: View {
                             component.onPause()
                         } label: {
                             Image(systemName: "pause.fill")
-                                .font(.title2)
-                                .foregroundColor(.white)
-                                .padding(12)
-                                .glassPanelStyle(cornerRadius: 99)
+                                .foregroundColor(textColor)
+                                .frame(width: 32, height: 32)
                         }
-                        
+                        .buttonStyle(.plain)
+
                         Spacer()
                         
                         GameStatsView(
@@ -68,9 +65,7 @@ struct GameView: View {
                         )
                         .gesture(
                             TapGesture()
-                                .onEnded {
-                                    component.onRotate()
-                                }
+                                .onEnded { component.onRotate() }
                                 .simultaneously(with: DragGesture(minimumDistance: 0)
                                     .onChanged { value in
                                         if !didStartDragging {
@@ -179,13 +174,24 @@ struct StatItem: View {
     let label: String
     let value: String
     
+    @Environment(\.colorScheme) var colorScheme
+
+    private var textColor: Color {
+        colorScheme == .dark ? Color.green : Color(red: 0, green: 0.5, blue: 0)
+    }
+    
     var body: some View {
         VStack(spacing: 4) {
             Text(label)
                 .font(.caption)
-                .foregroundColor(.secondary)
+                .foregroundColor(textColor)
+                .shadow(color: .black.opacity(0.3), radius: 1)
+
             Text(value)
                 .font(.headline)
+                .fontWeight(.bold)
+                .foregroundColor(.primary)
+                .shadow(color: .black.opacity(0.3), radius: 1)
         }
     }
 }
@@ -193,11 +199,18 @@ struct StatItem: View {
 struct NextPieceView: View {
     let piece: Tetromino
     
+    @Environment(\.colorScheme) var colorScheme
+
+    private var textColor: Color {
+        colorScheme == .dark ? Color.green : Color(red: 0, green: 0.5, blue: 0)
+    }
+    
     var body: some View {
         VStack(spacing: 4) {
             Text(Strings.next)
                 .font(.caption)
-                .foregroundColor(.secondary)
+                .foregroundColor(textColor)
+                .shadow(color: .black.opacity(0.3), radius: 1)
             
             // Render the actual piece
             Canvas { context, size in
