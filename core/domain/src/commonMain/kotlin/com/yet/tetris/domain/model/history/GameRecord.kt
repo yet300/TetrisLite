@@ -7,7 +7,7 @@ import kotlin.time.ExperimentalTime
 data class GameRecord(
     val id: String,
     val score: Long,
-    val linesCleared: Int,
+    val linesCleared: Long,
     val difficulty: Difficulty,
     val timestamp: Long
 ) {

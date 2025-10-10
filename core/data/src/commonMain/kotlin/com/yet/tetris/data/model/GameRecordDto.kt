@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 data class GameRecordDto(
     val id: String,
     val score: Long,
-    val linesCleared: Int,
+    val linesCleared: Long,
     val difficulty: DifficultyDto,
     val timestamp: Long
 )
