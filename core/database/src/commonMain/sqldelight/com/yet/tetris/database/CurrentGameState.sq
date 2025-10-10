@@ -1,0 +1,35 @@
+import com.yet.tetris.domain.model.game.TetrominoType;
+import kotlin.Boolean;
+
+CREATE TABLE CurrentGameState (
+    id INTEGER NOT NULL PRIMARY KEY DEFAULT 1,
+    score INTEGER NOT NULL,
+    linesCleared INTEGER NOT NULL,
+    currentPieceType TEXT AS TetrominoType,
+    currentPieceRotation INTEGER NOT NULL DEFAULT 0,
+    currentPositionX INTEGER NOT NULL,
+    currentPositionY INTEGER NOT NULL,
+    nextPieceType TEXT AS TetrominoType NOT NULL,
+    nextPieceRotation INTEGER NOT NULL DEFAULT 0,
+    isGameOver INTEGER AS Boolean NOT NULL DEFAULT 0,
+    isPaused INTEGER AS Boolean NOT NULL DEFAULT 0,
+    boardWidth INTEGER NOT NULL DEFAULT 10,
+    boardHeight INTEGER NOT NULL DEFAULT 20
+);
+
+-- Queries
+insertOrReplaceGameState:
+INSERT OR REPLACE INTO CurrentGameState (
+    id, score, linesCleared, currentPieceType, currentPieceRotation,
+    currentPositionX, currentPositionY, nextPieceType, nextPieceRotation,
+    isGameOver, isPaused, boardWidth, boardHeight
+) VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+getGameState:
+SELECT * FROM CurrentGameState WHERE id = 1;
+
+clearGameState:
+DELETE FROM CurrentGameState WHERE id = 1;
+
+hasSavedState:
+SELECT COUNT(*) > 0 FROM CurrentGameState WHERE id = 1;

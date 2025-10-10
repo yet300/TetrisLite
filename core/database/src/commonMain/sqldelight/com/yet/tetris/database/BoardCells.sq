@@ -1,0 +1,19 @@
+import com.yet.tetris.domain.model.game.TetrominoType;
+
+CREATE TABLE BoardCells (
+    positionX INTEGER NOT NULL,
+    positionY INTEGER NOT NULL,
+    pieceType TEXT AS TetrominoType NOT NULL,
+    PRIMARY KEY (positionX, positionY)
+);
+
+-- Queries
+insertCell:
+INSERT OR REPLACE INTO BoardCells (positionX, positionY, pieceType)
+VALUES (?, ?, ?);
+
+getAllCells:
+SELECT * FROM BoardCells;
+
+clearAllCells:
+DELETE FROM BoardCells;

@@ -1,0 +1,40 @@
+import com.yet.tetris.domain.model.game.Difficulty;
+
+CREATE TABLE GameHistory (
+    id TEXT NOT NULL PRIMARY KEY,
+    score INTEGER NOT NULL,
+    linesCleared INTEGER NOT NULL,
+    difficulty TEXT AS Difficulty NOT NULL,
+    timestamp INTEGER NOT NULL
+);
+
+-- Queries
+insertGame:
+INSERT INTO GameHistory (id, score, linesCleared, difficulty, timestamp)
+VALUES (?, ?, ?, ?, ?);
+
+getAllGames:
+SELECT * FROM GameHistory
+ORDER BY timestamp DESC;
+
+getGameById:
+SELECT * FROM GameHistory
+WHERE id = ?;
+
+deleteGame:
+DELETE FROM GameHistory
+WHERE id = ?;
+
+clearAllGames:
+DELETE FROM GameHistory;
+
+getGamesCount:
+SELECT COUNT(*) FROM GameHistory;
+
+deleteOldestGames:
+DELETE FROM GameHistory
+WHERE id IN (
+    SELECT id FROM GameHistory
+    ORDER BY timestamp ASC
+    LIMIT ?
+);
