@@ -10,6 +10,12 @@ struct HomeView: View {
     @StateValue
     private var bottomSheetSlot: ChildSlot<AnyObject, HomeComponentBottomSheetChild>
     
+    @Environment(\.colorScheme) var colorScheme
+
+    private var textColor: Color {
+        colorScheme == .dark ? Color.green : Color(red: 0, green: 0.5, blue: 0)
+    }
+    
     init(_ component: HomeComponent) {
         self.component = component
         _model = StateValue(component.model)
@@ -19,14 +25,6 @@ struct HomeView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                // Background gradient
-                LinearGradient(
-                    colors: [.blue.opacity(0.3), .purple.opacity(0.3)],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-                .ignoresSafeArea()
-                
                 switch model {
                 case is HomeComponentModelLoading:
                     ProgressView()
@@ -40,7 +38,7 @@ struct HomeView: View {
                             .font(.system(size: 48, weight: .bold, design: .rounded))
                             .foregroundStyle(
                                 LinearGradient(
-                                    colors: [.blue, .purple],
+                                    colors: [.accentColor, .secondaryAccent],
                                     startPoint: .leading,
                                     endPoint: .trailing
                                 )
@@ -102,8 +100,11 @@ struct HomeView: View {
                         component.onOpenHistory()
                     } label: {
                         Image(systemName: "clock.fill")
-                            .foregroundColor(.primary)
+                            .foregroundColor(textColor)
+                            .frame(width: 32, height: 32)
                     }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("app_info.close")
                 }
                 
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -111,8 +112,11 @@ struct HomeView: View {
                         component.onOpenSettings()
                     } label: {
                         Image(systemName: "gearshape.fill")
-                            .foregroundColor(.primary)
+                            .foregroundColor(textColor)
+                            .frame(width: 32, height: 32)
                     }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("app_info.close")
                 }
             }
             .sheet(item: Binding<SheetItem?>(
@@ -174,7 +178,7 @@ struct DifficultySelector: View {
         VStack(alignment: .center, spacing: 12) {
             Text(Strings.difficulty)
                 .font(.headline)
-                .foregroundColor(.secondary)
+                .foregroundColor(.secondaryLabel)
 
             Picker(Strings.difficulty, selection: $selectedDifficulty) {
                 ForEach([Difficulty.easy, Difficulty.normal, Difficulty.hard], id: \.self) { difficulty in
@@ -206,14 +210,14 @@ struct GlassButton: View {
                 Text(title)
                     .font(.headline)
             }
-            .foregroundColor(style == .primary ? .white : .primary)
+            .foregroundColor(style == .primary ? .primaryLabel : .label)
             .padding()
             .frame(maxWidth: .infinity)
             .background(
                 ZStack {
                     if style == .primary {
                         LinearGradient(
-                            colors: [.blue.opacity(0.5), .purple.opacity(0.4)],
+                            colors: [.accentColor.opacity(0.5), .secondaryAccent.opacity(0.4)],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         )
