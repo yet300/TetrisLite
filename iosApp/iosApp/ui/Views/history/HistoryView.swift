@@ -22,16 +22,21 @@ struct HistoryView: View {
                     if(content.games.isEmpty) {
                         EmptyHistoryView()
                     } else {
-                        ScrollView {
-                            LazyVStack(spacing: 12) {
+                        List {
                                 ForEach(content.games, id: \.id) { game in
-                                    GameRecordCard(game: game) {
-                                        component.onDeleteGame(id: game.id)
+                                    GameRecordCard(game: game)
+                                    .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                                        Button(role: .destructive) {
+                                            component.onDeleteGame(id: game.id)
+                                        } label: {
+                                            Label("Delete", systemImage: "trash.fill")
+                                        }
                                     }
+                                    .listRowSeparator(.hidden)
+                                    .listRowBackground(Color.clear)
                                 }
                             }
-                            .padding()
-                        }
+                            .listStyle(.plain)
                     }
                 default:
                     EmptyView()
@@ -57,36 +62,40 @@ struct HistoryView: View {
 
 struct GameRecordCard: View {
     let game: GameRecord
-    let onDelete: () -> Void
     
     var body: some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 8) {
-                Text(Strings.scoreLabel(Int(game.score)))
-                    .font(.headline)
-                Text(Strings.linesLabel(Int(game.linesCleared)))
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-                Text(Strings.difficultyLabel(game.difficulty.name))
+        VStack(alignment: .leading, spacing: 4) {
+            HStack {
+                Image(systemName: "gamecontroller.fill")
                     .font(.caption)
                     .foregroundColor(.secondary)
+                
+                Text(game.difficulty.name)
+                    .font(.caption)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.secondary)
+                
+                Spacer()
+                
                 Text(formatDate(game.timestamp))
-                    .font(.caption2)
+                    .font(.caption)
                     .foregroundColor(.secondary)
             }
+            .padding(.bottom, 4)
+
+            Text(Strings.scoreLabel(Int(game.score)))
+                .font(.headline)
+                .fontWeight(.semibold)
+                .foregroundColor(.primary)
             
-            Spacer()
-            
-            Button(role: .destructive) {
-                onDelete()
-            } label: {
-                Image(systemName: "trash")
-                    .foregroundColor(.red)
-            }
+            Text(Strings.linesLabel(Int(game.linesCleared)))
+                .font(.subheadline)
+                .foregroundColor(.secondary)
         }
         .padding()
-        .background(.regularMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .background(.thinMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 2)
     }
     
     private func formatDate(_ timestamp: Int64) -> String {
@@ -103,13 +112,17 @@ struct EmptyHistoryView: View {
         VStack(spacing: 16) {
             Image(systemName: "clock")
                 .font(.system(size: 64))
-                .foregroundColor(.secondary)
+                .foregroundColor(.accent)
             Text(Strings.noGamesYet)
                 .font(.title2)
-                .foregroundColor(.secondary)
+                .foregroundColor(.label)
             Text(Strings.startGamePrompt)
                 .font(.subheadline)
-                .foregroundColor(.secondary)
+                .foregroundColor(.label)
         }
     }
+}
+
+#Preview {
+    HistoryView(PreviewHistoryComponent())
 }
