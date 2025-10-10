@@ -8,17 +8,17 @@ struct GameOverDialogContent: View {
     var body: some View {
         Text(Strings.gameOver)
             .font(.largeTitle.bold())
-            .foregroundColor(.white)
-            .shadow(color: .red, radius: 10)
+            .foregroundColor(.primaryLabel)
+            .shadow(color: .systemRed, radius: 10)
 
         VStack {
             Text(Strings.finalScore(Int(model.finalScore)))
                 .font(.title2)
+                .foregroundColor(.primaryLabel)
             Text(Strings.linesCleared(Int(model.finalLinesCleared)))
-                .font(.body)
-                .foregroundColor(.white.opacity(0.8))
+                .font(.title2)
+                .foregroundColor(.primaryLabel)
         }
-        .foregroundColor(.white)
 
         VStack(spacing: 16) {
             GlassDialogButton(title: Strings.retry, isPrimary: true, action: component.onRetry)

@@ -7,7 +7,7 @@ import Shared
     var body: some View {
         Text(Strings.gamePaused)
             .font(.largeTitle.bold())
-            .foregroundColor(.white)
+            .foregroundColor(.primaryLabel)
 
         VStack(spacing: 16) {
             GlassDialogButton(title: Strings.resume, isPrimary: true, action: component.onResume)

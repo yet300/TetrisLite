@@ -8,15 +8,16 @@ struct ErrorDialogContent: View {
     var body: some View {
         Image(systemName: "exclamationmark.triangle.fill")
             .font(.system(size: 48))
-            .foregroundColor(.yellow)
+            .foregroundColor(.systemRed)
 
         VStack {
-            Text(Strings.errorTitle).font(.title.bold())
+            Text(Strings.errorTitle)
+                .font(.title.bold())
+                .foregroundColor(.errorLabel)
             Text(message)
                 .multilineTextAlignment(.center)
-                .foregroundColor(.white.opacity(0.8))
+                .foregroundColor(.secondaryLabel)
         }
-        .foregroundColor(.white)
 
         GlassDialogButton(title: Strings.ok, isPrimary: true, action: onDismiss)
     }
