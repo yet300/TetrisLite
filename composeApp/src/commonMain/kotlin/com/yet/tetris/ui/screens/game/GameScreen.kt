@@ -183,7 +183,7 @@ private fun GamePlayingContent(
 @Composable
 
 private fun GameStatsRow(
-    score: Int,
+    score: Long,
     lines: Int,
     time: Long
 ) {

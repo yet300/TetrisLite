@@ -5,7 +5,7 @@ data class GameState(
     val currentPiece: Tetromino?,
     val currentPosition: Position,
     val nextPiece: Tetromino,
-    val score: Int = 0,
+    val score: Long = 0L,
     val linesCleared: Int = 0,
     val isGameOver: Boolean = false,
     val isPaused: Boolean = false
