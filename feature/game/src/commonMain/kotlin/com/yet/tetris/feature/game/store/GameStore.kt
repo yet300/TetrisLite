@@ -58,5 +58,7 @@ internal interface GameStore : Store<GameStore.Intent, GameStore.State, GameStor
         data object GamePaused : Label()
         data object GameOver : Label()
         data object NavigateBack : Label()
+
+        data object ResumeGame : Label()
     }
 }

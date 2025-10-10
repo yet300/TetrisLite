@@ -55,6 +55,8 @@ class DefaultGameComponent(
                     is GameStore.Label.ShowError -> sheetNavigation.activate(DialogConfig.Error(it.message))
 
                     GameStore.Label.GamePaused -> sheetNavigation.activate(DialogConfig.Pause)
+
+                    GameStore.Label.ResumeGame -> sheetNavigation.dismiss()
                 }
             }
         }

@@ -196,6 +196,7 @@ internal class GameStoreFactory : KoinComponent {
         private fun resumeGame() {
             gameLoopUseCase.resume()
             dispatch(GameStore.Msg.PausedChanged(false))
+            publish(GameStore.Label.ResumeGame)
         }
         
         private fun quitGame(state: GameStore.State) {
