@@ -184,7 +184,7 @@ private fun GamePlayingContent(
 
 private fun GameStatsRow(
     score: Long,
-    lines: Int,
+    lines: Long,
     time: Long
 ) {
     Card(

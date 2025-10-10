@@ -20,7 +20,7 @@ interface GameComponent : BackHandlerOwner {
         val elapsedTime: Long = 0,
         val isGameOver: Boolean = false,
         val finalScore: Long = 0,
-        val finalLinesCleared: Int = 0,
+        val finalLinesCleared: Long = 0,
         val ghostPieceY: Int? = null
     )
 

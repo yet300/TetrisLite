@@ -166,7 +166,7 @@ class DefaultGameComponent(
         data object Pause : DialogConfig
 
         @Serializable
-        data class GameOver(val score: Long, val lines: Int) : DialogConfig
+        data class GameOver(val score: Long, val lines: Long) : DialogConfig
 
         @Serializable
         data class Error(val message: String) : DialogConfig
