@@ -13,6 +13,7 @@ import com.arkivanov.decompose.value.Value
 import com.arkivanov.decompose.value.operator.map
 import com.arkivanov.decompose.value.subscribe
 import com.arkivanov.essenty.backhandler.BackCallback
+import com.arkivanov.essenty.lifecycle.subscribe
 import com.arkivanov.mvikotlin.core.instancekeeper.getStore
 import com.arkivanov.mvikotlin.extensions.coroutines.labels
 import com.yet.tetris.feature.game.store.GameStore
@@ -32,7 +33,16 @@ class DefaultGameComponent(
     private val sheetNavigation = SlotNavigation<DialogConfig>()
 
     init {
-        val backCallback = BackCallback(isEnabled = isGameActive()) {}
+        lifecycle.subscribe(
+            onPause = {
+                if (isGameActive()) {
+                    onPause()
+                }
+            }
+        )
+        val backCallback = BackCallback(isEnabled = isGameActive()) {
+            onPause()
+        }
         backHandler.register(backCallback)
 
         store.asValue().subscribe(lifecycle) { state ->
