@@ -6,12 +6,13 @@ import com.russhwolf.settings.Settings
 import com.russhwolf.settings.coroutines.FlowSettings
 import com.russhwolf.settings.coroutines.toFlowSettings
 import com.russhwolf.settings.observable.makeObservable
+import com.yet.tetris.database.di.DatabaseModule
 import kotlinx.serialization.json.Json
 import org.koin.core.annotation.ComponentScan
 import org.koin.core.annotation.Module
 import org.koin.core.annotation.Single
 
-@Module
+@Module([DatabaseModule::class])
 @ComponentScan("com.yet.tetris.data.repository")
 class DataModule {
     @Single

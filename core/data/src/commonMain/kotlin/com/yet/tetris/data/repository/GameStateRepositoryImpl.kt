@@ -1,34 +1,41 @@
 package com.yet.tetris.data.repository
 
-import com.russhwolf.settings.Settings
-import com.yet.tetris.data.mapper.toDomain
-import com.yet.tetris.data.mapper.toDto
-import com.yet.tetris.data.model.GameStateDto
+import com.yet.tetris.database.dao.GameStateDao
+import com.yet.tetris.database.mapper.toDomain
+import com.yet.tetris.database.mapper.toEntities
 import com.yet.tetris.domain.model.game.GameState
 import com.yet.tetris.domain.repository.GameStateRepository
 import jakarta.inject.Singleton
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.serializer
 
 /**
- * Implementation of GameStateRepository using multiplatform-settings.
+ * Implementation of GameStateRepository using SQLDelight.
  * Used for pause/resume functionality.
  */
 @Singleton
 class GameStateRepositoryImpl(
-    private val settings: Settings,
-    private val json: Json
+    private val gameStateDao: GameStateDao
 ) : GameStateRepository {
-
-    companion object {
-        private const val KEY_GAME_STATE = "current_game_state"
-    }
     
     override suspend fun saveGameState(state: GameState) {
         try {
-            val dto = state.toDto()
-            val stateJson = json.encodeToString(serializer<GameStateDto>(), dto)
-            settings.putString(KEY_GAME_STATE, stateJson)
+            val entities = state.toEntities()
+            val data = entities.gameState
+            
+            gameStateDao.saveGameState(
+                score = data.score,
+                linesCleared = data.linesCleared,
+                currentPieceType = data.currentPieceType,
+                currentPieceRotation = data.currentPieceRotation,
+                currentPositionX = data.currentPositionX,
+                currentPositionY = data.currentPositionY,
+                nextPieceType = data.nextPieceType,
+                nextPieceRotation = data.nextPieceRotation,
+                isGameOver = data.isGameOver,
+                isPaused = data.isPaused,
+                boardWidth = data.boardWidth,
+                boardHeight = data.boardHeight,
+                boardCells = entities.boardCells
+            )
         } catch (e: Exception) {
             throw e
         }
@@ -36,23 +43,28 @@ class GameStateRepositoryImpl(
     
     override suspend fun loadGameState(): GameState? {
         return try {
-            val stateJson = settings.getStringOrNull(KEY_GAME_STATE)
-            if (stateJson != null) {
-                val dto = json.decodeFromString<GameStateDto>(stateJson)
-                dto.toDomain()
-            } else {
-                null
-            }
+            val gameState = gameStateDao.getGameState()
+            val boardCells = gameStateDao.getBoardCells()
+            
+            gameState?.toDomain(boardCells)
         } catch (e: Exception) {
             null
         }
     }
     
     override suspend fun clearGameState() {
-        settings.remove(KEY_GAME_STATE)
+        try {
+            gameStateDao.clearGameState()
+        } catch (e: Exception) {
+            throw e
+        }
     }
     
     override suspend fun hasSavedState(): Boolean {
-        return settings.hasKey(KEY_GAME_STATE)
+        return try {
+            gameStateDao.hasSavedState()
+        } catch (e: Exception) {
+            false
+        }
     }
 }
