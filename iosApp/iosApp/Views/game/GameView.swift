@@ -153,7 +153,7 @@ private typealias ErrorChild = GameComponentDialogChildError
 
 
 struct GameStatsView: View {
-    let score: Int32
+    let score: Int64
     let lines: Int32
     let time: Int64
     
