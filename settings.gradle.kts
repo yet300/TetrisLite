@@ -38,6 +38,7 @@ include(":shared")
 include(":core")
 include(":core:domain")
 include(":core:data")
+include(":core:database")
 include(":core:common")
 
 include(":feature")
