@@ -36,7 +36,7 @@ struct HomeView: View {
                         Spacer()
                         
                         // Title
-                        Text("Tetris Lite")
+                        Text(Strings.appTitle)
                             .font(.system(size: 48, weight: .bold, design: .rounded))
                             .foregroundStyle(
                                 LinearGradient(
@@ -64,14 +64,14 @@ struct HomeView: View {
                         // Action Buttons
                         VStack(spacing: 16) {
                             GlassButton(
-                                title: "Start New Game",
+                                title: Strings.startNewGame,
                                 icon: "play.fill",
                                 action: { component.onStartNewGame() }
                             )
                             
                             if content.hasSavedGame {
                                 GlassButton(
-                                    title: "Resume Game",
+                                    title: Strings.resumeGame,
                                     icon: "arrow.clockwise",
                                     style: .secondary,
                                     action: { component.onResumeGame() }
@@ -82,7 +82,7 @@ struct HomeView: View {
                         
                         // Keyboard support hint for iPad/Mac
                         #if targetEnvironment(macCatalyst) || os(macOS)
-                        Text("Use arrow keys or WASD to play")
+                        Text(Strings.keyboardHint)
                             .font(.caption)
                             .foregroundColor(.secondary)
                             .padding(.top, 8)
@@ -172,11 +172,11 @@ struct DifficultySelector: View {
     
     var body: some View {
         VStack(alignment: .center, spacing: 12) {
-            Text("Difficulty")
+            Text(Strings.difficulty)
                 .font(.headline)
                 .foregroundColor(.secondary)
 
-            Picker("Difficulty", selection: $selectedDifficulty) {
+            Picker(Strings.difficulty, selection: $selectedDifficulty) {
                 ForEach([Difficulty.easy, Difficulty.normal, Difficulty.hard], id: \.self) { difficulty in
                     Text(difficulty.name.capitalized).tag(difficulty)
                 }

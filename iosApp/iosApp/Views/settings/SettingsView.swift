@@ -26,14 +26,14 @@ struct SettingsView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Discard") {
+                    Button(Strings.discard) {
                         component.onDiscard()
                     }
                     .disabled(!model.hasUnsavedChanges)
                 }
                 
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Save") {
+                    Button(Strings.save) {
                         component.onSave()
                     }
                     .disabled(!model.hasUnsavedChanges || model.isSaving)
@@ -108,7 +108,7 @@ struct SettingsView: View {
     @ViewBuilder
     private var musicSettings: some View {
             VStack(alignment: .leading) {
-                Text("Music Volume")
+                Text(Strings.musicVolume)
                 Slider(value: Binding(
                     get: { Double(model.settings.audioSettings.musicVolume) },
                     set: { component.onMusicVolumeChanged(volume: Float($0)) }
@@ -127,7 +127,7 @@ struct SettingsView: View {
 
     private var soundEffectsSettings: some View {
         VStack(alignment: .leading) {
-            Text("SFX Volume")
+            Text(Strings.sfxVolume)
             Slider(value: Binding(
                 get: { Double(model.settings.audioSettings.sfxVolume) },
                 set: { component.onSFXVolumeChanged(volume: Float($0)) }

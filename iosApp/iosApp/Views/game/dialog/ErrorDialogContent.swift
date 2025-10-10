@@ -11,13 +11,13 @@ struct ErrorDialogContent: View {
             .foregroundColor(.yellow)
 
         VStack {
-            Text("Error").font(.title.bold())
+            Text(Strings.errorTitle).font(.title.bold())
             Text(message)
                 .multilineTextAlignment(.center)
                 .foregroundColor(.white.opacity(0.8))
         }
         .foregroundColor(.white)
 
-        GlassDialogButton(title: "OK", isPrimary: true, action: onDismiss)
+        GlassDialogButton(title: Strings.ok, isPrimary: true, action: onDismiss)
     }
 }

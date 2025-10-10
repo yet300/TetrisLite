@@ -159,9 +159,9 @@ struct GameStatsView: View {
     
     var body: some View {
         HStack(spacing: 16) {
-            StatItem(label: "Score", value: "\(score)")
-            StatItem(label: "Lines", value: "\(lines)")
-            StatItem(label: "Time", value: formatTime(time))
+            StatItem(label: Strings.score, value: "\(score)")
+            StatItem(label: Strings.lines, value: "\(lines)")
+            StatItem(label: Strings.time, value: formatTime(time))
         }
         .padding(12)
         .glassPanelStyle(cornerRadius: 16)
@@ -195,7 +195,7 @@ struct NextPieceView: View {
     
     var body: some View {
         VStack(spacing: 4) {
-            Text("Next")
+            Text(Strings.next)
                 .font(.caption)
                 .foregroundColor(.secondary)
             

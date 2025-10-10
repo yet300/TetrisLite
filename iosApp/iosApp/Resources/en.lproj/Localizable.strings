@@ -1,0 +1,38 @@
+/* Common */
+"save" = "Save";
+"discard" = "Discard";
+"cancel" = "Cancel";
+"resume" = "Resume";
+"quit" = "Quit";
+"retry" = "Retry";
+"ok" = "OK";
+"error_title" = "Error";
+
+/* Home Screen */
+"app_title" = "Tetris Lite";
+"start_new_game" = "Start New Game";
+"resume_game" = "Resume Game";
+"difficulty" = "Difficulty";
+"keyboard_hint" = "Use arrow keys or WASD to play";
+
+/* Game Screen */
+"next" = "Next";
+"score" = "Score";
+"lines" = "Lines";
+"time" = "Time";
+"game_over" = "Game Over";
+"final_score" = "Final Score: %d";
+"lines_cleared" = "Lines Cleared: %d";
+"back_to_home" = "Back to Home";
+"game_paused" = "Game Paused";
+
+/* Settings Screen */
+"music_volume" = "Music Volume";
+"sfx_volume" = "SFX Volume";
+
+/* History Screen */
+"no_games_yet" = "No games played yet";
+"start_game_prompt" = "Start a new game to see your history";
+"score_label" = "Score: %d";
+"lines_label" = "Lines: %d";
+"difficulty_label" = "Difficulty: %@";

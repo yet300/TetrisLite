@@ -62,12 +62,12 @@ struct GameRecordCard: View {
     var body: some View {
         HStack {
             VStack(alignment: .leading, spacing: 8) {
-                Text("Score: \(game.score)")
+                Text(Strings.scoreLabel(Int(game.score)))
                     .font(.headline)
-                Text("Lines: \(game.linesCleared)")
+                Text(Strings.linesLabel(Int(game.linesCleared)))
                     .font(.subheadline)
                     .foregroundColor(.secondary)
-                Text("Difficulty: \(game.difficulty.name)")
+                Text(Strings.difficultyLabel(game.difficulty.name))
                     .font(.caption)
                     .foregroundColor(.secondary)
                 Text(formatDate(game.timestamp))
@@ -104,10 +104,10 @@ struct EmptyHistoryView: View {
             Image(systemName: "clock")
                 .font(.system(size: 64))
                 .foregroundColor(.secondary)
-            Text("No games played yet")
+            Text(Strings.noGamesYet)
                 .font(.title2)
                 .foregroundColor(.secondary)
-            Text("Start a new game to see your history")
+            Text(Strings.startGamePrompt)
                 .font(.subheadline)
                 .foregroundColor(.secondary)
         }

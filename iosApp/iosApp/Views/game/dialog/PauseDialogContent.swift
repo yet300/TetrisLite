@@ -5,13 +5,13 @@ import Shared
     let component: GameComponent
 
     var body: some View {
-        Text("Game Paused")
+        Text(Strings.gamePaused)
             .font(.largeTitle.bold())
             .foregroundColor(.white)
 
         VStack(spacing: 16) {
-            GlassDialogButton(title: "Resume", isPrimary: true, action: component.onResume)
-            GlassDialogButton(title: "Quit", action: component.onQuit)
+            GlassDialogButton(title: Strings.resume, isPrimary: true, action: component.onResume)
+            GlassDialogButton(title: Strings.quit, action: component.onQuit)
         }
     }
 }
