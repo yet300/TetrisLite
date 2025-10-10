@@ -30,23 +30,7 @@ struct HomeView: View {
                     ProgressView()
                     
                 case let content as HomeComponentModelContent:
-                    VStack(spacing: 32) {
-                        Spacer()
-                        
-                        // Title
-                        Text(Strings.appTitle)
-                            .font(.system(size: 48, weight: .bold, design: .rounded))
-                            .foregroundStyle(
-                                LinearGradient(
-                                    colors: [.accentColor, .secondaryAccent],
-                                    startPoint: .leading,
-                                    endPoint: .trailing
-                                )
-                            )
-                        
-                        Spacer()
-                        
-                        // Difficulty Selector
+                    VStack {
                         DifficultySelector(
                             selectedDifficulty: Binding(
                                 get: { content.settings.difficulty },
@@ -58,41 +42,43 @@ struct HomeView: View {
                                 component.onDifficultyChanged(difficulty: difficulty)
                             }
                         )
-                        
-                        // Action Buttons
-                        VStack(spacing: 16) {
-                            GlassButton(
-                                title: Strings.startNewGame,
-                                icon: "play.fill",
-                                action: { component.onStartNewGame() }
-                            )
-                            
-                            if content.hasSavedGame {
-                                GlassButton(
-                                    title: Strings.resumeGame,
-                                    icon: "arrow.clockwise",
-                                    style: .secondary,
-                                    action: { component.onResumeGame() }
-                                )
-                            }
-                        }
-                        .padding(.horizontal, 32)
-                        
-                        // Keyboard support hint for iPad/Mac
-                        #if targetEnvironment(macCatalyst) || os(macOS)
-                        Text(Strings.keyboardHint)
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                            .padding(.top, 8)
-                        #endif
-                        
                         Spacer()
+
+                        VStack(spacing: 24) {
+                            VStack(spacing: 16) {
+                                GlassButton(
+                                    title: Strings.startNewGame,
+                                    icon: "play.fill",
+                                    action: { component.onStartNewGame() }
+                                )
+                                
+                                if content.hasSavedGame {
+                                    GlassButton(
+                                        title: Strings.resumeGame,
+                                        icon: "arrow.clockwise",
+                                        style: .secondary,
+                                        action: { component.onResumeGame() }
+                                    )
+                                }
+                            }
+                            .padding(.horizontal, 32)
+                            
+                            // Keyboard support hint for iPad/Mac
+                            #if targetEnvironment(macCatalyst) || os(macOS)
+                            Text(Strings.keyboardHint)
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                                .padding(.top, 8)
+                            #endif
+                        }
+                        .padding(.bottom, 32)
                     }
                     
                 default:
                     EmptyView()
                 }
             }
+            .navigationTitle(Strings.appTitle)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
@@ -248,3 +234,4 @@ struct GlassButton: View {
 
 private typealias HistoryChild = HomeComponentBottomSheetChildHistoryChild
 private typealias SettingsChild = HomeComponentBottomSheetChildSettingsChild
+
