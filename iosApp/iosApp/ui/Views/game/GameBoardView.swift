@@ -85,11 +85,11 @@ struct GameBoardView: View {
                         path.addLine(to: CGPoint(x: size.width, y: CGFloat(y) * cellSize))
                     }
                 },
-                with: .color(.gray.opacity(0.2)),
+                with: .color(.secondarySystemFill.opacity(0.2)),
                 lineWidth: 1
             )
         }
-        .border(Color.gray.opacity(0.5), width: 2)
+        .border(Color.secondarySystemFill.opacity(0.5), width: 2)
     }
     
     private func drawBlock(context: GraphicsContext, x: CGFloat, y: CGFloat, size: CGFloat, color: Color) {
@@ -111,6 +111,6 @@ struct GameBoardView: View {
     }
     
     private func getBackgroundColor() -> Color {
-        return .black.opacity(0.4)
+        return .systemBackground.opacity(0.4)
     }
 }
