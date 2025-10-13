@@ -5,9 +5,11 @@ import com.arkivanov.mvikotlin.core.store.SimpleBootstrapper
 import com.arkivanov.mvikotlin.core.store.Store
 import com.arkivanov.mvikotlin.core.store.StoreFactory
 import com.arkivanov.mvikotlin.extensions.coroutines.CoroutineExecutor
+import com.yet.tetris.domain.model.audio.SoundEffect
 import com.yet.tetris.domain.model.game.GameState
 import com.yet.tetris.domain.model.history.GameRecord
 import com.yet.tetris.domain.model.settings.GameSettings
+import com.yet.tetris.domain.repository.AudioRepository
 import com.yet.tetris.domain.repository.GameHistoryRepository
 import com.yet.tetris.domain.repository.GameSettingsRepository
 import com.yet.tetris.domain.repository.GameStateRepository
@@ -32,11 +34,12 @@ import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 internal class GameStoreFactory : KoinComponent {
-    
+
     private val storeFactory: StoreFactory by inject()
     private val gameSettingsRepository: GameSettingsRepository by inject()
     private val gameStateRepository: GameStateRepository by inject()
     private val gameHistoryRepository: GameHistoryRepository by inject()
+    private val audioRepository: AudioRepository by inject()
     private val startGameUseCase: StartGameUseCase by inject()
     private val movePieceUseCase: MovePieceUseCase by inject()
     private val rotatePieceUseCase: RotatePieceUseCase by inject()
@@ -108,7 +111,7 @@ internal class GameStoreFactory : KoinComponent {
             val getState  = state()
             when (intent) {
                 is GameStore.Intent.PauseGame -> pauseGame(getState)
-                is GameStore.Intent.ResumeGame -> resumeGame()
+                is GameStore.Intent.ResumeGame -> resumeGame(getState)
                 is GameStore.Intent.QuitGame -> quitGame(getState)
                 is GameStore.Intent.RetryGame -> {
                     gameLoopUseCase.stop()
@@ -141,10 +144,13 @@ internal class GameStoreFactory : KoinComponent {
             scope.launch {
                 try {
                     dispatch(GameStore.Msg.LoadingChanged(true))
-                    
+                    audioRepository.initialize()
+
                     // Load settings
                     val settings = gameSettingsRepository.getSettings()
-                    
+
+                    audioRepository.applySettings(settings.audioSettings)
+
                     // Try to load saved game state, otherwise start new game
                     val gameState = if (forceNewGame) {
                         gameStateRepository.clearGameState()
@@ -158,6 +164,10 @@ internal class GameStoreFactory : KoinComponent {
 
                     // Start the game loop and timer via the UseCase.
                     gameLoopUseCase.start(settings)
+
+                    if (settings.audioSettings.musicEnabled) {
+                        audioRepository.playMusic(settings.audioSettings.selectedMusicTheme)
+                    }
 
                 } catch (e: Exception) {
                     dispatch(GameStore.Msg.LoadingChanged(false))
@@ -191,28 +201,38 @@ internal class GameStoreFactory : KoinComponent {
                 state.gameState?.let { gameStateRepository.saveGameState(it) }
             }
             publish(GameStore.Label.GamePaused)
+            audioRepository.stopMusic()
         }
-        
-        private fun resumeGame() {
+
+        private  fun resumeGame(state: GameStore.State) {
             gameLoopUseCase.resume()
             dispatch(GameStore.Msg.PausedChanged(false))
+            if (state.settings.audioSettings.musicEnabled) {
+                scope.launch {
+                    audioRepository.playMusic(state.settings.audioSettings.selectedMusicTheme)
+                }
+            }
             publish(GameStore.Label.ResumeGame)
         }
-        
+
         private fun quitGame(state: GameStore.State) {
             gameLoopUseCase.stop()
+
+            audioRepository.stopMusic()
+
             // Save game state before quitting.
             scope.launch {
                 state.gameState?.let { gameStateRepository.saveGameState(it) }
             }
-            
+
             publish(GameStore.Label.NavigateBack)
         }
-        
+
         private fun moveLeft(state: GameStore.State) {
             state.gameState?.let { gameState ->
                 if (!state.isPaused && !gameState.isGameOver) {
                     movePieceUseCase.moveLeft(gameState)?.let { newState ->
+                        audioRepository.playSoundEffect(SoundEffect.PIECE_MOVE)
                         val ghostY = calculateGhostY(newState)
                         dispatch(GameStore.Msg.GameStateUpdated(newState, ghostY))
                     }
@@ -244,7 +264,7 @@ internal class GameStoreFactory : KoinComponent {
                 }
             }
         }
-        
+
         private fun rotate(state: GameStore.State) {
             state.gameState?.let { gameState ->
                 if (!state.isPaused && !gameState.isGameOver) {
@@ -255,7 +275,7 @@ internal class GameStoreFactory : KoinComponent {
                 }
             }
         }
-        
+
         private fun hardDrop(state: GameStore.State) {
             state.gameState?.let { gameState ->
                 if (!state.isPaused && !gameState.isGameOver) {
@@ -268,7 +288,7 @@ internal class GameStoreFactory : KoinComponent {
                 }
             }
         }
-        
+
         private fun handleSwipe(intent: GameStore.Intent.HandleSwipe, state: GameStore.State) {
             state.gameState?.let { gameState ->
                 if (!state.isPaused && !gameState.isGameOver) {
@@ -282,7 +302,7 @@ internal class GameStoreFactory : KoinComponent {
                     )?.let { newState ->
                         val ghostY = calculateGhostY(newState)
                         dispatch(GameStore.Msg.GameStateUpdated(newState, ghostY))
-                        
+
                         // If it was a hard drop, lock the piece
                         if (intent.velocityY > state.settings.swipeSensitivity.softDropThreshold) {
                             lockPiece(state.copy(gameState = newState))
@@ -291,20 +311,33 @@ internal class GameStoreFactory : KoinComponent {
                 }
             }
         }
-        
+
 
         private fun lockPiece(state: GameStore.State) {
             state.gameState?.let { gameState ->
+                val oldLines = gameState.linesCleared
                 val newState = lockPieceUseCase(gameState)
+
+                val linesCleared = newState.linesCleared - oldLines
+                when (linesCleared) {
+                    0L -> audioRepository.playSoundEffect(SoundEffect.PIECE_DROP)
+                    4L -> audioRepository.playSoundEffect(SoundEffect.TETRIS)
+                    else -> audioRepository.playSoundEffect(SoundEffect.LINE_CLEAR)
+                }
+
+//                if (newState.level > gameState.level) {
+//                    audioRepository.playSoundEffect(SoundEffect.LEVEL_UP)
+//                }
+
                 val ghostY = calculateGhostY(newState)
                 dispatch(GameStore.Msg.GameStateUpdated(newState, ghostY))
-                
+
                 if (newState.isGameOver) {
                     handleGameOver(newState, state.settings)
                 }
             }
         }
-        
+
         private fun calculateGhostY(gameState: GameState): Int? {
             return gameState.currentPiece?.let { piece ->
                 calculateGhostPositionUseCase(
@@ -314,10 +347,13 @@ internal class GameStoreFactory : KoinComponent {
                 )
             }
         }
-        
+
 
         private fun handleGameOver(gameState: GameState, settings: GameSettings) {
             gameLoopUseCase.stop()
+
+            audioRepository.stopMusic()
+            audioRepository.playSoundEffect(SoundEffect.GAME_OVER)
             scope.launch {
                 try {
                     // Save game record
@@ -329,10 +365,10 @@ internal class GameStoreFactory : KoinComponent {
                         timestamp = Clock.System.now().toEpochMilliseconds()
                     )
                     gameHistoryRepository.saveGame(record)
-                    
+
                     // Clear saved game state
                     gameStateRepository.clearGameState()
-                    
+
                     publish(GameStore.Label.GameOver)
                 } catch (e: Exception) {
                     publish(GameStore.Label.ShowError(e.message ?: "Failed to save game"))
