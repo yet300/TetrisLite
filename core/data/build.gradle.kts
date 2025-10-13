@@ -16,5 +16,9 @@ kotlin {
         commonTest.dependencies {
             implementation(libs.bundles.testing)
         }
+        jsMain.dependencies {
+            implementation(project.dependencies.enforcedPlatform(libs.jetbrains.kotlinWrappers.kotlinWrappersBom.get()))
+            implementation(libs.kotlin.browser)
+        }
     }
 }
