@@ -26,7 +26,7 @@ ksp = "2.2.20-2.0.3"
 kotlinx-coroutines = "1.10.2"
 kotlinxDatetime = "0.7.1-0.6.x-compat"
 kotlinxSerializationJson = "1.9.0"
-jetbrainsKotlinWrappers = "2025.9.9"
+jetbrainsKotlinWrappers = "2025.10.5"
 
 koin = "4.1.1"
 koin-annotation = "2.2.0-RC1"
