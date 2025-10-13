@@ -13,7 +13,7 @@ import org.koin.core.annotation.Module
 import org.koin.core.annotation.Single
 
 @Module([DatabaseModule::class, DataPlatformModule::class])
-@ComponentScan("com.yet.tetris.data.repository")
+@ComponentScan("com.yet.tetris.data")
 class DataModule {
     @Single
     fun provideJson(): Json = Json {
