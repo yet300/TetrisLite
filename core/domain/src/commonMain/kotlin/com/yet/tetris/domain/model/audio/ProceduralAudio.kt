@@ -135,6 +135,15 @@ object SoundEffectPresets {
         envelope = Envelope(attack = 0.05f, decay = 0.3f, sustain = 0.5f, release = 0.65f),
         volume = 0.6f
     )
+
+    val LEVEL_UP = SoundEffectParams(
+        waveform = WaveformType.SAWTOOTH,
+        startFrequency = 500f,
+        endFrequency = 1000f,
+        duration = 0.5f,
+        envelope = Envelope(attack = 0.05f, decay = 0.15f, sustain = 0.7f, release = 0.25f),
+        volume = 0.7f
+    )
 }
 
 /**
@@ -214,6 +223,19 @@ object MusicSequencePresets {
             Note(Note.E5, Note.QUARTER)
         ),
         tempo = 128,
+        loop = true
+    )
+
+    val MINIMAL_THEME = MusicSequence(
+        notes = listOf(
+            Note(Note.C4, Note.QUARTER),
+            Note(Note.E4, Note.QUARTER),
+            Note(Note.G4, Note.HALF),
+            Note(Note.A4, Note.QUARTER),
+            Note(Note.G4, Note.QUARTER),
+            Note(Note.E4, Note.HALF)
+        ),
+        tempo = 100,
         loop = true
     )
 }
