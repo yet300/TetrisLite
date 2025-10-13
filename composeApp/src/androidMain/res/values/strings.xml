@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">TetrisLite</string>
+    <string name="audio_attribution_label">Playback of game sounds and music</string>
 </resources>

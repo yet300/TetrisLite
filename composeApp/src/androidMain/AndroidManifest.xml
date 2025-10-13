@@ -20,4 +20,8 @@
         </activity>
     </application>
 
+    <attribution
+        android:tag="game_audio"
+        android:label="@string/audio_attribution_label" />
+
 </manifest>
