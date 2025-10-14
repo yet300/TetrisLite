@@ -14,10 +14,17 @@ gradlePlugin {
         }
 
         register("koinAnnotation") {
-            id = "com.plugins.KoinAnnotation"
+            id = "com.plugins.koin-annotation"
             displayName = "KMP Koin Annotation"
             tags = listOf("kmp", "koin-core", "koin-annotation")
             implementationClass = "com.yet.plugins.KoinAnnotationPlugin"
+        }
+
+        register("sqlDelight") {
+            id = "com.plugins.sqldelight"
+            displayName = "SqlDelight"
+            tags = listOf("sqldelight", "kmp")
+            implementationClass = "com.yet.plugins.SqlDelightConventionPlugin"
         }
     }
 }

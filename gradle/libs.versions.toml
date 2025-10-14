@@ -154,4 +154,5 @@ sqlDelight = { id = "app.cash.sqldelight", version.ref = "sqldelight" }
 
 local-kotlin-multiplatform = { id = "com.plugins.kotlinMultiplatformPlugin", version = "unspecified" }
 local-compose-multiplatform = { id = "com.plugins.composeMultiplatform", version = "unspecified" }
-local-koin = { id = "com.plugins.KoinAnnotation", version = "unspecified" }
+local-koin = { id = "com.plugins.koin-annotation", version = "unspecified" }
+local-sqlDelight = { id = "com.plugins.sqldelight", version = "unspecified" }
