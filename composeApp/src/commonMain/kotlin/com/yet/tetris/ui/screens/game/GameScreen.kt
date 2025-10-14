@@ -6,6 +6,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material3.*
@@ -16,6 +17,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.text.font.FontWeight
@@ -34,6 +36,7 @@ import com.yet.tetris.ui.screens.game.dialog.GameOverDialog
 import com.yet.tetris.ui.screens.game.dialog.PauseDialog
 import com.yet.tetris.ui.theme.*
 import com.yet.tetris.uikit.component.button.FrostedGlassButton
+import com.yet.tetris.uikit.component.modifier.glassPanel
 import com.yet.tetris.uikit.theme.TetrisLiteAppTheme
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -181,26 +184,23 @@ private fun GamePlayingContent(
 }
 
 @Composable
-
 private fun GameStatsRow(
     score: Long,
     lines: Long,
     time: Long
 ) {
-    Card(
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
-        )
+    Row(
+        modifier = Modifier
+            .glassPanel(
+                shape = RoundedCornerShape(16.dp),
+            )
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        horizontalArrangement = Arrangement.spacedBy(24.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(24.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            StatItem(stringResource(Res.string.score), score.toString())
-            StatItem(stringResource(Res.string.lines), lines.toString())
-            StatItem(stringResource(Res.string.time), formatTime(time))
-        }
+        StatItem(stringResource(Res.string.score), score.toString())
+        StatItem(stringResource(Res.string.lines), lines.toString())
+        StatItem(stringResource(Res.string.time), formatTime(time))
     }
 }
 
@@ -210,13 +210,13 @@ private fun StatItem(label: String, value: String) {
         Text(
             text = label,
             style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = MaterialTheme.colorScheme.onSurface
         )
         Text(
             text = value,
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onSurface
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }
@@ -228,25 +228,44 @@ private fun NextPiecePreview(
     settings: GameSettings
 ) {
     Column(
+        modifier = Modifier
+            .glassPanel(shape = RoundedCornerShape(16.dp))
+            .padding(6.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         Text(
+            modifier = Modifier.graphicsLayer {
+                shadowElevation = 2.dp.toPx()
+            },
             text = stringResource(Res.string.next),
             style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = MaterialTheme.colorScheme.onSurface
         )
 
         Canvas(
             modifier = Modifier.size(60.dp)
         ) {
-            val cellSize = size.width / 4
+            val cellSize = 12.dp.toPx()
+
+            val minX = nextPiece.blocks.minOfOrNull { it.x } ?: 0
+            val maxX = nextPiece.blocks.maxOfOrNull { it.x } ?: 0
+            val minY = nextPiece.blocks.minOfOrNull { it.y } ?: 0
+            val maxY = nextPiece.blocks.maxOfOrNull { it.y } ?: 0
+
+            val pieceWidth = (maxX - minX + 1) * cellSize
+            val pieceHeight = (maxY - minY + 1) * cellSize
+
+            val offsetX = (size.width - pieceWidth) / 2f - (minX * cellSize)
+            val offsetY = (size.height - pieceHeight) / 2f - (minY * cellSize)
+
+
             nextPiece.blocks.forEach { blockPos ->
                 drawRect(
                     color = getTetrominoColor(nextPiece.type, settings),
                     topLeft = Offset(
-                        (blockPos.x + 1) * cellSize,
-                        (blockPos.y + 1) * cellSize
+                        blockPos.x * cellSize + offsetX,
+                        blockPos.y * cellSize + offsetY
                     ),
                     size = Size(cellSize - 1, cellSize - 1)
                 )
