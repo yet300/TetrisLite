@@ -5,7 +5,9 @@ import com.yet.tetris.domain.model.history.GameRecord
 
 interface HistoryComponent {
     val model: Value<Model>
-    
+
+    fun onDismiss()
+
     fun onRefresh()
     fun onFilterChanged(filter: DateFilter)
     fun onDeleteGame(id: String)

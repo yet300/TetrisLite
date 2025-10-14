@@ -14,6 +14,10 @@ class PreviewHistoryComponent :
     override val model: Value<HistoryComponent.Model> =
         MutableValue(HistoryComponent.Model.Loading)
 
+    override fun onDismiss() {
+        TODO("Not yet implemented")
+    }
+
 
     override fun onRefresh() {
         TODO("Not yet implemented")

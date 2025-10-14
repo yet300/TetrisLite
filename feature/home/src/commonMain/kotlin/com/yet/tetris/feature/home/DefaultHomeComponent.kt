@@ -78,6 +78,7 @@ class DefaultHomeComponent(
         BottomSheetConfiguration.History -> HomeComponent.BottomSheetChild.HistoryChild(
             component = DefaultHistoryComponent(
                 componentContext = componentContext,
+                dismiss = ::onDismissBottomSheet
             )
         )
     }

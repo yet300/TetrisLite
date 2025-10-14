@@ -14,7 +14,8 @@ import org.koin.core.component.KoinComponent
 
 
 class DefaultHistoryComponent(
-    componentContext: ComponentContext
+    componentContext: ComponentContext,
+    private val dismiss: () -> Unit,
 ) : ComponentContext by componentContext, HistoryComponent, KoinComponent {
     private val store = instanceKeeper.getStore { HistoryStoreFactory().create() }
 
@@ -46,6 +47,8 @@ class DefaultHistoryComponent(
             )
         }
     }
+
+    override fun onDismiss() = dismiss()
 
     override fun onRefresh() {
         store.accept(HistoryStore.Intent.Refresh)
