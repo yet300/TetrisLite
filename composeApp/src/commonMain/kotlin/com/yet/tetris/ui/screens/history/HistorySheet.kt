@@ -6,23 +6,28 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.icons.filled.SportsEsports
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -39,15 +44,21 @@ import com.yet.tetris.domain.model.history.GameRecord
 import com.yet.tetris.feature.history.DateFilter
 import com.yet.tetris.feature.history.HistoryComponent
 import com.yet.tetris.feature.history.PreviewHistoryComponent
-import org.jetbrains.compose.resources.stringResource
-import tetrislite.composeapp.generated.resources.Res
-import tetrislite.composeapp.generated.resources.*
 import com.yet.tetris.uikit.component.button.FrostedGlassButton
+import com.yet.tetris.uikit.component.swipe.SwipeContent
+import com.yet.tetris.uikit.component.swipe.SwipeableActionsBox
 import com.yet.tetris.uikit.component.text.TitleText
 import com.yet.tetris.uikit.theme.TetrisLiteAppTheme
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import tetrislite.composeapp.generated.resources.Res
+import tetrislite.composeapp.generated.resources.game_history
+import tetrislite.composeapp.generated.resources.lines_label
+import tetrislite.composeapp.generated.resources.no_games_yet
+import tetrislite.composeapp.generated.resources.score_label
+import tetrislite.composeapp.generated.resources.start_game_prompt
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
@@ -156,6 +167,8 @@ private fun HistoryList(
     games: List<GameRecord>,
     onDeleteGame: (String) -> Unit
 ) {
+    var revealedId by remember { mutableStateOf<String?>(null) }
+
     LazyColumn(
         modifier = modifier,
         contentPadding = PaddingValues(top = 80.dp, bottom = 20.dp),
@@ -167,62 +180,107 @@ private fun HistoryList(
             )
         }
         items(games, key = { it.id }) { game ->
-            GameRecordCard(
+            GameRecordSwipeableItem(
                 game = game,
+                isRevealed = revealedId == game.id,
+                onExpand = { revealedId = game.id },
+                onCollapse = { revealedId = null },
                 onDelete = { onDeleteGame(game.id) }
             )
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun GameRecordSwipeableItem(
+    game: GameRecord,
+    isRevealed: Boolean,
+    onExpand: () -> Unit,
+    onCollapse: () -> Unit,
+    onDelete: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    SwipeableActionsBox(
+        modifier = modifier
+            .fillMaxSize(),
+        isRevealed = isRevealed,
+        onExpanded = onExpand,
+        onCollapsed = onCollapse,
+        onFullSwipe = onDelete,
+        actions = {
+            SwipeContent(
+                modifier = Modifier.padding(start = 30.dp),
+                icon = Icons.Default.Delete,
+                backgroundColor = MaterialTheme.colorScheme.error,
+                onClick = {
+                    onDelete()
+                    onCollapse()
+                }
+            )
+        },
+        content = {
+            GameRecordCard(
+                game = game
+            )
+        }
+    )
+}
+
 @Composable
 private fun GameRecordCard(
     game: GameRecord,
-    onDelete: () -> Unit
+    modifier: Modifier = Modifier
 ) {
     Card(
-        modifier = Modifier.fillMaxWidth()
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
+            Row(
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = stringResource(Res.string.score_label, game.score),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
+                Icon(
+                    imageVector = Icons.Default.SportsEsports,
+                    contentDescription = "Game icon",
+                    modifier = Modifier.size(16.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+                Spacer(Modifier.width(8.dp))
                 Text(
-                    text = stringResource(Res.string.lines_label, game.linesCleared),
-                    style = MaterialTheme.typography.bodyMedium,
+                    text = game.difficulty.name,
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                Text(
-                    text = stringResource(Res.string.difficulty_label, game.difficulty.name),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                Spacer(Modifier.weight(1f))
                 Text(
                     text = formatTimestamp(game.timestamp),
-                    style = MaterialTheme.typography.bodySmall,
+                    style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
+            Spacer(Modifier.height(8.dp))
 
-            IconButton(onClick = onDelete) {
-                Icon(
-                    Icons.Default.Delete,
-                    contentDescription = "Delete",
-                    tint = MaterialTheme.colorScheme.error
-                )
-            }
+            Text(
+                text =stringResource(Res.string.score_label, game.score),
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+
+            Text(
+                text = stringResource(Res.string.lines_label,game.linesCleared),
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }
