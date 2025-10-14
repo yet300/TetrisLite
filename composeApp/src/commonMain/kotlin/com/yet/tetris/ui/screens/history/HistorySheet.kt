@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material3.Card
@@ -94,13 +95,13 @@ fun HistorySheet(component: HistoryComponent) {
                 .background(MaterialTheme.colorScheme.background)
         ) {
             FrostedGlassButton(
-                modifier = Modifier.align(Alignment.CenterEnd),
+                modifier = Modifier.align(Alignment.CenterStart),
                 onClick = { showFilterMenu = true },
                 icon = Icons.Default.FilterList,
             )
 
             DropdownMenu(
-                modifier = Modifier.align(Alignment.CenterEnd),
+                modifier = Modifier.align(Alignment.CenterStart),
                 expanded = showFilterMenu,
                 onDismissRequest = { showFilterMenu = false }
             ) {
@@ -114,6 +115,12 @@ fun HistorySheet(component: HistoryComponent) {
                     )
                 }
             }
+
+            FrostedGlassButton(
+                modifier = Modifier.align(Alignment.CenterEnd),
+                onClick = component::onDismiss,
+                icon = Icons.Default.Close,
+            )
 
         }
     }

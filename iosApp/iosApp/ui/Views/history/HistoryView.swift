@@ -44,7 +44,7 @@ struct HistoryView: View {
             }
             .navigationTitle("Game History")
             .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
+                ToolbarItem(placement: .navigationBarLeading) {
                     Menu {
                         ForEach([DateFilter.all, DateFilter.today, DateFilter.thisWeek, DateFilter.thisMonth], id: \.self) { filter in
                             Button(filter.name) {
@@ -53,6 +53,14 @@ struct HistoryView: View {
                         }
                     } label: {
                         Image(systemName: "line.3.horizontal.decrease.circle")
+                    }
+                }
+
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: {
+                        component.onDismiss()
+                    }) {
+                        Image(systemName: "xmark")
                     }
                 }
             }
