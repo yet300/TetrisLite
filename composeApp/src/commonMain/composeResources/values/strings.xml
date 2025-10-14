@@ -21,8 +21,8 @@
     <string name="lines">Lines</string>
     <string name="time">Time</string>
     <string name="game_over">Game Over</string>
-    <string name="final_score">Final Score: %d</string>
-    <string name="lines_cleared">Lines Cleared: %d</string>
+    <string name="final_score">Final Score: %1$d</string>
+    <string name="lines_cleared">Lines Cleared: %1$d</string>
     <string name="back_to_home">Back to Home</string>
     <string name="game_paused">Game Paused</string>
     <string name="pause_message">What would you like to do?</string>
@@ -44,7 +44,7 @@
     <string name="game_history">Game History</string>
     <string name="no_games_yet">No games played yet</string>
     <string name="start_game_prompt">Start a new game to see your history</string>
-    <string name="score_label">Score: %d</string>
-    <string name="lines_label">Lines: %d</string>
+    <string name="score_label">Score: %1$d</string>
+    <string name="lines_label">Lines: %1$d</string>
     <string name="difficulty_label">Difficulty: %s</string>
 </resources>
