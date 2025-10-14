@@ -1,5 +1,8 @@
 package com.yet.tetris.database.dao
 
+import app.cash.sqldelight.async.coroutines.awaitAsList
+import app.cash.sqldelight.async.coroutines.awaitAsOne
+import app.cash.sqldelight.async.coroutines.awaitAsOneOrNull
 import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToList
 import com.yet.tetris.database.GameHistory
@@ -26,7 +29,7 @@ class GameHistoryDao(private val databaseManager: DatabaseManager) {
     }
     
     suspend fun getAllGames(): List<GameHistory> = withContext(Dispatchers.Default) {
-        databaseManager.getDb().gameHistoryQueries.getAllGames().executeAsList()
+        databaseManager.getDb().gameHistoryQueries.getAllGames().awaitAsList()
     }
     
     fun observeAllGames(): Flow<List<GameHistory>> {
@@ -41,7 +44,7 @@ class GameHistoryDao(private val databaseManager: DatabaseManager) {
     }
     
     suspend fun getGameById(id: String): GameHistory? = withContext(Dispatchers.Default) {
-        databaseManager.getDb().gameHistoryQueries.getGameById(id).executeAsOneOrNull()
+        databaseManager.getDb().gameHistoryQueries.getGameById(id).awaitAsOneOrNull()
     }
     
     suspend fun deleteGame(id: String) = withContext(Dispatchers.Default) {
@@ -53,7 +56,7 @@ class GameHistoryDao(private val databaseManager: DatabaseManager) {
     }
     
     suspend fun getGamesCount(): Long = withContext(Dispatchers.Default) {
-        databaseManager.getDb().gameHistoryQueries.getGamesCount().executeAsOne()
+        databaseManager.getDb().gameHistoryQueries.getGamesCount().awaitAsOne()
     }
     
     suspend fun deleteOldestGames(count: Long) = withContext(Dispatchers.Default) {

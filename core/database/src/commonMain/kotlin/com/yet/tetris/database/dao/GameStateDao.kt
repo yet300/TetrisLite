@@ -1,5 +1,8 @@
 package com.yet.tetris.database.dao
 
+import app.cash.sqldelight.async.coroutines.awaitAsList
+import app.cash.sqldelight.async.coroutines.awaitAsOne
+import app.cash.sqldelight.async.coroutines.awaitAsOneOrNull
 import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToOneOrNull
 import com.yet.tetris.database.BoardCells
@@ -63,11 +66,11 @@ class GameStateDao(private val databaseManager: DatabaseManager) {
     }
     
     suspend fun getGameState(): CurrentGameState? = withContext(Dispatchers.Default) {
-        databaseManager.getDb().currentGameStateQueries.getGameState().executeAsOneOrNull()
+        databaseManager.getDb().currentGameStateQueries.getGameState().awaitAsOneOrNull()
     }
     
     suspend fun getBoardCells(): List<BoardCells> = withContext(Dispatchers.Default) {
-        databaseManager.getDb().boardCellsQueries.getAllCells().executeAsList()
+        databaseManager.getDb().boardCellsQueries.getAllCells().awaitAsList()
     }
     
     suspend fun clearGameState() = withContext(Dispatchers.Default) {
@@ -78,7 +81,7 @@ class GameStateDao(private val databaseManager: DatabaseManager) {
     }
     
     suspend fun hasSavedState(): Boolean = withContext(Dispatchers.Default) {
-        databaseManager.getDb().currentGameStateQueries.hasSavedState().executeAsOne()
+        databaseManager.getDb().currentGameStateQueries.hasSavedState().awaitAsOne()
     }
     
     fun observeGameState(): Flow<CurrentGameState?> {
