@@ -1,29 +1,49 @@
 package com.yet.tetris.ui.screens.home
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.*
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
 import com.yet.tetris.domain.model.game.Difficulty
 import com.yet.tetris.feature.home.HomeComponent
 import com.yet.tetris.feature.home.PreviewHomeComponent
-import com.yet.tetris.ui.screens.settings.SettingsSheet
 import com.yet.tetris.ui.screens.history.HistorySheet
+import com.yet.tetris.ui.screens.settings.SettingsSheet
+import com.yet.tetris.uikit.component.button.EnumSegmentedButtonRow
 import com.yet.tetris.uikit.component.button.FrostedGlassButton
+import com.yet.tetris.uikit.component.button.GlassButton
 import com.yet.tetris.uikit.component.sheet.ModalBottomSheet
 import com.yet.tetris.uikit.theme.TetrisLiteAppTheme
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import tetrislite.composeapp.generated.resources.Res
-import tetrislite.composeapp.generated.resources.*
+import tetrislite.composeapp.generated.resources.app_title
+import tetrislite.composeapp.generated.resources.resume_game
+import tetrislite.composeapp.generated.resources.start_new_game
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -32,8 +52,14 @@ fun HomeScreen(component: HomeComponent) {
 
     Scaffold(
         topBar = {
-            TopAppBar(
+            CenterAlignedTopAppBar(
                 title = {
+                    Text(
+                        stringResource(Res.string.app_title),
+                        fontWeight = FontWeight.Bold
+                    )
+                },
+                navigationIcon = {
                     FrostedGlassButton(
                         onClick = component::onOpenHistory,
                         icon = Icons.Default.History
@@ -44,7 +70,10 @@ fun HomeScreen(component: HomeComponent) {
                         onClick = component::onOpenSettings,
                         icon = Icons.Default.Settings,
                     )
-                }
+                },
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    containerColor = Color.Transparent
+                )
             )
         }
     ) { paddingValues ->
@@ -110,83 +139,38 @@ private fun HomeContent(
     Column(
         modifier = modifier.padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically)
+        verticalArrangement = Arrangement.SpaceBetween
     ) {
-        Text(
-            text = stringResource(Res.string.app_title),
-            style = MaterialTheme.typography.displayLarge,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.primary
+        EnumSegmentedButtonRow(
+            modifier = Modifier.fillMaxWidth(0.8f),
+            selectedValue = currentDifficulty,
+            onValueChange = onDifficultyChanged,
         )
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.weight(1f))
 
-
-        DifficultySelector(
-            currentDifficulty = currentDifficulty,
-            onDifficultyChanged = onDifficultyChanged
-        )
-        Button(
-            onClick = onStartNewGame,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp)
-        ) {
-            Text(stringResource(Res.string.start_new_game), style = MaterialTheme.typography.titleMedium)
-        }
-
-        if (hasSavedGame) {
-            OutlinedButton(
-                onClick = onResumeGame,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp)
-            ) {
-                Text(stringResource(Res.string.resume_game), style = MaterialTheme.typography.titleMedium)
-            }
-        }
-    }
-}
-
-@Composable
-private fun DifficultySelector(
-    currentDifficulty: Difficulty,
-    onDifficultyChanged: (Difficulty) -> Unit
-) {
-    val options = Difficulty.entries
-
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = MaterialTheme.shapes.medium
-    ) {
         Column(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier.widthIn(max = 400.dp).padding(horizontal = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text(
-                text = stringResource(Res.string.difficulty),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
+            GlassButton(
+                title = stringResource(Res.string.start_new_game),
+                icon = Icons.Default.PlayArrow,
+                onClick = onStartNewGame,
+                modifier = Modifier.fillMaxWidth()
             )
 
-            SingleChoiceSegmentedButtonRow(
-                modifier = Modifier.fillMaxWidth(),
-                space = 8.dp
-            ) {
-                options.forEachIndexed { index, difficulty ->
-                    SegmentedButton(
-                        shape = SegmentedButtonDefaults.itemShape(
-                            index = index,
-                            count = options.size
-                        ),
-                        onClick = { onDifficultyChanged(difficulty) },
-                        selected = currentDifficulty == difficulty,
-                        label = { Text(difficulty.name) }
-                    )
-                }
+            if (hasSavedGame) {
+                GlassButton(
+                    title = stringResource(Res.string.resume_game),
+                    icon = Icons.Default.Refresh,
+                    onClick = onResumeGame,
+                    modifier = Modifier.fillMaxWidth(),
+                )
             }
         }
+        Spacer(modifier = Modifier.height(32.dp))
     }
 }
 
