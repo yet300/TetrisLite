@@ -34,9 +34,11 @@ import com.yet.tetris.feature.game.PreviewGameComponent
 import com.yet.tetris.ui.screens.game.dialog.ErrorDialog
 import com.yet.tetris.ui.screens.game.dialog.GameOverDialog
 import com.yet.tetris.ui.screens.game.dialog.PauseDialog
+import com.yet.tetris.ui.screens.settings.SettingsSheet
 import com.yet.tetris.ui.theme.*
 import com.yet.tetris.uikit.component.button.FrostedGlassButton
 import com.yet.tetris.uikit.component.modifier.glassPanel
+import com.yet.tetris.uikit.component.sheet.ModalBottomSheet
 import com.yet.tetris.uikit.theme.TetrisLiteAppTheme
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -66,20 +68,21 @@ fun GameScreen(component: GameComponent) {
                     }
                 )
 
-                GameSheet(component, model)
+                GameDialog(component, model)
+                GameSheet(component)
             }
         }
     }
 }
 
 @Composable
-fun GameSheet(
+fun GameDialog(
     component: GameComponent,
     model: GameComponent.Model
 ) {
-    val bottomSheetSlot by component.childSlot.subscribeAsState()
+    val dialogSheetSlot by component.childSlot.subscribeAsState()
 
-    bottomSheetSlot.child?.instance?.let { child ->
+    dialogSheetSlot.child?.instance?.let { child ->
         when (child) {
             is GameComponent.DialogChild.Pause -> {
                 PauseDialog(component = component)
@@ -92,8 +95,25 @@ fun GameSheet(
             is GameComponent.DialogChild.Error -> {
                 ErrorDialog(
                     message = child.message,
-                    onDismiss = component::onDismissSheet
+                    onDismiss = component::onDismissDialog
                 )
+            }
+        }
+    }
+}
+
+@Composable
+fun GameSheet(
+    component: GameComponent,
+) {
+    val dialogSheetSlot by component.sheetSlot.subscribeAsState()
+
+    dialogSheetSlot.child?.instance?.let { child ->
+        ModalBottomSheet(
+            onDismiss = component::onDismissSheet,
+        ) {
+            when (child) {
+                is GameComponent.SheetChild.Settings -> SettingsSheet(component = child.component)
             }
         }
     }
