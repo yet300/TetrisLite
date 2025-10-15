@@ -160,7 +160,7 @@ private struct BottomSheetView: View {
     }
 }
 
-struct SheetItem: Identifiable {
+private struct SheetItem: Identifiable {
     let child: HomeComponentBottomSheetChild
     
     var id: String {
