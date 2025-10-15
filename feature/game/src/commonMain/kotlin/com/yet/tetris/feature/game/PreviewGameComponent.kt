@@ -10,8 +10,15 @@ class PreviewGameComponent : GameComponent,
     ComponentContext by PreviewComponentContext {
     override val model: Value<GameComponent.Model> =
         MutableValue(GameComponent.Model())
-    override val childSlot: Value<ChildSlot<*, GameComponent.DialogChild>>  =
+    override val childSlot: Value<ChildSlot<*, GameComponent.DialogChild>> =
         MutableValue(ChildSlot<Any, GameComponent.DialogChild>(null))
+
+    override val sheetSlot: Value<ChildSlot<*, GameComponent.SheetChild>> =
+        MutableValue(ChildSlot<Any, GameComponent.SheetChild>(null))
+
+    override fun onDismissDialog() {
+        TODO("Not yet implemented")
+    }
 
     override fun onDismissSheet() {
         TODO("Not yet implemented")
@@ -30,6 +37,10 @@ class PreviewGameComponent : GameComponent,
     }
 
     override fun onResume() {
+        TODO("Not yet implemented")
+    }
+
+    override fun onSettings() {
         TODO("Not yet implemented")
     }
 

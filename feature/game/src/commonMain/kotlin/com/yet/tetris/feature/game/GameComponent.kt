@@ -6,12 +6,15 @@ import com.arkivanov.decompose.value.Value
 import com.arkivanov.essenty.backhandler.BackHandlerOwner
 import com.yet.tetris.domain.model.game.GameState
 import com.yet.tetris.domain.model.settings.GameSettings
+import com.yet.tetris.feature.settings.SettingsComponent
 
 @OptIn(ExperimentalDecomposeApi::class)
 interface GameComponent : BackHandlerOwner {
     val model: Value<Model>
 
     val childSlot: Value<ChildSlot<*, DialogChild>>
+
+    val sheetSlot: Value<ChildSlot<*, SheetChild>>
 
     data class Model(
         val isLoading: Boolean = true,
@@ -24,12 +27,16 @@ interface GameComponent : BackHandlerOwner {
         val ghostPieceY: Int? = null
     )
 
+    fun onDismissDialog()
+
     fun onDismissSheet()
+
     fun onBackClick()
     fun onRetry()
 
     fun onPause()
     fun onResume()
+    fun onSettings()
     fun onQuit()
     fun onMoveLeft()
     fun onMoveRight()
@@ -48,6 +55,10 @@ interface GameComponent : BackHandlerOwner {
         class GameOver : DialogChild
 
         class Error(val message: String) : DialogChild
+    }
+
+    sealed interface SheetChild {
+        class Settings(val component: SettingsComponent) : SheetChild
     }
 
 }

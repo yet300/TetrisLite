@@ -18,6 +18,7 @@ import com.arkivanov.mvikotlin.core.instancekeeper.getStore
 import com.arkivanov.mvikotlin.extensions.coroutines.labels
 import com.yet.tetris.feature.game.store.GameStore
 import com.yet.tetris.feature.game.store.GameStoreFactory
+import com.yet.tetris.feature.settings.DefaultSettingsComponent
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import org.koin.core.component.KoinComponent
@@ -30,7 +31,9 @@ class DefaultGameComponent(
 
     private val store = instanceKeeper.getStore { GameStoreFactory().create() }
 
-    private val sheetNavigation = SlotNavigation<DialogConfig>()
+    private val dialogNavigation = SlotNavigation<DialogConfig>()
+
+    private val sheetNavigation = SlotNavigation<SheetConfig>()
 
     init {
         lifecycle.subscribe(
@@ -53,7 +56,7 @@ class DefaultGameComponent(
             // Handle labels
             store.labels.collect {
                 when (it) {
-                    is GameStore.Label.GameOver -> sheetNavigation.activate(
+                    is GameStore.Label.GameOver -> dialogNavigation.activate(
                         DialogConfig.GameOver(
                             score = store.state.gameState?.score ?: 0,
                             lines = store.state.gameState?.linesCleared ?: 0
@@ -62,11 +65,11 @@ class DefaultGameComponent(
 
                     is GameStore.Label.NavigateBack -> onBackClick()
 
-                    is GameStore.Label.ShowError -> sheetNavigation.activate(DialogConfig.Error(it.message))
+                    is GameStore.Label.ShowError -> dialogNavigation.activate(DialogConfig.Error(it.message))
 
-                    GameStore.Label.GamePaused -> sheetNavigation.activate(DialogConfig.Pause)
+                    GameStore.Label.GamePaused -> dialogNavigation.activate(DialogConfig.Pause)
 
-                    GameStore.Label.ResumeGame -> sheetNavigation.dismiss()
+                    GameStore.Label.ResumeGame -> dialogNavigation.dismiss()
                 }
             }
         }
@@ -87,25 +90,29 @@ class DefaultGameComponent(
 
     override val childSlot: Value<ChildSlot<*, GameComponent.DialogChild>> =
         childSlot(
-            source = sheetNavigation,
+            source = dialogNavigation,
             serializer = DialogConfig.serializer(),
+            key = "GameDialog",
+            handleBackButton = true,
+            childFactory = ::createDialogChild
+        )
+
+    override val sheetSlot: Value<ChildSlot<*, GameComponent.SheetChild>> =
+        childSlot(
+            source = sheetNavigation,
+            serializer = SheetConfig.serializer(),
             key = "GameSheet",
             handleBackButton = true,
-        ) { config, childComponentContext ->
-            when (config) {
-                is DialogConfig.Pause ->
-                    GameComponent.DialogChild.Pause()
-
-                is DialogConfig.GameOver ->
-                    GameComponent.DialogChild.GameOver()
-
-                is DialogConfig.Error -> GameComponent.DialogChild.Error(config.message)
-            }
-        }
+            childFactory = ::createSheetChild
+        )
 
     private fun isGameActive(): Boolean {
         val state = store.state
         return state.gameState != null && !state.isPaused && !(state.gameState.isGameOver)
+    }
+
+    override fun onDismissDialog() {
+        dialogNavigation.dismiss()
     }
 
     override fun onDismissSheet() {
@@ -115,7 +122,7 @@ class DefaultGameComponent(
     override fun onBackClick() = navigateBack()
 
     override fun onRetry() {
-        sheetNavigation.dismiss()
+        dialogNavigation.dismiss()
         store.accept(GameStore.Intent.RetryGame)
     }
 
@@ -126,6 +133,10 @@ class DefaultGameComponent(
 
     override fun onResume() {
         store.accept(GameStore.Intent.ResumeGame)
+    }
+
+    override fun onSettings() {
+        sheetNavigation.activate(SheetConfig.Settings)
     }
 
     override fun onQuit() {
@@ -172,6 +183,30 @@ class DefaultGameComponent(
         store.accept(GameStore.Intent.DragEnded)
     }
 
+    private fun createDialogChild(
+        config: DialogConfig,
+        componentContext: ComponentContext
+    ): GameComponent.DialogChild =
+        when (config) {
+            is DialogConfig.Pause -> GameComponent.DialogChild.Pause()
+            is DialogConfig.GameOver -> GameComponent.DialogChild.GameOver()
+            is DialogConfig.Error -> GameComponent.DialogChild.Error(config.message)
+        }
+
+    private fun createSheetChild(
+        config: SheetConfig,
+        componentContext: ComponentContext
+    ): GameComponent.SheetChild =
+        when (config) {
+            is SheetConfig.Settings -> GameComponent.SheetChild.Settings(
+                DefaultSettingsComponent(
+                    componentContext = componentContext,
+                    onDismiss = ::onDismissSheet,
+                    onSettingsSaved = ::onDismissSheet
+                )
+            )
+        }
+
     @Serializable
     sealed interface DialogConfig {
         @Serializable
@@ -182,5 +217,11 @@ class DefaultGameComponent(
 
         @Serializable
         data class Error(val message: String) : DialogConfig
+    }
+
+    @Serializable
+    sealed interface SheetConfig {
+        @Serializable
+        data object Settings : SheetConfig
     }
 }
