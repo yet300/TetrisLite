@@ -22,7 +22,7 @@ struct SettingsView: View {
                 controlsSection
                 audioSection
             }
-            .navigationTitle("Settings")
+            .navigationTitle(Strings.settings)
             #if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
             #endif

@@ -28,10 +28,12 @@ enum Strings {
     static let gamePaused = NSLocalizedString("game_paused", comment: "")
     
     // Settings Screen
+    static let settings = NSLocalizedString("settings_valume", comment: "")
     static let musicVolume = NSLocalizedString("music_volume", comment: "")
     static let sfxVolume = NSLocalizedString("sfx_volume", comment: "")
     
     // History Screen
+    static let history = NSLocalizedString("history_value", comment: "")
     static let noGamesYet = NSLocalizedString("no_games_yet", comment: "")
     static let startGamePrompt = NSLocalizedString("start_game_prompt", comment: "")
     

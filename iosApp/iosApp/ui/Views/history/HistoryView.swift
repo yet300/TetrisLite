@@ -42,7 +42,7 @@ struct HistoryView: View {
                     EmptyView()
                 }
             }
-            .navigationTitle("Game History")
+            .navigationTitle(Strings.history)
             .toolbar {
                 #if os(iOS)
                 ToolbarItem(placement: .navigationBarLeading) {
