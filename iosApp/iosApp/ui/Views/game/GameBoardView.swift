@@ -17,58 +17,48 @@ struct GameBoardView: View {
             )
             
             // Draw locked blocks
-            for (position, type) in gameState.board.cells {
-                if let pos = position as? Position, let tetrominoType = type as? TetrominoType {
-                    if pos.y >= 0 {
-                        context.drawStyledBlock(
-                            type: tetrominoType,
-                            settings: settings,
-                            topLeft: CGPoint(x: CGFloat(pos.x) * cellSize, y: CGFloat(pos.y) * cellSize),
-                            cellSize: cellSize,
-                            alpha: 1.0
-                        )
-                    }
-                }
-            }
+            for (pos, tetrominoType) in gameState.board.cells {
+                 if pos.y >= 0 {
+                     context.drawStyledBlock(
+                         type: tetrominoType,
+                         settings: settings,
+                         topLeft: CGPoint(x: CGFloat(pos.x) * cellSize, y: CGFloat(pos.y) * cellSize),
+                         cellSize: cellSize,
+                     )
+                 }
+             }
             
             // Draw ghost piece
-            if let piece = gameState.currentPiece,
-               let landingY = ghostY,
-               landingY > gameState.currentPosition.y {
-                for block in piece.blocks {
-                    if let blockPos = block as? Position {
-                        let absoluteX = gameState.currentPosition.x + blockPos.x
-                        let absoluteY = landingY + blockPos.y
-                        
-                        if absoluteY >= 0 && absoluteY < gameState.board.height {
-                            context.drawStyledBlock(
-                                type: piece.type,
-                                settings: settings,
-                                topLeft: CGPoint(x: CGFloat(absoluteX) * cellSize, y: CGFloat(absoluteY) * cellSize),
-                                cellSize: cellSize,
-                                alpha: 0.3
-                            )
-                        }
+            if let piece = gameState.currentPiece, let landingY = ghostY, landingY > gameState.currentPosition.y {
+                for blockPos in piece.blocks {
+                    let absoluteX = gameState.currentPosition.x + blockPos.x
+                    let absoluteY = landingY + blockPos.y
+                    
+                    if absoluteY >= 0 && absoluteY < gameState.board.height {
+                        context.drawStyledBlock(
+                            type: piece.type,
+                            settings: settings,
+                            topLeft: CGPoint(x: CGFloat(absoluteX) * cellSize, y: CGFloat(absoluteY) * cellSize),
+                            cellSize: cellSize,
+                            alpha: 0.3
+                        )
                     }
                 }
             }
             
             // Draw current piece
             if let piece = gameState.currentPiece {
-                for block in piece.blocks {
-                    if let blockPos = block as? Position {
-                        let absoluteX = gameState.currentPosition.x + blockPos.x
-                        let absoluteY = gameState.currentPosition.y + blockPos.y
-                        
-                        if absoluteY >= 0 && absoluteY < gameState.board.height {
-                            context.drawStyledBlock(
-                                type: piece.type,
-                                settings: settings,
-                                topLeft: CGPoint(x: CGFloat(absoluteX) * cellSize, y: CGFloat(absoluteY) * cellSize),
-                                cellSize: cellSize,
-                                alpha: 1.0
-                            )
-                        }
+                for blockPos in piece.blocks {
+                    let absoluteX = gameState.currentPosition.x + blockPos.x
+                    let absoluteY = gameState.currentPosition.y + blockPos.y
+                    
+                    if absoluteY >= 0 && absoluteY < gameState.board.height {
+                        context.drawStyledBlock(
+                            type: piece.type,
+                            settings: settings,
+                            topLeft: CGPoint(x: CGFloat(absoluteX) * cellSize, y: CGFloat(absoluteY) * cellSize),
+                            cellSize: cellSize
+                        )
                     }
                 }
             }

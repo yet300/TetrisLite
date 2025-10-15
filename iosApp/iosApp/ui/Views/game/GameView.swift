@@ -217,7 +217,7 @@ struct NextPieceView: View {
             // Render the actual piece
             Canvas { context, size in
                 let cellSize: CGFloat = 12
-                let blocks = piece.blocks.compactMap { $0 as? Position }
+                let blocks = piece.blocks
                 
                 // Calculate bounds to center the piece
                 let minX = blocks.map { $0.x }.min() ?? 0
