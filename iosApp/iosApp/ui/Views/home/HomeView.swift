@@ -79,31 +79,26 @@ struct HomeView: View {
                 }
             }
             .navigationTitle(Strings.appTitle)
+            #if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
+            #endif
             .toolbar {
+            #if os(iOS)
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button {
-                        component.onOpenHistory()
-                    } label: {
-                        Image(systemName: "clock.fill")
-                            .foregroundColor(textColor)
-                            .frame(width: 32, height: 32)
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityLabel("app_info.close")
+                    historyButton
                 }
-                
+    
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button {
-                        component.onOpenSettings()
-                    } label: {
-                        Image(systemName: "gearshape.fill")
-                            .foregroundColor(textColor)
-                            .frame(width: 32, height: 32)
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityLabel("app_info.close")
+                    settingsButton
                 }
+            #else
+                ToolbarItem {
+                    historyButton
+                }
+                ToolbarItem {
+                    settingsButton
+                }
+            #endif
             }
             .sheet(item: Binding<SheetItem?>(
                 get: {
@@ -123,6 +118,30 @@ struct HomeView: View {
                 BottomSheetView(child: sheetItem.child)
             }
         }
+    }
+    
+    private var historyButton: some View {
+        Button {
+            component.onOpenHistory()
+        } label: {
+            Image(systemName: "clock.fill")
+                .foregroundColor(textColor)
+                .frame(width: 32, height: 32)
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("History")
+    }
+    
+    private var settingsButton: some View {
+        Button {
+            component.onOpenSettings()
+        } label: {
+            Image(systemName: "gearshape.fill")
+                .foregroundColor(textColor)
+                .frame(width: 32, height: 32)
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Settings")
     }
 }
 

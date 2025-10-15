@@ -1,3 +1,4 @@
+#if os(iOS)
 import SwiftUI
 import Shared
 
@@ -39,3 +40,4 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         return true
     }
 }
+#endif

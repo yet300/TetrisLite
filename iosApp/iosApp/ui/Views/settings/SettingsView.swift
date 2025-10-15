@@ -23,25 +23,44 @@ struct SettingsView: View {
                 audioSection
             }
             .navigationTitle("Settings")
+            #if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
+            #endif
             .toolbar {
+                #if os(iOS)
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button(Strings.discard) {
-                        component.onDiscard()
-                    }
-                    .disabled(!model.hasUnsavedChanges)
+                    discardButton
                 }
                 
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(Strings.save) {
-                        component.onSave()
-                    }
-                    .disabled(!model.hasUnsavedChanges || model.isSaving)
+                    saveButton
                 }
+                #else
+                ToolbarItem(placement: .cancellationAction) {
+                    discardButton
+                }
+                
+                ToolbarItem(placement: .confirmationAction) {
+                    saveButton
+                }
+                #endif
             }
         }
     }
-    
+            
+            private var discardButton: some View {
+                Button(Strings.discard) {
+                    component.onDiscard()
+                }
+                .disabled(!model.hasUnsavedChanges)
+            }
+            
+            private var saveButton: some View {
+                Button(Strings.save) {
+                    component.onSave()
+                }
+                .disabled(!model.hasUnsavedChanges || model.isSaving)
+            }
     // MARK: - Subviews
 
     private var visualThemeSection: some View {

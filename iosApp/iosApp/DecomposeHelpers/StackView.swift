@@ -7,7 +7,9 @@
 
 
 import SwiftUI
+#if os(iOS)
 import UIKit
+#endif
 import Shared
 
 struct StackView<T: AnyObject, Content: View>: View {
@@ -23,29 +25,38 @@ struct StackView<T: AnyObject, Content: View>: View {
     private var stack: [Child<AnyObject, T>] { stackValue.items }
 
     var body: some View {
-        // iOS 16.0 has an issue with swipe back see https://stackoverflow.com/questions/73978107/incomplete-swipe-back-gesture-causes-navigationpath-mismanagement
-        if #available(iOS 16.1, *) {
+        if #available(iOS 16.1, macOS 13.0, *) {
             NavigationStack(
                 path: Binding(
                     get: { stack.dropFirst() },
                     set: { updatedPath in onBack(Int32(updatedPath.count)) }
                 )
             ) {
-                childContent(stack.first!.instance!)
-                    .navigationDestination(for: Child<AnyObject, T>.self) {
-                        childContent($0.instance!)
-                    }
+                if let first = stack.first?.instance {
+                    childContent(first)
+                        .navigationDestination(for: Child<AnyObject, T>.self) {
+                            childContent($0.instance!)
+                        }
+                }
             }
         } else {
+            #if os(iOS)
             StackInteropView(
                 components: stack.map { $0.instance! },
                 getTitle: getTitle,
                 onBack: onBack,
                 childContent: childContent
             )
+            #else
+            if let first = stack.first?.instance {
+                childContent(first)
+            }
+            #endif
         }
     }
 }
+
+#if os(iOS)
 
 private struct StackInteropView<T: AnyObject, Content: View>: UIViewControllerRepresentable {
     var components: [T]
@@ -123,6 +134,7 @@ private struct StackInteropView<T: AnyObject, Content: View>: UIViewControllerRe
         }
     }
 }
+#endif
 
 // stubs for XCode < 14:
 #if compiler(<5.7)

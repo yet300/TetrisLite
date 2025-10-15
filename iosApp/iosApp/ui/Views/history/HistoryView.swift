@@ -44,26 +44,44 @@ struct HistoryView: View {
             }
             .navigationTitle("Game History")
             .toolbar {
+                #if os(iOS)
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Menu {
-                        ForEach([DateFilter.all, DateFilter.today, DateFilter.thisWeek, DateFilter.thisMonth], id: \.self) { filter in
-                            Button(filter.name) {
-                                component.onFilterChanged(filter: filter)
-                            }
-                        }
-                    } label: {
-                        Image(systemName: "line.3.horizontal.decrease.circle")
-                    }
+                    filterMenu
                 }
 
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: {
-                        component.onDismiss()
-                    }) {
-                        Image(systemName: "xmark")
-                    }
+                    dismissButton
+                }
+                #else
+                ToolbarItem(placement: .cancellationAction) {
+                    dismissButton
+                } 
+                ToolbarItem(placement: .primaryAction) {
+                    filterMenu
+                }
+                #endif
+            }
+        }
+    }
+    
+    private var filterMenu: some View {
+        Menu {
+            ForEach([DateFilter.all, DateFilter.today, DateFilter.thisWeek, DateFilter.thisMonth], id: \.self) { filter in
+                Button(filter.name) {
+                    component.onFilterChanged(filter: filter)
                 }
             }
+        } label: {
+            Image(systemName: "line.3.horizontal.decrease.circle")
+        }
+    }
+    
+    
+    private var dismissButton: some View {
+        Button(action: {
+            component.onDismiss()
+        }) {
+            Image(systemName: "xmark")
         }
     }
 }
