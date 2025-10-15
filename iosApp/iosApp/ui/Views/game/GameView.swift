@@ -10,6 +10,9 @@ struct GameView: View {
     @StateValue
     private var dialog: ChildSlot<AnyObject, GameComponentDialogChild>
     
+    @StateValue
+    private var sheet: ChildSlot<AnyObject, GameComponentSheetChild>
+    
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorScheme) var colorScheme
 
@@ -24,6 +27,7 @@ struct GameView: View {
         self.component = component
         _model = StateValue(component.model)
         _dialog = StateValue(component.childSlot)
+        _sheet = StateValue(component.sheetSlot)
     }
     
     var body: some View {
@@ -110,6 +114,22 @@ struct GameView: View {
             }
         }
         .navigationBarBackButtonHidden(true)
+        .sheet(item: Binding<SheetItem?>(
+            get: {
+                if let child = sheet.child?.instance {
+                    return SheetItem(child: child)
+                } else {
+                    return nil
+                }
+            },
+            set: { item in
+                if item == nil {
+                    component.onDismissSheet()
+                }
+            }
+        )) { sheetItem in
+            SheetView(child: sheetItem.child)
+        }
         .keyboardAware { key in
             switch key.lowercased() {
             case "a", "directionleft": component.onMoveLeft()
@@ -125,6 +145,32 @@ struct GameView: View {
     }
 }
 
+
+private struct SheetView: View {
+    let child: GameComponentSheetChild
+    
+    var body: some View {
+        switch child {
+        case let child as SettingsChild:
+            SettingsView(child.component)
+        default:
+            EmptyView()
+        }
+    }
+}
+
+private struct SheetItem: Identifiable {
+    let child: GameComponentSheetChild
+    
+    var id: String {
+        switch child {
+        case is GameComponentSheetChildSettings:
+            return "settings"
+        default:
+            return UUID().uuidString
+        }
+    }
+}
 
 private struct DialogView: View {
     let component: GameComponent
@@ -147,6 +193,7 @@ private struct DialogView: View {
 private typealias GameOverChild = GameComponentDialogChildGameOver
 private typealias PauseChild = GameComponentDialogChildPause
 private typealias ErrorChild = GameComponentDialogChildError
+private typealias SettingsChild = GameComponentSheetChildSettings
 
 
 struct GameStatsView: View {

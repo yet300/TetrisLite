@@ -11,6 +11,7 @@ import Shared
 
         VStack(spacing: 16) {
             GlassDialogButton(title: Strings.resume, isPrimary: true, action: component.onResume)
+            GlassDialogButton(title: Strings.settings, isPrimary: true, action: component.onSettings)
             GlassDialogButton(title: Strings.quit, action: component.onQuit)
         }
     }
