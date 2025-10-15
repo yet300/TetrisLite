@@ -49,6 +49,7 @@ internal interface GameStore : Store<GameStore.Intent, GameStore.State, GameStor
         data class PausedChanged(val isPaused: Boolean) : Msg()
         data class ElapsedTimeUpdated(val elapsedTime: Long) : Msg()
         data class LoadingChanged(val isLoading: Boolean) : Msg()
+        data class SettingsUpdated(val settings: GameSettings) : Msg()
     }
 
 

@@ -25,6 +25,7 @@ import com.yet.tetris.domain.usecase.LockPieceUseCase
 import com.yet.tetris.domain.usecase.MovePieceUseCase
 import com.yet.tetris.domain.usecase.RotatePieceUseCase
 import com.yet.tetris.domain.usecase.StartGameUseCase
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -76,6 +77,7 @@ internal class GameStoreFactory : KoinComponent {
                 is GameStore.Msg.PausedChanged -> copy(isPaused = msg.isPaused)
                 is GameStore.Msg.ElapsedTimeUpdated -> copy(elapsedTime = msg.elapsedTime)
                 is GameStore.Msg.LoadingChanged -> copy(isLoading = msg.isLoading)
+                is GameStore.Msg.SettingsUpdated -> copy(settings = msg.settings)
             }
     }
 
@@ -99,6 +101,16 @@ internal class GameStoreFactory : KoinComponent {
                         }
                     }
                 }
+            }
+
+            scope.launch {
+                gameSettingsRepository.observeSettings()
+                     .drop(1)
+                    .collect { newSettings ->
+                        dispatch(GameStore.Msg.SettingsUpdated(newSettings))
+
+                        audioRepository.applySettings(newSettings.audioSettings)
+                    }
             }
         }
 
