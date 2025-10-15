@@ -71,7 +71,7 @@ class DefaultHomeComponent(
         BottomSheetConfiguration.Settings -> HomeComponent.BottomSheetChild.SettingsChild(
             component = DefaultSettingsComponent(
                 componentContext = componentContext,
-                onSettingsSaved = {},
+                onSettingsSaved = ::onDismissBottomSheet,
                 onDismiss = ::onDismissBottomSheet
             )
         )
