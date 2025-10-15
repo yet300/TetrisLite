@@ -30,6 +30,9 @@ internal fun Project.configureKotlinMultiplatform(
     iosX64()
     iosSimulatorArm64()
 
+    macosX64()
+    macosArm64()
+
     applyDefaultHierarchyTemplate()
 
     //common dependencies
