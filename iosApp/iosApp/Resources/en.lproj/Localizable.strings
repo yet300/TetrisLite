@@ -27,10 +27,12 @@
 "game_paused" = "Game Paused";
 
 /* Settings Screen */
+"settings_valume" = "Settings";
 "music_volume" = "Music Volume";
 "sfx_volume" = "SFX Volume";
 
 /* History Screen */
+"history_value" = "History Game";
 "no_games_yet" = "No games played yet";
 "start_game_prompt" = "Start a new game to see your history";
 "score_label" = "Score: %d";
