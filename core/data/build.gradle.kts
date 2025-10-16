@@ -13,8 +13,15 @@ kotlin {
             implementation(libs.bundles.multiplatform.settings)
 
         }
+        androidUnitTest.dependencies {
+            implementation(libs.bundles.android.test)
+        }
+
         commonTest.dependencies {
             implementation(libs.bundles.testing)
+            implementation(projects.core.database)
+            implementation(libs.multiplatform.settings.test)
+            implementation(libs.multiplatform.settings.coroutines)
         }
         jsMain.dependencies {
             implementation(project.dependencies.enforcedPlatform(libs.jetbrains.kotlinWrappers.kotlinWrappersBom.get()))
