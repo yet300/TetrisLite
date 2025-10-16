@@ -137,7 +137,8 @@ private fun GamePlayingContent(
                 onMoveRight = component::onMoveRight,
                 onMoveDown = component::onMoveDown,
                 onRotate = component::onRotate,
-                onHardDrop = component::onHardDrop
+                onHardDrop = component::onHardDrop,
+                onPause = component::onPause
             ),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(16.dp)

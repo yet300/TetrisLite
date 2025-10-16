@@ -24,7 +24,8 @@ actual fun Modifier.keyboardHandler(
     onMoveRight: () -> Unit,
     onMoveDown: () -> Unit,
     onRotate: () -> Unit,
-    onHardDrop: () -> Unit
+    onHardDrop: () -> Unit,
+    onPause: () -> Unit,
 ): Modifier {
     DisposableEffect(Unit) {
         val handleKeyDown = { event: dynamic ->
@@ -50,6 +51,10 @@ actual fun Modifier.keyboardHandler(
                 }
                 "enter" -> {
                     onHardDrop()
+                    keyboardEvent.preventDefault()
+                }
+                "escape" -> {
+                    onPause()
                     keyboardEvent.preventDefault()
                 }
             }
