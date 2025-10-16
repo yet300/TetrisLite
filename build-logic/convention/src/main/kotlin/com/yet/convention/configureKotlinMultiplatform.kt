@@ -44,5 +44,8 @@ internal fun Project.configureKotlinMultiplatform(
                 api(libs.findLibrary("kotlinx-serialization-json").get())
             }
         }
+        commonTest.dependencies {
+            implementation(libs.findBundle("testing").get())
+        }
     }
 }
