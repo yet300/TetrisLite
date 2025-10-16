@@ -11,6 +11,8 @@ import com.yet.tetris.feature.history.store.HistoryStore.Label
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
@@ -326,10 +328,9 @@ class HistoryStoreTest {
 /**
  * Collects all emitted labels from a Flow for testing purposes.
  */
-private fun <T> kotlinx.coroutines.flow.Flow<T>.test(): List<T> {
-    val list = mutableListOf<T>()
-    CoroutineScope(Dispatchers.Unconfined).launch {
-        collect { list.add(it) }
-    }
+fun <T> Flow<T>.test(): MutableList<T> {
+    val list = ArrayList<T>()
+    @Suppress("OPT_IN_USAGE")
+    GlobalScope.launch(Dispatchers.Unconfined) { collect { list += it } }
     return list
 }
