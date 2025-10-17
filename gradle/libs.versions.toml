@@ -18,6 +18,11 @@ turbine = "1.2.1"
 mockk = "1.14.6"
 coreKtx = "1.7.0"
 
+uiautomator = "2.3.0"
+benchmarkMacroJunit4 = "1.4.1"
+baselineprofile = "1.2.4"
+profileinstaller = "1.4.1"
+
 composeHotReload = "1.0.0-beta09"
 composeMultiplatform = "1.9.0"
 
@@ -117,6 +122,9 @@ android-gradlePlugin = { module = "com.android.tools.build:gradle", version.ref 
 kotlin-gradlePlugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 ksp-gradlePlugin = { group = "com.google.devtools.ksp", name = "com.google.devtools.ksp.gradle.plugin", version.ref = "ksp" }
 compose-gradlePlugin = { module = "org.jetbrains.compose:org.jetbrains.compose.gradle.plugin", version.ref = "composeMultiplatform" }
+androidx-uiautomator = { group = "androidx.test.uiautomator", name = "uiautomator", version.ref = "uiautomator" }
+androidx-benchmark-macro-junit4 = { group = "androidx.benchmark", name = "benchmark-macro-junit4", version.ref = "benchmarkMacroJunit4" }
+androidx-profileinstaller = { group = "androidx.profileinstaller", name = "profileinstaller", version.ref = "profileinstaller" }
 
 [bundles]
 decompose = [
@@ -171,3 +179,6 @@ local-kotlin-multiplatform = { id = "com.plugins.kotlinMultiplatformPlugin", ver
 local-compose-multiplatform = { id = "com.plugins.composeMultiplatform", version = "unspecified" }
 local-koin = { id = "com.plugins.koin-annotation", version = "unspecified" }
 local-sqlDelight = { id = "com.plugins.sqldelight", version = "unspecified" }
+android-test = { id = "com.android.test", version.ref = "agp" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+baselineprofile = { id = "androidx.baselineprofile", version.ref = "baselineprofile" }
