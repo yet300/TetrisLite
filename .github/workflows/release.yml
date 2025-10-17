@@ -220,17 +220,14 @@ jobs:
         with:
           node-version: '18'
           cache: 'npm'
-          cache-dependency-path: webApp/package-lock.json
       
       - name: Build Kotlin/JS library
         run: ./gradlew :shared:jsBrowserProductionLibraryDistribution --no-daemon
       
       - name: Install web dependencies
-        working-directory: webApp
         run: npm ci
       
       - name: Build web app
-        working-directory: webApp
         run: npm run build
       
       - name: Create web archive
