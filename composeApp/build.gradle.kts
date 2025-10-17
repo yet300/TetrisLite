@@ -107,19 +107,19 @@ android {
         }
     }
 
-    val keystorePropertiesFile = rootProject.file("keystore.properties")
-    val keystoreProperties = Properties()
-    keystoreProperties.load(FileInputStream(keystorePropertiesFile))
-
-    signingConfigs {
-        create("release") {
-            storeFile = File(keystoreProperties["RELEASE_STORE_FILE"] as String)
-
-            keyPassword =  keystoreProperties["RELEASE_STORE_PASSWORD"] as String
-            keyAlias =  keystoreProperties["RELEASE_KEY_ALIAS"] as String
-            storePassword =  keystoreProperties["RELEASE_KEY_PASSWORD"] as String
-        }
-    }
+//    val keystorePropertiesFile = rootProject.file("keystore.properties")
+//    val keystoreProperties = Properties()
+//    keystoreProperties.load(FileInputStream(keystorePropertiesFile))
+//
+//    signingConfigs {
+//        create("release") {
+//            storeFile = File(keystoreProperties["RELEASE_STORE_FILE"] as String)
+//
+//            keyPassword =  keystoreProperties["RELEASE_STORE_PASSWORD"] as String
+//            keyAlias =  keystoreProperties["RELEASE_KEY_ALIAS"] as String
+//            storePassword =  keystoreProperties["RELEASE_KEY_PASSWORD"] as String
+//        }
+//    }
     buildTypes {
         release {
             applicationIdSuffix = ".release"
@@ -130,7 +130,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            signingConfig = signingConfigs.getByName("release")
+//            signingConfig = signingConfigs.getByName("release")
         }
     }
     compileOptions {
