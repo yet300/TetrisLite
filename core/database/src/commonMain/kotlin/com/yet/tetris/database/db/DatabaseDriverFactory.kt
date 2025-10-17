@@ -9,4 +9,4 @@ expect class DatabaseDriverFactory {
     suspend fun provideDbDriver(schema: SqlSchema<QueryResult.AsyncValue<Unit>>): SqlDriver
 }
 
-internal const val dbFileName = "tetris_lite_db"
+internal const val DB_FILE_NAME = "tetris_lite_db"

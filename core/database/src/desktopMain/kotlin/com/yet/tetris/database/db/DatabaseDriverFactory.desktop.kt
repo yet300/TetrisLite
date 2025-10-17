@@ -10,7 +10,7 @@ import java.util.Properties
 actual class DatabaseDriverFactory {
     actual suspend fun provideDbDriver(schema: SqlSchema<QueryResult.AsyncValue<Unit>>): SqlDriver =
         JdbcSqliteDriver(
-            url = "jdbc:sqlite:$dbFileName.db",
+            url = "jdbc:sqlite:$DB_FILE_NAME.db",
             properties = Properties(),
             schema = schema.synchronous(),
         )

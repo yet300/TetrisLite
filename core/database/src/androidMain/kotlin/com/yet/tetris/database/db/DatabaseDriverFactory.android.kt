@@ -12,5 +12,5 @@ actual class DatabaseDriverFactory(
     private val context: Context,
 ) {
     actual suspend fun provideDbDriver(schema: SqlSchema<QueryResult.AsyncValue<Unit>>): SqlDriver =
-        AndroidSqliteDriver(schema.synchronous(), context, dbFileName)
+        AndroidSqliteDriver(schema.synchronous(), context, DB_FILE_NAME)
 }
