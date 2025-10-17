@@ -1,0 +1,208 @@
+name: Pull Request Check
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+  push:
+    branches: [ main, develop ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  code-quality:
+    name: Code Quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+      
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v3
+        with:
+          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
+      
+      - name: Check code style
+        run: ./gradlew ktlintCheck --no-daemon
+        continue-on-error: true
+      
+      - name: Run Detekt
+        run: ./gradlew detekt --no-daemon
+        continue-on-error: true
+      
+      - name: Publish Detekt Report
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: build/reports/detekt/detekt.sarif
+        continue-on-error: true
+
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+      
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v3
+        with:
+          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
+      
+      - name: Run all tests
+        run: ./gradlew test --no-daemon
+      
+      - name: Generate test report
+        if: always()
+        run: ./gradlew testReport --no-daemon
+        continue-on-error: true
+      
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: |
+            **/build/test-results/**/*.xml
+            **/build/reports/tests/**
+          retention-days: 7
+      
+      - name: Publish Test Report
+        uses: mikepenz/action-junit-report@v4
+        if: always()
+        with:
+          report_paths: '**/build/test-results/**/TEST-*.xml'
+          check_name: Test Results
+
+  build-android:
+    name: Build Android
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: [code-quality, test]
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+      
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v3
+        with:
+          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
+      
+      - name: Build Android Debug APK
+        run: ./gradlew :composeApp:assembleDebug --no-daemon
+      
+      - name: Upload Android APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-debug-apk
+          path: composeApp/build/outputs/apk/debug/*.apk
+          retention-days: 7
+
+  build-desktop:
+    name: Build Desktop
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    needs: [code-quality, test]
+    
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+      
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v3
+        with:
+          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
+      
+      - name: Build Desktop Distribution
+        run: ./gradlew :composeApp:packageDistributionForCurrentOS --no-daemon
+      
+      - name: Upload Desktop Distribution
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-${{ matrix.os }}
+          path: composeApp/build/compose/binaries/main/**/*
+          retention-days: 7
+
+  build-web:
+    name: Build Web
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: [code-quality, test]
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+      
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v3
+        with:
+          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: webApp/package-lock.json
+      
+      - name: Build Kotlin/JS library
+        run: ./gradlew :shared:jsBrowserProductionLibraryDistribution --no-daemon
+      
+      - name: Install web dependencies
+        working-directory: webApp
+        run: npm ci
+      
+      - name: Build web app
+        working-directory: webApp
+        run: npm run build
+      
+      - name: Upload web build
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-build
+          path: webApp/dist/
+          retention-days: 7

@@ -1,0 +1,257 @@
+name: Release Build
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version'
+        required: true
+        default: '1.0.0'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  create-release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+      version: ${{ steps.get_version.outputs.version }}
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Get version
+        id: get_version
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "version=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+          else
+            echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ steps.get_version.outputs.version }}
+          release_name: Release ${{ steps.get_version.outputs.version }}
+          draft: false
+          prerelease: false
+
+  build-android-release:
+    name: Build Android Release
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    needs: create-release
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+      
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v3
+      
+      - name: Decode Keystore
+        if: ${{ secrets.KEYSTORE_BASE64 != '' }}
+        id: decode_keystore
+        uses: timheuer/base64-to-file@v1.2
+        with:
+          fileName: 'release.keystore'
+          encodedString: ${{ secrets.KEYSTORE_BASE64 }}
+      
+      - name: Build Release APK
+        env:
+          KEYSTORE_PATH: ${{ steps.decode_keystore.outputs.filePath }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          if [ -n "$KEYSTORE_PATH" ]; then
+            ./gradlew :composeApp:assembleRelease \
+              -Pandroid.injected.signing.store.file=$KEYSTORE_PATH \
+              -Pandroid.injected.signing.store.password=$KEYSTORE_PASSWORD \
+              -Pandroid.injected.signing.key.alias=$KEY_ALIAS \
+              -Pandroid.injected.signing.key.password=$KEY_PASSWORD \
+              --no-daemon
+          else
+            ./gradlew :composeApp:assembleRelease --no-daemon
+          fi
+      
+      - name: Upload Release APK
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create-release.outputs.upload_url }}
+          asset_path: composeApp/build/outputs/apk/release/composeApp-release.apk
+          asset_name: TetrisLite-${{ needs.create-release.outputs.version }}-android.apk
+          asset_content_type: application/vnd.android.package-archive
+      
+      - name: Build Release AAB
+        env:
+          KEYSTORE_PATH: ${{ steps.decode_keystore.outputs.filePath }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          if [ -n "$KEYSTORE_PATH" ]; then
+            ./gradlew :composeApp:bundleRelease \
+              -Pandroid.injected.signing.store.file=$KEYSTORE_PATH \
+              -Pandroid.injected.signing.store.password=$KEYSTORE_PASSWORD \
+              -Pandroid.injected.signing.key.alias=$KEY_ALIAS \
+              -Pandroid.injected.signing.key.password=$KEY_PASSWORD \
+              --no-daemon
+          else
+            ./gradlew :composeApp:bundleRelease --no-daemon
+          fi
+      
+      - name: Upload Release AAB
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create-release.outputs.upload_url }}
+          asset_path: composeApp/build/outputs/bundle/release/composeApp-release.aab
+          asset_name: TetrisLite-${{ needs.create-release.outputs.version }}-android.aab
+          asset_content_type: application/octet-stream
+      
+      - name: Clean up keystore
+        if: always()
+        run: rm -f ${{ steps.decode_keystore.outputs.filePath }}
+
+  build-desktop-release:
+    name: Build Desktop Release
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    needs: create-release
+    
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: Deb
+            artifact: deb
+          - os: macos-latest
+            target: Dmg
+            artifact: dmg
+          - os: windows-latest
+            target: Msi
+            artifact: msi
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+      
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v3
+      
+      - name: Build Desktop Package
+        run: ./gradlew :composeApp:package${{ matrix.target }} --no-daemon
+      
+      - name: Find package file (Unix)
+        if: runner.os != 'Windows'
+        id: find_package_unix
+        run: |
+          FILE=$(find composeApp/build/compose/binaries/main/${{ matrix.target }}/ -name "*.${{ matrix.artifact }}" | head -n 1)
+          echo "package_path=$FILE" >> $GITHUB_OUTPUT
+          echo "package_name=TetrisLite-${{ needs.create-release.outputs.version }}-${{ runner.os }}.${{ matrix.artifact }}" >> $GITHUB_OUTPUT
+      
+      - name: Find package file (Windows)
+        if: runner.os == 'Windows'
+        id: find_package_windows
+        shell: pwsh
+        run: |
+          $FILE = Get-ChildItem -Path "composeApp/build/compose/binaries/main/${{ matrix.target }}/" -Filter "*.${{ matrix.artifact }}" | Select-Object -First 1 -ExpandProperty FullName
+          echo "package_path=$FILE" >> $env:GITHUB_OUTPUT
+          echo "package_name=TetrisLite-${{ needs.create-release.outputs.version }}-${{ runner.os }}.${{ matrix.artifact }}" >> $env:GITHUB_OUTPUT
+      
+      - name: Upload Desktop Package
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create-release.outputs.upload_url }}
+          asset_path: ${{ steps.find_package_unix.outputs.package_path || steps.find_package_windows.outputs.package_path }}
+          asset_name: ${{ steps.find_package_unix.outputs.package_name || steps.find_package_windows.outputs.package_name }}
+          asset_content_type: application/octet-stream
+
+  build-web-release:
+    name: Build Web Release
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: create-release
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+      
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v3
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: webApp/package-lock.json
+      
+      - name: Build Kotlin/JS library
+        run: ./gradlew :shared:jsBrowserProductionLibraryDistribution --no-daemon
+      
+      - name: Install web dependencies
+        working-directory: webApp
+        run: npm ci
+      
+      - name: Build web app
+        working-directory: webApp
+        run: npm run build
+      
+      - name: Create web archive
+        run: |
+          cd webApp/dist
+          tar -czf ../../TetrisLite-${{ needs.create-release.outputs.version }}-web.tar.gz .
+      
+      - name: Upload Web Package
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create-release.outputs.upload_url }}
+          asset_path: TetrisLite-${{ needs.create-release.outputs.version }}-web.tar.gz
+          asset_name: TetrisLite-${{ needs.create-release.outputs.version }}-web.tar.gz
+          asset_content_type: application/gzip
+      
+      - name: Deploy to GitHub Pages
+        if: github.event_name == 'push'
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./webApp/dist
+          cname: ${{ secrets.CUSTOM_DOMAIN }}
