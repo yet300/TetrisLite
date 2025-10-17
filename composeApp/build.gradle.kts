@@ -94,14 +94,14 @@ android {
             excludes += "**/*.kotlin_metadata"
             excludes += "**/*.version"
             excludes += "**/kotlin/**"
-            
+
             // Exclude SQLite native libraries for non-Android platforms
             excludes += "org/sqlite/native/Mac/**"
             excludes += "org/sqlite/native/Windows/**"
             excludes += "org/sqlite/native/Linux/**"
             excludes += "org/sqlite/native/FreeBSD/**"
         }
-        
+
         jniLibs {
             useLegacyPackaging = true
         }
@@ -110,31 +110,28 @@ android {
     val keystorePropertiesFile = rootProject.file("keystore.properties")
     val keystoreProperties = Properties()
     keystoreProperties.load(FileInputStream(keystorePropertiesFile))
-    if (keystorePropertiesFile.exists()) {
-        signingConfigs {
-            create("release") {
-                storeFile = File(keystoreProperties["RELEASE_STORE_FILE"] as String)
 
-                keyPassword = keystoreProperties["RELEASE_STORE_PASSWORD"] as String
-                keyAlias = keystoreProperties["RELEASE_KEY_ALIAS"] as String
-                storePassword = keystoreProperties["RELEASE_KEY_PASSWORD"] as String
-            }
-        }
-        buildTypes {
-            release {
-                applicationIdSuffix = ".release"
+    signingConfigs {
+        create("release") {
+            storeFile = File(keystoreProperties["RELEASE_STORE_FILE"] as String)
 
-                isMinifyEnabled = true
-                isShrinkResources = true
-                proguardFiles(
-                    getDefaultProguardFile("proguard-android-optimize.txt"),
-                    "proguard-rules.pro"
-                )
-                signingConfig = signingConfigs["release"]
-            }
+            keyPassword =  keystoreProperties["RELEASE_STORE_PASSWORD"] as String
+            keyAlias =  keystoreProperties["RELEASE_KEY_ALIAS"] as String
+            storePassword =  keystoreProperties["RELEASE_KEY_PASSWORD"] as String
         }
-    } else {
-        println(">>> Keystore.properties not found, skipping local signing config.")
+    }
+    buildTypes {
+        release {
+            applicationIdSuffix = ".release"
+
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+            signingConfig = signingConfigs.getByName("release")
+        }
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
