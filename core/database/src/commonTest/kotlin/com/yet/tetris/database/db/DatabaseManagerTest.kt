@@ -6,6 +6,7 @@ import com.yet.tetris.database.createTestDatabaseDriverFactory
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.test.runTest
+import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -17,6 +18,11 @@ class DatabaseManagerTest: RobolectricTestRunner() {
 
     private fun createManager() = DatabaseManager(driverFactory)
 
+
+    @AfterTest
+    fun tearDown() {
+        createManager().close()
+    }
 
     @Test
     fun getDb_shouldReturnDatabaseInstance() = runTest {

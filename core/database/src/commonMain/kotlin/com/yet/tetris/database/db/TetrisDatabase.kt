@@ -1,5 +1,6 @@
 package com.yet.tetris.database.db
 
+import app.cash.sqldelight.db.SqlDriver
 import com.yet.tetris.database.TetrisLiteDatabase
 import com.yet.tetris.database.utils.enumAdapter
 import jakarta.inject.Singleton
@@ -14,6 +15,8 @@ import kotlinx.coroutines.sync.withLock
  */
 @Singleton
 class DatabaseManager(private val driverFactory: DatabaseDriverFactory) {
+
+    private var driver: SqlDriver? = null
 
     // A deferred value that will hold the fully initialized database instance.
     private val deferredDb =
@@ -39,6 +42,7 @@ class DatabaseManager(private val driverFactory: DatabaseDriverFactory) {
                 // This is the first coroutine, so it performs the initialization.
                 try {
                     val driver = driverFactory.provideDbDriver(TetrisLiteDatabase.Schema)
+                    this.driver = driver
                     val database = TetrisLiteDatabase(
                         driver = driver,
                         GameHistoryAdapter = com.yet.tetris.database.GameHistory.Adapter(
@@ -63,5 +67,9 @@ class DatabaseManager(private val driverFactory: DatabaseDriverFactory) {
 
         // Wait for the initialization to complete (either by us or another coroutine) and return the result.
         return deferredDb.await()
+    }
+
+    fun close() {
+        driver?.close()
     }
 }
