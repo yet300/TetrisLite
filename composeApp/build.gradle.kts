@@ -30,7 +30,7 @@ kotlin {
     }
 
     jvm()
-    
+
     sourceSets {
         androidMain.dependencies {
             implementation(compose.preview)
@@ -110,28 +110,31 @@ android {
     val keystorePropertiesFile = rootProject.file("keystore.properties")
     val keystoreProperties = Properties()
     keystoreProperties.load(FileInputStream(keystorePropertiesFile))
+    if (keystorePropertiesFile.exists()) {
+        signingConfigs {
+            create("release") {
+                storeFile = File(keystoreProperties["RELEASE_STORE_FILE"] as String)
 
-    signingConfigs {
-        create("release") {
-            storeFile = File(keystoreProperties["RELEASE_STORE_FILE"] as String)
-
-            keyPassword =  keystoreProperties["RELEASE_STORE_PASSWORD"] as String
-            keyAlias =  keystoreProperties["RELEASE_KEY_ALIAS"] as String
-            storePassword =  keystoreProperties["RELEASE_KEY_PASSWORD"] as String
+                keyPassword = keystoreProperties["RELEASE_STORE_PASSWORD"] as String
+                keyAlias = keystoreProperties["RELEASE_KEY_ALIAS"] as String
+                storePassword = keystoreProperties["RELEASE_KEY_PASSWORD"] as String
+            }
         }
-    }
-    buildTypes {
-        release {
-            applicationIdSuffix = ".release"
+        buildTypes {
+            release {
+                applicationIdSuffix = ".release"
 
-            isMinifyEnabled = true
-            isShrinkResources = true
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
-            signingConfig = signingConfigs["release"]
+                isMinifyEnabled = true
+                isShrinkResources = true
+                proguardFiles(
+                    getDefaultProguardFile("proguard-android-optimize.txt"),
+                    "proguard-rules.pro"
+                )
+                signingConfig = signingConfigs["release"]
+            }
         }
+    } else {
+        println(">>> Keystore.properties not found, skipping local signing config.")
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
