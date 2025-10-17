@@ -7,25 +7,24 @@ import com.yet.tetris.domain.model.game.GameState
  * Used for pause/resume functionality and recovering from app restarts.
  */
 interface GameStateRepository {
-    
     /**
      * Saves the current game state.
      * Allows the game to be resumed later.
      */
     suspend fun saveGameState(state: GameState)
-    
+
     /**
      * Loads the previously saved game state.
      * Returns null if no saved state exists.
      */
     suspend fun loadGameState(): GameState?
-    
+
     /**
      * Clears the saved game state.
      * Should be called when a game ends or a new game starts.
      */
     suspend fun clearGameState()
-    
+
     /**
      * Checks if a saved game state exists.
      */

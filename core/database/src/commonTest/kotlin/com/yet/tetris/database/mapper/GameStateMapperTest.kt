@@ -2,36 +2,41 @@ package com.yet.tetris.database.mapper
 
 import com.yet.tetris.database.BoardCells
 import com.yet.tetris.database.CurrentGameState
-import com.yet.tetris.domain.model.game.*
+import com.yet.tetris.domain.model.game.GameBoard
+import com.yet.tetris.domain.model.game.GameState
+import com.yet.tetris.domain.model.game.Position
+import com.yet.tetris.domain.model.game.Tetromino
+import com.yet.tetris.domain.model.game.TetrominoType
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 
 class GameStateMapperTest {
-
     @Test
     fun toDomain_shouldMapGameStateWithCurrentPiece() {
         // Given
-        val dbState = CurrentGameState(
-            id = 1,
-            score = 1000,
-            linesCleared = 10,
-            currentPieceType = TetrominoType.T,
-            currentPieceRotation = 1,
-            currentPositionX = 5,
-            currentPositionY = 3,
-            nextPieceType = TetrominoType.L,
-            nextPieceRotation = 2,
-            isGameOver = false,
-            isPaused = false,
-            boardWidth = 10,
-            boardHeight = 20
-        )
-        val boardCells = listOf(
-            BoardCells(positionX = 0, positionY = 0, pieceType = TetrominoType.I),
-            BoardCells(positionX = 1, positionY = 0, pieceType = TetrominoType.O)
-        )
+        val dbState =
+            CurrentGameState(
+                id = 1,
+                score = 1000,
+                linesCleared = 10,
+                currentPieceType = TetrominoType.T,
+                currentPieceRotation = 1,
+                currentPositionX = 5,
+                currentPositionY = 3,
+                nextPieceType = TetrominoType.L,
+                nextPieceRotation = 2,
+                isGameOver = false,
+                isPaused = false,
+                boardWidth = 10,
+                boardHeight = 20,
+            )
+        val boardCells =
+            listOf(
+                BoardCells(positionX = 0, positionY = 0, pieceType = TetrominoType.I),
+                BoardCells(positionX = 1, positionY = 0, pieceType = TetrominoType.O),
+            )
 
         // When
         val domain = dbState.toDomain(boardCells)
@@ -56,21 +61,22 @@ class GameStateMapperTest {
     @Test
     fun toDomain_shouldMapGameStateWithoutCurrentPiece() {
         // Given
-        val dbState = CurrentGameState(
-            id = 1,
-            score = 500,
-            linesCleared = 5,
-            currentPieceType = null,
-            currentPieceRotation = 0,
-            currentPositionX = 0,
-            currentPositionY = 0,
-            nextPieceType = TetrominoType.I,
-            nextPieceRotation = 0,
-            isGameOver = true,
-            isPaused = false,
-            boardWidth = 10,
-            boardHeight = 20
-        )
+        val dbState =
+            CurrentGameState(
+                id = 1,
+                score = 500,
+                linesCleared = 5,
+                currentPieceType = null,
+                currentPieceRotation = 0,
+                currentPositionX = 0,
+                currentPositionY = 0,
+                nextPieceType = TetrominoType.I,
+                nextPieceRotation = 0,
+                isGameOver = true,
+                isPaused = false,
+                boardWidth = 10,
+                boardHeight = 20,
+            )
 
         // When
         val domain = dbState.toDomain(emptyList())
@@ -84,27 +90,30 @@ class GameStateMapperTest {
     @Test
     fun toEntities_shouldMapGameStateToEntities() {
         // Given
-        val board = GameBoard(
-            width = 10,
-            height = 20,
-            cells = mapOf(
-                Position(0, 0) to TetrominoType.I,
-                Position(1, 0) to TetrominoType.O,
-                Position(2, 1) to TetrominoType.T
+        val board =
+            GameBoard(
+                width = 10,
+                height = 20,
+                cells =
+                    mapOf(
+                        Position(0, 0) to TetrominoType.I,
+                        Position(1, 0) to TetrominoType.O,
+                        Position(2, 1) to TetrominoType.T,
+                    ),
             )
-        )
         val currentPiece = Tetromino.create(TetrominoType.S, 1)
         val nextPiece = Tetromino.create(TetrominoType.Z, 2)
-        val gameState = GameState(
-            board = board,
-            currentPiece = currentPiece,
-            currentPosition = Position(5, 3),
-            nextPiece = nextPiece,
-            score = 2000,
-            linesCleared = 20,
-            isGameOver = false,
-            isPaused = true
-        )
+        val gameState =
+            GameState(
+                board = board,
+                currentPiece = currentPiece,
+                currentPosition = Position(5, 3),
+                nextPiece = nextPiece,
+                score = 2000,
+                linesCleared = 20,
+                isGameOver = false,
+                isPaused = true,
+            )
 
         // When
         val entities = gameState.toEntities()
@@ -130,16 +139,17 @@ class GameStateMapperTest {
         // Given
         val board = GameBoard(width = 10, height = 20, cells = emptyMap())
         val nextPiece = Tetromino.create(TetrominoType.I, 0)
-        val gameState = GameState(
-            board = board,
-            currentPiece = null,
-            currentPosition = Position(0, 0),
-            nextPiece = nextPiece,
-            score = 0,
-            linesCleared = 0,
-            isGameOver = true,
-            isPaused = false
-        )
+        val gameState =
+            GameState(
+                board = board,
+                currentPiece = null,
+                currentPosition = Position(0, 0),
+                nextPiece = nextPiece,
+                score = 0,
+                linesCleared = 0,
+                isGameOver = true,
+                isPaused = false,
+            )
 
         // When
         val entities = gameState.toEntities()
@@ -154,42 +164,46 @@ class GameStateMapperTest {
     @Test
     fun roundTrip_shouldPreserveGameState() {
         // Given
-        val originalBoard = GameBoard(
-            width = 10,
-            height = 20,
-            cells = mapOf(
-                Position(0, 0) to TetrominoType.I,
-                Position(1, 1) to TetrominoType.J
+        val originalBoard =
+            GameBoard(
+                width = 10,
+                height = 20,
+                cells =
+                    mapOf(
+                        Position(0, 0) to TetrominoType.I,
+                        Position(1, 1) to TetrominoType.J,
+                    ),
             )
-        )
-        val originalState = GameState(
-            board = originalBoard,
-            currentPiece = Tetromino.create(TetrominoType.T, 1),
-            currentPosition = Position(5, 5),
-            nextPiece = Tetromino.create(TetrominoType.L, 2),
-            score = 3000,
-            linesCleared = 30,
-            isGameOver = false,
-            isPaused = false
-        )
+        val originalState =
+            GameState(
+                board = originalBoard,
+                currentPiece = Tetromino.create(TetrominoType.T, 1),
+                currentPosition = Position(5, 5),
+                nextPiece = Tetromino.create(TetrominoType.L, 2),
+                score = 3000,
+                linesCleared = 30,
+                isGameOver = false,
+                isPaused = false,
+            )
 
         // When
         val entities = originalState.toEntities()
-        val dbState = CurrentGameState(
-            id = 1,
-            score = entities.gameState.score,
-            linesCleared = entities.gameState.linesCleared,
-            currentPieceType = entities.gameState.currentPieceType,
-            currentPieceRotation = entities.gameState.currentPieceRotation,
-            currentPositionX = entities.gameState.currentPositionX,
-            currentPositionY = entities.gameState.currentPositionY,
-            nextPieceType = entities.gameState.nextPieceType,
-            nextPieceRotation = entities.gameState.nextPieceRotation,
-            isGameOver = entities.gameState.isGameOver,
-            isPaused = entities.gameState.isPaused,
-            boardWidth = entities.gameState.boardWidth,
-            boardHeight = entities.gameState.boardHeight
-        )
+        val dbState =
+            CurrentGameState(
+                id = 1,
+                score = entities.gameState.score,
+                linesCleared = entities.gameState.linesCleared,
+                currentPieceType = entities.gameState.currentPieceType,
+                currentPieceRotation = entities.gameState.currentPieceRotation,
+                currentPositionX = entities.gameState.currentPositionX,
+                currentPositionY = entities.gameState.currentPositionY,
+                nextPieceType = entities.gameState.nextPieceType,
+                nextPieceRotation = entities.gameState.nextPieceRotation,
+                isGameOver = entities.gameState.isGameOver,
+                isPaused = entities.gameState.isPaused,
+                boardWidth = entities.gameState.boardWidth,
+                boardHeight = entities.gameState.boardHeight,
+            )
         val result = dbState.toDomain(entities.boardCells)
 
         // Then

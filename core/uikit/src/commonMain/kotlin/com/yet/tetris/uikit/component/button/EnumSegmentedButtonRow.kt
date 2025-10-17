@@ -16,28 +16,29 @@ inline fun <reified T : Enum<T>> EnumSegmentedButtonRow(
     modifier: Modifier = Modifier,
     selectedValue: T,
     crossinline onValueChange: (T) -> Unit,
-    crossinline getLabel: (T) -> String = { it.name.replace('_', ' ') }
+    crossinline getLabel: (T) -> String = { it.name.replace('_', ' ') },
 ) {
     val enumValues = enumValues<T>()
 
     SingleChoiceSegmentedButtonRow(
         modifier = modifier,
-        space = 8.dp
+        space = 8.dp,
     ) {
         enumValues.forEachIndexed { index, enumValue ->
             SegmentedButton(
-                shape = SegmentedButtonDefaults.itemShape(
-                    index = index,
-                    count = enumValues.size
-                ),
+                shape =
+                    SegmentedButtonDefaults.itemShape(
+                        index = index,
+                        count = enumValues.size,
+                    ),
                 onClick = { onValueChange(enumValue) },
                 selected = selectedValue == enumValue,
                 label = {
                     Text(
                         text = getLabel(enumValue),
-                        style = MaterialTheme.typography.labelMedium
+                        style = MaterialTheme.typography.labelMedium,
                     )
-                }
+                },
             )
         }
     }

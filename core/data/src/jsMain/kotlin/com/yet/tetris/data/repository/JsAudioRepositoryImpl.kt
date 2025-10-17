@@ -22,15 +22,13 @@ import web.audio.close
 import web.audio.resume
 import web.audio.suspended
 
-
 /**
  * JavaScript-specific implementation of the AudioRepository using the Web Audio API.
  * This implementation is fully asynchronous and runs in the browser.
  */
 class JsAudioRepositoryImpl(
-    private val cacheManager: AudioCacheManager
+    private val cacheManager: AudioCacheManager,
 ) : AudioRepository {
-
     // A lazy-initialized AudioContext. Browsers require a user interaction to start it.
     private val audioContext: AudioContext by lazy { AudioContext() }
 
@@ -144,11 +142,12 @@ class JsAudioRepositoryImpl(
      * This is the bridge between the common KMP world and the JS-specific audio engine.
      */
     private fun pcmDataToAudioBuffer(pcmData: FloatArray): AudioBuffer {
-        val buffer = audioContext.createBuffer(
-            1, // number of channels (mono)
-            pcmData.size, // number of frames
-            AudioSynthesizer.SAMPLE_RATE.toFloat() // sample rate
-        )
+        val buffer =
+            audioContext.createBuffer(
+                1, // number of channels (mono)
+                pcmData.size, // number of frames
+                AudioSynthesizer.SAMPLE_RATE.toFloat(), // sample rate
+            )
         // This cast is the most direct and performant way to pass the data.
         buffer.copyToChannel(pcmData.unsafeCast<Float32Array<ArrayBuffer>>(), 0)
         return buffer

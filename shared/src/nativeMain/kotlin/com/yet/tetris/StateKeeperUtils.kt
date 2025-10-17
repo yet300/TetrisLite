@@ -10,7 +10,10 @@ import platform.Foundation.decodeTopLevelObjectOfClass
 import platform.Foundation.encodeObject
 
 @Suppress("unused") // Used in Swift
-fun save(coder: NSCoder, state: SerializableContainer) {
+fun save(
+    coder: NSCoder,
+    state: SerializableContainer,
+) {
     coder.encodeObject(`object` = Json.encodeToString(SerializableContainer.serializer(), state), forKey = "state")
 }
 

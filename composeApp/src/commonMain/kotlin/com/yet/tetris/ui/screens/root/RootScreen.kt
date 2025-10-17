@@ -2,7 +2,6 @@ package com.yet.tetris.ui.screens.root
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-
 import com.arkivanov.decompose.extensions.compose.stack.Children
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
 import com.yet.tetris.feature.root.RootComponent

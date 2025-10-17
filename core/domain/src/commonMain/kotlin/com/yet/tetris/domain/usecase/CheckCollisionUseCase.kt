@@ -11,48 +11,56 @@ import jakarta.inject.Singleton
  */
 @Singleton
 class CheckCollisionUseCase {
-    
     /**
      * Checks if placing a tetromino at the given position would result in a collision.
-     * 
+     *
      * @param board The current game board state
      * @param piece The tetromino to check
      * @param position The position where the piece would be placed
      * @return true if there is a collision, false if the position is valid
      */
-    operator fun invoke(board: GameBoard, piece: Tetromino, position: Position): Boolean {
+    operator fun invoke(
+        board: GameBoard,
+        piece: Tetromino,
+        position: Position,
+    ): Boolean {
         val absolutePositions = piece.getAbsolutePositions(position)
-        
+
         return absolutePositions.any { pos ->
             // Check boundary collisions
-            !isWithinBounds(board, pos) || 
-            // Check collisions with locked blocks
-            board.isPositionOccupied(pos)
+            !isWithinBounds(board, pos) ||
+                // Check collisions with locked blocks
+                board.isPositionOccupied(pos)
         }
     }
-    
+
     /**
      * Checks if a position is within the board boundaries.
      */
-    private fun isWithinBounds(board: GameBoard, position: Position): Boolean {
-        return position.x >= 0 && 
-               position.x < board.width && 
-               position.y >= 0 && 
-               position.y < board.height
-    }
-    
+    private fun isWithinBounds(
+        board: GameBoard,
+        position: Position,
+    ): Boolean =
+        position.x >= 0 &&
+            position.x < board.width &&
+            position.y >= 0 &&
+            position.y < board.height
+
     /**
      * Checks if a specific position is valid (within bounds and not occupied).
      */
-    fun isPositionValid(board: GameBoard, position: Position): Boolean {
-        return isWithinBounds(board, position) && !board.isPositionOccupied(position)
-    }
-    
+    fun isPositionValid(
+        board: GameBoard,
+        position: Position,
+    ): Boolean = isWithinBounds(board, position) && !board.isPositionOccupied(position)
+
     /**
      * Checks if a tetromino can be placed at the given position.
      * This is the inverse of the collision check.
      */
-    fun canPlacePiece(board: GameBoard, piece: Tetromino, position: Position): Boolean {
-        return !invoke(board, piece, position)
-    }
+    fun canPlacePiece(
+        board: GameBoard,
+        piece: Tetromino,
+        position: Position,
+    ): Boolean = !invoke(board, piece, position)
 }

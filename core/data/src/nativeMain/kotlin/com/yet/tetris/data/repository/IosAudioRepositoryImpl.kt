@@ -32,9 +32,8 @@ import platform.posix.memcpy
 
 @OptIn(ExperimentalForeignApi::class, BetaInteropApi::class)
 class IosAudioRepositoryImpl(
-    private val cacheManager: AudioCacheManager
+    private val cacheManager: AudioCacheManager,
 ) : AudioRepository {
-
     /**
      * An isolated, thread-local object that holds all AVFoundation state.
      * This ensures that these native objects are only ever created and accessed from the main thread,
@@ -45,12 +44,13 @@ class IosAudioRepositoryImpl(
         val engine = AVAudioEngine()
         val sfxPlayerNode = AVAudioPlayerNode()
         val musicPlayerNode = AVAudioPlayerNode()
-        val audioFormat = AVAudioFormat(
-            commonFormat = AVAudioPCMFormatFloat32,
-            sampleRate = AudioSynthesizer.SAMPLE_RATE.toDouble(),
-            channels = 1.toUInt(),
-            interleaved = false
-        )
+        val audioFormat =
+            AVAudioFormat(
+                commonFormat = AVAudioPCMFormatFloat32,
+                sampleRate = AudioSynthesizer.SAMPLE_RATE.toDouble(),
+                channels = 1.toUInt(),
+                interleaved = false,
+            )
         val sfxCache = mutableMapOf<SoundEffect, AVAudioPCMBuffer>()
         var currentSettings = AudioSettings()
 
@@ -116,9 +116,10 @@ class IosAudioRepositoryImpl(
 
             // Ленивое кэширование: если звука нет в кэше, синтезируем его.
             if (AudioEngine.sfxCache[effect] == null) {
-                val pcmData = withContext(Dispatchers.Default) {
-                    cacheManager.getSfxPcm(effect)
-                }
+                val pcmData =
+                    withContext(Dispatchers.Default) {
+                        cacheManager.getSfxPcm(effect)
+                    }
                 if (pcmData != null) {
                     val buffer = pcmDataToPcmBuffer(AudioEngine.audioFormat, pcmData)
                     AudioEngine.sfxCache[effect] = buffer
@@ -175,11 +176,12 @@ class IosAudioRepositoryImpl(
      * Asynchronously stops all sounds, clears caches, and cancels all coroutines.
      */
     override suspend fun release() {
-        mainScope.launch {
-            AudioEngine.musicPlayerNode.stop()
-            AudioEngine.engine.stop()
-            AudioEngine.sfxCache.clear()
-        }.join() // Wait for the cleanup to finish
+        mainScope
+            .launch {
+                AudioEngine.musicPlayerNode.stop()
+                AudioEngine.engine.stop()
+                AudioEngine.sfxCache.clear()
+            }.join() // Wait for the cleanup to finish
         cacheManager.clear()
         mainScope.cancel()
     }
@@ -188,7 +190,10 @@ class IosAudioRepositoryImpl(
      * Helper function to fill an AVAudioPCMBuffer with data from a FloatArray.
      * This function performs memory operations and should be used carefully.
      */
-    private fun fillPcmBuffer(buffer: AVAudioPCMBuffer, pcmData: FloatArray) {
+    private fun fillPcmBuffer(
+        buffer: AVAudioPCMBuffer,
+        pcmData: FloatArray,
+    ) {
         buffer.frameLength = pcmData.size.toUInt()
         val channelData = buffer.floatChannelData?.get(0)
         if (channelData != null) {
@@ -201,7 +206,10 @@ class IosAudioRepositoryImpl(
     /**
      * Helper function to convert a Kotlin FloatArray into a new AVAudioPCMBuffer.
      */
-    private fun pcmDataToPcmBuffer(format: AVAudioFormat, pcmData: FloatArray): AVAudioPCMBuffer {
+    private fun pcmDataToPcmBuffer(
+        format: AVAudioFormat,
+        pcmData: FloatArray,
+    ): AVAudioPCMBuffer {
         val buffer = AVAudioPCMBuffer(pCMFormat = format, frameCapacity = pcmData.size.toUInt())!!
         fillPcmBuffer(buffer, pcmData)
         return buffer

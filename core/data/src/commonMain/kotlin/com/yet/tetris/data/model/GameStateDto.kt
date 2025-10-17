@@ -11,37 +11,45 @@ data class GameStateDto(
     val score: Long = 0,
     val linesCleared: Long = 0,
     val isGameOver: Boolean = false,
-    val isPaused: Boolean = false
+    val isPaused: Boolean = false,
 )
 
 @Serializable
 data class GameBoardDto(
     val width: Int = 10,
     val height: Int = 20,
-    val cells: Map<PositionDto, TetrominoTypeDto> = emptyMap()
+    val cells: Map<PositionDto, TetrominoTypeDto> = emptyMap(),
 )
 
 @Serializable
 data class TetrominoDto(
     val type: TetrominoTypeDto,
     val blocks: List<PositionDto>,
-    val rotation: Int = 0
+    val rotation: Int = 0,
 )
 
 @Serializable
 data class PositionDto(
     val x: Int,
-    val y: Int
+    val y: Int,
 )
 
 @Serializable
 enum class TetrominoTypeDto {
-    I, O, T, S, Z, J, L
+    I,
+    O,
+    T,
+    S,
+    Z,
+    J,
+    L,
 }
 
 @Serializable
-enum class DifficultyDto(val fallDelayMs: Long) {
+enum class DifficultyDto(
+    val fallDelayMs: Long,
+) {
     EASY(1000),
     NORMAL(600),
-    HARD(300)
+    HARD(300),
 }

@@ -3,14 +3,13 @@ package com.yet.tetris.ui.screens.game
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.Modifier
-import kotlinx.browser.document
 import kotlinx.browser.window
 import org.w3c.dom.events.KeyboardEvent
 
 /**
  * Keyboard handler for web platform
  * Listens to keyboard events and maps them to game actions
- * 
+ *
  * Key mappings:
  * - Arrow Left / A: Move left
  * - Arrow Right / D: Move right
@@ -31,7 +30,7 @@ actual fun Modifier.keyboardHandler(
         val handleKeyDown = { event: dynamic ->
             val keyboardEvent = event as KeyboardEvent
             val key = keyboardEvent.key.lowercase()
-            
+
             when (key) {
                 "arrowleft", "a" -> {
                     onMoveLeft()
@@ -45,7 +44,7 @@ actual fun Modifier.keyboardHandler(
                     onMoveDown()
                     keyboardEvent.preventDefault()
                 }
-                "arrowup", "w", " " -> {  // Space key
+                "arrowup", "w", " " -> { // Space key
                     onRotate()
                     keyboardEvent.preventDefault()
                 }
@@ -59,15 +58,15 @@ actual fun Modifier.keyboardHandler(
                 }
             }
         }
-        
+
         // Add event listener to window
         window.addEventListener("keydown", handleKeyDown)
-        
+
         // Cleanup on dispose
         onDispose {
             window.removeEventListener("keydown", handleKeyDown)
         }
     }
-    
+
     return this
 }

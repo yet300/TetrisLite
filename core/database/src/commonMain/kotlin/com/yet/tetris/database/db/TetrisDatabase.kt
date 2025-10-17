@@ -8,14 +8,14 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
-
 /**
  * Manages the singleton instance of the database, handling its asynchronous initialization.
  * This class ensures that the database driver is created only once in a thread-safe manner.
  */
 @Singleton
-class DatabaseManager(private val driverFactory: DatabaseDriverFactory) {
-
+class DatabaseManager(
+    private val driverFactory: DatabaseDriverFactory,
+) {
     private var driver: SqlDriver? = null
 
     // A deferred value that will hold the fully initialized database instance.
@@ -43,19 +43,23 @@ class DatabaseManager(private val driverFactory: DatabaseDriverFactory) {
                 try {
                     val driver = driverFactory.provideDbDriver(TetrisLiteDatabase.Schema)
                     this.driver = driver
-                    val database = TetrisLiteDatabase(
-                        driver = driver,
-                        GameHistoryAdapter = com.yet.tetris.database.GameHistory.Adapter(
-                            difficultyAdapter = enumAdapter()
-                        ),
-                        CurrentGameStateAdapter = com.yet.tetris.database.CurrentGameState.Adapter(
-                            currentPieceTypeAdapter = enumAdapter(),
-                            nextPieceTypeAdapter = enumAdapter(),
-                        ),
-                        BoardCellsAdapter = com.yet.tetris.database.BoardCells.Adapter(
-                            pieceTypeAdapter = enumAdapter()
+                    val database =
+                        TetrisLiteDatabase(
+                            driver = driver,
+                            GameHistoryAdapter =
+                                com.yet.tetris.database.GameHistory.Adapter(
+                                    difficultyAdapter = enumAdapter(),
+                                ),
+                            CurrentGameStateAdapter =
+                                com.yet.tetris.database.CurrentGameState.Adapter(
+                                    currentPieceTypeAdapter = enumAdapter(),
+                                    nextPieceTypeAdapter = enumAdapter(),
+                                ),
+                            BoardCellsAdapter =
+                                com.yet.tetris.database.BoardCells.Adapter(
+                                    pieceTypeAdapter = enumAdapter(),
+                                ),
                         )
-                    )
                     // Once initialized, complete the deferred object with the result.
                     deferredDb.complete(database)
                 } catch (e: Exception) {

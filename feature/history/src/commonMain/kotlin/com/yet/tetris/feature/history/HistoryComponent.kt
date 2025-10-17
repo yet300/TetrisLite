@@ -9,15 +9,17 @@ interface HistoryComponent {
     fun onDismiss()
 
     fun onRefresh()
+
     fun onFilterChanged(filter: DateFilter)
+
     fun onDeleteGame(id: String)
-    
+
     sealed interface Model {
         data object Loading : Model
+
         data class Content(
             val games: List<GameRecord>,
-            val currentFilter: DateFilter
+            val currentFilter: DateFilter,
         ) : Model
     }
-
 }

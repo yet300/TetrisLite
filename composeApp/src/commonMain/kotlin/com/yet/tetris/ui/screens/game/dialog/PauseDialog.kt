@@ -19,7 +19,7 @@ import tetrislite.composeapp.generated.resources.resume
 @Composable
 fun PauseDialog(component: GameComponent) {
     AlertDialog(
-        onDismissRequest = component::onResume, // Dismissing by clicking outside resumes the game
+        onDismissRequest = component::onResume,
         title = { Text(stringResource(Res.string.game_paused)) },
         text = { Text(stringResource(Res.string.pause_message)) },
         confirmButton = {
@@ -29,7 +29,7 @@ fun PauseDialog(component: GameComponent) {
         },
         dismissButton = {
             Row(
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
             ) {
                 TextButton(onClick = component::onQuit) {
                     Text(stringResource(Res.string.quit))
@@ -38,6 +38,6 @@ fun PauseDialog(component: GameComponent) {
                     Text(stringResource(Res.string.game_settings))
                 }
             }
-        }
+        },
     )
 }

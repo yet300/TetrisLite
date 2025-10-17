@@ -9,7 +9,6 @@ import kotlin.test.assertTrue
 
 @Suppress("TestFunctionName")
 class RootComponentTest {
-
     @Test
     fun WHEN_RootComponent_interface_exists_THEN_test_passes() {
         // This is a placeholder test to verify the component structure
@@ -23,7 +22,7 @@ class RootComponentTest {
         // Verify the Child sealed class structure
         val homeClass = RootComponent.Child.Home::class
         val gameClass = RootComponent.Child.Game::class
-        
+
         assertTrue(homeClass.simpleName == "Home", "Home child exists")
         assertTrue(gameClass.simpleName == "Game", "Game child exists")
     }
@@ -35,7 +34,6 @@ class RootComponentTest {
             )
         }
 }
-
 
 internal fun <T : Any> createComponent(factory: (ComponentContext) -> T): T {
     val lifecycle = LifecycleRegistry()

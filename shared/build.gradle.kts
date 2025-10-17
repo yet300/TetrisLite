@@ -12,12 +12,12 @@ kotlin {
             jvmTarget.set(JvmTarget.JVM_11)
         }
     }
-    
+
     listOf(
         iosArm64(),
         iosSimulatorArm64(),
         macosX64(),
-        macosArm64()
+        macosArm64(),
     ).forEach { iosTarget ->
         iosTarget.binaries.framework {
             baseName = "Shared"
@@ -34,9 +34,9 @@ kotlin {
             export(projects.feature.history)
         }
     }
-    
+
     jvm()
-    
+
     js {
         outputModuleName = "shared"
         browser()
@@ -46,7 +46,7 @@ kotlin {
             target = "es2015"
         }
     }
-    
+
     sourceSets {
         commonMain.dependencies {
             implementation(projects.core.data)
@@ -71,12 +71,18 @@ kotlin {
 
 android {
     namespace = "com.yet.tetris.shared"
-    compileSdk = libs.versions.android.compileSdk.get().toInt()
+    compileSdk =
+        libs.versions.android.compileSdk
+            .get()
+            .toInt()
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
     defaultConfig {
-        minSdk = libs.versions.android.minSdk.get().toInt()
+        minSdk =
+            libs.versions.android.minSdk
+                .get()
+                .toInt()
     }
 }

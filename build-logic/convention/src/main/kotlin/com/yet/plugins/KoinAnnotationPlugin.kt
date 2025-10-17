@@ -42,5 +42,12 @@ class KoinAnnotationPlugin : Plugin<Project> {
             dependsOn("kspCommonMainKotlinMetadata")
         }
 
+        tasks.named("runKtlintCheckOverCommonMainSourceSet") {
+            dependsOn(tasks.named("kspCommonMainKotlinMetadata"))
+        }
+
+        tasks.named("runKtlintFormatOverCommonMainSourceSet") {
+            dependsOn(tasks.named("kspCommonMainKotlinMetadata"))
+        }
     }
 }

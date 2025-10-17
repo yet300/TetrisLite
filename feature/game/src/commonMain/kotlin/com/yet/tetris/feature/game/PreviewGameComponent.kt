@@ -6,7 +6,8 @@ import com.arkivanov.decompose.router.slot.ChildSlot
 import com.arkivanov.decompose.value.MutableValue
 import com.arkivanov.decompose.value.Value
 
-class PreviewGameComponent : GameComponent,
+class PreviewGameComponent :
+    GameComponent,
     ComponentContext by PreviewComponentContext {
     override val model: Value<GameComponent.Model> =
         MutableValue(GameComponent.Model())
@@ -72,7 +73,7 @@ class PreviewGameComponent : GameComponent,
         deltaX: Float,
         deltaY: Float,
         velocityX: Float,
-        velocityY: Float
+        velocityY: Float,
     ) {
         TODO("Not yet implemented")
     }
@@ -85,13 +86,14 @@ class PreviewGameComponent : GameComponent,
         TODO("Not yet implemented")
     }
 
-    override fun onDragged(deltaX: Float, deltaY: Float) {
+    override fun onDragged(
+        deltaX: Float,
+        deltaY: Float,
+    ) {
         TODO("Not yet implemented")
     }
 
     override fun onDragEnded() {
         TODO("Not yet implemented")
     }
-
 }
-

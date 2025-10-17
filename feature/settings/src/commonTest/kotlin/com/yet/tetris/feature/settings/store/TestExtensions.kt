@@ -3,9 +3,7 @@ package com.yet.tetris.feature.settings.store
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.test.TestScope
 
 /**
  * Collects all emitted labels from a Flow for testing purposes.

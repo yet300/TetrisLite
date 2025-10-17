@@ -15,18 +15,17 @@ import kotlinx.coroutines.flow.map
  */
 @Singleton
 class GameHistoryRepositoryImpl(
-    private val gameHistoryDao: GameHistoryDao
+    private val gameHistoryDao: GameHistoryDao,
 ) : GameHistoryRepository {
-    
     companion object {
         private const val MAX_HISTORY_SIZE = 100L
     }
-    
+
     override suspend fun saveGame(record: GameRecord) {
         try {
             // Insert the new game
             gameHistoryDao.insertGame(record.toEntity())
-            
+
             // Check if we need to delete old games
             val count = gameHistoryDao.getGamesCount()
             if (count > MAX_HISTORY_SIZE) {
@@ -37,28 +36,26 @@ class GameHistoryRepositoryImpl(
             throw e
         }
     }
-    
-    override suspend fun getAllGames(): List<GameRecord> {
-        return try {
+
+    override suspend fun getAllGames(): List<GameRecord> =
+        try {
             gameHistoryDao.getAllGames().map { it.toDomain() }
         } catch (e: Exception) {
             emptyList()
         }
-    }
-    
-    override suspend fun getGameById(id: String): GameRecord? {
-        return try {
+
+    override suspend fun getGameById(id: String): GameRecord? =
+        try {
             gameHistoryDao.getGameById(id)?.toDomain()
         } catch (e: Exception) {
             null
         }
-    }
-    
-    override fun observeGames(): Flow<List<GameRecord>> {
-        return gameHistoryDao.observeAllGames()
+
+    override fun observeGames(): Flow<List<GameRecord>> =
+        gameHistoryDao
+            .observeAllGames()
             .map { games -> games.map { it.toDomain() } }
-    }
-    
+
     override suspend fun deleteGame(id: String) {
         try {
             gameHistoryDao.deleteGame(id)
@@ -66,7 +63,7 @@ class GameHistoryRepositoryImpl(
             throw e
         }
     }
-    
+
     override suspend fun clearAllGames() {
         try {
             gameHistoryDao.clearAllGames()

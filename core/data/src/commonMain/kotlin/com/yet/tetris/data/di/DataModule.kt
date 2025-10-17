@@ -16,10 +16,11 @@ import org.koin.core.annotation.Single
 @ComponentScan("com.yet.tetris.data")
 class DataModule {
     @Single
-    fun provideJson(): Json = Json {
-        ignoreUnknownKeys = true
-        encodeDefaults = true
-    }
+    fun provideJson(): Json =
+        Json {
+            ignoreUnknownKeys = true
+            encodeDefaults = true
+        }
 
     @Single
     fun provideSettings(): Settings = Settings()

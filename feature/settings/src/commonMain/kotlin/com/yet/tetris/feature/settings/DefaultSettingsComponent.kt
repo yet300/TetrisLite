@@ -22,8 +22,10 @@ import org.koin.core.component.KoinComponent
 class DefaultSettingsComponent(
     componentContext: ComponentContext,
     private val onSettingsSaved: () -> Unit,
-    private val onDismiss: () -> Unit
-) : ComponentContext by componentContext, SettingsComponent, KoinComponent {
+    private val onDismiss: () -> Unit,
+) : ComponentContext by componentContext,
+    SettingsComponent,
+    KoinComponent {
     private val store = instanceKeeper.getStore { SettingsStoreFactory().create() }
 
     init {
@@ -41,16 +43,16 @@ class DefaultSettingsComponent(
                 }
             }
         }
-
     }
 
-    override val model: Value<SettingsComponent.Model> = store.asValue().map { state ->
-        SettingsComponent.Model(
-            settings = state.settings,
-            isSaving = state.isSaving,
-            hasUnsavedChanges = state.hasUnsavedChanges
-        )
-    }
+    override val model: Value<SettingsComponent.Model> =
+        store.asValue().map { state ->
+            SettingsComponent.Model(
+                settings = state.settings,
+                isSaving = state.isSaving,
+                hasUnsavedChanges = state.hasUnsavedChanges,
+            )
+        }
 
     override fun onDifficultyChanged(difficulty: Difficulty) {
         store.accept(SettingsStore.Intent.ChangeDifficulty(difficulty))

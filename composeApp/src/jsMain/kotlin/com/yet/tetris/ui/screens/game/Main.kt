@@ -9,7 +9,7 @@ import com.arkivanov.essenty.lifecycle.LifecycleRegistry
 import com.arkivanov.essenty.lifecycle.resume
 import com.arkivanov.essenty.lifecycle.stop
 import com.yet.tetris.App
-import com.yet.tetris.di.initKoin
+import com.yet.tetris.di.InitKoin
 import com.yet.tetris.feature.root.DefaultRootComponent
 import org.jetbrains.skiko.wasm.onWasmReady
 import web.dom.DocumentVisibilityState
@@ -20,15 +20,16 @@ import web.events.EventHandler
 @OptIn(ExperimentalDecomposeApi::class, ExperimentalComposeUiApi::class)
 fun main() {
     val lifecycle = LifecycleRegistry()
-    initKoin()
+    InitKoin()
 
     val root =
         withWebHistory { stateKeeper, deepLink ->
             DefaultRootComponent(
-                componentContext = DefaultComponentContext(
-                    lifecycle = lifecycle,
-                    stateKeeper = stateKeeper
-                ),
+                componentContext =
+                    DefaultComponentContext(
+                        lifecycle = lifecycle,
+                        stateKeeper = stateKeeper,
+                    ),
             )
         }
 
@@ -36,11 +37,10 @@ fun main() {
 
     onWasmReady {
         ComposeViewport(content = {
-                    App(rootComponent = root)
-                })
+            App(rootComponent = root)
+        })
     }
 }
-
 
 private fun LifecycleRegistry.attachToDocument() {
     fun onVisibilityChanged() {
@@ -53,7 +53,8 @@ private fun LifecycleRegistry.attachToDocument() {
 
     onVisibilityChanged()
 
-    web.dom.document.onvisibilitychange = EventHandler { event: Event ->
-        onVisibilityChanged()
-    }
+    web.dom.document.onvisibilitychange =
+        EventHandler { event: Event ->
+            onVisibilityChanged()
+        }
 }

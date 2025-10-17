@@ -22,24 +22,27 @@ import kotlin.math.min
  * This is suitable for playing procedurally generated PCM data with low latency.
  */
 class AndroidAudioRepositoryImpl(
-    private val cacheManager: AudioCacheManager
+    private val cacheManager: AudioCacheManager,
 ) : AudioRepository {
-
     private val audioScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
     private var musicTrack: AudioTrack? = null
     private var isMusicPlaying = false
     private var currentSettings = AudioSettings()
 
     // Platform-specific audio configuration objects.
-    private val audioFormat = AudioFormat.Builder()
-        .setEncoding(AudioFormat.ENCODING_PCM_FLOAT)
-        .setSampleRate(AudioSynthesizer.SAMPLE_RATE)
-        .setChannelMask(AudioFormat.CHANNEL_OUT_MONO)
-        .build()
-    private val audioAttributes = AudioAttributes.Builder()
-        .setUsage(AudioAttributes.USAGE_GAME)
-        .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-        .build()
+    private val audioFormat =
+        AudioFormat
+            .Builder()
+            .setEncoding(AudioFormat.ENCODING_PCM_FLOAT)
+            .setSampleRate(AudioSynthesizer.SAMPLE_RATE)
+            .setChannelMask(AudioFormat.CHANNEL_OUT_MONO)
+            .build()
+    private val audioAttributes =
+        AudioAttributes
+            .Builder()
+            .setUsage(AudioAttributes.USAGE_GAME)
+            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+            .build()
 
     /**
      * Delegates the pre-caching of sound effects to the cache manager.
@@ -82,6 +85,7 @@ class AndroidAudioRepositoryImpl(
             }
         }
     }
+
     /**
      * Retrieves (or synthesizes) the music track PCM data and starts streaming playback.
      */

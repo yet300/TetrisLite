@@ -5,10 +5,9 @@ import jakarta.inject.Singleton
 import org.koin.core.annotation.Module
 import org.koin.core.scope.Scope
 
+@Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
 @Module
 actual class DatabasePlatformModule {
     @Singleton
-    actual fun provideDatabasePlatformModule(scope: Scope): DatabaseDriverFactory {
-     return DatabaseDriverFactory()
-    }
+    actual fun provideDatabasePlatformModule(scope: Scope): DatabaseDriverFactory = DatabaseDriverFactory()
 }

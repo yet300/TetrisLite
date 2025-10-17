@@ -12,21 +12,19 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
 internal class SettingsStoreFactory : KoinComponent {
-    
     private val storeFactory: StoreFactory by inject()
     private val gameSettingsRepository: GameSettingsRepository by inject()
 
     fun create(): SettingsStore =
-        object : SettingsStore,
+        object :
+            SettingsStore,
             Store<SettingsStore.Intent, SettingsStore.State, SettingsStore.Label> by storeFactory.create(
                 name = "SettingsStore",
                 initialState = SettingsStore.State(),
                 bootstrapper = SimpleBootstrapper(SettingsStore.Action.SettingsLoadStarted),
                 executorFactory = ::ExecutorImpl,
-                reducer = ReducerImpl
+                reducer = ReducerImpl,
             ) {}
-
-
 
     private object ReducerImpl : Reducer<SettingsStore.State, SettingsStore.Msg> {
         override fun SettingsStore.State.reduce(msg: SettingsStore.Msg): SettingsStore.State =
@@ -40,9 +38,7 @@ internal class SettingsStoreFactory : KoinComponent {
 
     private inner class ExecutorImpl :
         CoroutineExecutor<SettingsStore.Intent, SettingsStore.Action, SettingsStore.State, SettingsStore.Msg, SettingsStore.Label>() {
-
         private var originalSettings: GameSettings? = null
-
 
         override fun executeAction(action: SettingsStore.Action) {
             when (action) {
@@ -53,49 +49,60 @@ internal class SettingsStoreFactory : KoinComponent {
         override fun executeIntent(intent: SettingsStore.Intent) {
             val getState = state()
             when (intent) {
-                is SettingsStore.Intent.ChangeDifficulty -> updateSettings(getState) {
-                    it.copy(difficulty = intent.difficulty)
-                }
+                is SettingsStore.Intent.ChangeDifficulty ->
+                    updateSettings(getState) {
+                        it.copy(difficulty = intent.difficulty)
+                    }
 
-                is SettingsStore.Intent.ChangeVisualTheme -> updateSettings(getState) {
-                    it.copy(themeConfig = it.themeConfig.copy(visualTheme = intent.theme))
-                }
+                is SettingsStore.Intent.ChangeVisualTheme ->
+                    updateSettings(getState) {
+                        it.copy(themeConfig = it.themeConfig.copy(visualTheme = intent.theme))
+                    }
 
-                is SettingsStore.Intent.ChangePieceStyle -> updateSettings(getState) {
-                    it.copy(themeConfig = it.themeConfig.copy(pieceStyle = intent.style))
-                }
+                is SettingsStore.Intent.ChangePieceStyle ->
+                    updateSettings(getState) {
+                        it.copy(themeConfig = it.themeConfig.copy(pieceStyle = intent.style))
+                    }
 
-                is SettingsStore.Intent.ChangeKeyboardLayout -> updateSettings(getState) {
-                    it.copy(keyboardLayout = intent.layout)
-                }
+                is SettingsStore.Intent.ChangeKeyboardLayout ->
+                    updateSettings(getState) {
+                        it.copy(keyboardLayout = intent.layout)
+                    }
 
-                is SettingsStore.Intent.ChangeSwipeLayout -> updateSettings(getState) {
-                    it.copy(swipeLayout = intent.layout)
-                }
+                is SettingsStore.Intent.ChangeSwipeLayout ->
+                    updateSettings(getState) {
+                        it.copy(swipeLayout = intent.layout)
+                    }
 
-                is SettingsStore.Intent.ChangeSwipeSensitivity -> updateSettings(getState) {
-                    it.copy(swipeSensitivity = intent.sensitivity)
-                }
+                is SettingsStore.Intent.ChangeSwipeSensitivity ->
+                    updateSettings(getState) {
+                        it.copy(swipeSensitivity = intent.sensitivity)
+                    }
 
-                is SettingsStore.Intent.ToggleMusic -> updateSettings(getState) {
-                    it.copy(audioSettings = it.audioSettings.copy(musicEnabled = intent.enabled))
-                }
+                is SettingsStore.Intent.ToggleMusic ->
+                    updateSettings(getState) {
+                        it.copy(audioSettings = it.audioSettings.copy(musicEnabled = intent.enabled))
+                    }
 
-                is SettingsStore.Intent.ToggleSoundEffects -> updateSettings(getState) {
-                    it.copy(audioSettings = it.audioSettings.copy(soundEffectsEnabled = intent.enabled))
-                }
+                is SettingsStore.Intent.ToggleSoundEffects ->
+                    updateSettings(getState) {
+                        it.copy(audioSettings = it.audioSettings.copy(soundEffectsEnabled = intent.enabled))
+                    }
 
-                is SettingsStore.Intent.ChangeMusicVolume -> updateSettings(getState) {
-                    it.copy(audioSettings = it.audioSettings.copy(musicVolume = intent.volume))
-                }
+                is SettingsStore.Intent.ChangeMusicVolume ->
+                    updateSettings(getState) {
+                        it.copy(audioSettings = it.audioSettings.copy(musicVolume = intent.volume))
+                    }
 
-                is SettingsStore.Intent.ChangeSFXVolume -> updateSettings(getState) {
-                    it.copy(audioSettings = it.audioSettings.copy(sfxVolume = intent.volume))
-                }
+                is SettingsStore.Intent.ChangeSFXVolume ->
+                    updateSettings(getState) {
+                        it.copy(audioSettings = it.audioSettings.copy(sfxVolume = intent.volume))
+                    }
 
-                is SettingsStore.Intent.ChangeMusicTheme -> updateSettings(getState) {
-                    it.copy(audioSettings = it.audioSettings.copy(selectedMusicTheme = intent.theme))
-                }
+                is SettingsStore.Intent.ChangeMusicTheme ->
+                    updateSettings(getState) {
+                        it.copy(audioSettings = it.audioSettings.copy(selectedMusicTheme = intent.theme))
+                    }
 
                 is SettingsStore.Intent.SaveSettings -> saveSettings(getState)
                 is SettingsStore.Intent.DiscardChanges -> discardChanges()
@@ -116,7 +123,7 @@ internal class SettingsStoreFactory : KoinComponent {
 
         private fun updateSettings(
             state: SettingsStore.State,
-            update: (GameSettings) -> GameSettings
+            update: (GameSettings) -> GameSettings,
         ) {
             val updatedSettings = update(state.settings)
             dispatch(SettingsStore.Msg.SettingsUpdated(updatedSettings))

@@ -24,11 +24,12 @@ import org.koin.core.component.KoinComponent
 class DefaultHomeComponent(
     componentContext: ComponentContext,
     private val navigateToGame: () -> Unit,
-) : ComponentContext by componentContext, HomeComponent, KoinComponent {
+) : ComponentContext by componentContext,
+    HomeComponent,
+    KoinComponent {
     private val store = instanceKeeper.getStore { HomeStoreFactory().create() }
 
     private val bottomSheetSlot = SlotNavigation<BottomSheetConfiguration>()
-
 
     init {
         coroutineScope().launch {
@@ -43,46 +44,50 @@ class DefaultHomeComponent(
                 }
             }
         }
-
     }
 
-    override val model: Value<HomeComponent.Model> = store.asValue().map { state ->
-        if (state.isLoading) {
-            HomeComponent.Model.Loading
-        } else {
-            HomeComponent.Model.Content(
-                settings = state.settings,
-                hasSavedGame = state.hasSavedGame
-            )
+    override val model: Value<HomeComponent.Model> =
+        store.asValue().map { state ->
+            if (state.isLoading) {
+                HomeComponent.Model.Loading
+            } else {
+                HomeComponent.Model.Content(
+                    settings = state.settings,
+                    hasSavedGame = state.hasSavedGame,
+                )
+            }
         }
-    }
     override val childBottomSheetNavigation: Value<ChildSlot<*, HomeComponent.BottomSheetChild>> =
         childSlot(
             source = bottomSheetSlot,
             serializer = BottomSheetConfiguration.serializer(),
             handleBackButton = true,
-            childFactory = ::createChildSheet
+            childFactory = ::createChildSheet,
         )
 
     private fun createChildSheet(
         config: BottomSheetConfiguration,
         componentContext: ComponentContext,
-    ): HomeComponent.BottomSheetChild = when (config) {
-        BottomSheetConfiguration.Settings -> HomeComponent.BottomSheetChild.SettingsChild(
-            component = DefaultSettingsComponent(
-                componentContext = componentContext,
-                onSettingsSaved = ::onDismissBottomSheet,
-                onDismiss = ::onDismissBottomSheet
-            )
-        )
-        BottomSheetConfiguration.History -> HomeComponent.BottomSheetChild.HistoryChild(
-            component = DefaultHistoryComponent(
-                componentContext = componentContext,
-                dismiss = ::onDismissBottomSheet
-            )
-        )
-    }
-
+    ): HomeComponent.BottomSheetChild =
+        when (config) {
+            BottomSheetConfiguration.Settings ->
+                HomeComponent.BottomSheetChild.SettingsChild(
+                    component =
+                        DefaultSettingsComponent(
+                            componentContext = componentContext,
+                            onSettingsSaved = ::onDismissBottomSheet,
+                            onDismiss = ::onDismissBottomSheet,
+                        ),
+                )
+            BottomSheetConfiguration.History ->
+                HomeComponent.BottomSheetChild.HistoryChild(
+                    component =
+                        DefaultHistoryComponent(
+                            componentContext = componentContext,
+                            dismiss = ::onDismissBottomSheet,
+                        ),
+                )
+        }
 
     override fun onDismissBottomSheet() {
         bottomSheetSlot.dismiss()

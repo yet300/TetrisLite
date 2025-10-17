@@ -15,7 +15,10 @@ import kotlin.time.ExperimentalTime
 // Define the events that the UseCase can emit
 sealed interface GameLoopEvent {
     data object GameTick : GameLoopEvent // Event for the piece to fall
-    data class TimerUpdated(val elapsedTime: Long) : GameLoopEvent
+
+    data class TimerUpdated(
+        val elapsedTime: Long,
+    ) : GameLoopEvent
 }
 
 /**
@@ -25,9 +28,8 @@ sealed interface GameLoopEvent {
  */
 @OptIn(ExperimentalTime::class)
 class GameLoopUseCase(
-    private val scope: CoroutineScope
+    private val scope: CoroutineScope,
 ) {
-
     private val _events = MutableSharedFlow<GameLoopEvent>()
     val events: Flow<GameLoopEvent> = _events.asSharedFlow()
 
@@ -51,25 +53,31 @@ class GameLoopUseCase(
         gameStartTime = Clock.System.now().toEpochMilliseconds()
         totalPausedDuration = 0
 
-        gameLoopJob = scope.launch {
-            while (isActive) {
-                delay(settings.difficulty.fallDelayMs)
-                if (!isPaused) {
-                    _events.emit(GameLoopEvent.GameTick)
+        gameLoopJob =
+            scope.launch {
+                while (isActive) {
+                    delay(settings.difficulty.fallDelayMs)
+                    if (!isPaused) {
+                        _events.emit(GameLoopEvent.GameTick)
+                    }
                 }
             }
-        }
 
-        timerJob = scope.launch {
-            while (isActive) {
-                delay(100)
-                if (!isPaused) {
-                    val elapsed = (Clock.System.now()
-                        .toEpochMilliseconds() - gameStartTime) - totalPausedDuration
-                    _events.emit(GameLoopEvent.TimerUpdated(elapsed))
+        timerJob =
+            scope.launch {
+                while (isActive) {
+                    delay(100)
+                    if (!isPaused) {
+                        val elapsed =
+                            (
+                                Clock.System
+                                    .now()
+                                    .toEpochMilliseconds() - gameStartTime
+                            ) - totalPausedDuration
+                        _events.emit(GameLoopEvent.TimerUpdated(elapsed))
+                    }
                 }
             }
-        }
     }
 
     /**

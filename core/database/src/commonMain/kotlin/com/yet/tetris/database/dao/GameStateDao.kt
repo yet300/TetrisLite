@@ -17,8 +17,9 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
 
 @Singleton
-class GameStateDao(private val databaseManager: DatabaseManager) {
-
+class GameStateDao(
+    private val databaseManager: DatabaseManager,
+) {
     suspend fun saveGameState(
         score: Long,
         linesCleared: Long,
@@ -32,7 +33,7 @@ class GameStateDao(private val databaseManager: DatabaseManager) {
         isPaused: Boolean,
         boardWidth: Long,
         boardHeight: Long,
-        boardCells: List<BoardCells>
+        boardCells: List<BoardCells>,
     ) = withContext(Dispatchers.Default) {
         databaseManager.getDb().transaction {
             // Save game state
@@ -48,50 +49,66 @@ class GameStateDao(private val databaseManager: DatabaseManager) {
                 isGameOver = isGameOver,
                 isPaused = isPaused,
                 boardWidth = boardWidth,
-                boardHeight = boardHeight
+                boardHeight = boardHeight,
             )
-            
+
             // Clear old board cells
             databaseManager.getDb().boardCellsQueries.clearAllCells()
-            
+
             // Insert new board cells
             boardCells.forEach { cell ->
                 databaseManager.getDb().boardCellsQueries.insertCell(
                     positionX = cell.positionX,
                     positionY = cell.positionY,
-                    pieceType = cell.pieceType
+                    pieceType = cell.pieceType,
                 )
             }
         }
     }
-    
-    suspend fun getGameState(): CurrentGameState? = withContext(Dispatchers.Default) {
-        databaseManager.getDb().currentGameStateQueries.getGameState().awaitAsOneOrNull()
-    }
-    
-    suspend fun getBoardCells(): List<BoardCells> = withContext(Dispatchers.Default) {
-        databaseManager.getDb().boardCellsQueries.getAllCells().awaitAsList()
-    }
-    
-    suspend fun clearGameState() = withContext(Dispatchers.Default) {
-        databaseManager.getDb().transaction {
-            databaseManager.getDb().currentGameStateQueries.clearGameState()
-            databaseManager.getDb().boardCellsQueries.clearAllCells()
+
+    suspend fun getGameState(): CurrentGameState? =
+        withContext(Dispatchers.Default) {
+            databaseManager
+                .getDb()
+                .currentGameStateQueries
+                .getGameState()
+                .awaitAsOneOrNull()
         }
-    }
-    
-    suspend fun hasSavedState(): Boolean = withContext(Dispatchers.Default) {
-        databaseManager.getDb().currentGameStateQueries.hasSavedState().awaitAsOne()
-    }
-    
-    fun observeGameState(): Flow<CurrentGameState?> {
-        return flow {
+
+    suspend fun getBoardCells(): List<BoardCells> =
+        withContext(Dispatchers.Default) {
+            databaseManager
+                .getDb()
+                .boardCellsQueries
+                .getAllCells()
+                .awaitAsList()
+        }
+
+    suspend fun clearGameState() =
+        withContext(Dispatchers.Default) {
+            databaseManager.getDb().transaction {
+                databaseManager.getDb().currentGameStateQueries.clearGameState()
+                databaseManager.getDb().boardCellsQueries.clearAllCells()
+            }
+        }
+
+    suspend fun hasSavedState(): Boolean =
+        withContext(Dispatchers.Default) {
+            databaseManager
+                .getDb()
+                .currentGameStateQueries
+                .hasSavedState()
+                .awaitAsOne()
+        }
+
+    fun observeGameState(): Flow<CurrentGameState?> =
+        flow {
             val db = databaseManager.getDb()
             emitAll(
-                db.currentGameStateQueries.getGameState()
+                db.currentGameStateQueries
+                    .getGameState()
                     .asFlow()
-                    .mapToOneOrNull(Dispatchers.Default)
+                    .mapToOneOrNull(Dispatchers.Default),
             )
         }
-    }
 }

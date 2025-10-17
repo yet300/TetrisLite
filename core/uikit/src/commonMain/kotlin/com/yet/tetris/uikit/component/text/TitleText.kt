@@ -14,18 +14,20 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun TitleText(
     text: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Text(
         text = text,
-        style = TextStyle(
-            fontFamily = FontFamily.Monospace,
-            fontWeight = FontWeight.Bold,
-            fontSize = 32.sp
-        ),
+        style =
+            TextStyle(
+                fontFamily = FontFamily.Monospace,
+                fontWeight = FontWeight.Bold,
+                fontSize = 32.sp,
+            ),
         color = MaterialTheme.colorScheme.onBackground,
-        modifier = modifier
-            .padding(horizontal = 24.dp)
-            .padding(bottom = 16.dp),
+        modifier =
+            modifier
+                .padding(horizontal = 24.dp)
+                .padding(bottom = 16.dp),
     )
 }

@@ -1,6 +1,7 @@
 package com.yet.tetris.feature.root
 
 import com.arkivanov.decompose.ComponentContext
+import com.arkivanov.decompose.DelicateDecomposeApi
 import com.arkivanov.decompose.ExperimentalDecomposeApi
 import com.arkivanov.decompose.router.stack.ChildStack
 import com.arkivanov.decompose.router.stack.StackNavigation
@@ -17,17 +18,18 @@ import org.koin.core.component.KoinComponent
 
 class DefaultRootComponent(
     componentContext: ComponentContext,
-) : ComponentContext by componentContext, RootComponent, KoinComponent {
-
+) : ComponentContext by componentContext,
+    RootComponent,
+    KoinComponent {
     private val navigation = StackNavigation<Configuration>()
 
-    private val stack = childStack(
-        source = navigation,
-        serializer = Configuration.serializer(),
-        initialConfiguration = Configuration.HomeScreen,
-        childFactory = ::createChild,
-    )
-
+    private val stack =
+        childStack(
+            source = navigation,
+            serializer = Configuration.serializer(),
+            initialConfiguration = Configuration.HomeScreen,
+            childFactory = ::createChild,
+        )
 
     @OptIn(ExperimentalDecomposeApi::class)
     override val webNavigation: WebNavigation<*> =
@@ -43,7 +45,6 @@ class DefaultRootComponent(
             },
         )
 
-
     override val childStack: Value<ChildStack<*, RootComponent.Child>>
         get() = stack
 
@@ -51,35 +52,37 @@ class DefaultRootComponent(
         navigation.pop()
     }
 
+    @OptIn(DelicateDecomposeApi::class)
     private fun createChild(
         config: Configuration,
         componentContext: ComponentContext,
-    ): RootComponent.Child = when (config) {
+    ): RootComponent.Child =
+        when (config) {
+            Configuration.HomeScreen ->
+                RootComponent.Child.Home(
+                    component =
+                        DefaultHomeComponent(
+                            componentContext = componentContext,
+                            navigateToGame = { navigation.push(Configuration.GameScreen) },
+                        ),
+                )
 
-        Configuration.HomeScreen -> RootComponent.Child.Home(
-            component = DefaultHomeComponent(
-                componentContext = componentContext,
-                navigateToGame = { navigation.push(Configuration.GameScreen) },
-            )
-        )
-
-        Configuration.GameScreen -> RootComponent.Child.Game(
-            component = DefaultGameComponent(
-                componentContext = componentContext,
-                navigateBack = { navigation.pop() },
-            )
-        )
-    }
-
+            Configuration.GameScreen ->
+                RootComponent.Child.Game(
+                    component =
+                        DefaultGameComponent(
+                            componentContext = componentContext,
+                            navigateBack = { navigation.pop() },
+                        ),
+                )
+        }
 
     @Serializable
     sealed class Configuration {
-
         @Serializable
         data object HomeScreen : Configuration()
 
         @Serializable
         data object GameScreen : Configuration()
-
     }
 }

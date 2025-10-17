@@ -9,7 +9,6 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 class StartGameUseCaseTest {
-
     private val generateTetromino = GenerateTetrominoUseCase()
     private val useCase = StartGameUseCase(generateTetromino)
 

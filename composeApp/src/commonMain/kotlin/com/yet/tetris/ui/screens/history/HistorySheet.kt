@@ -69,15 +69,16 @@ fun HistorySheet(component: HistoryComponent) {
     var showFilterMenu by remember { mutableStateOf(false) }
 
     Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp)
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
     ) {
         when (val state = model) {
             is HistoryComponent.Model.Loading -> {
                 Box(
                     modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
+                    contentAlignment = Alignment.Center,
                 ) {
                     CircularProgressIndicator()
                 }
@@ -92,18 +93,19 @@ fun HistorySheet(component: HistoryComponent) {
                     HistoryList(
                         modifier = Modifier.fillMaxSize(),
                         games = state.games,
-                        onDeleteGame = component::onDeleteGame
+                        onDeleteGame = component::onDeleteGame,
                     )
                 }
             }
         }
         // TopBar
         Box(
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .fillMaxWidth()
-                .height(64.dp)
-                .background(MaterialTheme.colorScheme.background)
+            modifier =
+                Modifier
+                    .align(Alignment.TopEnd)
+                    .fillMaxWidth()
+                    .height(64.dp)
+                    .background(MaterialTheme.colorScheme.background),
         ) {
             FrostedGlassButton(
                 modifier = Modifier.align(Alignment.CenterStart),
@@ -114,7 +116,7 @@ fun HistorySheet(component: HistoryComponent) {
             DropdownMenu(
                 modifier = Modifier.align(Alignment.CenterStart),
                 expanded = showFilterMenu,
-                onDismissRequest = { showFilterMenu = false }
+                onDismissRequest = { showFilterMenu = false },
             ) {
                 DateFilter.entries.forEach { filter ->
                     DropdownMenuItem(
@@ -122,7 +124,7 @@ fun HistorySheet(component: HistoryComponent) {
                         onClick = {
                             component.onFilterChanged(filter)
                             showFilterMenu = false
-                        }
+                        },
                     )
                 }
             }
@@ -132,7 +134,6 @@ fun HistorySheet(component: HistoryComponent) {
                 onClick = component::onDismiss,
                 icon = Icons.Default.Close,
             )
-
         }
     }
 }
@@ -141,21 +142,21 @@ fun HistorySheet(component: HistoryComponent) {
 private fun EmptyHistoryState(modifier: Modifier = Modifier) {
     Box(
         modifier = modifier,
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Text(
                 text = stringResource(Res.string.no_games_yet),
                 style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Text(
                 text = stringResource(Res.string.start_game_prompt),
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
     }
@@ -165,14 +166,14 @@ private fun EmptyHistoryState(modifier: Modifier = Modifier) {
 private fun HistoryList(
     modifier: Modifier = Modifier,
     games: List<GameRecord>,
-    onDeleteGame: (String) -> Unit
+    onDeleteGame: (String) -> Unit,
 ) {
     var revealedId by remember { mutableStateOf<String?>(null) }
 
     LazyColumn(
         modifier = modifier,
         contentPadding = PaddingValues(top = 80.dp, bottom = 20.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         item(key = "header") {
             TitleText(
@@ -185,7 +186,7 @@ private fun HistoryList(
                 isRevealed = revealedId == game.id,
                 onExpand = { revealedId = game.id },
                 onCollapse = { revealedId = null },
-                onDelete = { onDeleteGame(game.id) }
+                onDelete = { onDeleteGame(game.id) },
             )
         }
     }
@@ -199,11 +200,12 @@ private fun GameRecordSwipeableItem(
     onExpand: () -> Unit,
     onCollapse: () -> Unit,
     onDelete: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     SwipeableActionsBox(
-        modifier = modifier
-            .fillMaxSize(),
+        modifier =
+            modifier
+                .fillMaxSize(),
         isRevealed = isRevealed,
         onExpanded = onExpand,
         onCollapsed = onCollapse,
@@ -216,70 +218,71 @@ private fun GameRecordSwipeableItem(
                 onClick = {
                     onDelete()
                     onCollapse()
-                }
+                },
             )
         },
         content = {
             GameRecordCard(
-                game = game
+                game = game,
             )
-        }
+        },
     )
 }
 
 @Composable
 private fun GameRecordCard(
     game: GameRecord,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        colors =
+            CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+            ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+            verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             Row(
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Icon(
                     imageVector = Icons.Default.SportsEsports,
                     contentDescription = "Game icon",
                     modifier = Modifier.size(16.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Spacer(Modifier.width(8.dp))
                 Text(
                     text = game.difficulty.name,
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Spacer(Modifier.weight(1f))
                 Text(
                     text = formatTimestamp(game.timestamp),
                     style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
             Spacer(Modifier.height(8.dp))
 
             Text(
-                text =stringResource(Res.string.score_label, game.score),
+                text = stringResource(Res.string.score_label, game.score),
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.onSurface
+                color = MaterialTheme.colorScheme.onSurface,
             )
 
             Text(
-                text = stringResource(Res.string.lines_label,game.linesCleared),
+                text = stringResource(Res.string.lines_label, game.linesCleared),
                 style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
     }
@@ -291,7 +294,6 @@ private fun formatTimestamp(timestamp: Long): String {
     val dateTime = instant.toLocalDateTime(TimeZone.currentSystemDefault())
     return "${dateTime.date} ${dateTime.hour}:${dateTime.minute.toString().padStart(2, '0')}"
 }
-
 
 @Composable
 @Preview

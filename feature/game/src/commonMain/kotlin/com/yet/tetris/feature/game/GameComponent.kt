@@ -24,7 +24,7 @@ interface GameComponent : BackHandlerOwner {
         val isGameOver: Boolean = false,
         val finalScore: Long = 0,
         val finalLinesCleared: Long = 0,
-        val ghostPieceY: Int? = null
+        val ghostPieceY: Int? = null,
     )
 
     fun onDismissDialog()
@@ -32,33 +32,58 @@ interface GameComponent : BackHandlerOwner {
     fun onDismissSheet()
 
     fun onBackClick()
+
     fun onRetry()
 
     fun onPause()
+
     fun onResume()
+
     fun onSettings()
+
     fun onQuit()
+
     fun onMoveLeft()
+
     fun onMoveRight()
+
     fun onMoveDown()
+
     fun onRotate()
+
     fun onHardDrop()
-    fun onSwipe(deltaX: Float, deltaY: Float, velocityX: Float, velocityY: Float)
+
+    fun onSwipe(
+        deltaX: Float,
+        deltaY: Float,
+        velocityX: Float,
+        velocityY: Float,
+    )
 
     fun onBoardSizeChanged(height: Float)
+
     fun onDragStarted()
-    fun onDragged(deltaX: Float, deltaY: Float)
+
+    fun onDragged(
+        deltaX: Float,
+        deltaY: Float,
+    )
+
     fun onDragEnded()
 
     sealed interface DialogChild {
         class Pause : DialogChild
+
         class GameOver : DialogChild
 
-        class Error(val message: String) : DialogChild
+        class Error(
+            val message: String,
+        ) : DialogChild
     }
 
     sealed interface SheetChild {
-        class Settings(val component: SettingsComponent) : SheetChild
+        class Settings(
+            val component: SettingsComponent,
+        ) : SheetChild
     }
-
 }

@@ -12,29 +12,28 @@ import jakarta.inject.Singleton
  */
 @Singleton
 class StartGameUseCase(
-    private val generateTetromino: GenerateTetrominoUseCase
+    private val generateTetromino: GenerateTetrominoUseCase,
 ) {
-    
     companion object {
         // Standard spawn position for new pieces (top-center of board)
         private const val SPAWN_X = 3
         private const val SPAWN_Y = 0
     }
-    
+
     /**
      * Initializes a new game with the provided settings.
-     * 
+     *
      * @param settings Game settings to apply (difficulty, colors, etc.)
      * @return Initial GameState ready to play
      */
     operator fun invoke(settings: GameSettings): GameState {
         // Reset the tetromino generator for a new game
         generateTetromino.reset()
-        
+
         // Generate first two pieces
         val currentPiece = generateTetromino()
         val nextPiece = generateTetromino()
-        
+
         return GameState(
             board = GameBoard(),
             currentPiece = currentPiece,
@@ -43,14 +42,12 @@ class StartGameUseCase(
             score = 0,
             linesCleared = 0,
             isGameOver = false,
-            isPaused = false
+            isPaused = false,
         )
     }
-    
+
     /**
      * Creates a new game with default settings.
      */
-    fun startWithDefaults(): GameState {
-        return invoke(GameSettings())
-    }
+    fun startWithDefaults(): GameState = invoke(GameSettings())
 }

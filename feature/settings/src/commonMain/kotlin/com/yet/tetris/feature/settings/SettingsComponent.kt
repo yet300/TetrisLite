@@ -16,22 +16,32 @@ interface SettingsComponent {
     data class Model(
         val settings: GameSettings,
         val isSaving: Boolean,
-        val hasUnsavedChanges: Boolean
+        val hasUnsavedChanges: Boolean,
     )
 
     fun onDifficultyChanged(difficulty: Difficulty)
+
     fun onVisualThemeChanged(theme: VisualTheme)
+
     fun onPieceStyleChanged(style: PieceStyle)
+
     fun onKeyboardLayoutChanged(layout: KeyboardLayout)
+
     fun onSwipeLayoutChanged(layout: SwipeLayout)
+
     fun onSwipeSensitivityChanged(sensitivity: SwipeSensitivity)
+
     fun onMusicToggled(enabled: Boolean)
+
     fun onSoundEffectsToggled(enabled: Boolean)
+
     fun onMusicVolumeChanged(volume: Float)
+
     fun onSFXVolumeChanged(volume: Float)
+
     fun onMusicThemeChanged(theme: MusicTheme)
+
     fun onSave()
+
     fun onDiscard()
-
 }
-

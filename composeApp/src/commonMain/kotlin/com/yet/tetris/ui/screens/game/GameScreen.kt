@@ -5,12 +5,26 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Pause
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -35,28 +49,36 @@ import com.yet.tetris.ui.screens.game.dialog.ErrorDialog
 import com.yet.tetris.ui.screens.game.dialog.GameOverDialog
 import com.yet.tetris.ui.screens.game.dialog.PauseDialog
 import com.yet.tetris.ui.screens.settings.SettingsSheet
-import com.yet.tetris.ui.theme.*
+import com.yet.tetris.ui.theme.getBackgroundComposeColor
+import com.yet.tetris.ui.theme.getTetrominoComposeColor
+import com.yet.tetris.ui.theme.getTetrominoDarkColor
+import com.yet.tetris.ui.theme.getTetrominoLightColor
 import com.yet.tetris.uikit.component.button.FrostedGlassButton
 import com.yet.tetris.uikit.component.modifier.glassPanel
 import com.yet.tetris.uikit.component.sheet.ModalBottomSheet
 import com.yet.tetris.uikit.theme.TetrisLiteAppTheme
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
-import tetrislite.composeapp.generated.resources.*
+import tetrislite.composeapp.generated.resources.Res
+import tetrislite.composeapp.generated.resources.lines
+import tetrislite.composeapp.generated.resources.next
+import tetrislite.composeapp.generated.resources.score
+import tetrislite.composeapp.generated.resources.time
 
 @Composable
 fun GameScreen(component: GameComponent) {
     val model by component.model.subscribeAsState()
 
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background),
     ) {
         when {
             model.isLoading -> {
                 CircularProgressIndicator(
-                    modifier = Modifier.align(Alignment.Center)
+                    modifier = Modifier.align(Alignment.Center),
                 )
             }
             model.gameState != null -> {
@@ -65,7 +87,7 @@ fun GameScreen(component: GameComponent) {
                     component = component,
                     onPauseClick = {
                         component.onPause()
-                    }
+                    },
                 )
 
                 GameDialog(component, model)
@@ -78,7 +100,7 @@ fun GameScreen(component: GameComponent) {
 @Composable
 fun GameDialog(
     component: GameComponent,
-    model: GameComponent.Model
+    model: GameComponent.Model,
 ) {
     val dialogSheetSlot by component.childSlot.subscribeAsState()
 
@@ -95,7 +117,7 @@ fun GameDialog(
             is GameComponent.DialogChild.Error -> {
                 ErrorDialog(
                     message = child.message,
-                    onDismiss = component::onDismissDialog
+                    onDismiss = component::onDismissDialog,
                 )
             }
         }
@@ -103,9 +125,7 @@ fun GameDialog(
 }
 
 @Composable
-fun GameSheet(
-    component: GameComponent,
-) {
+fun GameSheet(component: GameComponent) {
     val dialogSheetSlot by component.sheetSlot.subscribeAsState()
 
     dialogSheetSlot.child?.instance?.let { child ->
@@ -123,83 +143,82 @@ fun GameSheet(
 private fun GamePlayingContent(
     model: GameComponent.Model,
     component: GameComponent,
-    onPauseClick: () -> Unit
+    onPauseClick: () -> Unit,
 ) {
     val gameState = model.gameState ?: return
 
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 16.dp)
-            .navigationBarsPadding()
-            .keyboardHandler(
-                onMoveLeft = component::onMoveLeft,
-                onMoveRight = component::onMoveRight,
-                onMoveDown = component::onMoveDown,
-                onRotate = component::onRotate,
-                onHardDrop = component::onHardDrop,
-                onPause = component::onPause
-            ),
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .padding(horizontal = 16.dp)
+                .navigationBarsPadding()
+                .keyboardHandler(
+                    onMoveLeft = component::onMoveLeft,
+                    onMoveRight = component::onMoveRight,
+                    onMoveDown = component::onMoveDown,
+                    onRotate = component::onRotate,
+                    onHardDrop = component::onHardDrop,
+                    onPause = component::onPause,
+                ),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         // Top section: Stats and Next Piece
         Row(
             modifier = Modifier.fillMaxWidth().statusBarsPadding(),
             horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             // Pause button
             FrostedGlassButton(
                 onClick = onPauseClick,
-                icon = Icons.Default.Pause
+                icon = Icons.Default.Pause,
             )
 
             // Game stats
             GameStatsRow(
                 score = gameState.score,
                 lines = gameState.linesCleared,
-                time = model.elapsedTime
+                time = model.elapsedTime,
             )
 
             // Next piece
             NextPiecePreview(
                 nextPiece = gameState.nextPiece,
-                settings = model.settings
+                settings = model.settings,
             )
         }
 
         // Game board - centered with border
         GameBoardWithBorder(
-            modifier = Modifier
-                .weight(1f)
-                .widthIn(max = 400.dp)
-                .onSizeChanged { size ->
-                    component.onBoardSizeChanged(size.height.toFloat())
-                }
-                .pointerInput(Unit) {
-                    detectTapGestures(
-                        onTap = { component.onRotate() }
-                    )
-                }
-                .pointerInput(Unit) {
-                    detectTapGestures(
-                        onTap = { component.onRotate() }
-                    )
-                }
-                .pointerInput(Unit) {
-                    detectDragGestures(
-                        onDragStart = { component.onDragStarted() },
-                        onDragEnd = component::onDragEnded,
-                        onDrag = { change, dragAmount ->
-                            change.consume()
-                            component.onDragged(dragAmount.x, dragAmount.y)
-                        }
-                    )
-                },
+            modifier =
+                Modifier
+                    .weight(1f)
+                    .widthIn(max = 400.dp)
+                    .onSizeChanged { size ->
+                        component.onBoardSizeChanged(size.height.toFloat())
+                    }.pointerInput(Unit) {
+                        detectTapGestures(
+                            onTap = { component.onRotate() },
+                        )
+                    }.pointerInput(Unit) {
+                        detectTapGestures(
+                            onTap = { component.onRotate() },
+                        )
+                    }.pointerInput(Unit) {
+                        detectDragGestures(
+                            onDragStart = { component.onDragStarted() },
+                            onDragEnd = component::onDragEnded,
+                            onDrag = { change, dragAmount ->
+                                change.consume()
+                                component.onDragged(dragAmount.x, dragAmount.y)
+                            },
+                        )
+                    },
             gameState = gameState,
             settings = model.settings,
-            ghostPieceY = model.ghostPieceY
+            ghostPieceY = model.ghostPieceY,
         )
     }
 }
@@ -208,16 +227,16 @@ private fun GamePlayingContent(
 private fun GameStatsRow(
     score: Long,
     lines: Long,
-    time: Long
+    time: Long,
 ) {
     Row(
-        modifier = Modifier
-            .glassPanel(
-                shape = RoundedCornerShape(16.dp),
-            )
-            .padding(horizontal = 16.dp, vertical = 12.dp),
+        modifier =
+            Modifier
+                .glassPanel(
+                    shape = RoundedCornerShape(16.dp),
+                ).padding(horizontal = 16.dp, vertical = 12.dp),
         horizontalArrangement = Arrangement.spacedBy(24.dp),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         StatItem(stringResource(Res.string.score), score.toString())
         StatItem(stringResource(Res.string.lines), lines.toString())
@@ -226,46 +245,50 @@ private fun GameStatsRow(
 }
 
 @Composable
-private fun StatItem(label: String, value: String) {
+private fun StatItem(
+    label: String,
+    value: String,
+) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
             text = label,
             style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurface
+            color = MaterialTheme.colorScheme.onSurface,
         )
         Text(
             text = value,
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
 }
 
 @Composable
-
 private fun NextPiecePreview(
     nextPiece: Tetromino,
-    settings: GameSettings
+    settings: GameSettings,
 ) {
     Column(
-        modifier = Modifier
-            .glassPanel(shape = RoundedCornerShape(16.dp))
-            .padding(6.dp),
+        modifier =
+            Modifier
+                .glassPanel(shape = RoundedCornerShape(16.dp))
+                .padding(6.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(4.dp)
+        verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         Text(
-            modifier = Modifier.graphicsLayer {
-                shadowElevation = 2.dp.toPx()
-            },
+            modifier =
+                Modifier.graphicsLayer {
+                    shadowElevation = 2.dp.toPx()
+                },
             text = stringResource(Res.string.next),
             style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurface
+            color = MaterialTheme.colorScheme.onSurface,
         )
 
         Canvas(
-            modifier = Modifier.size(60.dp)
+            modifier = Modifier.size(60.dp),
         ) {
             val cellSize = 12.dp.toPx()
 
@@ -280,15 +303,15 @@ private fun NextPiecePreview(
             val offsetX = (size.width - pieceWidth) / 2f - (minX * cellSize)
             val offsetY = (size.height - pieceHeight) / 2f - (minY * cellSize)
 
-
             nextPiece.blocks.forEach { blockPos ->
                 drawRect(
                     color = getTetrominoColor(nextPiece.type, settings),
-                    topLeft = Offset(
-                        blockPos.x * cellSize + offsetX,
-                        blockPos.y * cellSize + offsetY
-                    ),
-                    size = Size(cellSize - 1, cellSize - 1)
+                    topLeft =
+                        Offset(
+                            blockPos.x * cellSize + offsetX,
+                            blockPos.y * cellSize + offsetY,
+                        ),
+                    size = Size(cellSize - 1, cellSize - 1),
                 )
             }
         }
@@ -300,17 +323,18 @@ private fun GameBoardWithBorder(
     modifier: Modifier = Modifier,
     gameState: GameState,
     settings: GameSettings,
-    ghostPieceY: Int?
+    ghostPieceY: Int?,
 ) {
     Canvas(
-        modifier = modifier
-            .aspectRatio(gameState.board.width.toFloat() / gameState.board.height.toFloat())
-            .fillMaxWidth()
-            .background(settings.themeConfig.getBackgroundComposeColor())
-            .border(
-                width = 2.dp,
-                color = MaterialTheme.colorScheme.outline,
-            )
+        modifier =
+            modifier
+                .aspectRatio(gameState.board.width.toFloat() / gameState.board.height.toFloat())
+                .fillMaxWidth()
+                .background(settings.themeConfig.getBackgroundComposeColor())
+                .border(
+                    width = 2.dp,
+                    color = MaterialTheme.colorScheme.outline,
+                ),
     ) {
         val cellSize = size.width / gameState.board.width
 
@@ -321,7 +345,7 @@ private fun GameBoardWithBorder(
                     type = type,
                     settings = settings,
                     topLeft = Offset(pos.x * cellSize, pos.y * cellSize),
-                    cellSize = cellSize
+                    cellSize = cellSize,
                 )
             }
         }
@@ -331,20 +355,22 @@ private fun GameBoardWithBorder(
             ghostPieceY?.let { landingY ->
                 if (landingY > gameState.currentPosition.y) {
                     piece.blocks.forEach { blockPos ->
-                        val absolutePos = Position(
-                            gameState.currentPosition.x + blockPos.x,
-                            landingY + blockPos.y
-                        )
+                        val absolutePos =
+                            Position(
+                                gameState.currentPosition.x + blockPos.x,
+                                landingY + blockPos.y,
+                            )
                         if (absolutePos.y >= 0 && absolutePos.y < gameState.board.height) {
                             drawStyledBlock(
                                 type = piece.type,
                                 settings = settings,
-                                topLeft = Offset(
-                                    absolutePos.x * cellSize,
-                                    absolutePos.y * cellSize
-                                ),
+                                topLeft =
+                                    Offset(
+                                        absolutePos.x * cellSize,
+                                        absolutePos.y * cellSize,
+                                    ),
                                 cellSize = cellSize,
-                                alpha = 0.3f
+                                alpha = 0.3f,
                             )
                         }
                     }
@@ -355,19 +381,21 @@ private fun GameBoardWithBorder(
         // Draw current piece
         gameState.currentPiece?.let { piece ->
             piece.blocks.forEach { blockPos ->
-                val absolutePos = Position(
-                    gameState.currentPosition.x + blockPos.x,
-                    gameState.currentPosition.y + blockPos.y
-                )
+                val absolutePos =
+                    Position(
+                        gameState.currentPosition.x + blockPos.x,
+                        gameState.currentPosition.y + blockPos.y,
+                    )
                 if (absolutePos.y >= 0 && absolutePos.y < gameState.board.height) {
                     drawStyledBlock(
                         type = piece.type,
                         settings = settings,
-                        topLeft = Offset(
-                            absolutePos.x * cellSize,
-                            absolutePos.y * cellSize
-                        ),
-                        cellSize = cellSize
+                        topLeft =
+                            Offset(
+                                absolutePos.x * cellSize,
+                                absolutePos.y * cellSize,
+                            ),
+                        cellSize = cellSize,
                     )
                 }
             }
@@ -379,7 +407,7 @@ private fun GameBoardWithBorder(
                 color = Color.Gray.copy(alpha = 0.2f),
                 start = Offset(x * cellSize, 0f),
                 end = Offset(x * cellSize, size.height),
-                strokeWidth = 1f
+                strokeWidth = 1f,
             )
         }
         for (y in 0..gameState.board.height) {
@@ -387,22 +415,23 @@ private fun GameBoardWithBorder(
                 color = Color.Gray.copy(alpha = 0.2f),
                 start = Offset(0f, y * cellSize),
                 end = Offset(size.width, y * cellSize),
-                strokeWidth = 1f
+                strokeWidth = 1f,
             )
         }
     }
 }
 
-private fun getTetrominoColor(type: TetrominoType, settings: GameSettings): Color {
-    return settings.themeConfig.getTetrominoComposeColor(type)
-}
+private fun getTetrominoColor(
+    type: TetrominoType,
+    settings: GameSettings,
+): Color = settings.themeConfig.getTetrominoComposeColor(type)
 
 private fun DrawScope.drawStyledBlock(
     type: TetrominoType,
     settings: GameSettings,
     topLeft: Offset,
     cellSize: Float,
-    alpha: Float = 1f
+    alpha: Float = 1f,
 ) {
     val baseColor = getTetrominoColor(type, settings).copy(alpha = alpha)
     val lightColor = settings.themeConfig.getTetrominoLightColor(type).copy(alpha = alpha)
@@ -415,7 +444,7 @@ private fun DrawScope.drawStyledBlock(
             drawRect(
                 color = baseColor,
                 topLeft = topLeft,
-                size = blockSize
+                size = blockSize,
             )
         }
 
@@ -424,28 +453,28 @@ private fun DrawScope.drawStyledBlock(
             drawRect(
                 color = baseColor,
                 topLeft = topLeft,
-                size = blockSize
+                size = blockSize,
             )
             // Draw border
             drawRect(
                 color = lightColor,
                 topLeft = topLeft,
-                size = Size(blockSize.width, 2f)
+                size = Size(blockSize.width, 2f),
             )
             drawRect(
                 color = lightColor,
                 topLeft = topLeft,
-                size = Size(2f, blockSize.height)
+                size = Size(2f, blockSize.height),
             )
             drawRect(
                 color = darkColor,
                 topLeft = Offset(topLeft.x, topLeft.y + blockSize.height - 2f),
-                size = Size(blockSize.width, 2f)
+                size = Size(blockSize.width, 2f),
             )
             drawRect(
                 color = darkColor,
                 topLeft = Offset(topLeft.x + blockSize.width - 2f, topLeft.y),
-                size = Size(2f, blockSize.height)
+                size = Size(2f, blockSize.height),
             )
         }
 
@@ -454,22 +483,23 @@ private fun DrawScope.drawStyledBlock(
             drawRect(
                 color = baseColor,
                 topLeft = topLeft,
-                size = blockSize
+                size = blockSize,
             )
             // Top-left highlight
             drawRect(
                 color = lightColor.copy(alpha = alpha * 0.5f),
                 topLeft = topLeft,
-                size = Size(blockSize.width * 0.5f, blockSize.height * 0.5f)
+                size = Size(blockSize.width * 0.5f, blockSize.height * 0.5f),
             )
             // Bottom-right shadow
             drawRect(
                 color = darkColor.copy(alpha = alpha * 0.3f),
-                topLeft = Offset(
-                    topLeft.x + blockSize.width * 0.5f,
-                    topLeft.y + blockSize.height * 0.5f
-                ),
-                size = Size(blockSize.width * 0.5f, blockSize.height * 0.5f)
+                topLeft =
+                    Offset(
+                        topLeft.x + blockSize.width * 0.5f,
+                        topLeft.y + blockSize.height * 0.5f,
+                    ),
+                size = Size(blockSize.width * 0.5f, blockSize.height * 0.5f),
             )
         }
 
@@ -482,11 +512,12 @@ private fun DrawScope.drawStyledBlock(
                     val isLight = (px + py) % 2 == 0
                     drawRect(
                         color = if (isLight) baseColor else darkColor,
-                        topLeft = Offset(
-                            topLeft.x + px * pixelSize,
-                            topLeft.y + py * pixelSize
-                        ),
-                        size = Size(pixelSize - 0.5f, pixelSize - 0.5f)
+                        topLeft =
+                            Offset(
+                                topLeft.x + px * pixelSize,
+                                topLeft.y + py * pixelSize,
+                            ),
+                        size = Size(pixelSize - 0.5f, pixelSize - 0.5f),
                     )
                 }
             }
@@ -497,24 +528,24 @@ private fun DrawScope.drawStyledBlock(
             drawRect(
                 color = baseColor.copy(alpha = alpha * 0.6f),
                 topLeft = topLeft,
-                size = blockSize
+                size = blockSize,
             )
             // Shine effect on top
             drawRect(
                 color = Color.White.copy(alpha = alpha * 0.3f),
                 topLeft = topLeft,
-                size = Size(blockSize.width, blockSize.height * 0.3f)
+                size = Size(blockSize.width, blockSize.height * 0.3f),
             )
             // Border
             drawRect(
                 color = lightColor.copy(alpha = alpha * 0.8f),
                 topLeft = topLeft,
-                size = Size(blockSize.width, 1f)
+                size = Size(blockSize.width, 1f),
             )
             drawRect(
                 color = lightColor.copy(alpha = alpha * 0.8f),
                 topLeft = topLeft,
-                size = Size(1f, blockSize.height)
+                size = Size(1f, blockSize.height),
             )
         }
     }
@@ -523,12 +554,10 @@ private fun DrawScope.drawStyledBlock(
 private fun formatTime(milliseconds: Long): String {
     val seconds = (milliseconds / 1000) % 60
     val minutes = (milliseconds / 1000) / 60
-    return "${minutes}:${seconds.toString().padStart(2, '0')}"
+    return "$minutes:${seconds.toString().padStart(2, '0')}"
 }
 
-
 @Composable
-
 @Preview
 fun GameScreenPreview() {
     TetrisLiteAppTheme {

@@ -20,20 +20,21 @@ fun SwipeContent(
     icon: ImageVector,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    ) {
+) {
     Box(
-        modifier = modifier
-            .size(56.dp)
-            .clip(CircleShape)
-            .background(backgroundColor)
-            .clickable { onClick() },
-        contentAlignment = Alignment.Center
+        modifier =
+            modifier
+                .size(56.dp)
+                .clip(CircleShape)
+                .background(backgroundColor)
+                .clickable { onClick() },
+        contentAlignment = Alignment.Center,
     ) {
         Icon(
             imageVector = icon,
             tint = Color.White,
             contentDescription = icon.name,
-            modifier = Modifier.size(28.dp)
+            modifier = Modifier.size(28.dp),
         )
     }
 }

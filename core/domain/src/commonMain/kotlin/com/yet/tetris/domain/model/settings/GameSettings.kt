@@ -10,5 +10,5 @@ data class GameSettings(
     val keyboardLayout: KeyboardLayout = KeyboardLayout.ARROWS,
     val swipeLayout: SwipeLayout = SwipeLayout.STANDARD,
     val swipeSensitivity: SwipeSensitivity = SwipeSensitivity(),
-    val audioSettings: AudioSettings = AudioSettings()
+    val audioSettings: AudioSettings = AudioSettings(),
 )

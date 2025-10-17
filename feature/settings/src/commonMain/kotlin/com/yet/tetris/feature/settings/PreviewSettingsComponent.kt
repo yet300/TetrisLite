@@ -3,13 +3,11 @@ package com.yet.tetris.feature.settings
 import com.app.common.decompose.PreviewComponentContext
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.ExperimentalDecomposeApi
-import com.arkivanov.decompose.router.slot.ChildSlot
 import com.arkivanov.decompose.router.webhistory.WebNavigationOwner
 import com.arkivanov.decompose.value.MutableValue
 import com.arkivanov.decompose.value.Value
 import com.yet.tetris.domain.model.audio.MusicTheme
 import com.yet.tetris.domain.model.game.Difficulty
-import com.yet.tetris.domain.model.game.TetrominoType
 import com.yet.tetris.domain.model.settings.GameSettings
 import com.yet.tetris.domain.model.settings.KeyboardLayout
 import com.yet.tetris.domain.model.settings.SwipeLayout
@@ -20,16 +18,16 @@ import com.yet.tetris.domain.model.theme.VisualTheme
 @OptIn(ExperimentalDecomposeApi::class)
 class PreviewSettingsComponent :
     SettingsComponent,
-    ComponentContext by PreviewComponentContext, WebNavigationOwner.NoOp {
+    ComponentContext by PreviewComponentContext,
+    WebNavigationOwner.NoOp {
     override val model: Value<SettingsComponent.Model> =
         MutableValue(
             SettingsComponent.Model(
                 settings = GameSettings(),
                 isSaving = false,
-                hasUnsavedChanges = false
-            )
+                hasUnsavedChanges = false,
+            ),
         )
-
 
     override fun onDifficultyChanged(difficulty: Difficulty) {
         TODO("Not yet implemented")
@@ -82,6 +80,4 @@ class PreviewSettingsComponent :
     override fun onDiscard() {
         TODO("Not yet implemented")
     }
-
-
 }

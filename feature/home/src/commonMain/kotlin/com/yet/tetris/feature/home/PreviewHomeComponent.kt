@@ -12,8 +12,8 @@ import com.yet.tetris.domain.model.game.Difficulty
 @OptIn(ExperimentalDecomposeApi::class)
 class PreviewHomeComponent :
     HomeComponent,
-    ComponentContext by PreviewComponentContext, WebNavigationOwner.NoOp {
-
+    ComponentContext by PreviewComponentContext,
+    WebNavigationOwner.NoOp {
     override val model: Value<HomeComponent.Model> =
         MutableValue(HomeComponent.Model.Loading)
     override val childBottomSheetNavigation: Value<ChildSlot<*, HomeComponent.BottomSheetChild>> =
@@ -42,6 +42,4 @@ class PreviewHomeComponent :
     override fun onOpenHistory() {
         TODO("Not yet implemented")
     }
-
-
 }

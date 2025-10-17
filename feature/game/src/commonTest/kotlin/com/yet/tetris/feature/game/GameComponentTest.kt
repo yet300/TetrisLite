@@ -41,7 +41,6 @@ import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class GameComponentTest : KoinTest {
-
     private val testDispatcher = StandardTestDispatcher()
     private lateinit var lifecycle: LifecycleRegistry
     private lateinit var settingsRepository: FakeGameSettingsRepository
@@ -89,7 +88,7 @@ class GameComponentTest : KoinTest {
                     single { handleSwipe }
                     single { calculateGhost }
                     single { gestureHandling }
-                }
+                },
             )
         }
     }
@@ -100,315 +99,361 @@ class GameComponentTest : KoinTest {
         Dispatchers.resetMain()
     }
 
-    private fun createComponent(): DefaultGameComponent {
-        return DefaultGameComponent(
+    private fun createComponent(): DefaultGameComponent =
+        DefaultGameComponent(
             componentContext = DefaultComponentContext(lifecycle = lifecycle),
-            navigateBack = { navigateBackCalled = true }
+            navigateBack = { navigateBackCalled = true },
         )
-    }
 
     @Test
-    fun WHEN_component_created_THEN_model_initializes() = runTest(testDispatcher) {
-        val component = createComponent()
-        lifecycle.resume()
-        
-        // Model starts in some state (may be loading or already loaded)
-        val model = component.model.value
-        assertNotNull(model)
-    }
+    fun WHEN_component_created_THEN_model_initializes() =
+        runTest(testDispatcher) {
+            val component = createComponent()
+            lifecycle.resume()
 
-    @Test
-    fun WHEN_game_starts_THEN_model_has_game_state() = runTest(testDispatcher) {
-        val component = createComponent()
-        lifecycle.resume()
-        advanceUntilIdle()
-
-        // Wait for game to initialize
-        testDispatcher.scheduler.advanceTimeBy(100)
-        advanceUntilIdle()
-
-        val model = component.model.value
-        assertFalse(model.isLoading)
-        assertNotNull(model.gameState)
-    }
-
-    @Test
-    fun WHEN_onMoveLeft_THEN_piece_moves_left() = runTest(testDispatcher) {
-        val component = createComponent()
-        lifecycle.resume()
-        advanceUntilIdle()
-        testDispatcher.scheduler.advanceTimeBy(100)
-        advanceUntilIdle()
-
-        val initialX = component.model.value.gameState?.currentPosition?.x
-
-        component.onMoveLeft()
-        advanceUntilIdle()
-
-        val newX = component.model.value.gameState?.currentPosition?.x
-        if (initialX != null && newX != null) {
-            assertTrue(newX <= initialX)
+            // Model starts in some state (may be loading or already loaded)
+            val model = component.model.value
+            assertNotNull(model)
         }
-    }
 
     @Test
-    fun WHEN_onMoveRight_THEN_piece_moves_right() = runTest(testDispatcher) {
-        val component = createComponent()
-        lifecycle.resume()
-        advanceUntilIdle()
-        testDispatcher.scheduler.advanceTimeBy(100)
-        advanceUntilIdle()
+    fun WHEN_game_starts_THEN_model_has_game_state() =
+        runTest(testDispatcher) {
+            val component = createComponent()
+            lifecycle.resume()
+            advanceUntilIdle()
 
-        val initialX = component.model.value.gameState?.currentPosition?.x
+            // Wait for game to initialize
+            testDispatcher.scheduler.advanceTimeBy(100)
+            advanceUntilIdle()
 
-        component.onMoveRight()
-        advanceUntilIdle()
-
-        val newX = component.model.value.gameState?.currentPosition?.x
-        if (initialX != null && newX != null) {
-            assertTrue(newX >= initialX)
+            val model = component.model.value
+            assertFalse(model.isLoading)
+            assertNotNull(model.gameState)
         }
-    }
 
     @Test
-    fun WHEN_onRotate_THEN_piece_rotates() = runTest(testDispatcher) {
-        val component = createComponent()
-        lifecycle.resume()
-        advanceUntilIdle()
-        testDispatcher.scheduler.advanceTimeBy(100)
-        advanceUntilIdle()
+    fun WHEN_onMoveLeft_THEN_piece_moves_left() =
+        runTest(testDispatcher) {
+            val component = createComponent()
+            lifecycle.resume()
+            advanceUntilIdle()
+            testDispatcher.scheduler.advanceTimeBy(100)
+            advanceUntilIdle()
 
-        // Ensure game is initialized
-        assertNotNull(component.model.value.gameState, "Game state should be initialized")
+            val initialX =
+                component.model.value.gameState
+                    ?.currentPosition
+                    ?.x
 
-        component.onRotate()
-        advanceUntilIdle()
+            component.onMoveLeft()
+            advanceUntilIdle()
 
-        // Verify game state still exists after rotation
-        assertNotNull(component.model.value.gameState)
-    }
-
-    @Test
-    fun WHEN_onPause_THEN_pause_dialog_shown() = runTest(testDispatcher) {
-        val component = createComponent()
-        lifecycle.resume()
-        advanceUntilIdle()
-        testDispatcher.scheduler.advanceTimeBy(100)
-        advanceUntilIdle()
-
-        component.onPause()
-        advanceUntilIdle()
-
-        val dialog = component.childSlot.value.child?.instance
-        assertIs<GameComponent.DialogChild.Pause>(dialog)
-    }
-
-    @Test
-    fun WHEN_onResume_THEN_dialog_dismissed() = runTest(testDispatcher) {
-        val component = createComponent()
-        lifecycle.resume()
-        advanceUntilIdle()
-        testDispatcher.scheduler.advanceTimeBy(100)
-        advanceUntilIdle()
-
-        component.onPause()
-        advanceUntilIdle()
-
-        component.onResume()
-        advanceUntilIdle()
-
-        val dialog = component.childSlot.value.child
-        assertNull(dialog)
-    }
-
-    @Test
-    fun WHEN_onSettings_THEN_settings_sheet_shown() = runTest(testDispatcher) {
-        val component = createComponent()
-        lifecycle.resume()
-        advanceUntilIdle()
-
-        component.onSettings()
-        advanceUntilIdle()
-
-        val sheet = component.sheetSlot.value.child?.instance
-        assertIs<GameComponent.SheetChild.Settings>(sheet)
-    }
-
-    @Test
-    fun WHEN_onDismissSheet_THEN_sheet_dismissed() = runTest(testDispatcher) {
-        val component = createComponent()
-        lifecycle.resume()
-        advanceUntilIdle()
-
-        component.onSettings()
-        advanceUntilIdle()
-
-        component.onDismissSheet()
-        advanceUntilIdle()
-
-        val sheet = component.sheetSlot.value.child
-        assertNull(sheet)
-    }
-
-    @Test
-    fun WHEN_onDismissDialog_THEN_dialog_dismissed() = runTest(testDispatcher) {
-        val component = createComponent()
-        lifecycle.resume()
-        advanceUntilIdle()
-        testDispatcher.scheduler.advanceTimeBy(100)
-        advanceUntilIdle()
-
-        component.onPause()
-        advanceUntilIdle()
-
-        component.onDismissDialog()
-        advanceUntilIdle()
-
-        val dialog = component.childSlot.value.child
-        assertNull(dialog)
-    }
-
-    @Test
-    fun WHEN_onQuit_THEN_navigates_back() = runTest(testDispatcher) {
-        val component = createComponent()
-        lifecycle.resume()
-        advanceUntilIdle()
-
-        component.onQuit()
-        advanceUntilIdle()
-
-        assertTrue(navigateBackCalled)
-    }
-
-    @Test
-    fun WHEN_onBackClick_THEN_navigates_back() = runTest(testDispatcher) {
-        val component = createComponent()
-        lifecycle.resume()
-        advanceUntilIdle()
-
-        component.onBackClick()
-
-        assertTrue(navigateBackCalled)
-    }
-
-    @Test
-    fun WHEN_onRetry_THEN_game_restarts() = runTest(testDispatcher) {
-        val component = createComponent()
-        lifecycle.resume()
-        advanceUntilIdle()
-        testDispatcher.scheduler.advanceTimeBy(100)
-        advanceUntilIdle()
-
-        component.onRetry()
-        advanceUntilIdle()
-        testDispatcher.scheduler.advanceTimeBy(100)
-        advanceUntilIdle()
-
-        // Verify game state exists after retry
-        assertNotNull(component.model.value.gameState)
-    }
-
-    @Test
-    fun WHEN_onSwipe_THEN_swipe_handled() = runTest(testDispatcher) {
-        val component = createComponent()
-        lifecycle.resume()
-        advanceUntilIdle()
-        testDispatcher.scheduler.advanceTimeBy(100)
-        advanceUntilIdle()
-
-        // Swipe right
-        component.onSwipe(deltaX = 100f, deltaY = 0f, velocityX = 500f, velocityY = 0f)
-        advanceUntilIdle()
-
-        // Just verify no crash - actual behavior depends on swipe handling logic
-        assertNotNull(component.model.value)
-    }
-
-    @Test
-    fun WHEN_onBoardSizeChanged_THEN_board_size_updated() = runTest(testDispatcher) {
-        val component = createComponent()
-        lifecycle.resume()
-        advanceUntilIdle()
-
-        component.onBoardSizeChanged(height = 800f)
-        advanceUntilIdle()
-
-        // Verify no crash
-        assertNotNull(component.model.value)
-    }
-
-    @Test
-    fun WHEN_drag_operations_THEN_handled_correctly() = runTest(testDispatcher) {
-        val component = createComponent()
-        lifecycle.resume()
-        advanceUntilIdle()
-        testDispatcher.scheduler.advanceTimeBy(100)
-        advanceUntilIdle()
-
-        component.onDragStarted()
-        advanceUntilIdle()
-
-        component.onDragged(deltaX = 10f, deltaY = 20f)
-        advanceUntilIdle()
-
-        component.onDragEnded()
-        advanceUntilIdle()
-
-        // Verify no crash
-        assertNotNull(component.model.value)
-    }
-
-    @Test
-    fun WHEN_onHardDrop_THEN_piece_drops() = runTest(testDispatcher) {
-        val component = createComponent()
-        lifecycle.resume()
-        advanceUntilIdle()
-        testDispatcher.scheduler.advanceTimeBy(100)
-        advanceUntilIdle()
-
-        val initialY = component.model.value.gameState?.currentPosition?.y
-
-        component.onHardDrop()
-        advanceUntilIdle()
-
-        val newY = component.model.value.gameState?.currentPosition?.y
-        // After hard drop, piece should be at a different position or a new piece spawned
-        assertNotNull(component.model.value.gameState)
-    }
-
-    @Test
-    fun WHEN_onMoveDown_THEN_piece_moves_down() = runTest(testDispatcher) {
-        val component = createComponent()
-        lifecycle.resume()
-        advanceUntilIdle()
-        testDispatcher.scheduler.advanceTimeBy(100)
-        advanceUntilIdle()
-
-        val initialY = component.model.value.gameState?.currentPosition?.y
-
-        component.onMoveDown()
-        advanceUntilIdle()
-
-        val newY = component.model.value.gameState?.currentPosition?.y
-        if (initialY != null && newY != null) {
-            assertTrue(newY >= initialY)
+            val newX =
+                component.model.value.gameState
+                    ?.currentPosition
+                    ?.x
+            if (initialX != null && newX != null) {
+                assertTrue(newX <= initialX)
+            }
         }
-    }
 
     @Test
-    fun WHEN_model_updates_THEN_elapsed_time_tracked() = runTest(testDispatcher) {
-        val component = createComponent()
-        lifecycle.resume()
-        advanceUntilIdle()
-        testDispatcher.scheduler.advanceTimeBy(100)
-        advanceUntilIdle()
+    fun WHEN_onMoveRight_THEN_piece_moves_right() =
+        runTest(testDispatcher) {
+            val component = createComponent()
+            lifecycle.resume()
+            advanceUntilIdle()
+            testDispatcher.scheduler.advanceTimeBy(100)
+            advanceUntilIdle()
 
-        val initialTime = component.model.value.elapsedTime
+            val initialX =
+                component.model.value.gameState
+                    ?.currentPosition
+                    ?.x
 
-        testDispatcher.scheduler.advanceTimeBy(1000)
-        advanceUntilIdle()
+            component.onMoveRight()
+            advanceUntilIdle()
 
-        val newTime = component.model.value.elapsedTime
-        assertTrue(newTime >= initialTime)
-    }
+            val newX =
+                component.model.value.gameState
+                    ?.currentPosition
+                    ?.x
+            if (initialX != null && newX != null) {
+                assertTrue(newX >= initialX)
+            }
+        }
+
+    @Test
+    fun WHEN_onRotate_THEN_piece_rotates() =
+        runTest(testDispatcher) {
+            val component = createComponent()
+            lifecycle.resume()
+            advanceUntilIdle()
+            testDispatcher.scheduler.advanceTimeBy(100)
+            advanceUntilIdle()
+
+            // Ensure game is initialized
+            assertNotNull(component.model.value.gameState, "Game state should be initialized")
+
+            component.onRotate()
+            advanceUntilIdle()
+
+            // Verify game state still exists after rotation
+            assertNotNull(component.model.value.gameState)
+        }
+
+    @Test
+    fun WHEN_onPause_THEN_pause_dialog_shown() =
+        runTest(testDispatcher) {
+            val component = createComponent()
+            lifecycle.resume()
+            advanceUntilIdle()
+            testDispatcher.scheduler.advanceTimeBy(100)
+            advanceUntilIdle()
+
+            component.onPause()
+            advanceUntilIdle()
+
+            val dialog =
+                component.childSlot.value.child
+                    ?.instance
+            assertIs<GameComponent.DialogChild.Pause>(dialog)
+        }
+
+    @Test
+    fun WHEN_onResume_THEN_dialog_dismissed() =
+        runTest(testDispatcher) {
+            val component = createComponent()
+            lifecycle.resume()
+            advanceUntilIdle()
+            testDispatcher.scheduler.advanceTimeBy(100)
+            advanceUntilIdle()
+
+            component.onPause()
+            advanceUntilIdle()
+
+            component.onResume()
+            advanceUntilIdle()
+
+            val dialog = component.childSlot.value.child
+            assertNull(dialog)
+        }
+
+    @Test
+    fun WHEN_onSettings_THEN_settings_sheet_shown() =
+        runTest(testDispatcher) {
+            val component = createComponent()
+            lifecycle.resume()
+            advanceUntilIdle()
+
+            component.onSettings()
+            advanceUntilIdle()
+
+            val sheet =
+                component.sheetSlot.value.child
+                    ?.instance
+            assertIs<GameComponent.SheetChild.Settings>(sheet)
+        }
+
+    @Test
+    fun WHEN_onDismissSheet_THEN_sheet_dismissed() =
+        runTest(testDispatcher) {
+            val component = createComponent()
+            lifecycle.resume()
+            advanceUntilIdle()
+
+            component.onSettings()
+            advanceUntilIdle()
+
+            component.onDismissSheet()
+            advanceUntilIdle()
+
+            val sheet = component.sheetSlot.value.child
+            assertNull(sheet)
+        }
+
+    @Test
+    fun WHEN_onDismissDialog_THEN_dialog_dismissed() =
+        runTest(testDispatcher) {
+            val component = createComponent()
+            lifecycle.resume()
+            advanceUntilIdle()
+            testDispatcher.scheduler.advanceTimeBy(100)
+            advanceUntilIdle()
+
+            component.onPause()
+            advanceUntilIdle()
+
+            component.onDismissDialog()
+            advanceUntilIdle()
+
+            val dialog = component.childSlot.value.child
+            assertNull(dialog)
+        }
+
+    @Test
+    fun WHEN_onQuit_THEN_navigates_back() =
+        runTest(testDispatcher) {
+            val component = createComponent()
+            lifecycle.resume()
+            advanceUntilIdle()
+
+            component.onQuit()
+            advanceUntilIdle()
+
+            assertTrue(navigateBackCalled)
+        }
+
+    @Test
+    fun WHEN_onBackClick_THEN_navigates_back() =
+        runTest(testDispatcher) {
+            val component = createComponent()
+            lifecycle.resume()
+            advanceUntilIdle()
+
+            component.onBackClick()
+
+            assertTrue(navigateBackCalled)
+        }
+
+    @Test
+    fun WHEN_onRetry_THEN_game_restarts() =
+        runTest(testDispatcher) {
+            val component = createComponent()
+            lifecycle.resume()
+            advanceUntilIdle()
+            testDispatcher.scheduler.advanceTimeBy(100)
+            advanceUntilIdle()
+
+            component.onRetry()
+            advanceUntilIdle()
+            testDispatcher.scheduler.advanceTimeBy(100)
+            advanceUntilIdle()
+
+            // Verify game state exists after retry
+            assertNotNull(component.model.value.gameState)
+        }
+
+    @Test
+    fun WHEN_onSwipe_THEN_swipe_handled() =
+        runTest(testDispatcher) {
+            val component = createComponent()
+            lifecycle.resume()
+            advanceUntilIdle()
+            testDispatcher.scheduler.advanceTimeBy(100)
+            advanceUntilIdle()
+
+            // Swipe right
+            component.onSwipe(deltaX = 100f, deltaY = 0f, velocityX = 500f, velocityY = 0f)
+            advanceUntilIdle()
+
+            // Just verify no crash - actual behavior depends on swipe handling logic
+            assertNotNull(component.model.value)
+        }
+
+    @Test
+    fun WHEN_onBoardSizeChanged_THEN_board_size_updated() =
+        runTest(testDispatcher) {
+            val component = createComponent()
+            lifecycle.resume()
+            advanceUntilIdle()
+
+            component.onBoardSizeChanged(height = 800f)
+            advanceUntilIdle()
+
+            // Verify no crash
+            assertNotNull(component.model.value)
+        }
+
+    @Test
+    fun WHEN_drag_operations_THEN_handled_correctly() =
+        runTest(testDispatcher) {
+            val component = createComponent()
+            lifecycle.resume()
+            advanceUntilIdle()
+            testDispatcher.scheduler.advanceTimeBy(100)
+            advanceUntilIdle()
+
+            component.onDragStarted()
+            advanceUntilIdle()
+
+            component.onDragged(deltaX = 10f, deltaY = 20f)
+            advanceUntilIdle()
+
+            component.onDragEnded()
+            advanceUntilIdle()
+
+            // Verify no crash
+            assertNotNull(component.model.value)
+        }
+
+    @Test
+    fun WHEN_onHardDrop_THEN_piece_drops() =
+        runTest(testDispatcher) {
+            val component = createComponent()
+            lifecycle.resume()
+            advanceUntilIdle()
+            testDispatcher.scheduler.advanceTimeBy(100)
+            advanceUntilIdle()
+
+            val initialY =
+                component.model.value.gameState
+                    ?.currentPosition
+                    ?.y
+
+            component.onHardDrop()
+            advanceUntilIdle()
+
+            val newY =
+                component.model.value.gameState
+                    ?.currentPosition
+                    ?.y
+            // After hard drop, piece should be at a different position or a new piece spawned
+            assertNotNull(component.model.value.gameState)
+        }
+
+    @Test
+    fun WHEN_onMoveDown_THEN_piece_moves_down() =
+        runTest(testDispatcher) {
+            val component = createComponent()
+            lifecycle.resume()
+            advanceUntilIdle()
+            testDispatcher.scheduler.advanceTimeBy(100)
+            advanceUntilIdle()
+
+            val initialY =
+                component.model.value.gameState
+                    ?.currentPosition
+                    ?.y
+
+            component.onMoveDown()
+            advanceUntilIdle()
+
+            val newY =
+                component.model.value.gameState
+                    ?.currentPosition
+                    ?.y
+            if (initialY != null && newY != null) {
+                assertTrue(newY >= initialY)
+            }
+        }
+
+    @Test
+    fun WHEN_model_updates_THEN_elapsed_time_tracked() =
+        runTest(testDispatcher) {
+            val component = createComponent()
+            lifecycle.resume()
+            advanceUntilIdle()
+            testDispatcher.scheduler.advanceTimeBy(100)
+            advanceUntilIdle()
+
+            val initialTime = component.model.value.elapsedTime
+
+            testDispatcher.scheduler.advanceTimeBy(1000)
+            advanceUntilIdle()
+
+            val newTime = component.model.value.elapsedTime
+            assertTrue(newTime >= initialTime)
+        }
 }

@@ -12,9 +12,10 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
-        val root = DefaultRootComponent(
-            componentContext = defaultComponentContext()
-        )
+        val root =
+            DefaultRootComponent(
+                componentContext = defaultComponentContext(),
+            )
 
         setContent {
             App(root)

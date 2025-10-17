@@ -8,28 +8,60 @@ import com.yet.tetris.domain.model.settings.KeyboardLayout
 import com.yet.tetris.domain.model.settings.SwipeLayout
 import com.yet.tetris.domain.model.settings.SwipeSensitivity
 
-internal interface SettingsStore :
-    Store<SettingsStore.Intent, SettingsStore.State, SettingsStore.Label> {
-
+internal interface SettingsStore : Store<SettingsStore.Intent, SettingsStore.State, SettingsStore.Label> {
     data class State(
         val settings: GameSettings = GameSettings(),
         val isSaving: Boolean = false,
-        val hasUnsavedChanges: Boolean = false
+        val hasUnsavedChanges: Boolean = false,
     )
 
     sealed class Intent {
-        data class ChangeDifficulty(val difficulty: Difficulty) : Intent()
-        data class ChangeVisualTheme(val theme: com.yet.tetris.domain.model.theme.VisualTheme) : Intent()
-        data class ChangePieceStyle(val style: com.yet.tetris.domain.model.theme.PieceStyle) : Intent()
-        data class ChangeKeyboardLayout(val layout: KeyboardLayout) : Intent()
-        data class ChangeSwipeLayout(val layout: SwipeLayout) : Intent()
-        data class ChangeSwipeSensitivity(val sensitivity: SwipeSensitivity) : Intent()
-        data class ToggleMusic(val enabled: Boolean) : Intent()
-        data class ToggleSoundEffects(val enabled: Boolean) : Intent()
-        data class ChangeMusicVolume(val volume: Float) : Intent()
-        data class ChangeSFXVolume(val volume: Float) : Intent()
-        data class ChangeMusicTheme(val theme: MusicTheme) : Intent()
+        data class ChangeDifficulty(
+            val difficulty: Difficulty,
+        ) : Intent()
+
+        data class ChangeVisualTheme(
+            val theme: com.yet.tetris.domain.model.theme.VisualTheme,
+        ) : Intent()
+
+        data class ChangePieceStyle(
+            val style: com.yet.tetris.domain.model.theme.PieceStyle,
+        ) : Intent()
+
+        data class ChangeKeyboardLayout(
+            val layout: KeyboardLayout,
+        ) : Intent()
+
+        data class ChangeSwipeLayout(
+            val layout: SwipeLayout,
+        ) : Intent()
+
+        data class ChangeSwipeSensitivity(
+            val sensitivity: SwipeSensitivity,
+        ) : Intent()
+
+        data class ToggleMusic(
+            val enabled: Boolean,
+        ) : Intent()
+
+        data class ToggleSoundEffects(
+            val enabled: Boolean,
+        ) : Intent()
+
+        data class ChangeMusicVolume(
+            val volume: Float,
+        ) : Intent()
+
+        data class ChangeSFXVolume(
+            val volume: Float,
+        ) : Intent()
+
+        data class ChangeMusicTheme(
+            val theme: MusicTheme,
+        ) : Intent()
+
         data object SaveSettings : Intent()
+
         data object DiscardChanges : Intent()
     }
 
@@ -38,15 +70,30 @@ internal interface SettingsStore :
     }
 
     sealed class Msg {
-        data class SettingsLoaded(val settings: GameSettings) : Msg()
-        data class SettingsUpdated(val settings: GameSettings) : Msg()
-        data class SavingChanged(val isSaving: Boolean) : Msg()
-        data class UnsavedChangesChanged(val hasUnsavedChanges: Boolean) : Msg()
+        data class SettingsLoaded(
+            val settings: GameSettings,
+        ) : Msg()
+
+        data class SettingsUpdated(
+            val settings: GameSettings,
+        ) : Msg()
+
+        data class SavingChanged(
+            val isSaving: Boolean,
+        ) : Msg()
+
+        data class UnsavedChangesChanged(
+            val hasUnsavedChanges: Boolean,
+        ) : Msg()
     }
 
     sealed class Label {
         data object SettingsSaved : Label()
+
         data object ChangesDiscarded : Label()
-        data class ShowError(val message: String) : Label()
+
+        data class ShowError(
+            val message: String,
+        ) : Label()
     }
 }

@@ -4,7 +4,6 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class PositionTest {
-
     @Test
     fun plus_shouldAddCoordinates() {
         // Given

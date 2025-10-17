@@ -14,7 +14,10 @@ import tetrislite.composeapp.generated.resources.error_title
 import tetrislite.composeapp.generated.resources.ok
 
 @Composable
- fun ErrorDialog(message: String, onDismiss: () -> Unit) {
+fun ErrorDialog(
+    message: String,
+    onDismiss: () -> Unit,
+) {
     AlertDialog(
         onDismissRequest = onDismiss,
         icon = { Icon(Icons.Default.Warning, contentDescription = "Error", tint = MaterialTheme.colorScheme.error) },
@@ -24,6 +27,6 @@ import tetrislite.composeapp.generated.resources.ok
             TextButton(onClick = onDismiss) {
                 Text(stringResource(Res.string.ok))
             }
-        }
+        },
     )
 }

@@ -1,22 +1,25 @@
 package com.yet.tetris.domain.usecase
 
-import com.yet.tetris.domain.model.game.*
+import com.yet.tetris.domain.model.game.GameBoard
+import com.yet.tetris.domain.model.game.GameState
+import com.yet.tetris.domain.model.game.Position
+import com.yet.tetris.domain.model.game.Tetromino
+import com.yet.tetris.domain.model.game.TetrominoType
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 
 class RotatePieceUseCaseTest {
-
     private val checkCollision = CheckCollisionUseCase()
     private val useCase = RotatePieceUseCase(checkCollision)
 
     private fun createTestState(
         position: Position = Position(3, 10),
         board: GameBoard = GameBoard(),
-        piece: Tetromino = Tetromino.create(TetrominoType.T, 0)
-    ): GameState {
-        return GameState(
+        piece: Tetromino = Tetromino.create(TetrominoType.T, 0),
+    ): GameState =
+        GameState(
             board = board,
             currentPiece = piece,
             currentPosition = position,
@@ -24,9 +27,8 @@ class RotatePieceUseCaseTest {
             score = 0,
             linesCleared = 0,
             isGameOver = false,
-            isPaused = false
+            isPaused = false,
         )
-    }
 
     @Test
     fun invoke_validRotation_shouldRotatePiece() {
@@ -80,10 +82,11 @@ class RotatePieceUseCaseTest {
     @Test
     fun invoke_wallKick_shouldAdjustPosition() {
         // Given - Piece at left wall
-        val state = createTestState(
-            position = Position(0, 10),
-            piece = Tetromino.create(TetrominoType.I, 0)
-        )
+        val state =
+            createTestState(
+                position = Position(0, 10),
+                piece = Tetromino.create(TetrominoType.I, 0),
+            )
 
         // When - Try to rotate (would go out of bounds without wall kick)
         val newState = useCase(state)
@@ -145,10 +148,11 @@ class RotatePieceUseCaseTest {
     @Test
     fun invoke_iPiece_shouldUseIPieceWallKicks() {
         // Given - I piece has different wall kick behavior
-        val state = createTestState(
-            position = Position(0, 10),
-            piece = Tetromino.create(TetrominoType.I, 0)
-        )
+        val state =
+            createTestState(
+                position = Position(0, 10),
+                piece = Tetromino.create(TetrominoType.I, 0),
+            )
 
         // When
         val newState = useCase(state)
@@ -160,10 +164,11 @@ class RotatePieceUseCaseTest {
     @Test
     fun invoke_tPiece_shouldUseStandardWallKicks() {
         // Given
-        val state = createTestState(
-            position = Position(0, 10),
-            piece = Tetromino.create(TetrominoType.T, 0)
-        )
+        val state =
+            createTestState(
+                position = Position(0, 10),
+                piece = Tetromino.create(TetrominoType.T, 0),
+            )
 
         // When
         val newState = useCase(state)
@@ -175,10 +180,11 @@ class RotatePieceUseCaseTest {
     @Test
     fun invoke_atRightWall_shouldWallKick() {
         // Given - Piece at right wall
-        val state = createTestState(
-            position = Position(8, 10),
-            piece = Tetromino.create(TetrominoType.T, 0)
-        )
+        val state =
+            createTestState(
+                position = Position(8, 10),
+                piece = Tetromino.create(TetrominoType.T, 0),
+            )
 
         // When - Rotate (may need wall kick)
         val newState = useCase(state)
@@ -190,10 +196,11 @@ class RotatePieceUseCaseTest {
     @Test
     fun invoke_nearBottom_shouldHandleCorrectly() {
         // Given - Piece near bottom
-        val state = createTestState(
-            position = Position(5, 18),
-            piece = Tetromino.create(TetrominoType.I, 0)
-        )
+        val state =
+            createTestState(
+                position = Position(5, 18),
+                piece = Tetromino.create(TetrominoType.I, 0),
+            )
 
         // When
         val newState = useCase(state)

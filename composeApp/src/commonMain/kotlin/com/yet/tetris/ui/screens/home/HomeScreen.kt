@@ -56,13 +56,13 @@ fun HomeScreen(component: HomeComponent) {
                 title = {
                     Text(
                         stringResource(Res.string.app_title),
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
                     )
                 },
                 navigationIcon = {
                     FrostedGlassButton(
                         onClick = component::onOpenHistory,
-                        icon = Icons.Default.History
+                        icon = Icons.Default.History,
                     )
                 },
                 actions = {
@@ -71,19 +71,21 @@ fun HomeScreen(component: HomeComponent) {
                         icon = Icons.Default.Settings,
                     )
                 },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = Color.Transparent
-                )
+                colors =
+                    TopAppBarDefaults.centerAlignedTopAppBarColors(
+                        containerColor = Color.Transparent,
+                    ),
             )
-        }
+        },
     ) { paddingValues ->
         when (val state = model) {
             is HomeComponent.Model.Loading -> {
                 Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues),
-                    contentAlignment = Alignment.Center
+                    modifier =
+                        Modifier
+                            .fillMaxSize()
+                            .padding(paddingValues),
+                    contentAlignment = Alignment.Center,
                 ) {
                     CircularProgressIndicator()
                 }
@@ -91,14 +93,15 @@ fun HomeScreen(component: HomeComponent) {
 
             is HomeComponent.Model.Content -> {
                 HomeContent(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues),
+                    modifier =
+                        Modifier
+                            .fillMaxSize()
+                            .padding(paddingValues),
                     hasSavedGame = state.hasSavedGame,
                     currentDifficulty = state.settings.difficulty,
                     onStartNewGame = component::onStartNewGame,
                     onResumeGame = component::onResumeGame,
-                    onDifficultyChanged = component::onDifficultyChanged
+                    onDifficultyChanged = component::onDifficultyChanged,
                 )
             }
         }
@@ -107,9 +110,7 @@ fun HomeScreen(component: HomeComponent) {
 }
 
 @Composable
-fun HomeSheet(
-    component: HomeComponent
-) {
+fun HomeSheet(component: HomeComponent) {
     val bottomSheetSlot by component.childBottomSheetNavigation.subscribeAsState()
 
     bottomSheetSlot.child?.instance?.let { child ->
@@ -134,12 +135,12 @@ private fun HomeContent(
     currentDifficulty: Difficulty,
     onStartNewGame: () -> Unit,
     onResumeGame: () -> Unit,
-    onDifficultyChanged: (Difficulty) -> Unit
+    onDifficultyChanged: (Difficulty) -> Unit,
 ) {
     Column(
         modifier = modifier.padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.SpaceBetween
+        verticalArrangement = Arrangement.SpaceBetween,
     ) {
         EnumSegmentedButtonRow(
             modifier = Modifier.fillMaxWidth(0.8f),
@@ -152,13 +153,13 @@ private fun HomeContent(
         Column(
             modifier = Modifier.widthIn(max = 400.dp).padding(horizontal = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             GlassButton(
                 title = stringResource(Res.string.start_new_game),
                 icon = Icons.Default.PlayArrow,
                 onClick = onStartNewGame,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
             )
 
             if (hasSavedGame) {

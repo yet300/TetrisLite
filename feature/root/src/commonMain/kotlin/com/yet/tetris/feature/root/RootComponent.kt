@@ -9,15 +9,20 @@ import com.yet.tetris.feature.game.GameComponent
 import com.yet.tetris.feature.home.HomeComponent
 
 @OptIn(ExperimentalDecomposeApi::class)
-interface RootComponent : BackHandlerOwner, WebNavigationOwner {
-
+interface RootComponent :
+    BackHandlerOwner,
+    WebNavigationOwner {
     val childStack: Value<ChildStack<*, Child>>
 
     fun onBackClicked()
 
     sealed class Child {
-        data class Home(val component: HomeComponent) : Child()
+        data class Home(
+            val component: HomeComponent,
+        ) : Child()
 
-        data class Game(val component: GameComponent) : Child()
+        data class Game(
+            val component: GameComponent,
+        ) : Child()
     }
 }

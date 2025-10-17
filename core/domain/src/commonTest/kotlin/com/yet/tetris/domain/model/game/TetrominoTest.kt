@@ -6,7 +6,6 @@ import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 
 class TetrominoTest {
-
     @Test
     fun create_allTypes_shouldHave4Blocks() {
         TetrominoType.entries.forEach { type ->
@@ -128,7 +127,12 @@ class TetrominoTest {
         val piece = Tetromino.create(TetrominoType.T, 0)
 
         // When - Rotate 4 times
-        val rotated4Times = piece.rotate().rotate().rotate().rotate()
+        val rotated4Times =
+            piece
+                .rotate()
+                .rotate()
+                .rotate()
+                .rotate()
 
         // Then - Should be back to original rotation
         assertEquals(0, rotated4Times.rotation)

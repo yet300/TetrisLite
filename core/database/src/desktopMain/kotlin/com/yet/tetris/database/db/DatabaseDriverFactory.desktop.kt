@@ -8,14 +8,10 @@ import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
 import java.util.Properties
 
 actual class DatabaseDriverFactory {
-
-    actual suspend fun provideDbDriver(
-        schema: SqlSchema<QueryResult.AsyncValue<Unit>>
-    ): SqlDriver {
-        return JdbcSqliteDriver(
-            url = "jdbc:sqlite:${dbFileName}.db",
+    actual suspend fun provideDbDriver(schema: SqlSchema<QueryResult.AsyncValue<Unit>>): SqlDriver =
+        JdbcSqliteDriver(
+            url = "jdbc:sqlite:$dbFileName.db",
             properties = Properties(),
-            schema = schema.synchronous()
+            schema = schema.synchronous(),
         )
-    }
 }

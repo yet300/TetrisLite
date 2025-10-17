@@ -7,17 +7,17 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class GameHistoryMapperTest {
-
     @Test
     fun toDomain_shouldMapAllFieldsCorrectly() {
         // Given
-        val entity = GameHistory(
-            id = "test-id",
-            score = 5000,
-            linesCleared = 50,
-            difficulty = Difficulty.HARD,
-            timestamp = 1234567890
-        )
+        val entity =
+            GameHistory(
+                id = "test-id",
+                score = 5000,
+                linesCleared = 50,
+                difficulty = Difficulty.HARD,
+                timestamp = 1234567890,
+            )
 
         // When
         val domain = entity.toDomain()
@@ -33,13 +33,14 @@ class GameHistoryMapperTest {
     @Test
     fun toEntity_shouldMapAllFieldsCorrectly() {
         // Given
-        val domain = GameRecord(
-            id = "test-id",
-            score = 5000,
-            linesCleared = 50,
-            difficulty = Difficulty.EASY,
-            timestamp = 1234567890
-        )
+        val domain =
+            GameRecord(
+                id = "test-id",
+                score = 5000,
+                linesCleared = 50,
+                difficulty = Difficulty.EASY,
+                timestamp = 1234567890,
+            )
 
         // When
         val entity = domain.toEntity()
@@ -55,13 +56,14 @@ class GameHistoryMapperTest {
     @Test
     fun roundTrip_shouldPreserveData() {
         // Given
-        val original = GameRecord(
-            id = "test-id",
-            score = 10000,
-            linesCleared = 100,
-            difficulty = Difficulty.NORMAL,
-            timestamp = 9876543210
-        )
+        val original =
+            GameRecord(
+                id = "test-id",
+                score = 10000,
+                linesCleared = 100,
+                difficulty = Difficulty.NORMAL,
+                timestamp = 9876543210,
+            )
 
         // When
         val entity = original.toEntity()

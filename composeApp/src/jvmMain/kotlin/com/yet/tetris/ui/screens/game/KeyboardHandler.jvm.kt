@@ -8,7 +8,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.focusTarget
-import androidx.compose.ui.input.key.*
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.type
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -18,14 +22,14 @@ actual fun Modifier.keyboardHandler(
     onMoveDown: () -> Unit,
     onRotate: () -> Unit,
     onHardDrop: () -> Unit,
-    onPause: () -> Unit
+    onPause: () -> Unit,
 ): Modifier {
     val focusRequester = remember { FocusRequester() }
-    
+
     LaunchedEffect(Unit) {
         focusRequester.requestFocus()
     }
-    
+
     return this
         .focusRequester(focusRequester)
         .focusTarget()
@@ -53,7 +57,7 @@ actual fun Modifier.keyboardHandler(
                         true
                     }
 
-                    Key.Escape ->{
+                    Key.Escape -> {
                         onPause()
                         true
                     }

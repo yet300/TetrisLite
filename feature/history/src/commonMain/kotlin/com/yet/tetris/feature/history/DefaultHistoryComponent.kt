@@ -12,11 +12,12 @@ import com.yet.tetris.feature.history.store.HistoryStoreFactory
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 
-
 class DefaultHistoryComponent(
     componentContext: ComponentContext,
     private val dismiss: () -> Unit,
-) : ComponentContext by componentContext, HistoryComponent, KoinComponent {
+) : ComponentContext by componentContext,
+    HistoryComponent,
+    KoinComponent {
     private val store = instanceKeeper.getStore { HistoryStoreFactory().create() }
 
     init {
@@ -34,19 +35,19 @@ class DefaultHistoryComponent(
                 }
             }
         }
-
     }
 
-    override val model: Value<HistoryComponent.Model> = store.asValue().map { state ->
-        if (state.isLoading && state.games.isEmpty()) {
-            HistoryComponent.Model.Loading
-        } else {
-            HistoryComponent.Model.Content(
-                games = state.filteredGames,
-                currentFilter = state.dateFilter
-            )
+    override val model: Value<HistoryComponent.Model> =
+        store.asValue().map { state ->
+            if (state.isLoading && state.games.isEmpty()) {
+                HistoryComponent.Model.Loading
+            } else {
+                HistoryComponent.Model.Content(
+                    games = state.filteredGames,
+                    currentFilter = state.dateFilter,
+                )
+            }
         }
-    }
 
     override fun onDismiss() = dismiss()
 

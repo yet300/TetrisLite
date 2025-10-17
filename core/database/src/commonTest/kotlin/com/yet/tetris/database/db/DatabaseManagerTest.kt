@@ -1,6 +1,5 @@
 package com.yet.tetris.database.db
 
-
 import com.yet.tetris.database.RobolectricTestRunner
 import com.yet.tetris.database.createTestDatabaseDriverFactory
 import kotlinx.coroutines.async
@@ -12,12 +11,10 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertSame
 
-class DatabaseManagerTest: RobolectricTestRunner() {
-
+class DatabaseManagerTest : RobolectricTestRunner() {
     private val driverFactory = createTestDatabaseDriverFactory()
 
     private fun createManager() = DatabaseManager(driverFactory)
-
 
     @AfterTest
     fun tearDown() {
@@ -25,61 +22,66 @@ class DatabaseManagerTest: RobolectricTestRunner() {
     }
 
     @Test
-    fun getDb_shouldReturnDatabaseInstance() = runTest {
-        // Given
-        val manager = createManager()
-        
-        // When
-        val db = manager.getDb()
+    fun getDb_shouldReturnDatabaseInstance() =
+        runTest {
+            // Given
+            val manager = createManager()
 
-        // Then
-        assertNotNull(db)
-    }
+            // When
+            val db = manager.getDb()
 
-    @Test
-    fun getDb_shouldReturnSameInstanceOnMultipleCalls() = runTest {
-        // Given
-        val manager = createManager()
-        
-        // When
-        val db1 = manager.getDb()
-        val db2 = manager.getDb()
-
-        // Then
-        assertSame(db1, db2)
-    }
-
-    @Test
-    fun getDb_shouldHandleConcurrentInitialization() = runTest {
-        // Given
-        val manager = createManager()
-        
-        // When - Multiple coroutines try to get the database simultaneously
-        val deferredDbs = List(10) {
-            async { manager.getDb() }
+            // Then
+            assertNotNull(db)
         }
-        val databases = deferredDbs.awaitAll()
-
-        // Then - All should get the same instance
-        val firstDb = databases.first()
-        databases.forEach { db ->
-            assertSame(firstDb, db)
-        }
-    }
 
     @Test
-    fun getDb_shouldInitializeDatabaseSchema() = runTest {
-        // Given
-        val manager = createManager()
-        
-        // When
-        val db = manager.getDb()
+    fun getDb_shouldReturnSameInstanceOnMultipleCalls() =
+        runTest {
+            // Given
+            val manager = createManager()
 
-        // Then - Verify tables exist by attempting queries
-        val gameHistoryCount = db.gameHistoryQueries.getGamesCount().executeAsOne()
-        assertEquals(0, gameHistoryCount)
+            // When
+            val db1 = manager.getDb()
+            val db2 = manager.getDb()
 
-        val hasSavedState = db.currentGameStateQueries.hasSavedState().executeAsOne()
-        assertEquals(false, hasSavedState)
-    }
+            // Then
+            assertSame(db1, db2)
+        }
+
+    @Test
+    fun getDb_shouldHandleConcurrentInitialization() =
+        runTest {
+            // Given
+            val manager = createManager()
+
+            // When - Multiple coroutines try to get the database simultaneously
+            val deferredDbs =
+                List(10) {
+                    async { manager.getDb() }
+                }
+            val databases = deferredDbs.awaitAll()
+
+            // Then - All should get the same instance
+            val firstDb = databases.first()
+            databases.forEach { db ->
+                assertSame(firstDb, db)
+            }
+        }
+
+    @Test
+    fun getDb_shouldInitializeDatabaseSchema() =
+        runTest {
+            // Given
+            val manager = createManager()
+
+            // When
+            val db = manager.getDb()
+
+            // Then - Verify tables exist by attempting queries
+            val gameHistoryCount = db.gameHistoryQueries.getGamesCount().executeAsOne()
+            assertEquals(0, gameHistoryCount)
+
+            val hasSavedState = db.currentGameStateQueries.hasSavedState().executeAsOne()
+            assertEquals(false, hasSavedState)
+        }
 }

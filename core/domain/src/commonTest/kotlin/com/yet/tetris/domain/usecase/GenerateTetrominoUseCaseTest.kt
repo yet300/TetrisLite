@@ -6,7 +6,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class GenerateTetrominoUseCaseTest {
-
     private val useCase = GenerateTetrominoUseCase()
 
     @Test

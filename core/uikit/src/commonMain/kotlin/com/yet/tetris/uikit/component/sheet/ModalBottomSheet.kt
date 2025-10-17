@@ -11,17 +11,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ModalBottomSheet(
     modifier: Modifier = Modifier,
     onDismiss: () -> Unit,
-    content: @Composable() (ColumnScope.() -> Unit),
+    content:
+        @Composable()
+        (ColumnScope.() -> Unit),
 ) {
-    val sheetState = rememberModalBottomSheetState(
-        skipPartiallyExpanded = true
-    )
+    val sheetState =
+        rememberModalBottomSheetState(
+            skipPartiallyExpanded = true,
+        )
     ModalBottomSheet(
         modifier = modifier.statusBarsPadding(),
         onDismissRequest = onDismiss,
@@ -29,6 +31,6 @@ fun ModalBottomSheet(
         dragHandle = null,
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
         containerColor = MaterialTheme.colorScheme.background,
-        content = content
+        content = content,
     )
 }

@@ -35,7 +35,7 @@ fun SwipeableActionsBox(
     onFullSwipe: () -> Unit,
     modifier: Modifier = Modifier,
     actions: @Composable RowScope.() -> Unit,
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
     var actionsWidth by remember { mutableFloatStateOf(0f) }
     var componentWidth by remember { mutableFloatStateOf(0f) }
@@ -54,58 +54,62 @@ fun SwipeableActionsBox(
     }
 
     Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .onSizeChanged {
-                componentWidth = it.width.toFloat()
-            }
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .onSizeChanged {
+                    componentWidth = it.width.toFloat()
+                },
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxHeight()
-                .align(Alignment.CenterEnd)
-                .onSizeChanged {
-                    actionsWidth = it.width.toFloat()
-                },
+            modifier =
+                Modifier
+                    .fillMaxHeight()
+                    .align(Alignment.CenterEnd)
+                    .onSizeChanged {
+                        actionsWidth = it.width.toFloat()
+                    },
             horizontalArrangement = Arrangement.End,
         ) {
             actions()
         }
 
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .offset { IntOffset(offset.value.roundToInt(), 0) }
-                .pointerInput(actionsWidth, componentWidth) {
-                    if (actionsWidth == 0f || componentWidth == 0f) return@pointerInput
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .offset { IntOffset(offset.value.roundToInt(), 0) }
+                    .pointerInput(actionsWidth, componentWidth) {
+                        if (actionsWidth == 0f || componentWidth == 0f) return@pointerInput
 
-                    detectHorizontalDragGestures(
-                        onHorizontalDrag = { _, dragAmount ->
-                            scope.launch {
-                                val newOffset = (offset.value + dragAmount)
-                                    .coerceIn(-componentWidth, 0f)
-                                offset.snapTo(newOffset)
-                            }
-                        },
-                        onDragEnd = {
-                            scope.launch {
-                                val revealThreshold = -actionsWidth / 2f
-                                val fullSwipeThreshold = -componentWidth * 0.75f
-
-                                if (offset.value < fullSwipeThreshold) {
-                                    offset.animateTo(-componentWidth)
-                                    onFullSwipe()
-                                } else if (offset.value < revealThreshold) {
-                                    offset.animateTo(-actionsWidth + endPaddingPx)
-                                    onExpanded()
-                                } else {
-                                    offset.animateTo(0f)
-                                    onCollapsed()
+                        detectHorizontalDragGestures(
+                            onHorizontalDrag = { _, dragAmount ->
+                                scope.launch {
+                                    val newOffset =
+                                        (offset.value + dragAmount)
+                                            .coerceIn(-componentWidth, 0f)
+                                    offset.snapTo(newOffset)
                                 }
-                            }
-                        }
-                    )
-                }
+                            },
+                            onDragEnd = {
+                                scope.launch {
+                                    val revealThreshold = -actionsWidth / 2f
+                                    val fullSwipeThreshold = -componentWidth * 0.75f
+
+                                    if (offset.value < fullSwipeThreshold) {
+                                        offset.animateTo(-componentWidth)
+                                        onFullSwipe()
+                                    } else if (offset.value < revealThreshold) {
+                                        offset.animateTo(-actionsWidth + endPaddingPx)
+                                        onExpanded()
+                                    } else {
+                                        offset.animateTo(0f)
+                                        onCollapsed()
+                                    }
+                                }
+                            },
+                        )
+                    },
         ) {
             content()
         }

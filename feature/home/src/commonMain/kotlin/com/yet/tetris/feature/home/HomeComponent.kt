@@ -13,22 +13,33 @@ interface HomeComponent {
     val childBottomSheetNavigation: Value<ChildSlot<*, BottomSheetChild>>
 
     fun onDismissBottomSheet()
+
     fun onStartNewGame()
+
     fun onResumeGame()
+
     fun onDifficultyChanged(difficulty: Difficulty)
+
     fun onOpenSettings()
+
     fun onOpenHistory()
-    
+
     sealed interface Model {
         data object Loading : Model
+
         data class Content(
             val settings: GameSettings,
-            val hasSavedGame: Boolean
+            val hasSavedGame: Boolean,
         ) : Model
     }
 
     sealed interface BottomSheetChild {
-        class HistoryChild(val component: HistoryComponent) : BottomSheetChild
-        class SettingsChild(val component: SettingsComponent) : BottomSheetChild
+        class HistoryChild(
+            val component: HistoryComponent,
+        ) : BottomSheetChild
+
+        class SettingsChild(
+            val component: SettingsComponent,
+        ) : BottomSheetChild
     }
 }

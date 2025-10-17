@@ -9,7 +9,5 @@ import org.koin.core.annotation.Single
 @Module
 actual class DataPlatformModule actual constructor() {
     @Single
-    actual fun provideAudioRepository(cacheManager: AudioCacheManager): AudioRepository {
-        return AndroidAudioRepositoryImpl(cacheManager)
-    }
+    actual fun provideAudioRepository(cacheManager: AudioCacheManager): AudioRepository = AndroidAudioRepositoryImpl(cacheManager)
 }

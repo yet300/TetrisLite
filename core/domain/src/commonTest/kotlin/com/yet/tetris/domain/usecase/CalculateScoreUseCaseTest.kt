@@ -4,7 +4,6 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class CalculateScoreUseCaseTest {
-
     private val useCase = CalculateScoreUseCase()
 
     @Test

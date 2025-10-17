@@ -20,15 +20,14 @@ import kotlinx.serialization.serializer
 @Singleton
 class GameSettingsRepositoryImpl(
     private val flowSettings: FlowSettings,
-    private val json: Json
+    private val json: Json,
 ) : GameSettingsRepository {
-    
     companion object {
         private const val KEY_SETTINGS = "game_settings"
     }
-    
-    override suspend fun getSettings(): GameSettings {
-        return try {
+
+    override suspend fun getSettings(): GameSettings =
+        try {
             val settingsJson = flowSettings.getStringOrNull(KEY_SETTINGS)
             if (settingsJson != null) {
                 val dto = json.decodeFromString<GameSettingsDto>(settingsJson)
@@ -40,8 +39,7 @@ class GameSettingsRepositoryImpl(
             // If deserialization fails, return default settings
             GameSettings()
         }
-    }
-    
+
     override suspend fun saveSettings(settings: GameSettings) {
         try {
             val dto = settings.toDto()
@@ -52,9 +50,10 @@ class GameSettingsRepositoryImpl(
             throw e
         }
     }
-    
-    override fun observeSettings(): Flow<GameSettings> {
-        return flowSettings.getStringOrNullFlow(KEY_SETTINGS)
+
+    override fun observeSettings(): Flow<GameSettings> =
+        flowSettings
+            .getStringOrNullFlow(KEY_SETTINGS)
             .map { settingsJson ->
                 if (settingsJson != null) {
                     try {
@@ -67,5 +66,4 @@ class GameSettingsRepositoryImpl(
                     GameSettings()
                 }
             }
-    }
 }

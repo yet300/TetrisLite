@@ -15,51 +15,70 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
 
 @Singleton
-class GameHistoryDao(private val databaseManager: DatabaseManager) {
-
-    
-    suspend fun insertGame(gameHistory: GameHistory) = withContext(Dispatchers.Default) {
-        databaseManager.getDb().gameHistoryQueries.insertGame(
-            id = gameHistory.id,
-            score = gameHistory.score,
-            linesCleared = gameHistory.linesCleared,
-            difficulty = gameHistory.difficulty,
-            timestamp = gameHistory.timestamp
-        )
-    }
-    
-    suspend fun getAllGames(): List<GameHistory> = withContext(Dispatchers.Default) {
-        databaseManager.getDb().gameHistoryQueries.getAllGames().awaitAsList()
-    }
-    
-    fun observeAllGames(): Flow<List<GameHistory>> {
-        return flow {
-            val db = databaseManager.getDb()
-            emitAll(
-                db.gameHistoryQueries.getAllGames()
-                    .asFlow()
-                    .mapToList(Dispatchers.Default)
+class GameHistoryDao(
+    private val databaseManager: DatabaseManager,
+) {
+    suspend fun insertGame(gameHistory: GameHistory) =
+        withContext(Dispatchers.Default) {
+            databaseManager.getDb().gameHistoryQueries.insertGame(
+                id = gameHistory.id,
+                score = gameHistory.score,
+                linesCleared = gameHistory.linesCleared,
+                difficulty = gameHistory.difficulty,
+                timestamp = gameHistory.timestamp,
             )
         }
-    }
-    
-    suspend fun getGameById(id: String): GameHistory? = withContext(Dispatchers.Default) {
-        databaseManager.getDb().gameHistoryQueries.getGameById(id).awaitAsOneOrNull()
-    }
-    
-    suspend fun deleteGame(id: String) = withContext(Dispatchers.Default) {
-        databaseManager.getDb().gameHistoryQueries.deleteGame(id)
-    }
-    
-    suspend fun clearAllGames() = withContext(Dispatchers.Default) {
-        databaseManager.getDb().gameHistoryQueries.clearAllGames()
-    }
-    
-    suspend fun getGamesCount(): Long = withContext(Dispatchers.Default) {
-        databaseManager.getDb().gameHistoryQueries.getGamesCount().awaitAsOne()
-    }
-    
-    suspend fun deleteOldestGames(count: Long) = withContext(Dispatchers.Default) {
-        databaseManager.getDb().gameHistoryQueries.deleteOldestGames(count)
-    }
+
+    suspend fun getAllGames(): List<GameHistory> =
+        withContext(Dispatchers.Default) {
+            databaseManager
+                .getDb()
+                .gameHistoryQueries
+                .getAllGames()
+                .awaitAsList()
+        }
+
+    fun observeAllGames(): Flow<List<GameHistory>> =
+        flow {
+            val db = databaseManager.getDb()
+            emitAll(
+                db.gameHistoryQueries
+                    .getAllGames()
+                    .asFlow()
+                    .mapToList(Dispatchers.Default),
+            )
+        }
+
+    suspend fun getGameById(id: String): GameHistory? =
+        withContext(Dispatchers.Default) {
+            databaseManager
+                .getDb()
+                .gameHistoryQueries
+                .getGameById(id)
+                .awaitAsOneOrNull()
+        }
+
+    suspend fun deleteGame(id: String) =
+        withContext(Dispatchers.Default) {
+            databaseManager.getDb().gameHistoryQueries.deleteGame(id)
+        }
+
+    suspend fun clearAllGames() =
+        withContext(Dispatchers.Default) {
+            databaseManager.getDb().gameHistoryQueries.clearAllGames()
+        }
+
+    suspend fun getGamesCount(): Long =
+        withContext(Dispatchers.Default) {
+            databaseManager
+                .getDb()
+                .gameHistoryQueries
+                .getGamesCount()
+                .awaitAsOne()
+        }
+
+    suspend fun deleteOldestGames(count: Long) =
+        withContext(Dispatchers.Default) {
+            databaseManager.getDb().gameHistoryQueries.deleteOldestGames(count)
+        }
 }

@@ -8,7 +8,6 @@ import org.koin.core.annotation.Single
 @Module
 actual class DataPlatformModule actual constructor() {
     @Single
-    actual fun provideAudioRepository(cacheManager: AudioCacheManager): com.yet.tetris.domain.repository.AudioRepository {
-        return JsAudioRepositoryImpl(cacheManager)
-    }
+    actual fun provideAudioRepository(cacheManager: AudioCacheManager): com.yet.tetris.domain.repository.AudioRepository =
+        JsAudioRepositoryImpl(cacheManager)
 }

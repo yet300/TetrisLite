@@ -13,14 +13,13 @@ import jakarta.inject.Singleton
  */
 @Singleton
 class GameStateRepositoryImpl(
-    private val gameStateDao: GameStateDao
+    private val gameStateDao: GameStateDao,
 ) : GameStateRepository {
-    
     override suspend fun saveGameState(state: GameState) {
         try {
             val entities = state.toEntities()
             val data = entities.gameState
-            
+
             gameStateDao.saveGameState(
                 score = data.score,
                 linesCleared = data.linesCleared,
@@ -34,24 +33,23 @@ class GameStateRepositoryImpl(
                 isPaused = data.isPaused,
                 boardWidth = data.boardWidth,
                 boardHeight = data.boardHeight,
-                boardCells = entities.boardCells
+                boardCells = entities.boardCells,
             )
         } catch (e: Exception) {
             throw e
         }
     }
-    
-    override suspend fun loadGameState(): GameState? {
-        return try {
+
+    override suspend fun loadGameState(): GameState? =
+        try {
             val gameState = gameStateDao.getGameState()
             val boardCells = gameStateDao.getBoardCells()
-            
+
             gameState?.toDomain(boardCells)
         } catch (e: Exception) {
             null
         }
-    }
-    
+
     override suspend fun clearGameState() {
         try {
             gameStateDao.clearGameState()
@@ -59,12 +57,11 @@ class GameStateRepositoryImpl(
             throw e
         }
     }
-    
-    override suspend fun hasSavedState(): Boolean {
-        return try {
+
+    override suspend fun hasSavedState(): Boolean =
+        try {
             gameStateDao.hasSavedState()
         } catch (e: Exception) {
             false
         }
-    }
 }

@@ -1,4 +1,4 @@
-package com.yet.tetris.domain.di;
+package com.yet.tetris.domain.di
 
 import org.koin.core.annotation.ComponentScan
 import org.koin.core.annotation.Module

@@ -34,10 +34,8 @@ class AudioCacheManager {
     /**
      * Retrieves a sound effect from the cache.
      */
-    suspend fun getSfxPcm(effect: SoundEffect): FloatArray? {
-        return cacheMutex.withLock { sfxPcmCache[effect] }
-    }
-    
+    suspend fun getSfxPcm(effect: SoundEffect): FloatArray? = cacheMutex.withLock { sfxPcmCache[effect] }
+
     /**
      * Retrieves a music track from the cache. If not present,
      * synthesizes and caches it before returning.
@@ -53,12 +51,11 @@ class AudioCacheManager {
             }
         }
     }
-    
+
     suspend fun clear() {
         cacheMutex.withLock {
             sfxPcmCache.clear()
             musicPcmCache.clear()
         }
     }
-
 }

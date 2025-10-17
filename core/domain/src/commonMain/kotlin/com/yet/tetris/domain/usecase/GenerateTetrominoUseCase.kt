@@ -12,10 +12,9 @@ import kotlin.random.Random
  */
 @Singleton
 class GenerateTetrominoUseCase {
-    
     private val bag = mutableListOf<TetrominoType>()
     private val random = Random.Default
-    
+
     /**
      * Generates the next tetromino using the bag randomizer algorithm.
      * When the bag is empty, it refills with all 7 piece types in random order.
@@ -24,11 +23,11 @@ class GenerateTetrominoUseCase {
         if (bag.isEmpty()) {
             refillBag()
         }
-        
+
         val type = bag.removeFirst()
         return Tetromino.create(type, rotation = 0)
     }
-    
+
     /**
      * Refills the bag with all 7 tetromino types in random order.
      */
@@ -37,7 +36,7 @@ class GenerateTetrominoUseCase {
         bag.addAll(TetrominoType.entries)
         bag.shuffle(random)
     }
-    
+
     /**
      * Resets the generator state. Useful for starting a new game.
      */

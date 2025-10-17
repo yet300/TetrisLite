@@ -16,22 +16,23 @@ import androidx.compose.ui.unit.dp
 fun FrostedGlassButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    icon: ImageVector
+    icon: ImageVector,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     IconButton(
         onClick = onClick,
         interactionSource = interactionSource,
         modifier = modifier,
-        colors = IconButtonDefaults.iconButtonColors(
-            contentColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
-            containerColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.1f)
-        )
+        colors =
+            IconButtonDefaults.iconButtonColors(
+                contentColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
+                containerColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.1f),
+            ),
     ) {
         Icon(
             imageVector = icon,
             contentDescription = icon.name,
-            modifier = Modifier.size(18.dp)
+            modifier = Modifier.size(18.dp),
         )
     }
 }

@@ -7,9 +7,10 @@ import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.db.SqlSchema
 import app.cash.sqldelight.driver.android.AndroidSqliteDriver
 
-actual class DatabaseDriverFactory(private val context: Context) {
-
-    actual suspend fun provideDbDriver(schema: SqlSchema<QueryResult.AsyncValue<Unit>>): SqlDriver {
-        return AndroidSqliteDriver(schema.synchronous(), context, dbFileName)
-    }
+@Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
+actual class DatabaseDriverFactory(
+    private val context: Context,
+) {
+    actual suspend fun provideDbDriver(schema: SqlSchema<QueryResult.AsyncValue<Unit>>): SqlDriver =
+        AndroidSqliteDriver(schema.synchronous(), context, dbFileName)
 }

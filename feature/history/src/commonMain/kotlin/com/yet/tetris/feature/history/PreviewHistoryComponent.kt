@@ -10,14 +10,14 @@ import com.arkivanov.decompose.value.Value
 @OptIn(ExperimentalDecomposeApi::class)
 class PreviewHistoryComponent :
     HistoryComponent,
-    ComponentContext by PreviewComponentContext, WebNavigationOwner.NoOp {
+    ComponentContext by PreviewComponentContext,
+    WebNavigationOwner.NoOp {
     override val model: Value<HistoryComponent.Model> =
         MutableValue(HistoryComponent.Model.Loading)
 
     override fun onDismiss() {
         TODO("Not yet implemented")
     }
-
 
     override fun onRefresh() {
         TODO("Not yet implemented")
@@ -30,5 +30,4 @@ class PreviewHistoryComponent :
     override fun onDeleteGame(id: String) {
         TODO("Not yet implemented")
     }
-
 }

@@ -7,16 +7,26 @@ import kotlin.time.ExperimentalTime
 
 // Define the inputs for the UseCase
 sealed interface GestureEvent {
-    data class DragStarted(val boardHeightPx: Float) : GestureEvent
-    data class Dragged(val deltaX: Float, val deltaY: Float) : GestureEvent
+    data class DragStarted(
+        val boardHeightPx: Float,
+    ) : GestureEvent
+
+    data class Dragged(
+        val deltaX: Float,
+        val deltaY: Float,
+    ) : GestureEvent
+
     data object DragEnded : GestureEvent
 }
 
 // Define the possible outcomes of the UseCase
 sealed interface GestureResult {
     data object MoveLeft : GestureResult
+
     data object MoveRight : GestureResult
+
     data object MoveDown : GestureResult
+
     data object HardDrop : GestureResult
 }
 
@@ -26,15 +36,14 @@ sealed interface GestureResult {
  */
 @OptIn(ExperimentalTime::class)
 @Singleton
-class GestureHandlingUseCase  {
-
+class GestureHandlingUseCase {
     // Internal state of the current gesture
     private data class State(
         val accumulatedDragX: Float = 0f,
         val totalDragDistanceY: Float = 0f,
         val dragStartTime: Long = 0L,
         val isHorizontalSwipeDetermined: Boolean = false,
-        val boardHeightPx: Float = 0f
+        val boardHeightPx: Float = 0f,
     )
 
     private var state: State? = null
@@ -55,20 +64,21 @@ class GestureHandlingUseCase  {
             is GestureEvent.DragEnded -> {
                 val currentState = state ?: return null
                 val dragDuration = Clock.System.now().toEpochMilliseconds() - currentState.dragStartTime
-                
-                val result = when {
-                    // Check for a hard drop (fast flick down)
-                    !currentState.isHorizontalSwipeDetermined &&
+
+                val result =
+                    when {
+                        // Check for a hard drop (fast flick down)
+                        !currentState.isHorizontalSwipeDetermined &&
                             currentState.totalDragDistanceY > currentState.boardHeightPx * 0.25f &&
                             dragDuration < 500 -> GestureResult.HardDrop
-                    
-                    // Check for a regular soft drop
-                    !currentState.isHorizontalSwipeDetermined &&
+
+                        // Check for a regular soft drop
+                        !currentState.isHorizontalSwipeDetermined &&
                             currentState.totalDragDistanceY > swipeThreshold -> GestureResult.MoveDown
-                    
-                    else -> null
-                }
-                
+
+                        else -> null
+                    }
+
                 state = null // Reset state on drag end
                 result
             }
@@ -84,7 +94,7 @@ class GestureHandlingUseCase  {
                 if (!isHorizontal && abs(event.deltaX) > abs(event.deltaY) * 1.5f) {
                     isHorizontal = true
                 }
-                
+
                 // Update Y distance for hard drop check
                 if (event.deltaY > 0) {
                     currentState = currentState.copy(totalDragDistanceY = currentState.totalDragDistanceY + event.deltaY)
@@ -101,7 +111,7 @@ class GestureHandlingUseCase  {
                         currentState = currentState.copy(accumulatedDragX = newAccumulatedX, isHorizontalSwipeDetermined = true)
                     }
                 }
-                
+
                 state = currentState
                 result
             }

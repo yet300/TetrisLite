@@ -12,13 +12,14 @@ import com.yet.tetris.feature.home.PreviewHomeComponent
 @OptIn(ExperimentalDecomposeApi::class)
 class PreviewRootComponent :
     RootComponent,
-    ComponentContext by PreviewComponentContext, WebNavigationOwner.NoOp {
+    ComponentContext by PreviewComponentContext,
+    WebNavigationOwner.NoOp {
     override val childStack: Value<ChildStack<*, RootComponent.Child>> =
         MutableValue(
             ChildStack(
                 configuration = Unit,
                 instance = RootComponent.Child.Home(PreviewHomeComponent()),
-            )
+            ),
         )
 
     override fun onBackClicked() {

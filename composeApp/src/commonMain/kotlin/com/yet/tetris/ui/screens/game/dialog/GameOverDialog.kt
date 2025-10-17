@@ -25,22 +25,22 @@ import tetrislite.composeapp.generated.resources.retry
 @Composable
 fun GameOverDialog(
     component: GameComponent,
-    model: GameComponent.Model
+    model: GameComponent.Model,
 ) {
     AlertDialog(
-        onDismissRequest = component::onQuit, // Dismissing by clicking outside quits to home
+        onDismissRequest = component::onQuit,
         icon = {
             Icon(
                 Icons.Default.Warning,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.error
+                tint = MaterialTheme.colorScheme.error,
             )
         },
         title = {
             Text(
                 text = stringResource(Res.string.game_over),
                 style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
             )
         },
         text = {
@@ -49,12 +49,12 @@ fun GameOverDialog(
                 Text(
                     text = stringResource(Res.string.final_score, model.finalScore),
                     style = MaterialTheme.typography.bodyLarge,
-                    textAlign = TextAlign.Center
+                    textAlign = TextAlign.Center,
                 )
                 Text(
                     text = stringResource(Res.string.lines_cleared, model.finalLinesCleared),
                     style = MaterialTheme.typography.bodyMedium,
-                    textAlign = TextAlign.Center
+                    textAlign = TextAlign.Center,
                 )
             }
         },
@@ -67,6 +67,6 @@ fun GameOverDialog(
             OutlinedButton(onClick = component::onQuit) {
                 Text(stringResource(Res.string.back_to_home))
             }
-        }
+        },
     )
 }

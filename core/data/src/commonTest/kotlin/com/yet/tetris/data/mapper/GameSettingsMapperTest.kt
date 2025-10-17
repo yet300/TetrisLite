@@ -3,7 +3,10 @@ package com.yet.tetris.data.mapper
 import com.yet.tetris.domain.model.audio.AudioSettings
 import com.yet.tetris.domain.model.audio.MusicTheme
 import com.yet.tetris.domain.model.game.Difficulty
-import com.yet.tetris.domain.model.settings.*
+import com.yet.tetris.domain.model.settings.GameSettings
+import com.yet.tetris.domain.model.settings.KeyboardLayout
+import com.yet.tetris.domain.model.settings.SwipeLayout
+import com.yet.tetris.domain.model.settings.SwipeSensitivity
 import com.yet.tetris.domain.model.theme.PieceStyle
 import com.yet.tetris.domain.model.theme.ThemeConfig
 import com.yet.tetris.domain.model.theme.VisualTheme
@@ -11,31 +14,34 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class GameSettingsMapperTest {
-
     @Test
     fun gameSettings_toDtoAndBack_shouldPreserveData() {
         // Given
-        val original = GameSettings(
-            difficulty = Difficulty.HARD,
-            themeConfig = ThemeConfig(
-                visualTheme = VisualTheme.NEON,
-                pieceStyle = PieceStyle.GRADIENT
-            ),
-            keyboardLayout = KeyboardLayout.WASD,
-            swipeLayout = SwipeLayout.INVERTED,
-            swipeSensitivity = SwipeSensitivity(
-                softDropThreshold = 0.6f,
-                horizontalSensitivity = 1.2f,
-                verticalSensitivity = 0.9f
-            ),
-            audioSettings = AudioSettings(
-                musicEnabled = false,
-                soundEffectsEnabled = true,
-                musicVolume = 0.5f,
-                sfxVolume = 0.8f,
-                selectedMusicTheme = MusicTheme.MODERN
+        val original =
+            GameSettings(
+                difficulty = Difficulty.HARD,
+                themeConfig =
+                    ThemeConfig(
+                        visualTheme = VisualTheme.NEON,
+                        pieceStyle = PieceStyle.GRADIENT,
+                    ),
+                keyboardLayout = KeyboardLayout.WASD,
+                swipeLayout = SwipeLayout.INVERTED,
+                swipeSensitivity =
+                    SwipeSensitivity(
+                        softDropThreshold = 0.6f,
+                        horizontalSensitivity = 1.2f,
+                        verticalSensitivity = 0.9f,
+                    ),
+                audioSettings =
+                    AudioSettings(
+                        musicEnabled = false,
+                        soundEffectsEnabled = true,
+                        musicVolume = 0.5f,
+                        sfxVolume = 0.8f,
+                        selectedMusicTheme = MusicTheme.MODERN,
+                    ),
             )
-        )
 
         // When
         val dto = original.toDto()
@@ -105,11 +111,12 @@ class GameSettingsMapperTest {
     @Test
     fun swipeSensitivity_shouldMapAllFields() {
         // Given
-        val original = SwipeSensitivity(
-            softDropThreshold = 0.7f,
-            horizontalSensitivity = 1.5f,
-            verticalSensitivity = 0.8f
-        )
+        val original =
+            SwipeSensitivity(
+                softDropThreshold = 0.7f,
+                horizontalSensitivity = 1.5f,
+                verticalSensitivity = 0.8f,
+            )
 
         // When
         val dto = original.toDto()
@@ -124,13 +131,14 @@ class GameSettingsMapperTest {
     @Test
     fun audioSettings_shouldMapAllFields() {
         // Given
-        val original = AudioSettings(
-            musicEnabled = true,
-            soundEffectsEnabled = false,
-            musicVolume = 0.3f,
-            sfxVolume = 0.9f,
-            selectedMusicTheme = MusicTheme.MINIMAL
-        )
+        val original =
+            AudioSettings(
+                musicEnabled = true,
+                soundEffectsEnabled = false,
+                musicVolume = 0.3f,
+                sfxVolume = 0.9f,
+                selectedMusicTheme = MusicTheme.MINIMAL,
+            )
 
         // When
         val dto = original.toDto()
@@ -147,10 +155,11 @@ class GameSettingsMapperTest {
     @Test
     fun themeConfig_shouldMapAllFields() {
         // Given
-        val original = ThemeConfig(
-            visualTheme = VisualTheme.SUNSET,
-            pieceStyle = PieceStyle.RETRO_PIXEL
-        )
+        val original =
+            ThemeConfig(
+                visualTheme = VisualTheme.SUNSET,
+                pieceStyle = PieceStyle.RETRO_PIXEL,
+            )
 
         // When
         val dto = original.toDto()

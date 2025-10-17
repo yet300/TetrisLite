@@ -12,23 +12,26 @@ import kotlin.math.abs
 @Singleton
 class HandleSwipeInputUseCase(
     private val movePiece: MovePieceUseCase,
-    private val hardDrop: HardDropUseCase
+    private val hardDrop: HardDropUseCase,
 ) {
-    
     /**
      * Represents the result of processing a swipe gesture.
      */
     sealed class SwipeAction {
         object MoveLeft : SwipeAction()
+
         object MoveRight : SwipeAction()
+
         object SoftDrop : SwipeAction()
+
         object HardDrop : SwipeAction()
+
         object None : SwipeAction()
     }
-    
+
     /**
      * Processes a swipe gesture and returns the updated game state.
-     * 
+     *
      * @param state Current game state
      * @param deltaX Horizontal swipe distance (positive = right, negative = left)
      * @param deltaY Vertical swipe distance (positive = down)
@@ -43,10 +46,10 @@ class HandleSwipeInputUseCase(
         deltaY: Float,
         velocityX: Float,
         velocityY: Float,
-        sensitivity: SwipeSensitivity
+        sensitivity: SwipeSensitivity,
     ): GameState? {
         val action = determineSwipeAction(deltaX, deltaY, velocityX, velocityY, sensitivity)
-        
+
         return when (action) {
             SwipeAction.MoveLeft -> movePiece.moveLeft(state)
             SwipeAction.MoveRight -> movePiece.moveRight(state)
@@ -59,7 +62,7 @@ class HandleSwipeInputUseCase(
             SwipeAction.None -> null
         }
     }
-    
+
     /**
      * Determines the action based on swipe direction and velocity.
      * Vertical swipes: slow = soft drop, fast = hard drop
@@ -70,11 +73,11 @@ class HandleSwipeInputUseCase(
         deltaY: Float,
         velocityX: Float,
         velocityY: Float,
-        sensitivity: SwipeSensitivity
+        sensitivity: SwipeSensitivity,
     ): SwipeAction {
         val absX = abs(deltaX)
         val absY = abs(deltaY)
-        
+
         // Determine primary direction
         return if (absX > absY) {
             // Horizontal swipe
@@ -91,7 +94,7 @@ class HandleSwipeInputUseCase(
             SwipeAction.None
         }
     }
-    
+
     /**
      * Handles a tap gesture (used for rotation).
      */

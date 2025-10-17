@@ -47,7 +47,7 @@ fun BasicScrollableScaffold(
         bottomBar = bottomBar,
         snackbarHost = snackbarHost,
         scrollBehavior = scrollBehavior,
-        content = content
+        content = content,
     )
 }
 
@@ -62,13 +62,14 @@ fun BasicScaffold(
     content: @Composable (PaddingValues) -> Unit,
 ) {
     Scaffold(
-        modifier = scrollBehavior?.nestedScrollConnection?.run(modifier::nestedScroll)
-            ?: modifier,
+        modifier =
+            scrollBehavior?.nestedScrollConnection?.run(modifier::nestedScroll)
+                ?: modifier,
         topBar = topBar,
         snackbarHost = snackbarHost,
         floatingActionButton = floatingActionButton,
         bottomBar = bottomBar,
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
-        content = content
+        content = content,
     )
 }

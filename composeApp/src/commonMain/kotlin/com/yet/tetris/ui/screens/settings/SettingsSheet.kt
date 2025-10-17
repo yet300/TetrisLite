@@ -37,47 +37,61 @@ import com.yet.tetris.uikit.theme.TetrisLiteAppTheme
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import tetrislite.composeapp.generated.resources.Res
-import tetrislite.composeapp.generated.resources.*
+import tetrislite.composeapp.generated.resources.audio
+import tetrislite.composeapp.generated.resources.discard
+import tetrislite.composeapp.generated.resources.game_settings
+import tetrislite.composeapp.generated.resources.keyboard_layout
+import tetrislite.composeapp.generated.resources.music
+import tetrislite.composeapp.generated.resources.music_theme
+import tetrislite.composeapp.generated.resources.music_volume
+import tetrislite.composeapp.generated.resources.piece_style
+import tetrislite.composeapp.generated.resources.save
+import tetrislite.composeapp.generated.resources.sfx_volume
+import tetrislite.composeapp.generated.resources.sound_effects
+import tetrislite.composeapp.generated.resources.swipe_layout
+import tetrislite.composeapp.generated.resources.visual_theme
 
 @Composable
 fun SettingsSheet(component: SettingsComponent) {
     val model by component.model.subscribeAsState()
 
     Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp)
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
     ) {
         SettingsScreenContent(model, component)
 
         // Action Buttons
         Box(
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .fillMaxWidth()
-                .height(64.dp)
-                .background(MaterialTheme.colorScheme.background)
+            modifier =
+                Modifier
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth()
+                    .height(64.dp)
+                    .background(MaterialTheme.colorScheme.background),
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 OutlinedButton(
                     onClick = component::onDiscard,
                     modifier = Modifier.weight(1f),
-                    enabled = model.hasUnsavedChanges
+                    enabled = model.hasUnsavedChanges,
                 ) {
                     Text(stringResource(Res.string.discard))
                 }
                 Button(
                     onClick = component::onSave,
                     modifier = Modifier.weight(1f),
-                    enabled = model.hasUnsavedChanges && !model.isSaving
+                    enabled = model.hasUnsavedChanges && !model.isSaving,
                 ) {
                     if (model.isSaving) {
                         CircularProgressIndicator(
                             modifier = Modifier.size(16.dp),
-                            strokeWidth = 2.dp
+                            strokeWidth = 2.dp,
                         )
                     } else {
                         Text(stringResource(Res.string.save))
@@ -91,12 +105,12 @@ fun SettingsSheet(component: SettingsComponent) {
 @Composable
 private fun SettingsScreenContent(
     model: SettingsComponent.Model,
-    component: SettingsComponent
+    component: SettingsComponent,
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(top = 80.dp, bottom = 20.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         item(key = "header") {
             TitleText(
@@ -109,7 +123,7 @@ private fun SettingsScreenContent(
             SettingsSection(title = stringResource(Res.string.visual_theme)) {
                 EnumFlowRowChips(
                     selectedValue = model.settings.themeConfig.visualTheme,
-                    onValueChange = { component.onVisualThemeChanged(it) }
+                    onValueChange = { component.onVisualThemeChanged(it) },
                 )
             }
         }
@@ -119,7 +133,7 @@ private fun SettingsScreenContent(
             SettingsSection(title = stringResource(Res.string.piece_style)) {
                 EnumFlowRowChips(
                     selectedValue = model.settings.themeConfig.pieceStyle,
-                    onValueChange = { component.onPieceStyleChanged(it) }
+                    onValueChange = { component.onPieceStyleChanged(it) },
                 )
             }
         }
@@ -129,7 +143,7 @@ private fun SettingsScreenContent(
             SettingsSection(title = stringResource(Res.string.keyboard_layout)) {
                 EnumSegmentedButtonRow(
                     selectedValue = model.settings.keyboardLayout,
-                    onValueChange = { component.onKeyboardLayoutChanged(it) }
+                    onValueChange = { component.onKeyboardLayoutChanged(it) },
                 )
             }
         }
@@ -139,7 +153,7 @@ private fun SettingsScreenContent(
             SettingsSection(title = stringResource(Res.string.swipe_layout)) {
                 EnumSegmentedButtonRow(
                     selectedValue = model.settings.swipeLayout,
-                    onValueChange = { component.onSwipeLayoutChanged(it) }
+                    onValueChange = { component.onSwipeLayoutChanged(it) },
                 )
             }
         }
@@ -167,12 +181,12 @@ private fun SettingsScreenContent(
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Text(stringResource(Res.string.music))
                         Switch(
                             checked = model.settings.audioSettings.musicEnabled,
-                            onCheckedChange = component::onMusicToggled
+                            onCheckedChange = component::onMusicToggled,
                         )
                     }
 
@@ -180,26 +194,26 @@ private fun SettingsScreenContent(
                         SliderRow(
                             label = stringResource(Res.string.music_volume),
                             value = model.settings.audioSettings.musicVolume,
-                            onValueChange = component::onMusicVolumeChanged
+                            onValueChange = component::onMusicVolumeChanged,
                         )
 
                         Text(stringResource(Res.string.music_theme), style = MaterialTheme.typography.bodyMedium)
 
                         EnumSegmentedButtonRow(
                             selectedValue = model.settings.audioSettings.selectedMusicTheme,
-                            onValueChange = { newTheme -> component.onMusicThemeChanged(newTheme) }
+                            onValueChange = { newTheme -> component.onMusicThemeChanged(newTheme) },
                         )
                     }
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Text(stringResource(Res.string.sound_effects))
                         Switch(
                             checked = model.settings.audioSettings.soundEffectsEnabled,
-                            onCheckedChange = component::onSoundEffectsToggled
+                            onCheckedChange = component::onSoundEffectsToggled,
                         )
                     }
 
@@ -207,7 +221,7 @@ private fun SettingsScreenContent(
                         SliderRow(
                             label = stringResource(Res.string.sfx_volume),
                             value = model.settings.audioSettings.sfxVolume,
-                            onValueChange = component::onSFXVolumeChanged
+                            onValueChange = component::onSFXVolumeChanged,
                         )
                     }
                 }
@@ -223,17 +237,16 @@ private fun SettingsScreenContent(
 @Composable
 private fun SettingsSection(
     title: String,
-    content: @Composable ColumnScope.() -> Unit
+    content: @Composable ColumnScope.() -> Unit,
 ) {
-
     Column(
         modifier = Modifier.padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Text(
             text = title,
             style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
         )
         content()
     }
@@ -243,12 +256,12 @@ private fun SettingsSection(
 private fun SliderRow(
     label: String,
     value: Float,
-    onValueChange: (Float) -> Unit
+    onValueChange: (Float) -> Unit,
 ) {
     Column {
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             Text(label)
             Text("${(value * 100).toInt()}%")
@@ -256,7 +269,7 @@ private fun SliderRow(
         Slider(
             value = value,
             onValueChange = onValueChange,
-            valueRange = 0f..1f
+            valueRange = 0f..1f,
         )
     }
 }

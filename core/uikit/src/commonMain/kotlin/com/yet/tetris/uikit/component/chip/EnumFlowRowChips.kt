@@ -14,20 +14,20 @@ inline fun <reified T : Enum<T>> EnumFlowRowChips(
     selectedValue: T,
     crossinline onValueChange: (T) -> Unit,
     modifier: Modifier = Modifier,
-    crossinline getLabel: (T) -> String = { it.name.replace('_', ' ') }
+    crossinline getLabel: (T) -> String = { it.name.replace('_', ' ') },
 ) {
     val enumValues = enumValues<T>()
 
     FlowRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalArrangement = Arrangement.spacedBy(2.dp),
-        modifier = modifier
+        modifier = modifier,
     ) {
         enumValues.forEach { enumValue ->
             TetrisFilterChip(
                 selected = selectedValue == enumValue,
                 onClick = { onValueChange(enumValue) },
-                label = getLabel(enumValue)
+                label = getLabel(enumValue),
             )
         }
     }

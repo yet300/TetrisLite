@@ -3,17 +3,16 @@ package com.yet.tetris.domain.model.game
 data class GameBoard(
     val width: Int = 10,
     val height: Int = 20,
-    val cells: Map<Position, TetrominoType> = emptyMap()
+    val cells: Map<Position, TetrominoType> = emptyMap(),
 ) {
-    fun isPositionOccupied(position: Position): Boolean {
-        return cells.containsKey(position)
-    }
+    fun isPositionOccupied(position: Position): Boolean = cells.containsKey(position)
 
-    fun isPositionValid(position: Position): Boolean {
-        return position.x in 0 until width && position.y >= 0 && position.y < height
-    }
+    fun isPositionValid(position: Position): Boolean = position.x in 0 until width && position.y >= 0 && position.y < height
 
-    fun lockPiece(piece: Tetromino, offset: Position): GameBoard {
+    fun lockPiece(
+        piece: Tetromino,
+        offset: Position,
+    ): GameBoard {
         val newCells = cells.toMutableMap()
         piece.getAbsolutePositions(offset).forEach { pos ->
             newCells[pos] = piece.type
@@ -22,9 +21,10 @@ data class GameBoard(
     }
 
     fun clearLines(): Pair<GameBoard, Int> {
-        val completedLines = (0 until height).filter { y ->
-            (0 until width).all { x -> cells.containsKey(Position(x, y)) }
-        }
+        val completedLines =
+            (0 until height).filter { y ->
+                (0 until width).all { x -> cells.containsKey(Position(x, y)) }
+            }
 
         if (completedLines.isEmpty()) {
             return this to 0

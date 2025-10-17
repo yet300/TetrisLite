@@ -1,6 +1,10 @@
 package com.yet.tetris.domain.usecase
 
-import com.yet.tetris.domain.model.game.*
+import com.yet.tetris.domain.model.game.GameBoard
+import com.yet.tetris.domain.model.game.GameState
+import com.yet.tetris.domain.model.game.Position
+import com.yet.tetris.domain.model.game.Tetromino
+import com.yet.tetris.domain.model.game.TetrominoType
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -9,7 +13,6 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class LockPieceUseCaseTest {
-
     private val checkCollision = CheckCollisionUseCase()
     private val calculateScore = CalculateScoreUseCase()
     private val generateTetromino = GenerateTetrominoUseCase()
@@ -20,9 +23,9 @@ class LockPieceUseCaseTest {
         board: GameBoard = GameBoard(),
         piece: Tetromino = Tetromino.create(TetrominoType.T),
         score: Long = 0,
-        linesCleared: Long = 0
-    ): GameState {
-        return GameState(
+        linesCleared: Long = 0,
+    ): GameState =
+        GameState(
             board = board,
             currentPiece = piece,
             currentPosition = position,
@@ -30,9 +33,8 @@ class LockPieceUseCaseTest {
             score = score,
             linesCleared = linesCleared,
             isGameOver = false,
-            isPaused = false
+            isPaused = false,
         )
-    }
 
     @Test
     fun invoke_shouldLockPieceToBoard() {
@@ -65,17 +67,19 @@ class LockPieceUseCaseTest {
     @Test
     fun invoke_withCompleteLine_shouldClearAndScore() {
         // Given - Almost complete line, piece will complete it
-        val cells = (0 until 6).associate { x ->
-            Position(x, 19) to TetrominoType.I
-        }
+        val cells =
+            (0 until 6).associate { x ->
+                Position(x, 19) to TetrominoType.I
+            }
         val board = GameBoard(cells = cells)
         val piece = Tetromino.create(TetrominoType.I, 0) // Horizontal
-        val state = createTestState(
-            position = Position(6, 18),
-            board = board,
-            piece = piece,
-            score = 0
-        )
+        val state =
+            createTestState(
+                position = Position(6, 18),
+                board = board,
+                piece = piece,
+                score = 0,
+            )
 
         // When
         val newState = useCase(state)
@@ -98,11 +102,12 @@ class LockPieceUseCaseTest {
         }
         val board = GameBoard(cells = cells)
         val piece = Tetromino.create(TetrominoType.I, 0)
-        val state = createTestState(
-            position = Position(6, 17),
-            board = board,
-            piece = piece
-        )
+        val state =
+            createTestState(
+                position = Position(6, 17),
+                board = board,
+                piece = piece,
+            )
 
         // When
         val newState = useCase(state)
@@ -148,17 +153,19 @@ class LockPieceUseCaseTest {
     @Test
     fun invoke_shouldAccumulateScore() {
         // Given
-        val cells = (0 until 6).associate { x ->
-            Position(x, 19) to TetrominoType.I
-        }
+        val cells =
+            (0 until 6).associate { x ->
+                Position(x, 19) to TetrominoType.I
+            }
         val board = GameBoard(cells = cells)
         val piece = Tetromino.create(TetrominoType.I, 0)
-        val state = createTestState(
-            position = Position(6, 18),
-            board = board,
-            piece = piece,
-            score = 500
-        )
+        val state =
+            createTestState(
+                position = Position(6, 18),
+                board = board,
+                piece = piece,
+                score = 500,
+            )
 
         // When
         val newState = useCase(state)
@@ -170,17 +177,19 @@ class LockPieceUseCaseTest {
     @Test
     fun invoke_shouldAccumulateLinesCleared() {
         // Given
-        val cells = (0 until 6).associate { x ->
-            Position(x, 19) to TetrominoType.I
-        }
+        val cells =
+            (0 until 6).associate { x ->
+                Position(x, 19) to TetrominoType.I
+            }
         val board = GameBoard(cells = cells)
         val piece = Tetromino.create(TetrominoType.I, 0)
-        val state = createTestState(
-            position = Position(6, 18),
-            board = board,
-            piece = piece,
-            linesCleared = 10
-        )
+        val state =
+            createTestState(
+                position = Position(6, 18),
+                board = board,
+                piece = piece,
+                linesCleared = 10,
+            )
 
         // When
         val newState = useCase(state)
@@ -216,9 +225,10 @@ class LockPieceUseCaseTest {
     @Test
     fun shouldLockPiece_aboveLockedPiece_shouldReturnTrue() {
         // Given - Locked pieces below
-        val cells = (0 until 10).associate { x ->
-            Position(x, 19) to TetrominoType.I
-        }
+        val cells =
+            (0 until 10).associate { x ->
+                Position(x, 19) to TetrominoType.I
+            }
         val board = GameBoard(cells = cells)
         val state = createTestState(position = Position(3, 17), board = board)
 

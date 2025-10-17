@@ -1,6 +1,10 @@
 package com.yet.tetris.domain.usecase
 
-import com.yet.tetris.domain.model.game.*
+import com.yet.tetris.domain.model.game.GameBoard
+import com.yet.tetris.domain.model.game.GameState
+import com.yet.tetris.domain.model.game.Position
+import com.yet.tetris.domain.model.game.Tetromino
+import com.yet.tetris.domain.model.game.TetrominoType
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -8,16 +12,15 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class HardDropUseCaseTest {
-
     private val checkCollision = CheckCollisionUseCase()
     private val useCase = HardDropUseCase(checkCollision)
 
     private fun createTestState(
         position: Position = Position(3, 0),
         board: GameBoard = GameBoard(),
-        piece: Tetromino = Tetromino.create(TetrominoType.T)
-    ): GameState {
-        return GameState(
+        piece: Tetromino = Tetromino.create(TetrominoType.T),
+    ): GameState =
+        GameState(
             board = board,
             currentPiece = piece,
             currentPosition = position,
@@ -25,9 +28,8 @@ class HardDropUseCaseTest {
             score = 0,
             linesCleared = 0,
             isGameOver = false,
-            isPaused = false
+            isPaused = false,
         )
-    }
 
     @Test
     fun invoke_emptyBoard_shouldDropToBottom() {
@@ -46,9 +48,10 @@ class HardDropUseCaseTest {
     @Test
     fun invoke_withLockedPieces_shouldStopAboveThem() {
         // Given - Locked pieces at bottom
-        val cells = (0 until 10).associate { x ->
-            Position(x, 19) to TetrominoType.I
-        }
+        val cells =
+            (0 until 10).associate { x ->
+                Position(x, 19) to TetrominoType.I
+            }
         val board = GameBoard(cells = cells)
         val state = createTestState(position = Position(3, 0), board = board)
 
@@ -137,9 +140,10 @@ class HardDropUseCaseTest {
     @Test
     fun calculateDropDistance_withObstacle_shouldReturnCorrectDistance() {
         // Given - Obstacle at y=15
-        val cells = (0 until 10).associate { x ->
-            Position(x, 15) to TetrominoType.I
-        }
+        val cells =
+            (0 until 10).associate { x ->
+                Position(x, 15) to TetrominoType.I
+            }
         val board = GameBoard(cells = cells)
         val state = createTestState(position = Position(3, 5), board = board)
 

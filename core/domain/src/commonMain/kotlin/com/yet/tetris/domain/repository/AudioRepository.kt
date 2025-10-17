@@ -5,7 +5,6 @@ import com.yet.tetris.domain.model.audio.MusicTheme
 import com.yet.tetris.domain.model.audio.SoundEffect
 
 interface AudioRepository {
-
     suspend fun initialize()
 
     suspend fun playMusic(theme: MusicTheme)

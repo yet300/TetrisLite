@@ -25,40 +25,41 @@ import androidx.compose.ui.unit.dp
  */
 fun Modifier.glassPanel(
     shape: Shape,
-    shadowElevation: Dp = 10.dp
-): Modifier = composed {
-    val isDarkTheme = isSystemInDarkTheme()
+    shadowElevation: Dp = 10.dp,
+): Modifier =
+    composed {
+        val isDarkTheme = isSystemInDarkTheme()
 
-    this
-        .takeIf { isDarkTheme }
-        ?.shadow(
-            elevation = shadowElevation,
-            shape = shape,
-            ambientColor = Color.Black.copy(alpha = 0.2f),
-            spotColor = Color.Black.copy(alpha = 0.2f)
-        )
-        ?.border(
-            width = 1.5.dp,
-            brush = Brush.verticalGradient(
-                colors = listOf(
-                    Color.White.copy(alpha = 0.4f),
-                    Color.White.copy(alpha = 0.2f)
-                )
-            ),
-            shape = shape
-        )
-        ?.background(
-            brush = Brush.linearGradient(
-                colors = listOf(
-                    Color.White.copy(alpha = 0.25f),
-                    Color.White.copy(alpha = 0.05f)
-                )
-            ),
-            shape = shape
-        )
-        ?.clip(shape) ?: Modifier
-}
-
+        this
+            .takeIf { isDarkTheme }
+            ?.shadow(
+                elevation = shadowElevation,
+                shape = shape,
+                ambientColor = Color.Black.copy(alpha = 0.2f),
+                spotColor = Color.Black.copy(alpha = 0.2f),
+            )?.border(
+                width = 1.5.dp,
+                brush =
+                    Brush.verticalGradient(
+                        colors =
+                            listOf(
+                                Color.White.copy(alpha = 0.4f),
+                                Color.White.copy(alpha = 0.2f),
+                            ),
+                    ),
+                shape = shape,
+            )?.background(
+                brush =
+                    Brush.linearGradient(
+                        colors =
+                            listOf(
+                                Color.White.copy(alpha = 0.25f),
+                                Color.White.copy(alpha = 0.05f),
+                            ),
+                    ),
+                shape = shape,
+            )?.clip(shape) ?: Modifier
+    }
 
 /**
  * A convenience overload of [glassPanel] for rounded rectangles.
@@ -69,7 +70,7 @@ fun Modifier.glassPanel(
  */
 fun Modifier.glassPanel(
     cornerRadius: Dp,
-    shadowElevation: Dp = 10.dp
+    shadowElevation: Dp = 10.dp,
 ): Modifier {
     val shape = RoundedCornerShape(cornerRadius)
     return this.glassPanel(shape = shape, shadowElevation = shadowElevation)

@@ -6,7 +6,6 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class GameBoardTest {
-
     @Test
     fun create_default_shouldHaveStandardDimensions() {
         // When
@@ -93,11 +92,12 @@ class GameBoardTest {
     @Test
     fun clearLines_noCompleteLines_shouldReturnSameBoard() {
         // Given
-        val cells = mapOf(
-            Position(0, 19) to TetrominoType.I,
-            Position(1, 19) to TetrominoType.I,
-            Position(2, 19) to TetrominoType.I
-        )
+        val cells =
+            mapOf(
+                Position(0, 19) to TetrominoType.I,
+                Position(1, 19) to TetrominoType.I,
+                Position(2, 19) to TetrominoType.I,
+            )
         val board = GameBoard(cells = cells)
 
         // When
@@ -111,9 +111,10 @@ class GameBoardTest {
     @Test
     fun clearLines_oneCompleteLine_shouldClearAndDrop() {
         // Given - Complete bottom line
-        val cells = (0 until 10).associate { x ->
-            Position(x, 19) to TetrominoType.I
-        }
+        val cells =
+            (0 until 10).associate { x ->
+                Position(x, 19) to TetrominoType.I
+            }
         val board = GameBoard(cells = cells)
 
         // When
@@ -127,12 +128,14 @@ class GameBoardTest {
     @Test
     fun clearLines_multipleLines_shouldClearAll() {
         // Given - Two complete lines
-        val cells = (0 until 10).flatMap { x ->
-            listOf(
-                Position(x, 18) to TetrominoType.I,
-                Position(x, 19) to TetrominoType.O
-            )
-        }.toMap()
+        val cells =
+            (0 until 10)
+                .flatMap { x ->
+                    listOf(
+                        Position(x, 18) to TetrominoType.I,
+                        Position(x, 19) to TetrominoType.O,
+                    )
+                }.toMap()
         val board = GameBoard(cells = cells)
 
         // When

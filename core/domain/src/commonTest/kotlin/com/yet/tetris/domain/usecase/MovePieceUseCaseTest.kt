@@ -1,22 +1,25 @@
 package com.yet.tetris.domain.usecase
 
-import com.yet.tetris.domain.model.game.*
+import com.yet.tetris.domain.model.game.GameBoard
+import com.yet.tetris.domain.model.game.GameState
+import com.yet.tetris.domain.model.game.Position
+import com.yet.tetris.domain.model.game.Tetromino
+import com.yet.tetris.domain.model.game.TetrominoType
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 
 class MovePieceUseCaseTest {
-
     private val checkCollision = CheckCollisionUseCase()
     private val useCase = MovePieceUseCase(checkCollision)
 
     private fun createTestState(
         position: Position = Position(3, 0),
         board: GameBoard = GameBoard(),
-        piece: Tetromino = Tetromino.create(TetrominoType.T)
-    ): GameState {
-        return GameState(
+        piece: Tetromino = Tetromino.create(TetrominoType.T),
+    ): GameState =
+        GameState(
             board = board,
             currentPiece = piece,
             currentPosition = position,
@@ -24,9 +27,8 @@ class MovePieceUseCaseTest {
             score = 0,
             linesCleared = 0,
             isGameOver = false,
-            isPaused = false
+            isPaused = false,
         )
-    }
 
     @Test
     fun moveLeft_validMove_shouldUpdatePosition() {
@@ -116,10 +118,10 @@ class MovePieceUseCaseTest {
         // Then
         assertNotNull(movedLeft)
         assertEquals(Position(4, 10), movedLeft.currentPosition)
-        
+
         assertNotNull(movedRight)
         assertEquals(Position(6, 10), movedRight.currentPosition)
-        
+
         assertNotNull(movedDown)
         assertEquals(Position(5, 11), movedDown.currentPosition)
     }

@@ -35,7 +35,6 @@ import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 internal class GameStoreFactory : KoinComponent {
-
     private val storeFactory: StoreFactory by inject()
     private val gameSettingsRepository: GameSettingsRepository by inject()
     private val gameStateRepository: GameStateRepository by inject()
@@ -51,29 +50,31 @@ internal class GameStoreFactory : KoinComponent {
     private val gestureHandlingUseCase: GestureHandlingUseCase by inject()
 
     fun create(): GameStore =
-        object : GameStore, Store<GameStore.Intent, GameStore.State, GameStore.Label> by storeFactory.create(
-            name = "GameStore",
-            initialState = GameStore.State(),
-            bootstrapper = SimpleBootstrapper(GameStore.Action.GameLoadStarted(forceNewGame = false)),
-            executorFactory = ::ExecutorImpl,
-            reducer = ReducerImpl
-        ) {}
-
-
+        object :
+            GameStore,
+            Store<GameStore.Intent, GameStore.State, GameStore.Label> by storeFactory.create(
+                name = "GameStore",
+                initialState = GameStore.State(),
+                bootstrapper = SimpleBootstrapper(GameStore.Action.GameLoadStarted(forceNewGame = false)),
+                executorFactory = ::ExecutorImpl,
+                reducer = ReducerImpl,
+            ) {}
 
     private object ReducerImpl : Reducer<GameStore.State, GameStore.Msg> {
         override fun GameStore.State.reduce(msg: GameStore.Msg): GameStore.State =
             when (msg) {
-                is GameStore.Msg.GameInitialized -> copy(
-                    isLoading = false,
-                    gameState = msg.gameState,
-                    settings = msg.settings,
-                    elapsedTime = 0L
-                )
-                is GameStore.Msg.GameStateUpdated -> copy(
-                    gameState = msg.gameState,
-                    ghostPieceY = msg.ghostPieceY
-                )
+                is GameStore.Msg.GameInitialized ->
+                    copy(
+                        isLoading = false,
+                        gameState = msg.gameState,
+                        settings = msg.settings,
+                        elapsedTime = 0L,
+                    )
+                is GameStore.Msg.GameStateUpdated ->
+                    copy(
+                        gameState = msg.gameState,
+                        ghostPieceY = msg.ghostPieceY,
+                    )
                 is GameStore.Msg.PausedChanged -> copy(isPaused = msg.isPaused)
                 is GameStore.Msg.ElapsedTimeUpdated -> copy(elapsedTime = msg.elapsedTime)
                 is GameStore.Msg.LoadingChanged -> copy(isLoading = msg.isLoading)
@@ -104,8 +105,9 @@ internal class GameStoreFactory : KoinComponent {
             }
 
             scope.launch {
-                gameSettingsRepository.observeSettings()
-                     .drop(1)
+                gameSettingsRepository
+                    .observeSettings()
+                    .drop(1)
                     .collect { newSettings ->
                         dispatch(GameStore.Msg.SettingsUpdated(newSettings))
 
@@ -119,8 +121,9 @@ internal class GameStoreFactory : KoinComponent {
                 is GameStore.Action.GameLoadStarted -> initializeGame(action.forceNewGame)
             }
         }
+
         override fun executeIntent(intent: GameStore.Intent) {
-            val getState  = state()
+            val getState = state()
             when (intent) {
                 is GameStore.Intent.PauseGame -> pauseGame(getState)
                 is GameStore.Intent.ResumeGame -> resumeGame(getState)
@@ -164,13 +167,14 @@ internal class GameStoreFactory : KoinComponent {
                     audioRepository.applySettings(settings.audioSettings)
 
                     // Try to load saved game state, otherwise start new game
-                    val gameState = if (forceNewGame) {
-                        gameStateRepository.clearGameState()
-                        startGameUseCase(settings)
-                    } else {
-                        gameStateRepository.loadGameState() ?: startGameUseCase(settings)
-                    }
-                    
+                    val gameState =
+                        if (forceNewGame) {
+                            gameStateRepository.clearGameState()
+                            startGameUseCase(settings)
+                        } else {
+                            gameStateRepository.loadGameState() ?: startGameUseCase(settings)
+                        }
+
                     dispatch(GameStore.Msg.GameInitialized(gameState, settings))
                     dispatch(GameStore.Msg.LoadingChanged(false))
 
@@ -180,7 +184,6 @@ internal class GameStoreFactory : KoinComponent {
                     if (settings.audioSettings.musicEnabled) {
                         audioRepository.playMusic(settings.audioSettings.selectedMusicTheme)
                     }
-
                 } catch (e: Exception) {
                     dispatch(GameStore.Msg.LoadingChanged(false))
                     publish(GameStore.Label.ShowError(e.message ?: "Failed to initialize game"))
@@ -203,11 +206,11 @@ internal class GameStoreFactory : KoinComponent {
                 }
             }
         }
-        
+
         private fun pauseGame(state: GameStore.State) {
             gameLoopUseCase.pause()
             dispatch(GameStore.Msg.PausedChanged(true))
-            
+
             // Save game state
             scope.launch {
                 state.gameState?.let { gameStateRepository.saveGameState(it) }
@@ -216,7 +219,7 @@ internal class GameStoreFactory : KoinComponent {
             audioRepository.stopMusic()
         }
 
-        private  fun resumeGame(state: GameStore.State) {
+        private fun resumeGame(state: GameStore.State) {
             gameLoopUseCase.resume()
             dispatch(GameStore.Msg.PausedChanged(false))
             if (state.settings.audioSettings.musicEnabled) {
@@ -301,7 +304,10 @@ internal class GameStoreFactory : KoinComponent {
             }
         }
 
-        private fun handleSwipe(intent: GameStore.Intent.HandleSwipe, state: GameStore.State) {
+        private fun handleSwipe(
+            intent: GameStore.Intent.HandleSwipe,
+            state: GameStore.State,
+        ) {
             state.gameState?.let { gameState ->
                 if (!state.isPaused && !gameState.isGameOver) {
                     handleSwipeInputUseCase(
@@ -310,7 +316,7 @@ internal class GameStoreFactory : KoinComponent {
                         intent.deltaY,
                         intent.velocityX,
                         intent.velocityY,
-                        state.settings.swipeSensitivity
+                        state.settings.swipeSensitivity,
                     )?.let { newState ->
                         val ghostY = calculateGhostY(newState)
                         dispatch(GameStore.Msg.GameStateUpdated(newState, ghostY))
@@ -323,7 +329,6 @@ internal class GameStoreFactory : KoinComponent {
                 }
             }
         }
-
 
         private fun lockPiece(state: GameStore.State) {
             state.gameState?.let { gameState ->
@@ -350,18 +355,19 @@ internal class GameStoreFactory : KoinComponent {
             }
         }
 
-        private fun calculateGhostY(gameState: GameState): Int? {
-            return gameState.currentPiece?.let { piece ->
+        private fun calculateGhostY(gameState: GameState): Int? =
+            gameState.currentPiece?.let { piece ->
                 calculateGhostPositionUseCase(
                     gameState = gameState,
                     piece = piece,
-                    currentPosition = gameState.currentPosition
+                    currentPosition = gameState.currentPosition,
                 )
             }
-        }
 
-
-        private fun handleGameOver(gameState: GameState, settings: GameSettings) {
+        private fun handleGameOver(
+            gameState: GameState,
+            settings: GameSettings,
+        ) {
             gameLoopUseCase.stop()
 
             audioRepository.stopMusic()
@@ -369,13 +375,14 @@ internal class GameStoreFactory : KoinComponent {
             scope.launch {
                 try {
                     // Save game record
-                    val record = GameRecord(
-                        id = Uuid.random().toString(),
-                        score = gameState.score,
-                        linesCleared = gameState.linesCleared,
-                        difficulty = settings.difficulty,
-                        timestamp = Clock.System.now().toEpochMilliseconds()
-                    )
+                    val record =
+                        GameRecord(
+                            id = Uuid.random().toString(),
+                            score = gameState.score,
+                            linesCleared = gameState.linesCleared,
+                            difficulty = settings.difficulty,
+                            timestamp = Clock.System.now().toEpochMilliseconds(),
+                        )
                     gameHistoryRepository.saveGame(record)
 
                     // Clear saved game state
@@ -391,7 +398,10 @@ internal class GameStoreFactory : KoinComponent {
         /**
          * A helper function to process a gesture event and execute the resulting action.
          */
-        private fun handleGestureEvent(event: GestureEvent, state: GameStore.State) {
+        private fun handleGestureEvent(
+            event: GestureEvent,
+            state: GameStore.State,
+        ) {
             val result = gestureHandlingUseCase(event)
             when (result) {
                 is GestureResult.MoveLeft -> moveLeft(state)

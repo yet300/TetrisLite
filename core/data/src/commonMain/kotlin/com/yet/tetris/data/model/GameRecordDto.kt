@@ -8,5 +8,5 @@ data class GameRecordDto(
     val score: Long,
     val linesCleared: Long,
     val difficulty: DifficultyDto,
-    val timestamp: Long
+    val timestamp: Long,
 )

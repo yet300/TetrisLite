@@ -24,22 +24,22 @@ import kotlin.math.min
  * This class is responsible for playing procedurally generated audio on desktop platforms.
  */
 class JvmAudioRepositoryImpl(
-    private val cacheManager: AudioCacheManager
+    private val cacheManager: AudioCacheManager,
 ) : AudioRepository {
-
     private val audioScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
     private var musicLine: SourceDataLine? = null
     private var isMusicPlaying = false
     private var currentSettings = AudioSettings()
 
     // Platform-specific audio format.
-    private val audioFormat = AudioFormat(
-        AudioSynthesizer.SAMPLE_RATE.toFloat(),
-        16, // 16-bit audio depth
-        1,  // mono channel
-        true, // signed
-        false // little-endian
-    )
+    private val audioFormat =
+        AudioFormat(
+            AudioSynthesizer.SAMPLE_RATE.toFloat(),
+            16, // 16-bit audio depth
+            1, // mono channel
+            true, // signed
+            false, // little-endian
+        )
 
     /**
      * Delegates the pre-caching of sound effects to the cache manager.
@@ -161,7 +161,10 @@ class JvmAudioRepositoryImpl(
     /**
      * Sets the volume of a SourceDataLine by converting a linear scale (0.0-1.0) to decibels.
      */
-    private fun setLineVolume(line: SourceDataLine, volume: Float) {
+    private fun setLineVolume(
+        line: SourceDataLine,
+        volume: Float,
+    ) {
         if (line.isControlSupported(FloatControl.Type.MASTER_GAIN)) {
             val gainControl = line.getControl(FloatControl.Type.MASTER_GAIN) as FloatControl
             if (volume > 0.0001f) {

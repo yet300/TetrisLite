@@ -8,7 +8,5 @@ import org.koin.core.scope.Scope
 @Module
 actual class DatabasePlatformModule {
     @Singleton
-    actual fun provideDatabasePlatformModule(scope: Scope): DatabaseDriverFactory {
-        return DatabaseDriverFactory()
-    }
+    actual fun provideDatabasePlatformModule(scope: Scope): DatabaseDriverFactory = DatabaseDriverFactory()
 }
