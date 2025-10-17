@@ -1,3 +1,5 @@
+import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
+
 plugins {
     // this is necessary to avoid the plugins to be loaded multiple times
     // in each subproject's classloader
@@ -13,4 +15,20 @@ plugins {
     alias(libs.plugins.android.test) apply false
     alias(libs.plugins.kotlin.android) apply false
     alias(libs.plugins.baselineprofile) apply false
+    alias(libs.plugins.ktlint) apply false
+}
+
+allprojects {
+    apply(plugin = "org.jlleitschuh.gradle.ktlint")
+    configure<org.jlleitschuh.gradle.ktlint.KtlintExtension> {
+
+        android.set(true)
+        debug.set(true)
+        ignoreFailures.set(false)
+        reporters {
+            reporter(ReporterType.PLAIN)
+            reporter(ReporterType.HTML)
+            reporter(ReporterType.SARIF)
+        }
+    }
 }
