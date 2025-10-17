@@ -1,5 +1,7 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import java.io.FileInputStream
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -77,14 +79,57 @@ android {
         versionCode = 1
         versionName = "1.0"
     }
+
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            excludes += "/META-INF/INDEX.LIST"
+            excludes += "/META-INF/DEPENDENCIES"
+            excludes += "/META-INF/LICENSE*"
+            excludes += "/META-INF/NOTICE*"
+            excludes += "META-INF/com/android/build/gradle/*"
+            excludes += "DebugProbesKt.bin"
+
+            excludes += "**/*.kotlin_metadata"
+            excludes += "**/*.version"
+            excludes += "**/kotlin/**"
+            
+            // Exclude SQLite native libraries for non-Android platforms
+            excludes += "org/sqlite/native/Mac/**"
+            excludes += "org/sqlite/native/Windows/**"
+            excludes += "org/sqlite/native/Linux/**"
+            excludes += "org/sqlite/native/FreeBSD/**"
+        }
+        
+        jniLibs {
+            useLegacyPackaging = true
+        }
+    }
+
+    val keystorePropertiesFile = rootProject.file("keystore.properties")
+    val keystoreProperties = Properties()
+    keystoreProperties.load(FileInputStream(keystorePropertiesFile))
+
+    signingConfigs {
+        create("release") {
+            storeFile = File(keystoreProperties["RELEASE_STORE_FILE"] as String)
+
+            keyPassword =  keystoreProperties["RELEASE_STORE_PASSWORD"] as String
+            keyAlias =  keystoreProperties["RELEASE_KEY_ALIAS"] as String
+            storePassword =  keystoreProperties["RELEASE_KEY_PASSWORD"] as String
         }
     }
     buildTypes {
-        getByName("release") {
-            isMinifyEnabled = false
+        release {
+            applicationIdSuffix = ".release"
+
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+            signingConfig = signingConfigs["release"]
         }
     }
     compileOptions {
