@@ -67,7 +67,7 @@ jobs:
         uses: gradle/gradle-build-action@v3
       
       - name: Decode Keystore
-        if: ${{ secrets.KEYSTORE_BASE64 != '' }}
+        if: secrets.KEYSTORE_BASE64
         id: decode_keystore
         uses: timheuer/base64-to-file@v1.2
         with:
@@ -131,7 +131,7 @@ jobs:
           asset_content_type: application/octet-stream
       
       - name: Clean up keystore
-        if: always()
+        if: always() && steps.decode_keystore.outputs.filePath
         run: rm -f ${{ steps.decode_keystore.outputs.filePath }}
 
   build-desktop-release:
