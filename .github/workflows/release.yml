@@ -67,7 +67,7 @@ jobs:
         uses: gradle/gradle-build-action@v3
       
       - name: Decode Keystore
-        if: secrets.KEYSTORE_BASE64
+        if: ${{ secrets.KEYSTORE_BASE64 != '' }}
         id: decode_keystore
         uses: timheuer/base64-to-file@v1.2
         with:
