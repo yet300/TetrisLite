@@ -42,14 +42,15 @@ class StartupBenchmarks {
     fun startupCompilationNone() = benchmark(CompilationMode.None())
 
     @Test
-    fun startupCompilationBaselineProfiles() = benchmark(CompilationMode.Partial(BaselineProfileMode.Require))
+    fun startupCompilationBaselineProfiles() =
+        benchmark(CompilationMode.Partial(BaselineProfileMode.Require))
 
     private fun benchmark(compilationMode: CompilationMode) {
         // The application id for the running build variant is read from the instrumentation arguments.
         rule.measureRepeated(
             packageName =
                 InstrumentationRegistry.getArguments().getString("targetAppId")
-                    ?: throw Exception("targetAppId not passed as instrumentation runner arg"),
+                    ?: throw IllegalArgumentException("targetAppId not passed as instrumentation runner arg"),
             metrics = listOf(StartupTimingMetric()),
             compilationMode = compilationMode,
             startupMode = StartupMode.COLD,
