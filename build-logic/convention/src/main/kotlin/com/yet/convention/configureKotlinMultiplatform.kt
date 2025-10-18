@@ -3,9 +3,9 @@ import org.gradle.api.Project
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 
-private const val JDK_VERSION = 21
-private val JVM_TARGET = JvmTarget.JVM_11
-val JAVA_VERSION = JavaVersion.VERSION_11
+private const val JDK_VERSION = 17
+private val JVM_TARGET = JvmTarget.JVM_17
+val JAVA_VERSION = JavaVersion.VERSION_17
 
 
 internal fun Project.configureKotlinMultiplatform(
