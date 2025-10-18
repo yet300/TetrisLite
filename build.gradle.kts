@@ -16,10 +16,15 @@ plugins {
     alias(libs.plugins.kotlin.android) apply false
     alias(libs.plugins.baselineprofile) apply false
     alias(libs.plugins.ktlint) apply false
+    alias(libs.plugins.detekt) apply false
 }
 
 allprojects {
     apply(plugin = "org.jlleitschuh.gradle.ktlint")
+
+    apply(plugin = "io.gitlab.arturbosch.detekt")
+
+
     configure<org.jlleitschuh.gradle.ktlint.KtlintExtension> {
 
         android.set(true)
@@ -30,5 +35,13 @@ allprojects {
             reporter(ReporterType.HTML)
             reporter(ReporterType.SARIF)
         }
+    }
+
+    configure<io.gitlab.arturbosch.detekt.extensions.DetektExtension> {
+        config.setFrom(files("$rootDir/config/detekt/detekt.yml"))
+
+        buildUponDefaultConfig = true
+
+        allRules = false
     }
 }
