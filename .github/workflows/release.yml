@@ -146,12 +146,20 @@ jobs:
       - name: Build Desktop Package
         run: ./gradlew :composeApp:package${{ matrix.target }} --no-daemon
 
-      - name: List build output (debug)
-        if: always()
+      - name: List build output (debug - Unix)
+        if: runner.os != 'Windows'
         run: |
           echo "Listing build output directory:"
           ls -la composeApp/build/compose/binaries/main/ || true
           find composeApp/build/compose/binaries/main/ -type f -name "*.${{ matrix.artifact }}" || true
+
+      - name: List build output (debug - Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          Write-Host "Listing build output directory:"
+          Get-ChildItem -Path "composeApp/build/compose/binaries/main/" -Recurse -ErrorAction SilentlyContinue
+          Get-ChildItem -Path "composeApp/build/compose/binaries/main/" -Recurse -Filter "*.${{ matrix.artifact }}" -ErrorAction SilentlyContinue
 
       - name: Find package file (Unix)
         if: runner.os != 'Windows'
