@@ -24,7 +24,6 @@ allprojects {
 
     apply(plugin = "io.gitlab.arturbosch.detekt")
 
-
     configure<org.jlleitschuh.gradle.ktlint.KtlintExtension> {
 
         android.set(true)
