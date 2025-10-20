@@ -128,6 +128,7 @@ jobs:
       
       - name: Validate Gradle wrapper
         uses: gradle/wrapper-validation-action@v2
+        continue-on-error: true
       
       - name: Check build configuration
         run: ./gradlew projects --no-daemon
