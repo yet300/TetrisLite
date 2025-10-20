@@ -133,7 +133,7 @@ jobs:
         run: ./gradlew projects --no-daemon
       
       - name: Compile all modules
-        run: ./gradlew compileKotlin --no-daemon
+        run: ./gradlew assemble --no-daemon
       
       - name: Check for unused dependencies
         run: ./gradlew buildHealth --no-daemon
