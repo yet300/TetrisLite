@@ -187,25 +187,13 @@ jobs:
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v3
       
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-          cache: 'npm'
-      
       - name: Build Kotlin/JS library
         run: ./gradlew :shared:jsBrowserProductionLibraryDistribution --no-daemon
       
-      - name: Install web dependencies
-        run: npm ci
-      
-      - name: Build web app
-        run: npm run build
-      
       - name: Create web archive
         run: |
-          cd webApp/dist
-          tar -czf ../../TetrisLite-${{ needs.create-release.outputs.version }}-web.tar.gz .
+          cd shared/build/dist/js/productionLibrary
+          tar -czf ../../../../../TetrisLite-${{ needs.create-release.outputs.version }}-web.tar.gz .
       
       - name: Upload Web Package
         uses: actions/upload-release-asset@v1
@@ -222,5 +210,5 @@ jobs:
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./webApp/dist
+          publish_dir: ./shared/build/dist/js/productionLibrary
           cname: ${{ secrets.CUSTOM_DOMAIN }}
