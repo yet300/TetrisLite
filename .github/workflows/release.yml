@@ -146,11 +146,23 @@ jobs:
       - name: Build Desktop Package
         run: ./gradlew :composeApp:package${{ matrix.target }} --no-daemon
 
+      - name: List build output (debug)
+        if: always()
+        run: |
+          echo "Listing build output directory:"
+          ls -la composeApp/build/compose/binaries/main/ || true
+          find composeApp/build/compose/binaries/main/ -type f -name "*.${{ matrix.artifact }}" || true
+
       - name: Find package file (Unix)
         if: runner.os != 'Windows'
         id: find_package_unix
         run: |
-          FILE=$(find composeApp/build/compose/binaries/main/${{ matrix.target }}/ -name "*.${{ matrix.artifact }}" | head -n 1)
+          FILE=$(find composeApp/build/compose/binaries/main/ -type f -name "*.${{ matrix.artifact }}" | head -n 1)
+          if [ -z "$FILE" ]; then
+            echo "Error: No .${{ matrix.artifact }} file found"
+            exit 1
+          fi
+          echo "Found file: $FILE"
           echo "package_path=$FILE" >> $GITHUB_OUTPUT
           echo "package_name=TetrisLite-${{ needs.create-release.outputs.version }}-${{ runner.os }}.${{ matrix.artifact }}" >> $GITHUB_OUTPUT
 
@@ -159,11 +171,17 @@ jobs:
         id: find_package_windows
         shell: pwsh
         run: |
-          $FILE = Get-ChildItem -Path "composeApp/build/compose/binaries/main/${{ matrix.target }}/" -Filter "*.${{ matrix.artifact }}" | Select-Object -First 1 -ExpandProperty FullName
+          $FILE = Get-ChildItem -Path "composeApp/build/compose/binaries/main/" -Recurse -Filter "*.${{ matrix.artifact }}" | Select-Object -First 1 -ExpandProperty FullName
+          if (-not $FILE) {
+            Write-Error "No .${{ matrix.artifact }} file found"
+            exit 1
+          }
+          Write-Host "Found file: $FILE"
           echo "package_path=$FILE" >> $env:GITHUB_OUTPUT
           echo "package_name=TetrisLite-${{ needs.create-release.outputs.version }}-${{ runner.os }}.${{ matrix.artifact }}" >> $env:GITHUB_OUTPUT
 
       - name: Upload Desktop Package
+        if: success()
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
