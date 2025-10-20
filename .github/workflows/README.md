@@ -24,26 +24,35 @@ This directory contains GitHub Actions workflows for continuous integration and 
 ### 2. Release Build (`release.yml`)
 
 **Triggers:** 
-- Push to tags matching `v*` (e.g., `v1.0.0`)
+
+- Push to tags matching `v*` (e.g., `v1.0.0`) - Creates full release
+- Push to `main` branch - Deploys web app to GitHub Pages only
 - Manual workflow dispatch
 
 **Jobs:**
-- **Create Release**: Creates a GitHub release
-- **Build Android Release**: Builds signed APK and AAB
-- **Build Desktop Release**: Builds platform-specific installers (DEB, DMG, MSI)
-- **Build Web Release**: Builds and optionally deploys to GitHub Pages
 
-**Artifacts:**
+- **Create Release**: Creates a GitHub release (tags only)
+- **Build Android Release**: Builds signed APK and AAB (tags only)
+- **Build Desktop Release**: Builds platform-specific installers (tags only)
+- **Build Web and Deploy to Pages**: Builds JS app and deploys to GitHub Pages (always)
+- **Upload Source Code**: Packages and uploads source code archives (tags only)
+
+**Artifacts (on release tags):**
 - Signed Android APK and AAB
-- Desktop installers for all platforms
-- Web application archive
+- Desktop installers for all platforms (DEB, DMG, MSI)
+- Web application archive (tar.gz)
+- Source code (tar.gz and zip)
+
+**Continuous Deployment:**
+
+- Every push to `main` automatically deploys the web app to GitHub Pages
+- Full release artifacts only created when pushing tags
 
 **Required Secrets:**
 - `KEYSTORE_BASE64`: Base64-encoded Android keystore
 - `KEYSTORE_PASSWORD`: Keystore password
 - `KEY_ALIAS`: Key alias
 - `KEY_PASSWORD`: Key password
-- `CUSTOM_DOMAIN`: (Optional) Custom domain for GitHub Pages
 
 ### 3. Test Suite (`test.yml`)
 
@@ -82,7 +91,17 @@ This directory contains GitHub Actions workflows for continuous integration and 
 GitHub Actions are enabled by default for public repositories. For private repositories, go to:
 - Repository Settings → Actions → General → Enable Actions
 
-### 2. Configure Secrets
+### 2. Enable GitHub Pages
+
+To enable GitHub Pages deployment:
+
+1. Go to **Settings → Pages**
+2. Under **Source**, select **GitHub Actions**
+3. Your app will be available at: `https://YOUR_USERNAME.github.io/TetrisLite/`
+
+**Note:** The first deployment may take a few minutes. Subsequent deployments are faster.
+
+### 3. Configure Secrets
 
 For release builds, add the following secrets in:
 **Settings → Secrets and variables → Actions**
@@ -167,6 +186,7 @@ Add these badges to your README.md:
 ![PR Check](https://github.com/YOUR_USERNAME/TetrisLite/workflows/Pull%20Request%20Check/badge.svg)
 ![Tests](https://github.com/YOUR_USERNAME/TetrisLite/workflows/Test%20Suite/badge.svg)
 ![Code Quality](https://github.com/YOUR_USERNAME/TetrisLite/workflows/Code%20Quality/badge.svg)
+![Release](https://github.com/YOUR_USERNAME/TetrisLite/workflows/Release%20Build/badge.svg)
 ```
 
 ## Caching Strategy

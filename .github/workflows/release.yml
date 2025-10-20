@@ -4,6 +4,8 @@ on:
   push:
     tags:
       - 'v*'
+    branches:
+      - main
   workflow_dispatch:
     inputs:
       version:
@@ -23,6 +25,7 @@ concurrency:
 jobs:
   create-release:
     name: Create Release
+    if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     outputs:
       upload_url: ${{ steps.create_release.outputs.upload_url }}
@@ -54,6 +57,7 @@ jobs:
 
   build-android-release:
     name: Build Android Release
+    if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 45
     needs: create-release
@@ -113,6 +117,7 @@ jobs:
 
   build-desktop-release:
     name: Build Desktop Release
+    if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
     runs-on: ${{ matrix.os }}
     timeout-minutes: 45
     needs: create-release
@@ -200,10 +205,11 @@ jobs:
           asset_content_type: application/octet-stream
 
   build-web-release:
-    name: Build Web Release and Deploy to Pages
+    name: Build Web and Deploy to Pages
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    needs: create-release
+    needs: [ create-release ]
+    if: always() && !cancelled()
 
     steps:
       - name: Checkout
@@ -221,11 +227,20 @@ jobs:
       - name: Build Compose Multiplatform JS App
         run: ./gradlew :composeApp:jsBrowserDistribution --no-daemon
 
-      - name: Create web archive
+      - name: Fix base path for GitHub Pages
+        run: |
+          cd composeApp/build/dist/js/productionExecutable
+          sed -i 's|<base href="/">|<base href="/TetrisLite/">|g' index.html
+          echo "Updated index.html with GitHub Pages base path"
+
+      - name: Create web archive for release
+        if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
         run: |
           cd composeApp/build/dist/js/productionExecutable
           tar -czf ../../../../../web-release.tar.gz .
+
       - name: Upload Web Package to Release
+        if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -249,6 +264,7 @@ jobs:
 
   upload-source-code:
     name: Upload Source Code
+    if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     needs: create-release
