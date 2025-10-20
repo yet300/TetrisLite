@@ -174,6 +174,11 @@ jobs:
     timeout-minutes: 30
     needs: create-release
     
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
+    
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -187,12 +192,12 @@ jobs:
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v3
       
-      - name: Build Kotlin/JS library
-        run: ./gradlew :shared:jsBrowserProductionLibraryDistribution --no-daemon
+      - name: Build Compose Multiplatform JS App
+        run: ./gradlew :composeApp:jsBrowserDistribution --no-daemon
       
       - name: Create web archive
         run: |
-          cd shared/build/dist/js/productionLibrary
+          cd composeApp/build/dist/js/productionExecutable
           tar -czf ../../../../../TetrisLite-${{ needs.create-release.outputs.version }}-web.tar.gz .
       
       - name: Upload Web Package
@@ -205,10 +210,49 @@ jobs:
           asset_name: TetrisLite-${{ needs.create-release.outputs.version }}-web.tar.gz
           asset_content_type: application/gzip
       
-      - name: Deploy to GitHub Pages
-        if: github.event_name == 'push'
-        uses: peaceiris/actions-gh-pages@v3
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+      
+      - name: Upload GitHub Pages artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./shared/build/dist/js/productionLibrary
-          cname: ${{ secrets.CUSTOM_DOMAIN }}
+          path: ./composeApp/build/dist/js/productionExecutable
+      
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+  upload-source-code:
+    name: Upload Source Code
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: create-release
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Create source archive
+        run: |
+          git archive --format=tar.gz --prefix=TetrisLite-${{ needs.create-release.outputs.version }}/ HEAD > TetrisLite-${{ needs.create-release.outputs.version }}-source.tar.gz
+          git archive --format=zip --prefix=TetrisLite-${{ needs.create-release.outputs.version }}/ HEAD > TetrisLite-${{ needs.create-release.outputs.version }}-source.zip
+      
+      - name: Upload Source TAR.GZ
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create-release.outputs.upload_url }}
+          asset_path: TetrisLite-${{ needs.create-release.outputs.version }}-source.tar.gz
+          asset_name: TetrisLite-${{ needs.create-release.outputs.version }}-source.tar.gz
+          asset_content_type: application/gzip
+      
+      - name: Upload Source ZIP
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create-release.outputs.upload_url }}
+          asset_path: TetrisLite-${{ needs.create-release.outputs.version }}-source.zip
+          asset_name: TetrisLite-${{ needs.create-release.outputs.version }}-source.zip
+          asset_content_type: application/zip
