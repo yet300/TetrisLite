@@ -168,3 +168,15 @@ compose.desktop {
         }
     }
 }
+
+tasks.register<Copy>("copySqlJsWasmToDist") {
+    from(rootProject.projectDir.resolve("node_modules/sql.js/dist/sql-wasm.wasm"))
+
+    into(project.layout.buildDirectory.dir("dist/js/productionExecutable"))
+
+    tasks.findByName("jsBrowserProductionWebpack")?.let { dependsOn(it) }
+}
+
+tasks.named("jsBrowserDistribution") {
+    dependsOn("copySqlJsWasmToDist")
+}
