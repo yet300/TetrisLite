@@ -133,7 +133,7 @@ jobs:
         run: ./gradlew projects --no-daemon
       
       - name: Compile all modules
-        run: ./gradlew assemble -x generateReleaseBaselineProfile --no-daemon
+        run: ./gradlew assemble -x :baselineprofile:assemble --no-daemon
       
       - name: Check for unused dependencies
         run: ./gradlew buildHealth --no-daemon
