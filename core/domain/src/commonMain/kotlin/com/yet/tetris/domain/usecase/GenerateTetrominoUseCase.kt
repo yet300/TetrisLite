@@ -24,7 +24,7 @@ class GenerateTetrominoUseCase {
             refillBag()
         }
 
-        val type = bag.removeFirst()
+        val type = bag.removeAt(0)
         return Tetromino.create(type, rotation = 0)
     }
 
