@@ -5,6 +5,10 @@ config.resolve = {
         crypto: false,
     }
 };
+const isProduction = config.mode === "production";
+
+config.output = config.output || {};
+config.output.publicPath = isProduction ? "/TetrisLite/" : "/";
 
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 config.plugins.push(
