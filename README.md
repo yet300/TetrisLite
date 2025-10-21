@@ -121,8 +121,8 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 Key areas for enhancement:
 
--UI/UX: Improve the iOS part
--UI/UX: Add native tablet landscape orientation support(MacOS, IpadOS)
+1. **UI/UX**: Improve the iOS part
+2. **MAC|IPAD**: Add native tablet landscape orientation support(MacOS, IpadOS)
 
 ## License
 
