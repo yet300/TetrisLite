@@ -225,6 +225,8 @@ jobs:
         uses: gradle/gradle-build-action@v3
 
       - name: Build Compose Multiplatform JS App
+        env:
+          WEBPACK_PUBLIC_PATH: /TetrisLite/
         run: ./gradlew :composeApp:jsBrowserDistribution --no-daemon
 
       - name: Fix base path for GitHub Pages
