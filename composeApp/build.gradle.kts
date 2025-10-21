@@ -68,6 +68,7 @@ kotlin {
                 ),
             )
             implementation(libs.kotlin.browser)
+            api(compose.components.resources)
         }
     }
 }

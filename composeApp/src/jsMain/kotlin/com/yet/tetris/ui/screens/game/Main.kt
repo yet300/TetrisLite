@@ -11,6 +11,7 @@ import com.arkivanov.essenty.lifecycle.stop
 import com.yet.tetris.App
 import com.yet.tetris.di.InitKoin
 import com.yet.tetris.feature.root.DefaultRootComponent
+import org.jetbrains.compose.resources.configureWebResources
 import org.jetbrains.skiko.wasm.onWasmReady
 import web.dom.DocumentVisibilityState
 import web.dom.visible
@@ -36,6 +37,11 @@ fun main() {
     lifecycle.attachToDocument()
 
     onWasmReady {
+
+        configureWebResources {
+            resourcePathMapping { path -> "./$path" }
+        }
+
         ComposeViewport(content = {
             App(rootComponent = root)
         })
