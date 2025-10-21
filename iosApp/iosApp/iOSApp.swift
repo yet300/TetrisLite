@@ -14,6 +14,7 @@ struct iOSApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView(rootComponent: appDelegate.root)
+                .ignoresSafeArea(.all, edges: .all)
         }
     }
 }

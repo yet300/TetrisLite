@@ -22,6 +22,13 @@ struct GameView: View {
     
     @State private var lastDragTranslation: CGSize = .zero
     @State private var didStartDragging = false
+
+    @Environment(\.horizontalSizeClass) var horizontalSizeClass
+    @Environment(\.verticalSizeClass) var verticalSizeClass
+
+    var isIPadOrLandscape: Bool {
+        horizontalSizeClass == .regular
+    }
     
     init(_ component: GameComponent) {
         self.component = component
@@ -35,35 +42,40 @@ struct GameView: View {
             if model.isLoading {
                 ProgressView()
             } else if let gameState = model.gameState {
-                VStack(spacing: 16) {
-                    // Top Bar
-                    HStack {
-                        Button {
-                            component.onPause()
-                        } label: {
-                            Image(systemName: "pause.fill")
-                                .foregroundColor(textColor)
-                                .frame(width: 32, height: 32)
-                                .padding(12)
-                                .glassPanelStyle(cornerRadius: 99)
-                        }
-                        .buttonStyle(.plain)
-
+                HStack(spacing: isIPadOrLandscape ? 32 : 0) {
+                    if isIPadOrLandscape {
                         Spacer()
-                        
-                        GameStatsView(
-                            score: gameState.score,
-                            lines: Int32(gameState.linesCleared),
-                            time: model.elapsedTime
-                        )
-                        
-                        Spacer()
-                        
-                        NextPieceView(piece: gameState.nextPiece)
                     }
-                    .padding(.horizontal)
-                    
-                    GeometryReader { geometry in
+
+                    VStack(spacing: 16) {
+                        // Top Bar
+                        HStack {
+                            Button {
+                                component.onPause()
+                            } label: {
+                                Image(systemName: "pause.fill")
+                                    .foregroundColor(textColor)
+                                    .frame(width: 32, height: 32)
+                                    .padding(12)
+                                    .glassPanelStyle(cornerRadius: 99)
+                            }
+                            .buttonStyle(.plain)
+
+                            Spacer()
+
+                            GameStatsView(
+                                score: gameState.score,
+                                lines: Int32(gameState.linesCleared),
+                                time: model.elapsedTime
+                            )
+
+                            Spacer()
+
+                            NextPieceView(piece: gameState.nextPiece)
+                        }
+                        .padding(.horizontal)
+
+                        GeometryReader { geometry in
                         GameBoardView(
                             gameState: gameState,
                             settings: model.settings,
@@ -103,6 +115,12 @@ struct GameView: View {
                     .padding()
                     
                     Spacer()
+                }
+                    .frame(maxWidth: isIPadOrLandscape ? 600 : .infinity)
+
+                    if isIPadOrLandscape {
+                        Spacer()
+                    }
                 }
                 
                 if let child = dialog.child?.instance {

@@ -3,22 +3,36 @@ import Shared
 
 struct RootView: View {
     private let root: RootComponent
+
+    @Environment(\.horizontalSizeClass) var horizontalSizeClass
+    @Environment(\.verticalSizeClass) var verticalSizeClass
     
     init(_ root: RootComponent) {
         self.root = root
     }
+
+    var isLandscape: Bool {
+        horizontalSizeClass == .regular && verticalSizeClass == .compact
+    }
+
+    var isIPad: Bool {
+        horizontalSizeClass == .regular && verticalSizeClass == .regular
+    }
         
     var body: some View {
-        StackView(
-            stackValue: StateValue(root.childStack),
-            getTitle: { _ in "Heh" },
-            onBack: { _ in
-                root.onBackClicked()
+        GeometryReader { geometry in
+            StackView(
+                stackValue: StateValue(root.childStack),
+                getTitle: { _ in "Heh" },
+                onBack: { _ in
+                    root.onBackClicked()
+                }
+            ) { child in
+                childView(for: child)
             }
-        ) { child in
-            childView(for: child)
+            .frame(width: geometry.size.width, height: geometry.size.height)
         }
-        
+        .ignoresSafeArea(.all, edges: .all)
     }
     
 }

@@ -21,66 +21,80 @@ struct HomeView: View {
         _model = StateValue(component.model)
         _bottomSheetSlot = StateValue(component.childBottomSheetNavigation)
     }
+
+    @Environment(\.horizontalSizeClass) var horizontalSizeClass
+    @Environment(\.verticalSizeClass) var verticalSizeClass
+
+    var isIPadOrLandscape: Bool {
+        horizontalSizeClass == .regular
+    }
     
     var body: some View {
         NavigationView {
-            ZStack {
-                switch model {
-                case is HomeComponentModelLoading:
-                    ProgressView()
-                    
-                case let content as HomeComponentModelContent:
-                    VStack {
-                        DifficultySelector(
-                            selectedDifficulty: Binding(
-                                get: { content.settings.difficulty },
-                                set: { newDifficulty in
-                                    component.onDifficultyChanged(difficulty: newDifficulty)
-                                }
-                            ),
-                            onSelect: { difficulty in
-                                component.onDifficultyChanged(difficulty: difficulty)
-                            }
-                        )
-                        Spacer()
+            GeometryReader { geometry in
+                ZStack {
+                    switch model {
+                    case is HomeComponentModelLoading:
+                        ProgressView()
+                            .frame(width: geometry.size.width, height: geometry.size.height)
 
-                        VStack(spacing: 24) {
-                            VStack(spacing: 16) {
-                                GlassButton(
-                                    title: Strings.startNewGame,
-                                    icon: "play.fill",
-                                    action: { component.onStartNewGame() }
-                                )
-                                
-                                if content.hasSavedGame {
-                                    GlassButton(
-                                        title: Strings.resumeGame,
-                                        icon: "arrow.clockwise",
-                                        style: .secondary,
-                                        action: { component.onResumeGame() }
-                                    )
+                    case let content as HomeComponentModelContent:
+                        VStack {
+                            DifficultySelector(
+                                selectedDifficulty: Binding(
+                                    get: { content.settings.difficulty },
+                                    set: { newDifficulty in
+                                        component.onDifficultyChanged(difficulty: newDifficulty)
+                                    }
+                                ),
+                                onSelect: { difficulty in
+                                    component.onDifficultyChanged(difficulty: difficulty)
                                 }
+                            )
+                            .frame(maxWidth: isIPadOrLandscape ? 600 : .infinity)
+
+                            Spacer()
+
+                            VStack(spacing: 24) {
+                                VStack(spacing: 16) {
+                                    GlassButton(
+                                        title: Strings.startNewGame,
+                                        icon: "play.fill",
+                                        action: { component.onStartNewGame() }
+                                    )
+
+                                    if content.hasSavedGame {
+                                        GlassButton(
+                                            title: Strings.resumeGame,
+                                            icon: "arrow.clockwise",
+                                            style: .secondary,
+                                            action: { component.onResumeGame() }
+                                        )
+                                    }
+                                }
+                                .padding(.horizontal, 32)
+                                .frame(maxWidth: isIPadOrLandscape ? 500 : .infinity)
+
+                                // Keyboard support hint for iPad/Mac
+                                #if targetEnvironment(macCatalyst) || os(macOS)
+                                Text(Strings.keyboardHint)
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                    .padding(.top, 8)
+                                #endif
                             }
-                            .padding(.horizontal, 32)
-                            
-                            // Keyboard support hint for iPad/Mac
-                            #if targetEnvironment(macCatalyst) || os(macOS)
-                            Text(Strings.keyboardHint)
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                                .padding(.top, 8)
-                            #endif
+                            .padding(.bottom, 32)
                         }
-                        .padding(.bottom, 32)
+                        .frame(width: geometry.size.width, height: geometry.size.height)
+
+                    default:
+                        EmptyView()
                     }
-                    
-                default:
-                    EmptyView()
                 }
             }
             .navigationTitle(Strings.appTitle)
             #if os(iOS)
-            .navigationBarTitleDisplayMode(.inline)
+            .navigationBarTitleDisplayMode(isIPadOrLandscape ? .large : .inline)
             #endif
             .toolbar {
             #if os(iOS)
@@ -118,6 +132,7 @@ struct HomeView: View {
                 BottomSheetView(child: sheetItem.child)
             }
         }
+        .navigationViewStyle(.stack)
     }
     
     private var historyButton: some View {
