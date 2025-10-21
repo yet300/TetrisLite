@@ -1,75 +1,137 @@
-This is a Kotlin Multiplatform project targeting Android, iOS, Web, Desktop (JVM).
+# TetrisLite
+<img width="258" height="258" alt="258" src="https://github.com/user-attachments/assets/de4c43fe-ba97-48d9-a3c9-ce5a901a75b0" />
 
-* [/composeApp](./composeApp/src) is for code that will be shared across your Compose Multiplatform applications.
-  It contains several subfolders:
-  - [commonMain](./composeApp/src/commonMain/kotlin) is for code that’s common for all targets.
-  - Other folders are for Kotlin code that will be compiled for only the platform indicated in the folder name.
-    For example, if you want to use Apple’s CoreCrypto for the iOS part of your Kotlin app,
-    the [iosMain](./composeApp/src/iosMain/kotlin) folder would be the right place for such calls.
-    Similarly, if you want to edit the Desktop (JVM) specific part, the [jvmMain](./composeApp/src/jvmMain/kotlin)
-    folder is the appropriate location.
 
-* [/iosApp](./iosApp/iosApp) contains iOS applications. Even if you’re sharing your UI with Compose Multiplatform,
-  you need this entry point for your iOS app. This is also where you should add SwiftUI code for your project.
+A modern, cross-platform Tetris game built with Kotlin Multiplatform and Compose Multiplatform, demonstrating true code sharing across Android, iOS, Desktop, and Web platforms.
 
-* [/shared](./shared/src) is for the code that will be shared between all targets in the project.
-  The most important subfolder is [commonMain](./shared/src/commonMain/kotlin). If preferred, you
-  can add code to the platform-specific folders here too.
+![Kotlin](https://img.shields.io/badge/Kotlin-2.2.20-blue.svg)
+![Compose](https://img.shields.io/badge/Compose-1.9.0-green.svg)
+![Platforms](https://img.shields.io/badge/Platforms-Android%20%7C%20iOS%20%7C%20Desktop%20%7C%20Web-orange.svg)
 
-* [/webApp](./webApp) contains web React application. It uses the Kotlin/JS library produced
-  by the [shared](./shared) module.
+## Features
 
-### Build and Run Android Application
+### 🎨 Customization
+- **Visual Themes** - 9 color schemes: Classic, Modern, Neon, Retro, Pastel, Dark, Monochrome, Cyberpunk, and Nature
+- **Piece Styles** - Choose between Solid, Gradient, and Outlined piece rendering
+- **Control Layouts** - Customizable keyboard layouts (Arrows, WASD, IJKL) and swipe gestures
+- **Swipe Sensitivity** - Adjustable touch controls for mobile devices
+- **Audio Settings** - Procedurally generated music and SFX with volume control and multiple themes
 
-To build and run the development version of the Android app, use the run configuration from the run widget
-in your IDE’s toolbar or build it directly from the terminal:
-- on macOS/Linux
-  ```shell
-  ./gradlew :composeApp:assembleDebug
-  ```
-- on Windows
-  ```shell
-  .\gradlew.bat :composeApp:assembleDebug
-  ```
+### 📱 Platform-Specific Features
+- **Android** - Touch controls with swipe gestures, baseline profiles for performance
+- **iOS** - Native SwiftUI integration with iOS-specific optimizations
+- **Desktop** - Keyboard controls with multiple layout options (Windows, macOS, Linux)
+- **Web** - Browser-based gameplay with full feature parity
 
-### Build and Run Desktop (JVM) Application
+### 💾 Technical Features
+- **Game History** - Track all your games with detailed statistics and filtering
+- **Persistent Settings** - Your preferences are saved across sessions
+- **Offline Support** - Play without an internet connection
+- **SQLite Database** - Local storage for game records and settings
+- **Procedural Audio** - Dynamically generated music and SFX (no audio files needed!)
+- **MVI Architecture** - Predictable state management with MVIKotlin
+- **Dependency Injection** - Koin for clean architecture
 
-To build and run the development version of the desktop app, use the run configuration from the run widget
-in your IDE’s toolbar or run it directly from the terminal:
-- on macOS/Linux
-  ```shell
-  ./gradlew :composeApp:run
-  ```
-- on Windows
-  ```shell
-  .\gradlew.bat :composeApp:run
-  ```
+### Tech Stack
+- **Kotlin Multiplatform** 2.2.20 - Share code across all platforms
+- **Compose Multiplatform** 1.9.0 - Modern declarative UI
+- **MVIKotlin** - MVI architecture for predictable state management
+- **Decompose** - Navigation and lifecycle management
+- **Koin** - Dependency injection
+- **SQLDelight** - Type-safe SQL database
+- **Kotlinx Coroutines** - Asynchronous programming
+- **Kotlinx Serialization** - JSON serialization
 
-### Build and Run Web Application
+## Architecture
 
-To build and run the development version of the web app, use the run configuration from the run widget
-in your IDE’s toolbar or run it directly from the terminal:
-1. Install [Node.js](https://nodejs.org/en/download) (which includes `npm`)
-2. Build Kotlin/JS shared code:
-   - on macOS/Linux
-     ```shell
-     ./gradlew :shared:jsBrowserDevelopmentLibraryDistribution
-     ```
-   - on Windows
-     ```shell
-     .\gradlew.bat :shared:jsBrowserDevelopmentLibraryDistribution
-     ```
-3. Build and run the web application
-   ```shell
-   npm install
-   npm run start
-   ```
+The project follows clean architecture principles with clear separation of concerns:
 
-### Build and Run iOS Application
+```
+TetrisLite/
+├── composeApp/          # Compose Multiplatform UI (Android, Desktop, iOS)
+├── iosApp/              # Native iOS app entry point with SwiftUI
+├── shared/              # Shared business logic and data layer
+├── core/                # Core modules
+│   ├── domain/          # Business logic, use cases, domain models
+│   ├── data/            # Repository implementations
+│   ├── database/        # SQLDelight database
+│   ├── common/          # Common utilities
+│   └── uikit/           # Shared UI components
+└── feature/             # Feature modules
+    ├── game/            # Game screen and logic
+    ├── home/            # Home screen
+    ├── settings/        # Settings management
+    ├── history/         # Game history
+    └── root/            # Navigation root
+```
 
-To build and run the development version of the iOS app, use the run configuration from the run widget
-in your IDE’s toolbar or open the [/iosApp](./iosApp) directory in Xcode and run it from there.
+## Getting Started
 
----
+### Prerequisites
+- **JDK 17** or higher
+- **Android Studio** Ladybug or later (for Android development)
+- **Xcode 15+** (for iOS development, macOS only)
+- **Node.js** (for web development)
 
-Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html)…
+### Build and Run
+
+#### Android
+```bash
+./gradlew :composeApp:assembleDebug
+./gradlew :composeApp:installDebug
+```
+
+#### Desktop (JVM)
+```bash
+./gradlew :composeApp:run
+```
+
+#### iOS
+Open `iosApp/iosApp.xcodeproj` in Xcode and run the project.
+
+#### Web
+```bash
+./gradlew :composeApp:jsBrowserDevelopment
+```
+
+## Development
+
+### Code Style
+The project uses Ktlint for code formatting and Detekt for static analysis.
+
+```bash
+./gradlew ktlintCheck
+./gradlew detekt
+```
+
+### Testing
+```bash
+./gradlew test
+```
+
+### CI/CD
+The project includes GitHub Actions workflows for:
+- **PR Checks** - Code quality, tests, and builds
+- **Release** - Automated builds and deployments
+- **Code Quality** - Static analysis and linting
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+Key areas for enhancement:
+
+-UI/UX: Improve the iOS part
+-UI/UX: Add native tablet landscape orientation support(MacOS, IpadOS)
+
+## License
+
+This project is open source and available under the MIT License.
+
+## Learn More
+
+- [Kotlin Multiplatform](https://www.jetbrains.com/kotlin-multiplatform/)
+- [Compose Multiplatform](https://www.jetbrains.com/lp/compose-multiplatform/)
+- [MVIKotlin](https://github.com/arkivanov/MVIKotlin)
+- [Decompose](https://github.com/arkivanov/Decompose)
+- [SQLDelight](https://cashapp.github.io/sqldelight/)
