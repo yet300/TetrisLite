@@ -227,12 +227,6 @@ jobs:
       - name: Build Compose Multiplatform JS App
         run: ./gradlew :composeApp:jsBrowserDistribution --no-daemon
 
-      - name: Fix base path for GitHub Pages
-        run: |
-          cd composeApp/build/dist/js/productionExecutable
-          sed -i 's|<base href="/">|<base href="/TetrisLite/">|g' index.html
-          echo "Updated index.html with GitHub Pages base path"
-
       - name: Create web archive for release
         if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
         run: |
