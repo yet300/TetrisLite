@@ -21,10 +21,6 @@ config.plugins.push(
             {
                 from: '../../node_modules/sql.js/dist/sql-wasm.wasm',
                 to: '.'
-            },
-            {
-                from: '../../node_modules/sql.js/dist/sql.js',
-                to: '.'
             }
         ]
     })
