@@ -10,7 +10,7 @@ actual class DatabaseDriverFactory {
     actual suspend fun provideDbDriver(schema: SqlSchema<QueryResult.AsyncValue<Unit>>): SqlDriver =
         WebWorkerDriver(
             Worker(
-                js("""new URL("@cashapp/sqldelight-sqljs-worker/sqljs.worker.js", import.meta.url)"""),
+                js("sqljs.worker.js"),
             ),
         ).also { schema.create(it).await() }
 }
