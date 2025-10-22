@@ -15,15 +15,15 @@ config.plugins.push(
     new CopyWebpackPlugin({
         patterns: [
             {
-                from: '../../node_modules/@cashapp/sqldelight-sqljs-worker/sqljs.worker.js',
+                from: path.resolve(rootDir, 'node_modules/@cashapp/sqldelight-sqljs-worker/sqljs.worker.js'),
                 to: '.'
             },
             {
-                from: '../../node_modules/sql.js/dist/sql-wasm.wasm',
+                from: path.resolve(rootDir, 'node_modules/sql.js/dist/sql-wasm.wasm'),
                 to: '.'
             },
             {
-                from: '../../node_modules/sql.js/dist/sql.js',
+                from: path.resolve(rootDir, 'node_modules/sql.js/dist/sql.js'),
                 to: '.'
             }
         ]
