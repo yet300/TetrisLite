@@ -1,3 +1,7 @@
+if (config.mode === 'production') {
+    config.output.publicPath = '/TetrisLite/';
+}
+
 config.resolve = {
     fallback: {
         fs: false,
