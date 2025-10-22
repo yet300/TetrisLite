@@ -14,14 +14,7 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 config.plugins.push(
     new CopyWebpackPlugin({
         patterns: [
-            {
-                from: '../../node_modules/@cashapp/sqldelight-sqljs-worker/sqljs.worker.js',
-                to: '.'
-            },
-            {
-                from: '../../node_modules/sql.js/dist/sql-wasm.wasm',
-                to: '.'
-            }
+            '../../node_modules/sql.js/dist/sql-wasm.wasm'
         ]
     })
 );
