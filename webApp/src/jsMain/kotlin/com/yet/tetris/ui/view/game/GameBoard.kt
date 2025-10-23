@@ -4,6 +4,7 @@ import com.yet.tetris.domain.model.game.GameState
 import com.yet.tetris.domain.model.game.Position
 import com.yet.tetris.domain.model.game.TetrominoType
 import com.yet.tetris.domain.model.theme.PieceStyle
+import com.yet.tetris.domain.model.theme.VisualTheme
 import js.objects.unsafeJso
 import mui.material.Box
 import mui.system.sx
@@ -28,6 +29,7 @@ import web.html.HTMLCanvasElement
 
 external interface GameBoardProps : Props {
     var gameState: GameState
+    var settings: com.yet.tetris.domain.model.settings.GameSettings
     var ghostY: Int?
     var onDragStarted: (() -> Unit)?
     var onDragged: ((deltaX: Float, deltaY: Float) -> Unit)?
@@ -195,14 +197,24 @@ val GameBoard = FC<GameBoardProps> { props ->
         val cellSize = canvas.width.toDouble() / cols
         canvas.height = (rows * cellSize).toInt()
 
-        // Clear canvas
-        ctx.fillStyle = "#000000".toJsString()
+        // Clear canvas with theme background color
+        val bgColor = getBackgroundColor(props.settings)
+        ctx.fillStyle = bgColor.toJsString()
         ctx.fillRect(0.0, 0.0, canvas.width.toDouble(), canvas.height.toDouble())
 
         // Draw locked blocks
         board.cells.forEach { (pos, type) ->
             if (pos.y >= 0) {
-                drawBlock(ctx, pos.x, pos.y, type, cellSize, PieceStyle.SOLID, 1.0)
+                drawBlock(
+                    ctx,
+                    pos.x,
+                    pos.y,
+                    type,
+                    cellSize,
+                    props.settings.themeConfig.pieceStyle,
+                    1.0,
+                    props.settings
+                )
             }
         }
 
@@ -222,8 +234,9 @@ val GameBoard = FC<GameBoardProps> { props ->
                                 absolutePos.y,
                                 piece.type,
                                 cellSize,
-                                PieceStyle.SOLID,
-                                0.3
+                                props.settings.themeConfig.pieceStyle,
+                                0.3,
+                                props.settings
                             )
                         }
                     }
@@ -245,15 +258,17 @@ val GameBoard = FC<GameBoardProps> { props ->
                         absolutePos.y,
                         piece.type,
                         cellSize,
-                        PieceStyle.SOLID,
-                        1.0
+                        props.settings.themeConfig.pieceStyle,
+                        1.0,
+                        props.settings
                     )
                 }
             }
         }
 
-        // Draw grid lines
-        ctx.strokeStyle = "rgba(128, 128, 128, 0.2)".toJsString()
+        // Draw grid lines with theme color
+        val gridColor = getGridColor(props.settings)
+        ctx.strokeStyle = gridColor.toJsString()
         ctx.lineWidth = 1.0
 
         // Vertical lines
@@ -307,9 +322,12 @@ private fun drawBlock(
     type: TetrominoType,
     cellSize: Double,
     style: PieceStyle,
-    alpha: Double
+    alpha: Double,
+    settings: com.yet.tetris.domain.model.settings.GameSettings
 ) {
-    val color = getTetrominoColor(type)
+    val color = getTetrominoColor(type, settings)
+    val lightColor = getTetrominoLightColor(type, settings)
+    val darkColor = getTetrominoDarkColor(type, settings)
     val blockSize = cellSize - 2
     val offsetX = x * cellSize + 1
     val offsetY = y * cellSize + 1
@@ -329,12 +347,12 @@ private fun drawBlock(
             ctx.fillRect(offsetX, offsetY, blockSize, blockSize)
 
             // Light border (top-left)
-            ctx.fillStyle = lightenColor(color).toJsString()
+            ctx.fillStyle = lightColor.toJsString()
             ctx.fillRect(offsetX, offsetY, blockSize, 2.0)
             ctx.fillRect(offsetX, offsetY, 2.0, blockSize)
 
             // Dark border (bottom-right)
-            ctx.fillStyle = darkenColor(color).toJsString()
+            ctx.fillStyle = darkColor.toJsString()
             ctx.fillRect(offsetX, offsetY + blockSize - 2, blockSize, 2.0)
             ctx.fillRect(offsetX + blockSize - 2, offsetY, 2.0, blockSize)
         }
@@ -343,8 +361,8 @@ private fun drawBlock(
             // Create gradient
             val gradient =
                 ctx.createLinearGradient(offsetX, offsetY, offsetX + blockSize, offsetY + blockSize)
-            gradient.addColorStop(0.0, lightenColor(color).toJsString())
-            gradient.addColorStop(1.0, darkenColor(color).toJsString())
+            gradient.addColorStop(0.0, lightColor.toJsString())
+            gradient.addColorStop(1.0, darkColor.toJsString())
             ctx.fillStyle = gradient
             ctx.fillRect(offsetX, offsetY, blockSize, blockSize)
         }
@@ -360,42 +378,172 @@ private fun drawBlock(
     ctx.globalAlpha = 1.0
 }
 
-private fun getTetrominoColor(type: TetrominoType): String {
-    return when (type) {
-        TetrominoType.I -> "#00F0F0" // Cyan
-        TetrominoType.O -> "#F0F000" // Yellow
-        TetrominoType.T -> "#A000F0" // Purple
-        TetrominoType.S -> "#00F000" // Green
-        TetrominoType.Z -> "#F00000" // Red
-        TetrominoType.J -> "#0000F0" // Blue
-        TetrominoType.L -> "#F0A000" // Orange
+private fun getTetrominoColor(
+    type: TetrominoType,
+    settings: com.yet.tetris.domain.model.settings.GameSettings
+): String {
+    val color = when (settings.themeConfig.visualTheme) {
+        VisualTheme.CLASSIC -> when (type) {
+            TetrominoType.I -> 0x00F0F0
+            TetrominoType.O -> 0xF0F000
+            TetrominoType.T -> 0xA000F0
+            TetrominoType.S -> 0x00F000
+            TetrominoType.Z -> 0xF00000
+            TetrominoType.J -> 0x0000F0
+            TetrominoType.L -> 0xF0A000
+        }
+
+        VisualTheme.RETRO_GAMEBOY -> when (type) {
+            TetrominoType.I -> 0x0F380F
+            TetrominoType.O -> 0x306230
+            TetrominoType.T -> 0x0F380F
+            TetrominoType.S -> 0x306230
+            TetrominoType.Z -> 0x0F380F
+            TetrominoType.J -> 0x306230
+            TetrominoType.L -> 0x0F380F
+        }
+
+        VisualTheme.RETRO_NES -> when (type) {
+            TetrominoType.I -> 0x00D8F8
+            TetrominoType.O -> 0xF8D800
+            TetrominoType.T -> 0xB800F8
+            TetrominoType.S -> 0x00F800
+            TetrominoType.Z -> 0xF80000
+            TetrominoType.J -> 0x0000F8
+            TetrominoType.L -> 0xF87800
+        }
+
+        VisualTheme.NEON -> when (type) {
+            TetrominoType.I -> 0x00FFFF
+            TetrominoType.O -> 0xFFFF00
+            TetrominoType.T -> 0xFF00FF
+            TetrominoType.S -> 0x00FF00
+            TetrominoType.Z -> 0xFF0066
+            TetrominoType.J -> 0x0066FF
+            TetrominoType.L -> 0xFF6600
+        }
+
+        VisualTheme.PASTEL -> when (type) {
+            TetrominoType.I -> 0xB4E7F5
+            TetrominoType.O -> 0xFFF4B4
+            TetrominoType.T -> 0xE5B4F5
+            TetrominoType.S -> 0xB4F5B4
+            TetrominoType.Z -> 0xF5B4B4
+            TetrominoType.J -> 0xB4B4F5
+            TetrominoType.L -> 0xF5D4B4
+        }
+
+        VisualTheme.MONOCHROME -> when (type) {
+            TetrominoType.I -> 0xFFFFFF
+            TetrominoType.O -> 0xE0E0E0
+            TetrominoType.T -> 0xC0C0C0
+            TetrominoType.S -> 0xA0A0A0
+            TetrominoType.Z -> 0x808080
+            TetrominoType.J -> 0x606060
+            TetrominoType.L -> 0x404040
+        }
+
+        VisualTheme.OCEAN -> when (type) {
+            TetrominoType.I -> 0x00CED1
+            TetrominoType.O -> 0x20B2AA
+            TetrominoType.T -> 0x4682B4
+            TetrominoType.S -> 0x5F9EA0
+            TetrominoType.Z -> 0x1E90FF
+            TetrominoType.J -> 0x0000CD
+            TetrominoType.L -> 0x000080
+        }
+
+        VisualTheme.SUNSET -> when (type) {
+            TetrominoType.I -> 0xFF6B6B
+            TetrominoType.O -> 0xFFD93D
+            TetrominoType.T -> 0xFF8C42
+            TetrominoType.S -> 0xFFA07A
+            TetrominoType.Z -> 0xFF69B4
+            TetrominoType.J -> 0xFF4500
+            TetrominoType.L -> 0xFF1493
+        }
+
+        VisualTheme.FOREST -> when (type) {
+            TetrominoType.I -> 0x228B22
+            TetrominoType.O -> 0x32CD32
+            TetrominoType.T -> 0x006400
+            TetrominoType.S -> 0x90EE90
+            TetrominoType.Z -> 0x2E8B57
+            TetrominoType.J -> 0x3CB371
+            TetrominoType.L -> 0x8FBC8F
+        }
     }
+    return "#${color.toString(16).padStart(6, '0')}"
 }
 
-private fun lightenColor(color: String): String {
-    // Simple lightening by adding white
-    return when (color) {
-        "#00F0F0" -> "#80F8F8"
-        "#F0F000" -> "#F8F880"
-        "#A000F0" -> "#D080F8"
-        "#00F000" -> "#80F880"
-        "#F00000" -> "#F88080"
-        "#0000F0" -> "#8080F8"
-        "#F0A000" -> "#F8D080"
-        else -> color
-    }
+private fun getTetrominoLightColor(
+    type: TetrominoType,
+    settings: com.yet.tetris.domain.model.settings.GameSettings
+): String {
+    val baseColor = getTetrominoColor(type, settings)
+    return lightenColorHex(baseColor, 0.3)
 }
 
-private fun darkenColor(color: String): String {
-    // Simple darkening
-    return when (color) {
-        "#00F0F0" -> "#007878"
-        "#F0F000" -> "#787800"
-        "#A000F0" -> "#500078"
-        "#00F000" -> "#007800"
-        "#F00000" -> "#780000"
-        "#0000F0" -> "#000078"
-        "#F0A000" -> "#785000"
-        else -> color
+private fun getTetrominoDarkColor(
+    type: TetrominoType,
+    settings: com.yet.tetris.domain.model.settings.GameSettings
+): String {
+    val baseColor = getTetrominoColor(type, settings)
+    return darkenColorHex(baseColor, 0.3)
+}
+
+private fun lightenColorHex(hex: String, factor: Double): String {
+    val color = hex.removePrefix("#").toInt(16)
+    val r = ((color shr 16) and 0xFF)
+    val g = ((color shr 8) and 0xFF)
+    val b = (color and 0xFF)
+
+    val newR = (r + (255 - r) * factor).toInt().coerceIn(0, 255)
+    val newG = (g + (255 - g) * factor).toInt().coerceIn(0, 255)
+    val newB = (b + (255 - b) * factor).toInt().coerceIn(0, 255)
+
+    return "#${((newR shl 16) or (newG shl 8) or newB).toString(16).padStart(6, '0')}"
+}
+
+private fun darkenColorHex(hex: String, factor: Double): String {
+    val color = hex.removePrefix("#").toInt(16)
+    val r = ((color shr 16) and 0xFF)
+    val g = ((color shr 8) and 0xFF)
+    val b = (color and 0xFF)
+
+    val newR = (r * (1 - factor)).toInt().coerceIn(0, 255)
+    val newG = (g * (1 - factor)).toInt().coerceIn(0, 255)
+    val newB = (b * (1 - factor)).toInt().coerceIn(0, 255)
+
+    return "#${((newR shl 16) or (newG shl 8) or newB).toString(16).padStart(6, '0')}"
+}
+
+private fun getBackgroundColor(settings: com.yet.tetris.domain.model.settings.GameSettings): String {
+    val color = when (settings.themeConfig.visualTheme) {
+        VisualTheme.CLASSIC -> 0x000000
+        VisualTheme.RETRO_GAMEBOY -> 0x9BBC0F
+        VisualTheme.RETRO_NES -> 0x000000
+        VisualTheme.NEON -> 0x0A0A0A
+        VisualTheme.PASTEL -> 0xF5F5DC
+        VisualTheme.MONOCHROME -> 0x000000
+        VisualTheme.OCEAN -> 0x001F3F
+        VisualTheme.SUNSET -> 0x2C1810
+        VisualTheme.FOREST -> 0x0D1F0D
     }
+    return "#${color.toString(16).padStart(6, '0')}"
+}
+
+private fun getGridColor(settings: com.yet.tetris.domain.model.settings.GameSettings): String {
+    val color = when (settings.themeConfig.visualTheme) {
+        VisualTheme.CLASSIC -> 0x333333
+        VisualTheme.RETRO_GAMEBOY -> 0x8BAC0F
+        VisualTheme.RETRO_NES -> 0x404040
+        VisualTheme.NEON -> 0x00FFFF
+        VisualTheme.PASTEL -> 0xE0E0E0
+        VisualTheme.MONOCHROME -> 0x404040
+        VisualTheme.OCEAN -> 0x004080
+        VisualTheme.SUNSET -> 0x804020
+        VisualTheme.FOREST -> 0x1A3D1A
+    }
+    return "#${color.toString(16).padStart(6, '0')}"
 }

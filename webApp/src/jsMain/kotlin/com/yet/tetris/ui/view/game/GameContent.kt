@@ -168,6 +168,7 @@ val GameContent = FC<RProps<GameComponent>> { props ->
                 model.gameState?.nextPiece?.let { nextPiece ->
                     NextPiecePreview {
                         piece = nextPiece
+                        settings = model.settings
                     }
                 }
             }
@@ -184,6 +185,7 @@ val GameContent = FC<RProps<GameComponent>> { props ->
                 model.gameState?.let { gameState ->
                     GameBoard {
                         this.gameState = gameState
+                        this.settings = model.settings
                         this.ghostY = model.ghostPieceY
                         this.onDragStarted = { props.component.onDragStarted() }
                         this.onDragged = { deltaX, deltaY ->
@@ -297,6 +299,7 @@ val StatItem = FC<StatItemProps> { props ->
 
 external interface NextPiecePreviewProps : Props {
     var piece: Tetromino
+    var settings: com.yet.tetris.domain.model.settings.GameSettings
 }
 
 @OptIn(ExperimentalWasmJsInterop::class)
@@ -324,9 +327,9 @@ val NextPiecePreview = FC<NextPiecePreviewProps> { props ->
         val offsetX = (canvas.width - pieceWidth) / 2 - (minX * cellSize)
         val offsetY = (canvas.height - pieceHeight) / 2 - (minY * cellSize)
 
-        // Draw piece
-        val color = getTetrominoColor(props.piece.type)
-        ctx.fillStyle = color
+        // Draw piece with theme color
+        val color = getTetrominoColorForPreview(props.piece.type, props.settings)
+        ctx.fillStyle = color.toJsString()
 
         props.piece.blocks.forEach { block ->
             val x = block.x * cellSize + offsetX
@@ -375,14 +378,100 @@ private fun formatTime(ms: Long): String {
     return "$minutes:${seconds.toString().padStart(2, '0')}"
 }
 
-private fun getTetrominoColor(type: TetrominoType): String {
-    return when (type) {
-        TetrominoType.I -> "#00F0F0"
-        TetrominoType.O -> "#F0F000"
-        TetrominoType.T -> "#A000F0"
-        TetrominoType.S -> "#00F000"
-        TetrominoType.Z -> "#F00000"
-        TetrominoType.J -> "#0000F0"
-        TetrominoType.L -> "#F0A000"
+private fun getTetrominoColorForPreview(
+    type: TetrominoType,
+    settings: com.yet.tetris.domain.model.settings.GameSettings
+): String {
+    val color = when (settings.themeConfig.visualTheme) {
+        com.yet.tetris.domain.model.theme.VisualTheme.CLASSIC -> when (type) {
+            TetrominoType.I -> 0x00F0F0
+            TetrominoType.O -> 0xF0F000
+            TetrominoType.T -> 0xA000F0
+            TetrominoType.S -> 0x00F000
+            TetrominoType.Z -> 0xF00000
+            TetrominoType.J -> 0x0000F0
+            TetrominoType.L -> 0xF0A000
+        }
+
+        com.yet.tetris.domain.model.theme.VisualTheme.RETRO_GAMEBOY -> when (type) {
+            TetrominoType.I -> 0x0F380F
+            TetrominoType.O -> 0x306230
+            TetrominoType.T -> 0x0F380F
+            TetrominoType.S -> 0x306230
+            TetrominoType.Z -> 0x0F380F
+            TetrominoType.J -> 0x306230
+            TetrominoType.L -> 0x0F380F
+        }
+
+        com.yet.tetris.domain.model.theme.VisualTheme.RETRO_NES -> when (type) {
+            TetrominoType.I -> 0x00D8F8
+            TetrominoType.O -> 0xF8D800
+            TetrominoType.T -> 0xB800F8
+            TetrominoType.S -> 0x00F800
+            TetrominoType.Z -> 0xF80000
+            TetrominoType.J -> 0x0000F8
+            TetrominoType.L -> 0xF87800
+        }
+
+        com.yet.tetris.domain.model.theme.VisualTheme.NEON -> when (type) {
+            TetrominoType.I -> 0x00FFFF
+            TetrominoType.O -> 0xFFFF00
+            TetrominoType.T -> 0xFF00FF
+            TetrominoType.S -> 0x00FF00
+            TetrominoType.Z -> 0xFF0066
+            TetrominoType.J -> 0x0066FF
+            TetrominoType.L -> 0xFF6600
+        }
+
+        com.yet.tetris.domain.model.theme.VisualTheme.PASTEL -> when (type) {
+            TetrominoType.I -> 0xB4E7F5
+            TetrominoType.O -> 0xFFF4B4
+            TetrominoType.T -> 0xE5B4F5
+            TetrominoType.S -> 0xB4F5B4
+            TetrominoType.Z -> 0xF5B4B4
+            TetrominoType.J -> 0xB4B4F5
+            TetrominoType.L -> 0xF5D4B4
+        }
+
+        com.yet.tetris.domain.model.theme.VisualTheme.MONOCHROME -> when (type) {
+            TetrominoType.I -> 0xFFFFFF
+            TetrominoType.O -> 0xE0E0E0
+            TetrominoType.T -> 0xC0C0C0
+            TetrominoType.S -> 0xA0A0A0
+            TetrominoType.Z -> 0x808080
+            TetrominoType.J -> 0x606060
+            TetrominoType.L -> 0x404040
+        }
+
+        com.yet.tetris.domain.model.theme.VisualTheme.OCEAN -> when (type) {
+            TetrominoType.I -> 0x00CED1
+            TetrominoType.O -> 0x20B2AA
+            TetrominoType.T -> 0x4682B4
+            TetrominoType.S -> 0x5F9EA0
+            TetrominoType.Z -> 0x1E90FF
+            TetrominoType.J -> 0x0000CD
+            TetrominoType.L -> 0x000080
+        }
+
+        com.yet.tetris.domain.model.theme.VisualTheme.SUNSET -> when (type) {
+            TetrominoType.I -> 0xFF6B6B
+            TetrominoType.O -> 0xFFD93D
+            TetrominoType.T -> 0xFF8C42
+            TetrominoType.S -> 0xFFA07A
+            TetrominoType.Z -> 0xFF69B4
+            TetrominoType.J -> 0xFF4500
+            TetrominoType.L -> 0xFF1493
+        }
+
+        com.yet.tetris.domain.model.theme.VisualTheme.FOREST -> when (type) {
+            TetrominoType.I -> 0x228B22
+            TetrominoType.O -> 0x32CD32
+            TetrominoType.T -> 0x006400
+            TetrominoType.S -> 0x90EE90
+            TetrominoType.Z -> 0x2E8B57
+            TetrominoType.J -> 0x3CB371
+            TetrominoType.L -> 0x8FBC8F
+        }
     }
+    return "#${color.toString(16).padStart(6, '0')}"
 }
