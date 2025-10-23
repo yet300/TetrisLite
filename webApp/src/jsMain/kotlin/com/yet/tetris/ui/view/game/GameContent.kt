@@ -185,6 +185,12 @@ val GameContent = FC<RProps<GameComponent>> { props ->
                     GameBoard {
                         this.gameState = gameState
                         this.ghostY = model.ghostPieceY
+                        this.onDragStarted = { props.component.onDragStarted() }
+                        this.onDragged = { deltaX, deltaY ->
+                            props.component.onDragged(deltaX, deltaY)
+                        }
+                        this.onDragEnded = { props.component.onDragEnded() }
+                        this.onTap = { props.component.onRotate() }
                     }
                 }
             }
