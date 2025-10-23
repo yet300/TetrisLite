@@ -1,7 +1,8 @@
 package com.yet.tetris.ui.view.game
 
+import com.yet.tetris.domain.model.game.Tetromino
+import com.yet.tetris.domain.model.game.TetrominoType
 import com.yet.tetris.feature.game.GameComponent
-import com.yet.tetris.ui.components.AppBarConfig
 import com.yet.tetris.ui.components.Scaffold
 import com.yet.tetris.ui.view.game.dialog.ErrorDialog
 import com.yet.tetris.ui.view.game.dialog.GameOverDialog
@@ -9,36 +10,44 @@ import com.yet.tetris.ui.view.game.dialog.PauseDialog
 import com.yet.tetris.ui.view.settings.SettingsSheet
 import com.yet.tetris.utils.RProps
 import com.yet.tetris.utils.useAsState
+import js.objects.unsafeJso
 import kotlinx.browser.window
 import mui.icons.material.Pause
-import mui.icons.material.Settings
 import mui.material.Box
 import mui.material.Container
-import mui.material.Grid
 import mui.material.IconButton
-import mui.material.IconButtonColor
-import mui.material.Paper
 import mui.material.Typography
 import mui.material.styles.TypographyVariant
-import mui.system.responsive
 import mui.system.sx
 import react.FC
 import react.Props
+import react.dom.html.ReactHTML.canvas
 import react.dom.html.ReactHTML.div
+import react.useEffect
 import react.useEffectOnce
+import react.useRef
+import web.canvas.CanvasRenderingContext2D
+import web.canvas.ID
 import web.cssom.AlignItems
-import web.cssom.BackgroundImage
+import web.cssom.BackdropFilter
+import web.cssom.Border
 import web.cssom.Color
 import web.cssom.Display
 import web.cssom.FlexDirection
 import web.cssom.JustifyContent
+import web.cssom.MaxHeight
+import web.cssom.Overflow
+import web.cssom.Padding
+import web.cssom.Position
 import web.cssom.TextTransform
+import web.cssom.Width
 import web.cssom.integer
 import web.cssom.number
 import web.cssom.pct
+import web.cssom.px
 import web.cssom.rem
+import web.html.HTMLCanvasElement
 
-@OptIn(ExperimentalWasmJsInterop::class)
 val GameContent = FC<RProps<GameComponent>> { props ->
     val model by props.component.model.useAsState()
     val dialogSlot by props.component.childSlot.useAsState()
@@ -78,10 +87,6 @@ val GameContent = FC<RProps<GameComponent>> { props ->
                     props.component.onPause()
                 }
 
-                "c" -> {
-                    event.preventDefault()
-                    // props.component.onHold() // If hold is implemented
-                }
             }
         }
 
@@ -95,26 +100,8 @@ val GameContent = FC<RProps<GameComponent>> { props ->
     }
 
     Scaffold {
-        appBar = AppBarConfig(
-            title = "Game",
-            onBackClick = { props.component.onBackClick() },
-            actions = {
-                IconButton {
-                    color = IconButtonColor.inherit
-                    onClick = { props.component.onSettings() }
-                    Settings()
-                }
-                IconButton {
-                    color = IconButtonColor.inherit
-                    onClick = { props.component.onPause() }
-                    Pause()
-                }
-            }
-        )
-
         sx {
-            backgroundImage =
-                "linear-gradient(135deg, rgb(102, 126, 234) 0%, rgb(118, 75, 162) 100%)".unsafeCast<BackgroundImage>()
+            backgroundColor = Color("#000000")
         }
 
         Container {
@@ -126,53 +113,66 @@ val GameContent = FC<RProps<GameComponent>> { props ->
                 padding = 2.rem
             }
 
-            // Stats
-            Paper {
-                elevation = 2
+            // Top row: Pause button, Stats, Next piece
+            Box {
                 sx {
-                    padding = 2.rem
+                    display = Display.flex
+                    justifyContent = JustifyContent.spaceBetween
+                    alignItems = AlignItems.center
                     marginBottom = 2.rem
-                    backgroundColor = Color("rgba(255, 255, 255, 0.95)")
-                    borderRadius = 1.rem
                 }
 
-                Grid {
-                    container = true
-                    spacing = responsive(2)
-
-                    Grid {
-                        item = true
-//                        xs = 4.unsafeCast<GridSize>()
-
-                        StatCard {
-                            label = "Score"
-                            value = model.gameState?.score?.toString() ?: "0"
+                // Pause button (frosted glass style)
+                IconButton {
+                    sx {
+                        backgroundColor = Color("rgba(255, 255, 255, 0.1)")
+                        backdropFilter = "blur(10px)".unsafeCast<BackdropFilter>()
+                        border = "1px solid rgba(255, 255, 255, 0.2)".unsafeCast<Border>()
+                        hover {
+                            backgroundColor = Color("rgba(255, 255, 255, 0.2)")
                         }
                     }
+                    onClick = { props.component.onPause() }
+                    Pause()
+                }
 
-                    Grid {
-                        item = true
-//                        xs = 4.unsafeCast<GridSize>()
-
-                        StatCard {
-                            label = "Lines"
-                            value = model.gameState?.linesCleared?.toString() ?: "0"
-                        }
+                // Stats (glass panel)
+                Box {
+                    sx {
+                        display = Display.flex
+                        gap = 2.rem
+                        padding = Padding(1.rem, 2.rem)
+                        backgroundColor = Color("rgba(255, 255, 255, 0.1)")
+                        backdropFilter = "blur(10px)".unsafeCast<BackdropFilter>()
+                        border = "1px solid rgba(255, 255, 255, 0.2)".unsafeCast<Border>()
+                        borderRadius = 1.rem
                     }
 
-                    Grid {
-                        item = true
-//                        xs = 4.unsafeCast<GridSize>()
+                    StatItem {
+                        label = "Score"
+                        value = model.gameState?.score?.toString() ?: "0"
+                    }
 
-                        StatCard {
-                            label = "Time"
-                            value = formatTime(model.elapsedTime)
-                        }
+                    StatItem {
+                        label = "Lines"
+                        value = model.gameState?.linesCleared?.toString() ?: "0"
+                    }
+
+                    StatItem {
+                        label = "Time"
+                        value = formatTime(model.elapsedTime)
+                    }
+                }
+
+                // Next piece preview
+                model.gameState?.nextPiece?.let { nextPiece ->
+                    NextPiecePreview {
+                        piece = nextPiece
                     }
                 }
             }
 
-            // Game board
+            // Game board - centered
             Box {
                 sx {
                     flexGrow = number(1.0)
@@ -199,7 +199,6 @@ val GameContent = FC<RProps<GameComponent>> { props ->
                     component = props.component
                 }
             }
-
             is GameComponent.DialogChild.GameOver -> {
                 GameOverDialog {
                     component = props.component
@@ -207,7 +206,6 @@ val GameContent = FC<RProps<GameComponent>> { props ->
                     lines = model.finalLinesCleared
                 }
             }
-
             is GameComponent.DialogChild.Error -> {
                 ErrorDialog {
                     message = dialog.message
@@ -222,17 +220,29 @@ val GameContent = FC<RProps<GameComponent>> { props ->
         when (sheet) {
             is GameComponent.SheetChild.Settings -> {
                 div {
+                    style = unsafeJso {
+                        position = "fixed".unsafeCast<Position>()
+                        top = 0.px
+                        left = 0.px
+                        right = 0.px
+                        bottom = 0.px
+                        backgroundColor = "rgba(0, 0, 0, 0.5)".unsafeCast<Color>()
+                        display = "flex".unsafeCast<Display>()
+                        alignItems = "center".unsafeCast<AlignItems>()
+                        justifyContent = "center".unsafeCast<JustifyContent>()
+                        zIndex = integer(1300)
+                    }
                     onClick = { props.component.onDismissSheet() }
 
                     div {
-//                        style = jso {
-//                            backgroundColor = "white"
-//                            borderRadius = 16.px
-//                            maxWidth = 600.px
-//                            width = "90%".unsafeCast<Width>()
-//                            maxHeight = "80vh".unsafeCast<MaxHeight>()
-//                            overflow = "auto".unsafeCast<Overflow>()
-//                        }
+                        style = unsafeJso {
+                            backgroundColor = Color("white")
+                            borderRadius = 16.px
+                            maxWidth = 600.px
+                            width = "90%".unsafeCast<Width>()
+                            maxHeight = "80vh".unsafeCast<MaxHeight>()
+                            overflow = "auto".unsafeCast<Overflow>()
+                        }
                         onClick = { it.stopPropagation() }
 
                         SettingsSheet {
@@ -245,12 +255,12 @@ val GameContent = FC<RProps<GameComponent>> { props ->
     }
 }
 
-external interface StatCardProps : Props {
+external interface StatItemProps : Props {
     var label: String
     var value: String
 }
 
-val StatCard = FC<StatCardProps> { props ->
+val StatItem = FC<StatItemProps> { props ->
     Box {
         sx {
             display = Display.flex
@@ -261,19 +271,94 @@ val StatCard = FC<StatCardProps> { props ->
         Typography {
             variant = TypographyVariant.caption
             sx {
-                color = Color("rgba(0, 0, 0, 0.6)")
+                color = Color("rgba(255, 255, 255, 0.7)")
                 textTransform = TextTransform.uppercase
+                fontSize = 0.75.rem
             }
             +props.label
         }
 
         Typography {
-            variant = TypographyVariant.h4
+            variant = TypographyVariant.h6
             sx {
                 fontWeight = integer(700)
-                color = Color("#667eea")
+                color = Color("#39FF14") // Terminal green
             }
             +props.value
+        }
+    }
+}
+
+external interface NextPiecePreviewProps : Props {
+    var piece: Tetromino
+}
+
+@OptIn(ExperimentalWasmJsInterop::class)
+val NextPiecePreview = FC<NextPiecePreviewProps> { props ->
+    val canvasRef = useRef<HTMLCanvasElement>()
+
+    useEffect(props.piece) {
+        val canvas = canvasRef.current ?: return@useEffect
+        val ctx = canvas.getContext(CanvasRenderingContext2D.ID) ?: return@useEffect
+
+        val cellSize = 15.0
+
+        // Clear canvas
+        ctx.clearRect(0.0, 0.0, canvas.width.toDouble(), canvas.height.toDouble())
+
+        // Calculate piece bounds
+        val minX = props.piece.blocks.minOfOrNull { it.x } ?: 0
+        val maxX = props.piece.blocks.maxOfOrNull { it.x } ?: 0
+        val minY = props.piece.blocks.minOfOrNull { it.y } ?: 0
+        val maxY = props.piece.blocks.maxOfOrNull { it.y } ?: 0
+
+        val pieceWidth = (maxX - minX + 1) * cellSize
+        val pieceHeight = (maxY - minY + 1) * cellSize
+
+        val offsetX = (canvas.width - pieceWidth) / 2 - (minX * cellSize)
+        val offsetY = (canvas.height - pieceHeight) / 2 - (minY * cellSize)
+
+        // Draw piece
+        val color = getTetrominoColor(props.piece.type)
+        ctx.fillStyle = color
+
+        props.piece.blocks.forEach { block ->
+            val x = block.x * cellSize + offsetX
+            val y = block.y * cellSize + offsetY
+            ctx.fillRect(x, y, cellSize - 1, cellSize - 1)
+        }
+    }
+
+    Box {
+        sx {
+            display = Display.flex
+            flexDirection = FlexDirection.column
+            alignItems = AlignItems.center
+            gap = 0.5.rem
+            padding = 1.rem
+            backgroundColor = Color("rgba(255, 255, 255, 0.1)")
+            backdropFilter = "blur(10px)".unsafeCast<BackdropFilter>()
+            border = "1px solid rgba(255, 255, 255, 0.2)".unsafeCast<Border>()
+            borderRadius = 1.rem
+        }
+
+        Typography {
+            variant = TypographyVariant.caption
+            sx {
+                color = Color("rgba(255, 255, 255, 0.7)")
+                textTransform = TextTransform.uppercase
+                fontSize = 0.75.rem
+            }
+            +"Next"
+        }
+
+        canvas {
+            ref = canvasRef
+            width = 80.toDouble()
+            height = 80.toDouble()
+            style = unsafeJso {
+                display = "block".unsafeCast<Display>()
+            }
         }
     }
 }
@@ -282,4 +367,16 @@ private fun formatTime(ms: Long): String {
     val seconds = (ms / 1000) % 60
     val minutes = ms / 1000 / 60
     return "$minutes:${seconds.toString().padStart(2, '0')}"
+}
+
+private fun getTetrominoColor(type: TetrominoType): String {
+    return when (type) {
+        TetrominoType.I -> "#00F0F0"
+        TetrominoType.O -> "#F0F000"
+        TetrominoType.T -> "#A000F0"
+        TetrominoType.S -> "#00F000"
+        TetrominoType.Z -> "#F00000"
+        TetrominoType.J -> "#0000F0"
+        TetrominoType.L -> "#F0A000"
+    }
 }
