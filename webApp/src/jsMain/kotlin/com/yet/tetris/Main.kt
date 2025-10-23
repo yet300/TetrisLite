@@ -8,9 +8,13 @@ import com.arkivanov.essenty.lifecycle.resume
 import com.arkivanov.essenty.lifecycle.stop
 import com.yet.tetris.di.InitKoin
 import com.yet.tetris.feature.root.DefaultRootComponent
+import com.yet.tetris.feature.root.RootComponent
+import com.yet.tetris.utils.RProps
 import kotlinx.browser.document
+import react.FC
 import react.create
 import react.dom.client.createRoot
+import theme.ThemeModule
 import web.dom.DocumentVisibilityState
 import web.dom.Element
 import web.dom.visible
@@ -37,10 +41,18 @@ fun main() {
     val reactRoot = createRoot(container.unsafeCast<Element>())
 
     reactRoot.render(
-        RootContent.create {
+        children = App.create {
             component = root
         }
     )
+}
+
+private val App = FC<RProps<RootComponent>> { props ->
+    ThemeModule {
+        RootContent {
+            component = props.component
+        }
+    }
 }
 
 private fun LifecycleRegistry.attachToDocument() {
