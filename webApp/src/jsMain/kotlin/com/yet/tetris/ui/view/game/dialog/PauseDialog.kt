@@ -28,21 +28,17 @@ val PauseDialog = FC<RProps<GameComponent>> { props ->
 
         DialogActions {
             Button {
-                onClick = { props.component.onResume() }
-                +"Resume"
+                onClick = { props.component.onQuit() }
+                color = ButtonColor.error
+                +"Quit"
             }
             Button {
                 onClick = { props.component.onSettings() }
                 +"Settings"
             }
             Button {
-                onClick = { props.component.onRetry() }
-                +"Restart"
-            }
-            Button {
-                onClick = { props.component.onQuit() }
-                color = ButtonColor.error
-                +"Quit"
+                onClick = { props.component.onResume() }
+                +"Resume"
             }
         }
     }
