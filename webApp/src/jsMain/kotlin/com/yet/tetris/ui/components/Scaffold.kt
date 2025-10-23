@@ -1,5 +1,6 @@
-package com.yet.tetris.components
+package com.yet.tetris.ui.components
 
+import mui.icons.material.ArrowBack
 import mui.material.AppBar
 import mui.material.AppBarPosition
 import mui.material.Box
@@ -63,7 +64,7 @@ val Scaffold: FC<ScaffoldProps> = FC { props ->
                             color = IconButtonColor.inherit
                             onClick = { appBar.onBackClick.invoke() }
 
-                            mui.icons.material.ArrowBack()
+                            ArrowBack()
                         }
                     }
 

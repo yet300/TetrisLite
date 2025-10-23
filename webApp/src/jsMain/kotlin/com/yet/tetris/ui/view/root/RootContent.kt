@@ -1,8 +1,8 @@
-package com.yet.tetris
+package com.yet.tetris.ui.view.root
 
 import com.yet.tetris.feature.root.RootComponent
-import com.yet.tetris.game.GameContent
-import com.yet.tetris.home.HomeContent
+import com.yet.tetris.ui.view.game.GameContent
+import com.yet.tetris.ui.view.home.HomeContent
 import com.yet.tetris.utils.RProps
 import com.yet.tetris.utils.useAsState
 import react.FC

@@ -1,11 +1,11 @@
-package com.yet.tetris.home
+package com.yet.tetris.ui.view.home
 
-import com.yet.tetris.components.AppBarConfig
-import com.yet.tetris.components.Scaffold
 import com.yet.tetris.domain.model.game.Difficulty
 import com.yet.tetris.feature.home.HomeComponent
-import com.yet.tetris.history.HistorySheet
-import com.yet.tetris.settings.SettingsSheet
+import com.yet.tetris.ui.components.AppBarConfig
+import com.yet.tetris.ui.components.Scaffold
+import com.yet.tetris.ui.view.history.HistorySheet
+import com.yet.tetris.ui.view.settings.SettingsSheet
 import com.yet.tetris.utils.RProps
 import com.yet.tetris.utils.useAsState
 import mui.icons.material.History

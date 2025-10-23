@@ -1,4 +1,4 @@
-package com.yet.tetris.game
+package com.yet.tetris.ui.view.game
 
 import com.yet.tetris.domain.model.game.GameState
 import com.yet.tetris.domain.model.game.Position

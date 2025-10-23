@@ -9,7 +9,8 @@ import com.arkivanov.essenty.lifecycle.stop
 import com.yet.tetris.di.InitKoin
 import com.yet.tetris.feature.root.DefaultRootComponent
 import com.yet.tetris.feature.root.RootComponent
-import com.yet.tetris.theme.ThemeModule
+import com.yet.tetris.ui.theme.ThemeModule
+import com.yet.tetris.ui.view.root.RootContent
 import com.yet.tetris.utils.RProps
 import kotlinx.browser.document
 import react.FC

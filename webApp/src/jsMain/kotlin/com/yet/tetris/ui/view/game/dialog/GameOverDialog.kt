@@ -1,4 +1,4 @@
-package com.yet.tetris.game.dialog
+package com.yet.tetris.ui.view.game.dialog
 
 import com.yet.tetris.feature.game.GameComponent
 import mui.material.Box

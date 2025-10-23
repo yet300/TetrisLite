@@ -1,9 +1,13 @@
-package com.yet.tetris.history
+package com.yet.tetris.ui.view.history
 
 import com.yet.tetris.feature.history.DateFilter
 import com.yet.tetris.feature.history.HistoryComponent
 import com.yet.tetris.utils.RProps
 import com.yet.tetris.utils.useAsState
+import mui.icons.material.Close
+import mui.icons.material.Delete
+import mui.icons.material.FilterList
+import mui.icons.material.SportsEsports
 import mui.material.Box
 import mui.material.Card
 import mui.material.CardContent
@@ -58,7 +62,7 @@ val HistorySheet = FC<RProps<HistoryComponent>> { props ->
             // Filter button
             IconButton {
                 onClick = { setShowFilterMenu(true) }
-                mui.icons.material.FilterList()
+                FilterList()
             }
 
             Typography {
@@ -69,7 +73,7 @@ val HistorySheet = FC<RProps<HistoryComponent>> { props ->
             // Close button
             IconButton {
                 onClick = { props.component.onDismiss() }
-                mui.icons.material.Close()
+                Close()
             }
 
             // Filter Menu
@@ -125,7 +129,7 @@ val HistorySheet = FC<RProps<HistoryComponent>> { props ->
                                 gap = 1.rem
                             }
 
-                            mui.icons.material.SportsEsports {
+                            SportsEsports {
                                 sx {
                                     fontSize = 4.rem
                                     color = Color("rgba(0, 0, 0, 0.3)")
@@ -177,7 +181,7 @@ val HistorySheet = FC<RProps<HistoryComponent>> { props ->
                                                             marginBottom = 0.5.rem
                                                         }
 
-                                                        mui.icons.material.SportsEsports {
+                                                        SportsEsports {
                                                             sx {
                                                                 fontSize = 1.rem
                                                                 color =
@@ -238,7 +242,7 @@ val HistorySheet = FC<RProps<HistoryComponent>> { props ->
                                                                 Color("rgba(244, 67, 54, 0.1)")
                                                         }
                                                     }
-                                                    mui.icons.material.Delete()
+                                                    Delete()
                                                 }
                                             }
                                         }

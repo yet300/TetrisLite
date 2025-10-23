@@ -1,9 +1,13 @@
-package com.yet.tetris.game
+package com.yet.tetris.ui.view.game
 
-import com.yet.tetris.components.AppBarConfig
-import com.yet.tetris.components.Scaffold
 import com.yet.tetris.feature.game.GameComponent
-import com.yet.tetris.game.dialog.ErrorDialog
+import com.yet.tetris.ui.components.AppBarConfig
+import com.yet.tetris.ui.components.Scaffold
+import com.yet.tetris.ui.view.game.dialog.ErrorDialog
+import com.yet.tetris.ui.view.game.dialog.GameOverDialog
+import com.yet.tetris.ui.view.game.dialog.PauseDialog
+import com.yet.tetris.ui.view.settings.SettingsSheet
+import com.yet.tetris.utils.RProps
 import com.yet.tetris.utils.useAsState
 import kotlinx.browser.window
 import mui.icons.material.Pause
@@ -19,6 +23,7 @@ import mui.material.styles.TypographyVariant
 import mui.system.responsive
 import mui.system.sx
 import react.FC
+import react.Props
 import react.dom.html.ReactHTML.div
 import react.useEffectOnce
 import web.cssom.AlignItems
@@ -34,7 +39,7 @@ import web.cssom.pct
 import web.cssom.rem
 
 @OptIn(ExperimentalWasmJsInterop::class)
-val GameContent = FC<com.yet.tetris.utils.RProps<GameComponent>> { props ->
+val GameContent = FC<RProps<GameComponent>> { props ->
     val model by props.component.model.useAsState()
     val dialogSlot by props.component.childSlot.useAsState()
     val sheetSlot by props.component.sheetSlot.useAsState()
@@ -190,13 +195,13 @@ val GameContent = FC<com.yet.tetris.utils.RProps<GameComponent>> { props ->
     dialogSlot.child?.instance?.let { dialog ->
         when (dialog) {
             is GameComponent.DialogChild.Pause -> {
-                _root_ide_package_.com.yet.tetris.game.dialog.PauseDialog {
+                PauseDialog {
                     component = props.component
                 }
             }
 
             is GameComponent.DialogChild.GameOver -> {
-                _root_ide_package_.com.yet.tetris.game.dialog.GameOverDialog {
+                GameOverDialog {
                     component = props.component
                     score = model.finalScore
                     lines = model.finalLinesCleared
@@ -230,7 +235,7 @@ val GameContent = FC<com.yet.tetris.utils.RProps<GameComponent>> { props ->
 //                        }
                         onClick = { it.stopPropagation() }
 
-                        _root_ide_package_.com.yet.tetris.settings.SettingsSheet {
+                        SettingsSheet {
                             component = sheet.component
                         }
                     }
@@ -240,7 +245,7 @@ val GameContent = FC<com.yet.tetris.utils.RProps<GameComponent>> { props ->
     }
 }
 
-external interface StatCardProps : react.Props {
+external interface StatCardProps : Props {
     var label: String
     var value: String
 }

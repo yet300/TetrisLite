@@ -1,4 +1,4 @@
-package com.yet.tetris.theme
+package com.yet.tetris.ui.theme
 
 import js.objects.unsafeJso
 import mui.material.CssBaseline

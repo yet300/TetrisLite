@@ -1,4 +1,4 @@
-package com.yet.tetris.settings
+package com.yet.tetris.ui.view.settings
 
 import com.yet.tetris.domain.model.audio.MusicTheme
 import com.yet.tetris.domain.model.settings.KeyboardLayout
