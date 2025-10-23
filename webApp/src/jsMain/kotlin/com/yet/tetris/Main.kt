@@ -9,12 +9,12 @@ import com.arkivanov.essenty.lifecycle.stop
 import com.yet.tetris.di.InitKoin
 import com.yet.tetris.feature.root.DefaultRootComponent
 import com.yet.tetris.feature.root.RootComponent
+import com.yet.tetris.theme.ThemeModule
 import com.yet.tetris.utils.RProps
 import kotlinx.browser.document
 import react.FC
 import react.create
 import react.dom.client.createRoot
-import theme.ThemeModule
 import web.dom.DocumentVisibilityState
 import web.dom.Element
 import web.dom.visible

@@ -1,4 +1,4 @@
-package theme
+package com.yet.tetris.theme
 
 import web.cssom.BackgroundImage
 
