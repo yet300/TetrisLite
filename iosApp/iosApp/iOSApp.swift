@@ -8,7 +8,7 @@ struct iOSApp: App {
     var appDelegate: AppDelegate
 
     init() {
-        InitKoinKt.doInitKoin()
+        InitKoinKt.InitKoin()
     }
 
     var body: some Scene {
