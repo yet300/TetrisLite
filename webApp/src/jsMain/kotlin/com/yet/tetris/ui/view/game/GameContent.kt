@@ -125,7 +125,7 @@ val GameContent = FC<RProps<GameComponent>> { props ->
                 sx {
                     display = Display.flex
                     justifyContent = JustifyContent.spaceBetween
-                    alignItems = AlignItems.flexStart
+                    alignItems = AlignItems.center
                     marginBottom = 0.5.rem
                     gap = 0.5.rem
                     flexWrap = FlexWrap.wrap
@@ -158,6 +158,7 @@ val GameContent = FC<RProps<GameComponent>> { props ->
                         border = "1px solid rgba(255, 255, 255, 0.2)".unsafeCast<Border>()
                         borderRadius = 0.75.rem
                         flexGrow = number(1.0)
+                        maxWidth = 400.px
                         justifyContent = JustifyContent.spaceAround
                         minWidth = 0.px
                     }
