@@ -1,12 +1,12 @@
 package com.yet.plugins
 
+import com.google.devtools.ksp.gradle.KspExtension
 import libs
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.dependencies
 import org.gradle.kotlin.dsl.getByType
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
-import com.google.devtools.ksp.gradle.KspExtension
 
 class KoinAnnotationPlugin : Plugin<Project> {
 
@@ -19,6 +19,7 @@ class KoinAnnotationPlugin : Plugin<Project> {
             sourceSets.getByName("commonMain").dependencies {
                 implementation(libs.findLibrary("koin-core").get())
                 implementation(libs.findLibrary("koin-annotation").get())
+                implementation(libs.findLibrary("koin-jsr330").get())
             }
             sourceSets.named("commonMain").configure {
                 kotlin.srcDir("build/generated/ksp/metadata/commonMain/kotlin")
