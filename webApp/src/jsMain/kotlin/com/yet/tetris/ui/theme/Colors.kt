@@ -40,6 +40,5 @@ object AppColors {
     val gradientEnd = Color("rgb(118, 75, 162)")
 
     // Helper function to create gradient background
-    fun gradientBackground() =
-        "linear-gradient(135deg, rgb(102, 126, 234) 0%, rgb(118, 75, 162) 100%)"
+    fun gradientBackground() = "linear-gradient(135deg, rgb(102, 126, 234) 0%, rgb(118, 75, 162) 100%)"
 }
