@@ -15,11 +15,9 @@ import mui.system.sx
 import react.FC
 import react.Props
 import web.cssom.AlignItems
-import web.cssom.Color
 import web.cssom.Display
 import web.cssom.FlexDirection
 import web.cssom.TextAlign
-import web.cssom.integer
 import web.cssom.rem
 
 external interface GameOverDialogProps : Props {
@@ -52,10 +50,6 @@ val GameOverDialog = FC<GameOverDialogProps> { props ->
 
                 Typography {
                     variant = TypographyVariant.h4
-                    sx {
-                        color = Color("#667eea")
-                        fontWeight = integer(700)
-                    }
                     +Strings.finalScore(props.score)
                 }
 
