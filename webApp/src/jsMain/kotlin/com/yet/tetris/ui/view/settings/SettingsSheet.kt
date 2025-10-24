@@ -67,6 +67,16 @@ val SettingsSheet = FC<RProps<SettingsComponent>> { props ->
             Stack {
                 spacing = responsive(4)
 
+                // Title
+                Typography {
+                    variant = TypographyVariant.h5
+                    sx {
+                        fontWeight = integer(700)
+                        marginBottom = 1.rem
+                    }
+                    +"Game Settings"
+                }
+
                 SettingsSection {
                     title = "Visual Theme"
 
