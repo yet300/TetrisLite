@@ -13,7 +13,7 @@ object BoardRenderer {
         ctx: CanvasRenderingContext2D,
         gameState: GameState,
         ghostY: Int?,
-        settings: GameSettings
+        settings: GameSettings,
     ) {
         val board = gameState.board
         val rows = board.height
@@ -39,7 +39,7 @@ object BoardRenderer {
                     cellSize,
                     settings.themeConfig.pieceStyle,
                     1.0,
-                    settings
+                    settings,
                 )
             }
         }
@@ -49,10 +49,11 @@ object BoardRenderer {
             ghostY?.let { landingY ->
                 if (landingY > gameState.currentPosition.y) {
                     piece.blocks.forEach { blockPos ->
-                        val absolutePos = Position(
-                            gameState.currentPosition.x + blockPos.x,
-                            landingY + blockPos.y
-                        )
+                        val absolutePos =
+                            Position(
+                                gameState.currentPosition.x + blockPos.x,
+                                landingY + blockPos.y,
+                            )
                         if (absolutePos.y >= 0 && absolutePos.y < rows) {
                             BlockRenderer.drawBlock(
                                 ctx,
@@ -62,7 +63,7 @@ object BoardRenderer {
                                 cellSize,
                                 settings.themeConfig.pieceStyle,
                                 0.3,
-                                settings
+                                settings,
                             )
                         }
                     }
@@ -73,10 +74,11 @@ object BoardRenderer {
         // Draw current piece
         gameState.currentPiece?.let { piece ->
             piece.blocks.forEach { blockPos ->
-                val absolutePos = Position(
-                    gameState.currentPosition.x + blockPos.x,
-                    gameState.currentPosition.y + blockPos.y
-                )
+                val absolutePos =
+                    Position(
+                        gameState.currentPosition.x + blockPos.x,
+                        gameState.currentPosition.y + blockPos.y,
+                    )
                 if (absolutePos.y >= 0 && absolutePos.y < rows) {
                     BlockRenderer.drawBlock(
                         ctx,
@@ -86,7 +88,7 @@ object BoardRenderer {
                         cellSize,
                         settings.themeConfig.pieceStyle,
                         1.0,
-                        settings
+                        settings,
                     )
                 }
             }
@@ -102,7 +104,7 @@ object BoardRenderer {
         rows: Int,
         cols: Int,
         cellSize: Double,
-        settings: GameSettings
+        settings: GameSettings,
     ) {
         val gridColor = ThemeColors.getGridColor(settings)
         ctx.strokeStyle = gridColor.toJsString()

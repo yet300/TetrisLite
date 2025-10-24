@@ -25,72 +25,79 @@ external interface ThemeSelectorProps : Props {
     var onPieceStyleChanged: (PieceStyle) -> Unit
 }
 
-val ThemeSelector = FC<ThemeSelectorProps> { props ->
-    Stack {
-        spacing = responsive(4)
+val ThemeSelector =
+    FC<ThemeSelectorProps> { props ->
+        Stack {
+            spacing = responsive(4)
 
-        // Visual Theme
-        SettingsSection {
-            title = Strings.visualTheme
+            // Visual Theme
+            SettingsSection {
+                title = Strings.VISUAL_THEME
 
-            Box {
-                sx {
-                    display = Display.flex
-                    flexWrap = FlexWrap.wrap
-                    gap = 1.rem
-                }
+                Box {
+                    sx {
+                        display = Display.flex
+                        flexWrap = FlexWrap.wrap
+                        gap = 1.rem
+                    }
 
-                VisualTheme.entries.forEach { theme ->
-                    Chip {
-                        label = div.create {
-                            +theme.name.lowercase().replaceFirstChar { it.uppercase() }
+                    VisualTheme.entries.forEach { theme ->
+                        Chip {
+                            label =
+                                div.create {
+                                    +theme.name.lowercase().replaceFirstChar { it.uppercase() }
+                                }
+                            variant =
+                                if (props.visualTheme == theme) {
+                                    ChipVariant.filled
+                                } else {
+                                    ChipVariant.outlined
+                                }
+                            color =
+                                if (props.visualTheme == theme) {
+                                    ChipColor.primary
+                                } else {
+                                    ChipColor.default
+                                }
+                            onClick = { props.onVisualThemeChanged(theme) }
                         }
-                        variant = if (props.visualTheme == theme) {
-                            ChipVariant.filled
-                        } else {
-                            ChipVariant.outlined
-                        }
-                        color = if (props.visualTheme == theme) {
-                            ChipColor.primary
-                        } else {
-                            ChipColor.default
-                        }
-                        onClick = { props.onVisualThemeChanged(theme) }
                     }
                 }
             }
-        }
 
-        // Piece Style
-        SettingsSection {
-            title = Strings.pieceStyle
+            // Piece Style
+            SettingsSection {
+                title = Strings.PIECE_STYLE
 
-            Box {
-                sx {
-                    display = Display.flex
-                    flexWrap = FlexWrap.wrap
-                    gap = 1.rem
-                }
+                Box {
+                    sx {
+                        display = Display.flex
+                        flexWrap = FlexWrap.wrap
+                        gap = 1.rem
+                    }
 
-                PieceStyle.entries.forEach { style ->
-                    Chip {
-                        label = div.create {
-                            +style.name.lowercase().replaceFirstChar { it.uppercase() }
+                    PieceStyle.entries.forEach { style ->
+                        Chip {
+                            label =
+                                div.create {
+                                    +style.name.lowercase().replaceFirstChar { it.uppercase() }
+                                }
+                            variant =
+                                if (props.pieceStyle == style) {
+                                    ChipVariant.filled
+                                } else {
+                                    ChipVariant.outlined
+                                }
+                            color =
+                                if (props.pieceStyle == style) {
+                                    ChipColor.primary
+                                } else {
+                                    ChipColor.default
+                                }
+                            onClick = { props.onPieceStyleChanged(style) }
                         }
-                        variant = if (props.pieceStyle == style) {
-                            ChipVariant.filled
-                        } else {
-                            ChipVariant.outlined
-                        }
-                        color = if (props.pieceStyle == style) {
-                            ChipColor.primary
-                        } else {
-                            ChipColor.default
-                        }
-                        onClick = { props.onPieceStyleChanged(style) }
                     }
                 }
             }
         }
     }
-}

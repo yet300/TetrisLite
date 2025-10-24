@@ -15,26 +15,27 @@ external interface ErrorDialogProps : Props {
     var onDismiss: () -> Unit
 }
 
-val ErrorDialog = FC<ErrorDialogProps> { props ->
-    Dialog {
-        open = true
-        onClose = { _, _ -> props.onDismiss() }
+val ErrorDialog =
+    FC<ErrorDialogProps> { props ->
+        Dialog {
+            open = true
+            onClose = { _, _ -> props.onDismiss() }
 
-        DialogTitle {
-            +Strings.errorTitle
-        }
-
-        DialogContent {
-            DialogContentText {
-                +props.message
+            DialogTitle {
+                +Strings.ERROR_TITLE
             }
-        }
 
-        DialogActions {
-            Button {
-                onClick = { props.onDismiss() }
-                +Strings.ok
+            DialogContent {
+                DialogContentText {
+                    +props.message
+                }
+            }
+
+            DialogActions {
+                Button {
+                    onClick = { props.onDismiss() }
+                    +Strings.OK
+                }
             }
         }
     }
-}

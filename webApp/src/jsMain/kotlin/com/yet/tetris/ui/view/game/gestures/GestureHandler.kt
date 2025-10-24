@@ -15,32 +15,36 @@ object GestureHandler {
         onDragStarted: (() -> Unit)?,
         onDragged: ((Float, Float) -> Unit)?,
         onDragEnded: (() -> Unit)?,
-        onTap: (() -> Unit)?
+        onTap: (() -> Unit)?,
     ): () -> Unit {
         val handleStart: (dynamic) -> Unit = { event ->
             event.preventDefault()
 
-            val clientX = if (event.type == "touchstart" && event.touches.length > 0) {
-                event.touches[0].clientX.unsafeCast<Double>()
-            } else {
-                event.clientX.unsafeCast<Double>()
-            }
+            val clientX =
+                if (event.type == "touchstart" && event.touches.length > 0) {
+                    event.touches[0].clientX.unsafeCast<Double>()
+                } else {
+                    event.clientX.unsafeCast<Double>()
+                }
 
-            val clientY = if (event.type == "touchstart" && event.touches.length > 0) {
-                event.touches[0].clientY.unsafeCast<Double>()
-            } else {
-                event.clientY.unsafeCast<Double>()
-            }
+            val clientY =
+                if (event.type == "touchstart" && event.touches.length > 0) {
+                    event.touches[0].clientY.unsafeCast<Double>()
+                } else {
+                    event.clientY.unsafeCast<Double>()
+                }
 
             startTimeRef.current = js("Date").now().unsafeCast<Double>()
-            lastPosRef.current = unsafeJso {
-                this.x = clientX
-                this.y = clientY
-            }
-            totalDragRef.current = unsafeJso {
-                this.x = 0.0
-                this.y = 0.0
-            }
+            lastPosRef.current =
+                unsafeJso {
+                    this.x = clientX
+                    this.y = clientY
+                }
+            totalDragRef.current =
+                unsafeJso {
+                    this.x = 0.0
+                    this.y = 0.0
+                }
             didStartDraggingRef.current = false
         }
 
@@ -48,17 +52,19 @@ object GestureHandler {
             event.preventDefault()
             val lastPos = lastPosRef.current
             if (lastPos != null) {
-                val clientX = if (event.type == "touchmove" && event.touches.length > 0) {
-                    event.touches[0].clientX.unsafeCast<Double>()
-                } else {
-                    event.clientX.unsafeCast<Double>()
-                }
+                val clientX =
+                    if (event.type == "touchmove" && event.touches.length > 0) {
+                        event.touches[0].clientX.unsafeCast<Double>()
+                    } else {
+                        event.clientX.unsafeCast<Double>()
+                    }
 
-                val clientY = if (event.type == "touchmove" && event.touches.length > 0) {
-                    event.touches[0].clientY.unsafeCast<Double>()
-                } else {
-                    event.clientY.unsafeCast<Double>()
-                }
+                val clientY =
+                    if (event.type == "touchmove" && event.touches.length > 0) {
+                        event.touches[0].clientY.unsafeCast<Double>()
+                    } else {
+                        event.clientY.unsafeCast<Double>()
+                    }
 
                 val deltaX = clientX - lastPos.x.unsafeCast<Double>()
                 val deltaY = clientY - lastPos.y.unsafeCast<Double>()
@@ -84,10 +90,11 @@ object GestureHandler {
                     onDragged?.invoke((deltaX * 1.5).toFloat(), (deltaY * 1.5).toFloat())
                 }
 
-                lastPosRef.current = unsafeJso {
-                    this.x = clientX
-                    this.y = clientY
-                }
+                lastPosRef.current =
+                    unsafeJso {
+                        this.x = clientX
+                        this.y = clientY
+                    }
             }
         }
 
@@ -97,11 +104,12 @@ object GestureHandler {
             if (lastPos != null) {
                 val elapsed = js("Date").now().unsafeCast<Double>() - (startTimeRef.current ?: 0.0)
                 val total = totalDragRef.current
-                val totalDist = if (total != null) {
-                    total.x.unsafeCast<Double>() + total.y.unsafeCast<Double>()
-                } else {
-                    0.0
-                }
+                val totalDist =
+                    if (total != null) {
+                        total.x.unsafeCast<Double>() + total.y.unsafeCast<Double>()
+                    } else {
+                        0.0
+                    }
 
                 if (didStartDraggingRef.current != true && elapsed < 300 && totalDist < 10) {
                     // Quick tap with minimal movement - rotate
@@ -125,9 +133,10 @@ object GestureHandler {
         }
 
         // Add event listeners with passive: false
-        val options = unsafeJso<dynamic> {
-            this.passive = false
-        }
+        val options =
+            unsafeJso<dynamic> {
+                this.passive = false
+            }
 
         canvas.asDynamic().addEventListener("mousedown", handleStart, options)
         canvas.asDynamic().addEventListener("mousemove", handleMove, options)

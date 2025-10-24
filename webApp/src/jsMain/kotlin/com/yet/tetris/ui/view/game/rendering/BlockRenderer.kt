@@ -15,7 +15,7 @@ object BlockRenderer {
         cellSize: Double,
         style: PieceStyle,
         alpha: Double,
-        settings: GameSettings
+        settings: GameSettings,
     ) {
         val color = ThemeColors.getTetrominoColor(type, settings)
         val lightColor = ThemeColors.getTetrominoLightColor(type, settings)
@@ -51,12 +51,13 @@ object BlockRenderer {
 
             PieceStyle.GRADIENT -> {
                 // Create gradient
-                val gradient = ctx.createLinearGradient(
-                    offsetX,
-                    offsetY,
-                    offsetX + blockSize,
-                    offsetY + blockSize
-                )
+                val gradient =
+                    ctx.createLinearGradient(
+                        offsetX,
+                        offsetY,
+                        offsetX + blockSize,
+                        offsetY + blockSize,
+                    )
                 gradient.addColorStop(0.0, lightColor.toJsString())
                 gradient.addColorStop(1.0, darkColor.toJsString())
                 ctx.fillStyle = gradient

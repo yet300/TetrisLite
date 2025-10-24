@@ -36,65 +36,68 @@ external interface GameBoardProps : Props {
 }
 
 @OptIn(ExperimentalWasmJsInterop::class)
-val GameBoard = FC<GameBoardProps> { props ->
-    val canvasRef = useRef<HTMLCanvasElement>()
-    val lastPosRef = useRef<dynamic>()
-    val didStartDraggingRef = useRef(false)
-    val startTimeRef = useRef<Double>()
-    val dragThresholdRef = useRef(5.0) // Pixels before considering it a drag
-    val totalDragRef = useRef<dynamic>() // Track total drag distance
+val GameBoard =
+    FC<GameBoardProps> { props ->
+        val canvasRef = useRef<HTMLCanvasElement>()
+        val lastPosRef = useRef<dynamic>()
+        val didStartDraggingRef = useRef(false)
+        val startTimeRef = useRef<Double>()
+        val dragThresholdRef = useRef(5.0) // Pixels before considering it a drag
+        val totalDragRef = useRef<dynamic>() // Track total drag distance
 
-    // Setup gesture event listeners
-    useEffect(Unit) {
-        val canvas = canvasRef.current ?: return@useEffect
+        // Setup gesture event listeners
+        useEffect(Unit) {
+            val canvas = canvasRef.current ?: return@useEffect
 
-        val cleanup = GestureHandler.setupGestureListeners(
-            canvas,
-            lastPosRef,
-            didStartDraggingRef,
-            startTimeRef,
-            totalDragRef,
-            props.onDragStarted,
-            props.onDragged,
-            props.onDragEnded,
-            props.onTap
-        )
+            val cleanup =
+                GestureHandler.setupGestureListeners(
+                    canvas,
+                    lastPosRef,
+                    didStartDraggingRef,
+                    startTimeRef,
+                    totalDragRef,
+                    props.onDragStarted,
+                    props.onDragged,
+                    props.onDragEnded,
+                    props.onTap,
+                )
 
-        cleanup
-    }
-
-    useEffect(props.gameState, props.ghostY) {
-        val canvas = canvasRef.current ?: return@useEffect
-        val ctx = canvas.getContext(CanvasRenderingContext2D.ID) ?: return@useEffect
-
-        BoardRenderer.render(canvas, ctx, props.gameState, props.ghostY, props.settings)
-    }
-
-    Box {
-        sx {
-            display = Display.flex
-            alignItems = AlignItems.center
-            justifyContent = JustifyContent.center
-            width = 100.pct
-            height = 100.pct
+            cleanup
         }
 
-        canvas {
-            ref = canvasRef
-            width = 300.0
-            style = unsafeJso {
-                width = "min(90vw, 400px)".unsafeCast<web.cssom.Width>()
-                maxWidth = "100%".unsafeCast<MaxWidth>()
-                maxHeight = "calc(100vh - 120px)".unsafeCast<MaxHeight>()
-                height = "auto".unsafeCast<web.cssom.Height>()
-                border = "2px solid rgba(255, 255, 255, 0.3)".unsafeCast<Border>()
-                borderRadius = 8.px
-                backgroundColor = Color("#000000")
-                boxShadow = "0 10px 40px rgba(0, 0, 0, 0.5)".unsafeCast<BoxShadow>()
-                touchAction = "none".unsafeCast<web.cssom.TouchAction>()
-                cursor = "pointer".unsafeCast<web.cssom.Cursor>()
-                display = "block".unsafeCast<Display>()
+        useEffect(props.gameState, props.ghostY) {
+            val canvas = canvasRef.current ?: return@useEffect
+            val ctx = canvas.getContext(CanvasRenderingContext2D.ID) ?: return@useEffect
+
+            BoardRenderer.render(canvas, ctx, props.gameState, props.ghostY, props.settings)
+        }
+
+        Box {
+            sx {
+                display = Display.flex
+                alignItems = AlignItems.center
+                justifyContent = JustifyContent.center
+                width = 100.pct
+                height = 100.pct
+            }
+
+            canvas {
+                ref = canvasRef
+                width = 300.0
+                style =
+                    unsafeJso {
+                        width = "min(90vw, 400px)".unsafeCast<web.cssom.Width>()
+                        maxWidth = "100%".unsafeCast<MaxWidth>()
+                        maxHeight = "calc(100vh - 120px)".unsafeCast<MaxHeight>()
+                        height = "auto".unsafeCast<web.cssom.Height>()
+                        border = "2px solid rgba(255, 255, 255, 0.3)".unsafeCast<Border>()
+                        borderRadius = 8.px
+                        backgroundColor = Color("#000000")
+                        boxShadow = "0 10px 40px rgba(0, 0, 0, 0.5)".unsafeCast<BoxShadow>()
+                        touchAction = "none".unsafeCast<web.cssom.TouchAction>()
+                        cursor = "pointer".unsafeCast<web.cssom.Cursor>()
+                        display = "block".unsafeCast<Display>()
+                    }
             }
         }
     }
-}

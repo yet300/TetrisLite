@@ -8,53 +8,57 @@ package com.yet.tetris.ui.strings
  */
 object Strings {
     // Common
-    const val save = "Save"
-    const val discard = "Discard"
-    const val cancel = "Cancel"
-    const val resume = "Resume"
-    const val quit = "Quit"
-    const val retry = "Retry"
-    const val ok = "Ok"
-    const val errorTitle = "An Error Occurred"
+    const val SAVE = "Save"
+    const val DISCARD = "Discard"
+    const val CANCEL = "Cancel"
+    const val RESUME = "Resume"
+    const val QUIT = "Quit"
+    const val RETRY = "Retry"
+    const val OK = "Ok"
+    const val ERROR_TITLE = "An Error Occurred"
 
     // Home Screen
-    const val appTitle = "Tetris Lite"
-    const val startNewGame = "Start New Game"
-    const val resumeGame = "Resume Game"
-    const val difficulty = "Difficulty"
+    const val APP_TITLE = "Tetris Lite"
+    const val START_NEW_GAME = "Start New Game"
+    const val RESUME_GAME = "Resume Game"
+    const val DIFFICULTY = "Difficulty"
 
     // Game Screen
-    const val next = "Next"
-    const val score = "Score"
-    const val lines = "Lines"
-    const val time = "Time"
-    const val gameOver = "Game Over"
-    const val backToHome = "Back to Home"
-    const val gamePaused = "Game Paused"
-    const val pauseMessage = "What would you like to do?"
+    const val NEXT = "Next"
+    const val SCORE = "Score"
+    const val LINES = "Lines"
+    const val TIME = "Time"
+    const val GAME_OVER = "Game Over"
+    const val BACK_TO_HOME = "Back to Home"
+    const val GAME_PAUSED = "Game Paused"
+    const val PAUSE_MESSAGE = "What would you like to do?"
 
     // Settings Screen
-    const val gameSettings = "Game Settings"
-    const val visualTheme = "Visual Theme"
-    const val pieceStyle = "Piece Style"
-    const val keyboardLayout = "Keyboard Layout"
-    const val swipeLayout = "Swipe Layout"
-    const val music = "Music"
-    const val musicTheme = "Music Theme"
-    const val soundEffects = "Sound Effects"
-    const val musicVolume = "Music Volume"
-    const val sfxVolume = "SFX Volume"
-    const val audio = "Audio"
+    const val GAME_SETTINGS = "Game Settings"
+    const val VISUAL_THEME = "Visual Theme"
+    const val PIECE_STYLE = "Piece Style"
+    const val KEYBOARD_LAYOUT = "Keyboard Layout"
+    const val SWIPE_LAYOUT = "Swipe Layout"
+    const val MUSIC = "Music"
+    const val MUSIC_THEME = "Music Theme"
+    const val SOUND_EFFECTS = "Sound Effects"
+    const val MUSIC_VOLUME = "Music Volume"
+    const val SFX_VOLUME = "SFX Volume"
+    const val AUDIO = "Audio"
 
     // History Screen
-    const val gameHistory = "Game History"
-    const val noGamesYet = "No games played yet"
-    const val startGamePrompt = "Start a new game to see your history"
+    const val GAME_HISTORY = "Game History"
+    const val NO_GAMES_YET = "No games played yet"
+    const val START_GAME_PROMPT = "Start a new game to see your history"
 
     // Formatted strings
     fun finalScore(score: Long) = "Final Score: $score"
+
     fun linesCleared(lines: Long) = "Lines Cleared: $lines"
+
     fun scoreLabel(score: Long) = "Score: $score"
+
     fun linesLabel(lines: Long) = "Lines: $lines"
+
     fun difficultyLabel(difficulty: String) = "Difficulty: $difficulty"
 }

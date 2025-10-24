@@ -12,35 +12,36 @@ import mui.material.DialogContentText
 import mui.material.DialogTitle
 import react.FC
 
-val PauseDialog = FC<RProps<GameComponent>> { props ->
-    Dialog {
-        open = true
-        onClose = { _, _ -> props.component.onResume() }
+val PauseDialog =
+    FC<RProps<GameComponent>> { props ->
+        Dialog {
+            open = true
+            onClose = { _, _ -> props.component.onResume() }
 
-        DialogTitle {
-            +Strings.gamePaused
-        }
+            DialogTitle {
+                +Strings.GAME_PAUSED
+            }
 
-        DialogContent {
-            DialogContentText {
-                +Strings.pauseMessage
+            DialogContent {
+                DialogContentText {
+                    +Strings.PAUSE_MESSAGE
+                }
             }
-        }
 
-        DialogActions {
-            Button {
-                onClick = { props.component.onQuit() }
-                color = ButtonColor.error
-                +Strings.quit
-            }
-            Button {
-                onClick = { props.component.onSettings() }
-                +Strings.gameSettings
-            }
-            Button {
-                onClick = { props.component.onResume() }
-                +Strings.resume
+            DialogActions {
+                Button {
+                    onClick = { props.component.onQuit() }
+                    color = ButtonColor.error
+                    +Strings.QUIT
+                }
+                Button {
+                    onClick = { props.component.onSettings() }
+                    +Strings.GAME_SETTINGS
+                }
+                Button {
+                    onClick = { props.component.onResume() }
+                    +Strings.RESUME
+                }
             }
         }
     }
-}

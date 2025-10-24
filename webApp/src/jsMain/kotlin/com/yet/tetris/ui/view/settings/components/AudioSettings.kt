@@ -34,137 +34,139 @@ external interface AudioSettingsProps : Props {
     var onSFXVolumeChanged: (Float) -> Unit
 }
 
-val AudioSettingsSection = FC<AudioSettingsProps> { props ->
-    SettingsSection {
-        title = Strings.audio
+val AudioSettingsSection =
+    FC<AudioSettingsProps> { props ->
+        SettingsSection {
+            title = Strings.AUDIO
 
-        Stack {
-            spacing = responsive(4)
+            Stack {
+                spacing = responsive(4)
 
-            // Music Toggle
-            Box {
-                sx {
-                    display = Display.flex
-                    alignItems = AlignItems.center
-                    justifyContent = JustifyContent.spaceBetween
-                }
-
-                Typography { +Strings.music }
-
-                Switch {
-                    checked = props.audioSettings.musicEnabled
-                    onChange = { _, checked ->
-                        props.onMusicToggled(checked)
-                    }
-                }
-            }
-
-            // Music Volume
-            if (props.audioSettings.musicEnabled) {
+                // Music Toggle
                 Box {
-                    Typography {
-                        variant = TypographyVariant.body2
-                        sx {
-                            display = Display.flex
-                            justifyContent = JustifyContent.spaceBetween
-                            marginBottom = 0.5.rem
-                        }
-                        div.create {
-                            +Strings.musicVolume
-                        }
-                        div.create {
-                            +"${(props.audioSettings.musicVolume * 100).toInt()}%"
-                        }
+                    sx {
+                        display = Display.flex
+                        alignItems = AlignItems.center
+                        justifyContent = JustifyContent.spaceBetween
                     }
 
-                    Slider {
-                        value = props.audioSettings.musicVolume.toDouble()
-                        onChange = { _, value, _ ->
-                            val numberValue = value as Number
-                            props.onMusicVolumeChanged(numberValue.toFloat())
+                    Typography { +Strings.MUSIC }
+
+                    Switch {
+                        checked = props.audioSettings.musicEnabled
+                        onChange = { _, checked ->
+                            props.onMusicToggled(checked)
                         }
-                        min = 0.0
-                        max = 1.0
-                        step = 0.01
                     }
                 }
 
-                // Music Theme
-                Box {
-                    Typography {
-                        variant = TypographyVariant.body2
-                        sx { marginBottom = 0.5.rem }
-                        +Strings.musicTheme
+                // Music Volume
+                if (props.audioSettings.musicEnabled) {
+                    Box {
+                        Typography {
+                            variant = TypographyVariant.body2
+                            sx {
+                                display = Display.flex
+                                justifyContent = JustifyContent.spaceBetween
+                                marginBottom = 0.5.rem
+                            }
+                            div.create {
+                                +Strings.MUSIC_VOLUME
+                            }
+                            div.create {
+                                +"${(props.audioSettings.musicVolume * 100).toInt()}%"
+                            }
+                        }
+
+                        Slider {
+                            value = props.audioSettings.musicVolume.toDouble()
+                            onChange = { _, value, _ ->
+                                val numberValue = value as Number
+                                props.onMusicVolumeChanged(numberValue.toFloat())
+                            }
+                            min = 0.0
+                            max = 1.0
+                            step = 0.01
+                        }
                     }
 
-                    ButtonGroup {
-                        fullWidth = true
-                        variant = ButtonGroupVariant.outlined
-                        size = Size.small
+                    // Music Theme
+                    Box {
+                        Typography {
+                            variant = TypographyVariant.body2
+                            sx { marginBottom = 0.5.rem }
+                            +Strings.MUSIC_THEME
+                        }
 
-                        MusicTheme.entries.forEach { theme ->
-                            Button {
-                                variant = if (props.audioSettings.selectedMusicTheme == theme) {
-                                    ButtonVariant.contained
-                                } else {
-                                    ButtonVariant.outlined
+                        ButtonGroup {
+                            fullWidth = true
+                            variant = ButtonGroupVariant.outlined
+                            size = Size.small
+
+                            MusicTheme.entries.forEach { theme ->
+                                Button {
+                                    variant =
+                                        if (props.audioSettings.selectedMusicTheme == theme) {
+                                            ButtonVariant.contained
+                                        } else {
+                                            ButtonVariant.outlined
+                                        }
+                                    onClick = { props.onMusicThemeChanged(theme) }
+                                    +theme.name.replace("_", " ")
                                 }
-                                onClick = { props.onMusicThemeChanged(theme) }
-                                +theme.name.replace("_", " ")
                             }
                         }
                     }
                 }
-            }
 
-            // Sound Effects Toggle
-            Box {
-                sx {
-                    display = Display.flex
-                    alignItems = AlignItems.center
-                    justifyContent = JustifyContent.spaceBetween
-                }
-
-                Typography { +Strings.soundEffects }
-
-                Switch {
-                    checked = props.audioSettings.soundEffectsEnabled
-                    onChange = { _, checked ->
-                        props.onSoundEffectsToggled(checked)
-                    }
-                }
-            }
-
-            // SFX Volume
-            if (props.audioSettings.soundEffectsEnabled) {
+                // Sound Effects Toggle
                 Box {
-                    Typography {
-                        variant = TypographyVariant.body2
-                        sx {
-                            display = Display.flex
-                            justifyContent = JustifyContent.spaceBetween
-                            marginBottom = 0.5.rem
-                        }
-                        div.create {
-                            +Strings.sfxVolume
-                        }
-                        div.create {
-                            +"${(props.audioSettings.sfxVolume * 100).toInt()}%"
-                        }
+                    sx {
+                        display = Display.flex
+                        alignItems = AlignItems.center
+                        justifyContent = JustifyContent.spaceBetween
                     }
 
-                    Slider {
-                        value = props.audioSettings.sfxVolume.toDouble()
-                        onChange = { _, value, _ ->
-                            val numberValue = value as Number
-                            props.onSFXVolumeChanged(numberValue.toFloat())
+                    Typography { +Strings.SOUND_EFFECTS }
+
+                    Switch {
+                        checked = props.audioSettings.soundEffectsEnabled
+                        onChange = { _, checked ->
+                            props.onSoundEffectsToggled(checked)
                         }
-                        min = 0.0
-                        max = 1.0
-                        step = 0.01
+                    }
+                }
+
+                // SFX Volume
+                if (props.audioSettings.soundEffectsEnabled) {
+                    Box {
+                        Typography {
+                            variant = TypographyVariant.body2
+                            sx {
+                                display = Display.flex
+                                justifyContent = JustifyContent.spaceBetween
+                                marginBottom = 0.5.rem
+                            }
+                            div.create {
+                                +Strings.SFX_VOLUME
+                            }
+                            div.create {
+                                +"${(props.audioSettings.sfxVolume * 100).toInt()}%"
+                            }
+                        }
+
+                        Slider {
+                            value = props.audioSettings.sfxVolume.toDouble()
+                            onChange = { _, value, _ ->
+                                val numberValue = value as Number
+                                props.onSFXVolumeChanged(numberValue.toFloat())
+                            }
+                            min = 0.0
+                            max = 1.0
+                            step = 0.01
+                        }
                     }
                 }
             }
         }
     }
-}

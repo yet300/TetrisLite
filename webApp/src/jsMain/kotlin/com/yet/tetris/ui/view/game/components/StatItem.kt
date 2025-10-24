@@ -21,35 +21,36 @@ external interface StatItemProps : Props {
     var value: String
 }
 
-val StatItem = FC<StatItemProps> { props ->
-    Box {
-        sx {
-            display = Display.flex
-            flexDirection = FlexDirection.column
-            alignItems = AlignItems.center
-            minWidth = 0.px
-        }
-
-        Typography {
-            variant = TypographyVariant.caption
+val StatItem =
+    FC<StatItemProps> { props ->
+        Box {
             sx {
-                color = Color("rgba(255, 255, 255, 0.7)")
-                textTransform = TextTransform.uppercase
-                fontSize = 0.7.rem
-                whiteSpace = WhiteSpace.nowrap
+                display = Display.flex
+                flexDirection = FlexDirection.column
+                alignItems = AlignItems.center
+                minWidth = 0.px
             }
-            +props.label
-        }
 
-        Typography {
-            variant = TypographyVariant.h6
-            sx {
-                fontWeight = integer(700)
-                color = Color("#39FF14") // Terminal green
-                fontSize = 1.1.rem
-                whiteSpace = WhiteSpace.nowrap
+            Typography {
+                variant = TypographyVariant.caption
+                sx {
+                    color = Color("rgba(255, 255, 255, 0.7)")
+                    textTransform = TextTransform.uppercase
+                    fontSize = 0.7.rem
+                    whiteSpace = WhiteSpace.nowrap
+                }
+                +props.label
             }
-            +props.value
+
+            Typography {
+                variant = TypographyVariant.h6
+                sx {
+                    fontWeight = integer(700)
+                    color = Color("#39FF14") // Terminal green
+                    fontSize = 1.1.rem
+                    whiteSpace = WhiteSpace.nowrap
+                }
+                +props.value
+            }
         }
     }
-}

@@ -13,21 +13,22 @@ external interface SettingsSectionProps : PropsWithChildren {
     var title: String
 }
 
-val SettingsSection = FC<SettingsSectionProps> { props ->
-    Box {
-        sx {
-            marginBottom = 2.rem
-        }
-
-        Typography {
-            variant = TypographyVariant.subtitle1
+val SettingsSection =
+    FC<SettingsSectionProps> { props ->
+        Box {
             sx {
-                marginBottom = 1.rem
-                fontWeight = integer(600)
+                marginBottom = 2.rem
             }
-            +props.title
-        }
 
-        +props.children
+            Typography {
+                variant = TypographyVariant.subtitle1
+                sx {
+                    marginBottom = 1.rem
+                    fontWeight = integer(600)
+                }
+                +props.title
+            }
+
+            +props.children
+        }
     }
-}

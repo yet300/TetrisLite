@@ -26,14 +26,16 @@ fun main() {
 
     val lifecycle = LifecycleRegistry()
 
-    val root = withWebHistory { stateKeeper, _ ->
-        DefaultRootComponent(
-            componentContext = DefaultComponentContext(
-                lifecycle = lifecycle,
-                stateKeeper = stateKeeper
+    val root =
+        withWebHistory { stateKeeper, _ ->
+            DefaultRootComponent(
+                componentContext =
+                    DefaultComponentContext(
+                        lifecycle = lifecycle,
+                        stateKeeper = stateKeeper,
+                    ),
             )
-        )
-    }
+        }
 
     lifecycle.attachToDocument()
 
@@ -42,19 +44,21 @@ fun main() {
     val reactRoot = createRoot(container.unsafeCast<Element>())
 
     reactRoot.render(
-        children = App.create {
-            component = root
-        }
+        children =
+            App.create {
+                component = root
+            },
     )
 }
 
-private val App = FC<RProps<RootComponent>> { props ->
-    ThemeModule {
-        RootContent {
-            component = props.component
+private val App =
+    FC<RProps<RootComponent>> { props ->
+        ThemeModule {
+            RootContent {
+                component = props.component
+            }
         }
     }
-}
 
 private fun LifecycleRegistry.attachToDocument() {
     fun onVisibilityChanged() {

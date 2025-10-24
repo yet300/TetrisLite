@@ -46,6 +46,5 @@ internal fun <T : Any> Value<T>.useAsState(): StateInstance<T> {
         cleanup
     }
 
-
     return state
 }

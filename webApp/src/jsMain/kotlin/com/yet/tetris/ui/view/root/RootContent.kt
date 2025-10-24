@@ -7,17 +7,20 @@ import com.yet.tetris.utils.RProps
 import com.yet.tetris.utils.useAsState
 import react.FC
 
-val RootContent = FC<RProps<RootComponent>> { props ->
-    val childStack by props.component.childStack.useAsState()
-    val activeChild = childStack.active.instance
+val RootContent =
+    FC<RProps<RootComponent>> { props ->
+        val childStack by props.component.childStack.useAsState()
+        val activeChild = childStack.active.instance
 
-    when (val child = activeChild) {
-        is RootComponent.Child.Home -> HomeContent {
-            component = child.component
-        }
+        when (val child = activeChild) {
+            is RootComponent.Child.Home ->
+                HomeContent {
+                    component = child.component
+                }
 
-        is RootComponent.Child.Game -> GameContent {
-            component = child.component
+            is RootComponent.Child.Game ->
+                GameContent {
+                    component = child.component
+                }
         }
     }
-}

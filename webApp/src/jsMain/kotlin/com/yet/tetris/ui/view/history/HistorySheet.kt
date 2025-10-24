@@ -38,122 +38,126 @@ import web.cssom.pct
 import web.cssom.rem
 import web.html.HTMLElement
 
-val HistorySheet = FC<RProps<HistoryComponent>> { props ->
-    val model by props.component.model.useAsState()
-    val (filterMenuAnchor, setFilterMenuAnchor) = useState<HTMLElement?>(null)
-    val filterButtonRef = useRef<HTMLElement>()
+val HistorySheet =
+    FC<RProps<HistoryComponent>> { props ->
+        val model by props.component.model.useAsState()
+        val (filterMenuAnchor, setFilterMenuAnchor) = useState<HTMLElement?>(null)
+        val filterButtonRef = useRef<HTMLElement>()
 
-    Box {
-        sx {
-            display = Display.flex
-            flexDirection = FlexDirection.column
-            height = 100.pct
-            position = Position.relative
-        }
-
-        // Header with Filter and Close buttons
         Box {
             sx {
                 display = Display.flex
-                alignItems = AlignItems.center
-                justifyContent = JustifyContent.spaceBetween
-                padding = 1.5.rem
-                borderBottom = "1px solid rgba(0, 0, 0, 0.1)".unsafeCast<BorderBottom>()
-                backgroundColor = Color("white")
+                flexDirection = FlexDirection.column
+                height = 100.pct
+                position = Position.relative
             }
 
-            // Filter button
-            div {
-                ref = filterButtonRef
+            // Header with Filter and Close buttons
+            Box {
+                sx {
+                    display = Display.flex
+                    alignItems = AlignItems.center
+                    justifyContent = JustifyContent.spaceBetween
+                    padding = 1.5.rem
+                    borderBottom = "1px solid rgba(0, 0, 0, 0.1)".unsafeCast<BorderBottom>()
+                    backgroundColor = Color("white")
+                }
+
+                // Filter button
+                div {
+                    ref = filterButtonRef
+                    IconButton {
+                        onClick = { setFilterMenuAnchor(filterButtonRef.current) }
+                        FilterList()
+                    }
+                }
+
+                Typography {
+                    variant = TypographyVariant.h5
+                    +Strings.GAME_HISTORY
+                }
+
+                // Close button
                 IconButton {
-                    onClick = { setFilterMenuAnchor(filterButtonRef.current) }
-                    FilterList()
+                    onClick = { props.component.onDismiss() }
+                    Close()
                 }
-            }
 
-            Typography {
-                variant = TypographyVariant.h5
-                +Strings.gameHistory
-            }
+                // Filter Menu - anchored to button
+                Menu {
+                    anchorEl = filterMenuAnchor?.asDynamic()
+                    open = filterMenuAnchor != null
+                    onClose = { setFilterMenuAnchor(null) }
 
-            // Close button
-            IconButton {
-                onClick = { props.component.onDismiss() }
-                Close()
-            }
-
-            // Filter Menu - anchored to button
-            Menu {
-                anchorEl = filterMenuAnchor?.asDynamic()
-                open = filterMenuAnchor != null
-                onClose = { setFilterMenuAnchor(null) }
-
-                DateFilter.entries.forEach { filter ->
-                    MenuItem {
-                        onClick = {
-                            props.component.onFilterChanged(filter)
-                            setFilterMenuAnchor(null)
+                    DateFilter.entries.forEach { filter ->
+                        MenuItem {
+                            onClick = {
+                                props.component.onFilterChanged(filter)
+                                setFilterMenuAnchor(null)
+                            }
+                            +filter.name
+                                .replace("_", " ")
+                                .lowercase()
+                                .replaceFirstChar { it.uppercase() }
                         }
-                        +filter.name.replace("_", " ").lowercase()
-                            .replaceFirstChar { it.uppercase() }
                     }
                 }
             }
-        }
 
-        // Content
-        Box {
-            sx {
-                flexGrow = number(1.0)
-                padding = 2.rem
-            }
-
-            when (model) {
-                is HistoryComponent.Model.Loading -> {
-                    Box {
-                        sx {
-                            display = Display.flex
-                            alignItems = AlignItems.center
-                            justifyContent = JustifyContent.center
-                            height = 100.pct
-                        }
-                        CircularProgress()
-                    }
+            // Content
+            Box {
+                sx {
+                    flexGrow = number(1.0)
+                    padding = 2.rem
                 }
 
-                is HistoryComponent.Model.Content -> {
-                    val content = model as HistoryComponent.Model.Content
+                when (model) {
+                    is HistoryComponent.Model.Loading -> {
+                        Box {
+                            sx {
+                                display = Display.flex
+                                alignItems = AlignItems.center
+                                justifyContent = JustifyContent.center
+                                height = 100.pct
+                            }
+                            CircularProgress()
+                        }
+                    }
 
-                    if (content.games.isEmpty()) {
-                        EmptyHistoryState()
-                    } else {
-                        GamesList {
-                            games = content.games
-                            onDeleteGame = props.component::onDeleteGame
+                    is HistoryComponent.Model.Content -> {
+                        val content = model as HistoryComponent.Model.Content
+
+                        if (content.games.isEmpty()) {
+                            EmptyHistoryState()
+                        } else {
+                            GamesList {
+                                games = content.games
+                                onDeleteGame = props.component::onDeleteGame
+                            }
                         }
                     }
                 }
             }
         }
     }
-}
 
 external interface GamesListProps : Props {
     var games: List<GameRecord>
     var onDeleteGame: (String) -> Unit
 }
 
-val GamesList = FC<GamesListProps> { props ->
-    Stack {
-        spacing = responsive(2)
+val GamesList =
+    FC<GamesListProps> { props ->
+        Stack {
+            spacing = responsive(2)
 
-        List {
-            props.games.forEach { game ->
-                GameRecordItem {
-                    this.game = game
-                    this.onDelete = { props.onDeleteGame(game.id) }
+            List {
+                props.games.forEach { game ->
+                    GameRecordItem {
+                        this.game = game
+                        this.onDelete = { props.onDeleteGame(game.id) }
+                    }
                 }
             }
         }
     }
-}

@@ -30,70 +30,71 @@ external interface ActionButtonsProps : Props {
 }
 
 @OptIn(ExperimentalWasmJsInterop::class)
-val ActionButtons = FC<ActionButtonsProps> { props ->
-    Box {
-        sx {
-            width = 100.pct
-            maxWidth = 400.px
-            display = Display.flex
-            flexDirection = FlexDirection.column
-            gap = 1.rem
-            paddingBottom = 2.rem
-        }
-
-        // Start New Game button
-        Button {
-            variant = ButtonVariant.contained
-            size = Size.large
-            fullWidth = true
-            onClick = { props.onStartNewGame() }
-            startIcon = PlayArrow.create()
+val ActionButtons =
+    FC<ActionButtonsProps> { props ->
+        Box {
             sx {
-                height = 56.px
-                backgroundColor = Color("rgba(255, 255, 255, 0.15)")
-                backdropFilter = "blur(10px)".unsafeCast<BackdropFilter>()
-                border = "1px solid rgba(255, 255, 255, 0.3)".unsafeCast<Border>()
-                borderRadius = 1.rem
-                color = Color("white")
-                fontWeight = integer(700)
-                fontSize = 1.rem
-                textTransform = "none".unsafeCast<TextTransform>()
-                boxShadow = "0 8px 32px rgba(0, 0, 0, 0.1)".unsafeCast<BoxShadow>()
-
-                hover {
-                    backgroundColor = Color("rgba(255, 255, 255, 0.25)")
-                    boxShadow = "0 12px 40px rgba(0, 0, 0, 0.15)".unsafeCast<BoxShadow>()
-                }
+                width = 100.pct
+                maxWidth = 400.px
+                display = Display.flex
+                flexDirection = FlexDirection.column
+                gap = 1.rem
+                paddingBottom = 2.rem
             }
-            +Strings.startNewGame
-        }
 
-        // Resume Game button (if available)
-        if (props.hasSavedGame) {
+            // Start New Game button
             Button {
-                variant = ButtonVariant.outlined
+                variant = ButtonVariant.contained
                 size = Size.large
                 fullWidth = true
-                onClick = { props.onResumeGame() }
-                startIcon = Replay.create()
+                onClick = { props.onStartNewGame() }
+                startIcon = PlayArrow.create()
                 sx {
                     height = 56.px
-                    backgroundColor = Color("rgba(255, 255, 255, 0.1)")
+                    backgroundColor = Color("rgba(255, 255, 255, 0.15)")
                     backdropFilter = "blur(10px)".unsafeCast<BackdropFilter>()
-                    border = "2px solid rgba(255, 255, 255, 0.3)".unsafeCast<Border>()
+                    border = "1px solid rgba(255, 255, 255, 0.3)".unsafeCast<Border>()
                     borderRadius = 1.rem
                     color = Color("white")
-                    fontWeight = integer(600)
+                    fontWeight = integer(700)
                     fontSize = 1.rem
                     textTransform = "none".unsafeCast<TextTransform>()
+                    boxShadow = "0 8px 32px rgba(0, 0, 0, 0.1)".unsafeCast<BoxShadow>()
 
                     hover {
-                        backgroundColor = Color("rgba(255, 255, 255, 0.2)")
-                        border = "2px solid rgba(255, 255, 255, 0.4)".unsafeCast<Border>()
+                        backgroundColor = Color("rgba(255, 255, 255, 0.25)")
+                        boxShadow = "0 12px 40px rgba(0, 0, 0, 0.15)".unsafeCast<BoxShadow>()
                     }
                 }
-                +Strings.resumeGame
+                +Strings.START_NEW_GAME
+            }
+
+            // Resume Game button (if available)
+            if (props.hasSavedGame) {
+                Button {
+                    variant = ButtonVariant.outlined
+                    size = Size.large
+                    fullWidth = true
+                    onClick = { props.onResumeGame() }
+                    startIcon = Replay.create()
+                    sx {
+                        height = 56.px
+                        backgroundColor = Color("rgba(255, 255, 255, 0.1)")
+                        backdropFilter = "blur(10px)".unsafeCast<BackdropFilter>()
+                        border = "2px solid rgba(255, 255, 255, 0.3)".unsafeCast<Border>()
+                        borderRadius = 1.rem
+                        color = Color("white")
+                        fontWeight = integer(600)
+                        fontSize = 1.rem
+                        textTransform = "none".unsafeCast<TextTransform>()
+
+                        hover {
+                            backgroundColor = Color("rgba(255, 255, 255, 0.2)")
+                            border = "2px solid rgba(255, 255, 255, 0.4)".unsafeCast<Border>()
+                        }
+                    }
+                    +Strings.RESUME_GAME
+                }
             }
         }
     }
-}

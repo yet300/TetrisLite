@@ -37,132 +37,135 @@ import web.cssom.rem
 import web.cssom.vh
 
 @OptIn(ExperimentalWasmJsInterop::class)
-val HomeContent = FC<RProps<HomeComponent>> { props ->
-    val model by props.component.model.useAsState()
-    val bottomSheetSlot by props.component.childBottomSheetNavigation.useAsState()
-    val activeSheet = bottomSheetSlot.child?.instance
+val HomeContent =
+    FC<RProps<HomeComponent>> { props ->
+        val model by props.component.model.useAsState()
+        val bottomSheetSlot by props.component.childBottomSheetNavigation.useAsState()
+        val activeSheet = bottomSheetSlot.child?.instance
 
-    Scaffold {
-        appBar = AppBarConfig(
-            title = Strings.appTitle,
-            navigationIcon = {
-                IconButton {
-                    sx {
-                        backgroundColor = Color("rgba(255, 255, 255, 0.1)")
-                        backdropFilter = "blur(10px)".unsafeCast<BackdropFilter>()
-                        hover {
-                            backgroundColor = Color("rgba(255, 255, 255, 0.2)")
+        Scaffold {
+            appBar =
+                AppBarConfig(
+                    title = Strings.APP_TITLE,
+                    navigationIcon = {
+                        IconButton {
+                            sx {
+                                backgroundColor = Color("rgba(255, 255, 255, 0.1)")
+                                backdropFilter = "blur(10px)".unsafeCast<BackdropFilter>()
+                                hover {
+                                    backgroundColor = Color("rgba(255, 255, 255, 0.2)")
+                                }
+                            }
+                            color = IconButtonColor.inherit
+                            onClick = { props.component.onOpenHistory() }
+                            History()
                         }
-                    }
-                    color = IconButtonColor.inherit
-                    onClick = { props.component.onOpenHistory() }
-                    History()
-                }
-            },
-            actions = {
-                IconButton {
-                    sx {
-                        backgroundColor = Color("rgba(255, 255, 255, 0.1)")
-                        backdropFilter = "blur(10px)".unsafeCast<BackdropFilter>()
-                        hover {
-                            backgroundColor = Color("rgba(255, 255, 255, 0.2)")
+                    },
+                    actions = {
+                        IconButton {
+                            sx {
+                                backgroundColor = Color("rgba(255, 255, 255, 0.1)")
+                                backdropFilter = "blur(10px)".unsafeCast<BackdropFilter>()
+                                hover {
+                                    backgroundColor = Color("rgba(255, 255, 255, 0.2)")
+                                }
+                            }
+                            color = IconButtonColor.inherit
+                            onClick = { props.component.onOpenSettings() }
+                            Settings()
                         }
-                    }
-                    color = IconButtonColor.inherit
-                    onClick = { props.component.onOpenSettings() }
-                    Settings()
-                }
-            }
-        )
+                    },
+                )
 
-        sx {
-            backgroundImage = AppColors.gradientBackground().unsafeCast<BackgroundImage>()
-        }
-
-        when (model) {
-            is HomeComponent.Model.Loading -> {
-                Box {
-                    sx {
-                        display = Display.flex
-                        alignItems = AlignItems.center
-                        justifyContent = JustifyContent.center
-                        height = 100.vh
-                    }
-                    CircularProgress {
-                        sx { color = Color("white") }
-                    }
-                }
-            }
-
-            is HomeComponent.Model.Content -> {
-                val content = model as HomeComponent.Model.Content
-
-                Container {
-                    maxWidth = "sm"
-                    sx {
-                        display = Display.flex
-                        flexDirection = FlexDirection.column
-                        alignItems = AlignItems.center
-                        justifyContent = JustifyContent.spaceBetween
-                        minHeight = "calc(100vh - 64px)".unsafeCast<web.cssom.MinHeight>()
-                        padding = 1.5.rem
-                        boxSizing = BoxSizing.borderBox
-                    }
-
-                    // Difficulty selector at top
-                    DifficultySelector {
-                        selectedDifficulty = content.settings.difficulty
-                        onDifficultyChanged = props.component::onDifficultyChanged
-                    }
-
-                    // Spacer
-                    Box { }
-
-                    // Action buttons at bottom
-                    ActionButtons {
-                        hasSavedGame = content.hasSavedGame
-                        onStartNewGame = props.component::onStartNewGame
-                        onResumeGame = props.component::onResumeGame
-                    }
-                }
-            }
-        }
-    }
-
-    // Bottom sheet drawer
-    Drawer {
-        anchor = DrawerAnchor.bottom
-        open = activeSheet != null
-        onClose = { _, _ -> props.component.onDismissBottomSheet() }
-
-        PaperProps = unsafeJso {
             sx {
-                borderTopLeftRadius = 16.px
-                borderTopRightRadius = 16.px
-
-                maxHeight = 90.vh
-
-                maxWidth = 600.px
-
-                marginLeft = "auto".unsafeCast<AutoLengthProperty>()
-                marginRight = "auto".unsafeCast<AutoLengthProperty>()
+                backgroundImage = AppColors.gradientBackground().unsafeCast<BackgroundImage>()
             }
-        }
 
-        activeSheet?.let { child ->
-            when (child) {
-                is HomeComponent.BottomSheetChild.HistoryChild -> {
-                    HistorySheet {
-                        component = child.component
+            when (model) {
+                is HomeComponent.Model.Loading -> {
+                    Box {
+                        sx {
+                            display = Display.flex
+                            alignItems = AlignItems.center
+                            justifyContent = JustifyContent.center
+                            height = 100.vh
+                        }
+                        CircularProgress {
+                            sx { color = Color("white") }
+                        }
                     }
                 }
 
-                is HomeComponent.BottomSheetChild.SettingsChild -> {
-                    SettingsSheet {
-                        component = child.component
+                is HomeComponent.Model.Content -> {
+                    val content = model as HomeComponent.Model.Content
+
+                    Container {
+                        maxWidth = "sm"
+                        sx {
+                            display = Display.flex
+                            flexDirection = FlexDirection.column
+                            alignItems = AlignItems.center
+                            justifyContent = JustifyContent.spaceBetween
+                            minHeight = "calc(100vh - 64px)".unsafeCast<web.cssom.MinHeight>()
+                            padding = 1.5.rem
+                            boxSizing = BoxSizing.borderBox
+                        }
+
+                        // Difficulty selector at top
+                        DifficultySelector {
+                            selectedDifficulty = content.settings.difficulty
+                            onDifficultyChanged = props.component::onDifficultyChanged
+                        }
+
+                        // Spacer
+                        Box { }
+
+                        // Action buttons at bottom
+                        ActionButtons {
+                            hasSavedGame = content.hasSavedGame
+                            onStartNewGame = props.component::onStartNewGame
+                            onResumeGame = props.component::onResumeGame
+                        }
+                    }
+                }
+            }
+        }
+
+        // Bottom sheet drawer
+        Drawer {
+            anchor = DrawerAnchor.bottom
+            open = activeSheet != null
+            onClose = { _, _ -> props.component.onDismissBottomSheet() }
+
+            PaperProps =
+                unsafeJso {
+                    sx {
+                        borderTopLeftRadius = 16.px
+                        borderTopRightRadius = 16.px
+
+                        maxHeight = 90.vh
+
+                        maxWidth = 600.px
+
+                        marginLeft = "auto".unsafeCast<AutoLengthProperty>()
+                        marginRight = "auto".unsafeCast<AutoLengthProperty>()
+                    }
+                }
+
+            activeSheet?.let { child ->
+                when (child) {
+                    is HomeComponent.BottomSheetChild.HistoryChild -> {
+                        HistorySheet {
+                            component = child.component
+                        }
+                    }
+
+                    is HomeComponent.BottomSheetChild.SettingsChild -> {
+                        SettingsSheet {
+                            component = child.component
+                        }
                     }
                 }
             }
         }
     }
-}

@@ -26,50 +26,51 @@ external interface GameOverDialogProps : Props {
     var lines: Long
 }
 
-val GameOverDialog = FC<GameOverDialogProps> { props ->
-    Dialog {
-        open = true
-        onClose = { _, _ -> props.component.onQuit() }
+val GameOverDialog =
+    FC<GameOverDialogProps> { props ->
+        Dialog {
+            open = true
+            onClose = { _, _ -> props.component.onQuit() }
 
-        DialogTitle {
-            sx {
-                textAlign = TextAlign.center
-            }
-            +Strings.gameOver
-        }
-
-        DialogContent {
-            Box {
+            DialogTitle {
                 sx {
-                    display = Display.flex
-                    flexDirection = FlexDirection.column
-                    alignItems = AlignItems.center
-                    gap = 1.rem
-                    padding = 1.rem
+                    textAlign = TextAlign.center
                 }
+                +Strings.GAME_OVER
+            }
 
-                Typography {
-                    variant = TypographyVariant.h4
-                    +Strings.finalScore(props.score)
-                }
+            DialogContent {
+                Box {
+                    sx {
+                        display = Display.flex
+                        flexDirection = FlexDirection.column
+                        alignItems = AlignItems.center
+                        gap = 1.rem
+                        padding = 1.rem
+                    }
 
-                Typography {
-                    variant = TypographyVariant.body1
-                    +Strings.linesCleared(props.lines)
+                    Typography {
+                        variant = TypographyVariant.h4
+                        +Strings.finalScore(props.score)
+                    }
+
+                    Typography {
+                        variant = TypographyVariant.body1
+                        +Strings.linesCleared(props.lines)
+                    }
                 }
             }
-        }
 
-        DialogActions {
-            Button {
-                onClick = { props.component.onRetry() }
-                variant = ButtonVariant.contained
-                +Strings.retry
-            }
-            Button {
-                onClick = { props.component.onQuit() }
-                +Strings.quit
+            DialogActions {
+                Button {
+                    onClick = { props.component.onRetry() }
+                    variant = ButtonVariant.contained
+                    +Strings.RETRY
+                }
+                Button {
+                    onClick = { props.component.onQuit() }
+                    +Strings.QUIT
+                }
             }
         }
     }
-}

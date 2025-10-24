@@ -29,105 +29,106 @@ import web.cssom.pct
 import web.cssom.px
 import web.cssom.rem
 
-val SettingsSheet = FC<RProps<SettingsComponent>> { props ->
-    val model by props.component.model.useAsState()
-    val settings = model.settings
+val SettingsSheet =
+    FC<RProps<SettingsComponent>> { props ->
+        val model by props.component.model.useAsState()
+        val settings = model.settings
 
-    Box {
-        sx {
-            display = Display.flex
-            flexDirection = FlexDirection.column
-            height = 100.pct
-            position = Position.relative
-        }
-
-        // Content - Scrollable
         Box {
             sx {
-                flexGrow = number(1.0)
-                padding = 2.rem
-                paddingBottom = 6.rem // Space for buttons at bottom
-            }
-
-            Stack {
-                spacing = responsive(4)
-
-                // Title
-                Typography {
-                    variant = TypographyVariant.h5
-                    sx {
-                        fontWeight = integer(700)
-                        marginBottom = 1.rem
-                    }
-                    +Strings.gameSettings
-                }
-
-                // Theme Settings
-                ThemeSelector {
-                    visualTheme = settings.themeConfig.visualTheme
-                    pieceStyle = settings.themeConfig.pieceStyle
-                    onVisualThemeChanged = props.component::onVisualThemeChanged
-                    onPieceStyleChanged = props.component::onPieceStyleChanged
-                }
-
-                // Control Settings
-                ControlSettings {
-                    keyboardLayout = settings.keyboardLayout
-                    swipeLayout = settings.swipeLayout
-                    onKeyboardLayoutChanged = props.component::onKeyboardLayoutChanged
-                    onSwipeLayoutChanged = props.component::onSwipeLayoutChanged
-                }
-
-                // Audio Settings
-                AudioSettingsSection {
-                    audioSettings = settings.audioSettings
-                    onMusicToggled = props.component::onMusicToggled
-                    onMusicVolumeChanged = props.component::onMusicVolumeChanged
-                    onMusicThemeChanged = props.component::onMusicThemeChanged
-                    onSoundEffectsToggled = props.component::onSoundEffectsToggled
-                    onSFXVolumeChanged = props.component::onSFXVolumeChanged
-                }
-            }
-        }
-
-        // Action Buttons - Fixed at bottom
-        Box {
-            sx {
-                position = Position.absolute
-                bottom = 0.px
-                left = 0.px
-                right = 0.px
                 display = Display.flex
-                gap = 1.rem
-                padding = 1.5.rem
-                backgroundColor = Color("white")
-                borderTop = "1px solid rgba(0, 0, 0, 0.1)".unsafeCast<BorderTop>()
-                boxShadow = "0 -2px 10px rgba(0, 0, 0, 0.1)".unsafeCast<BoxShadow>()
+                flexDirection = FlexDirection.column
+                height = 100.pct
+                position = Position.relative
             }
 
-            Button {
-                variant = ButtonVariant.outlined
-                fullWidth = true
-                disabled = !model.hasUnsavedChanges
-                onClick = { props.component.onDiscard() }
-                +Strings.discard
-            }
+            // Content - Scrollable
+            Box {
+                sx {
+                    flexGrow = number(1.0)
+                    padding = 2.rem
+                    paddingBottom = 6.rem // Space for buttons at bottom
+                }
 
-            Button {
-                variant = ButtonVariant.contained
-                fullWidth = true
-                disabled = !model.hasUnsavedChanges || model.isSaving
-                onClick = { props.component.onSave() }
+                Stack {
+                    spacing = responsive(4)
 
-                if (model.isSaving) {
-                    CircularProgress {
-                        size = 20
-                        sx { color = Color("white") }
+                    // Title
+                    Typography {
+                        variant = TypographyVariant.h5
+                        sx {
+                            fontWeight = integer(700)
+                            marginBottom = 1.rem
+                        }
+                        +Strings.GAME_SETTINGS
                     }
-                } else {
-                    +Strings.save
+
+                    // Theme Settings
+                    ThemeSelector {
+                        visualTheme = settings.themeConfig.visualTheme
+                        pieceStyle = settings.themeConfig.pieceStyle
+                        onVisualThemeChanged = props.component::onVisualThemeChanged
+                        onPieceStyleChanged = props.component::onPieceStyleChanged
+                    }
+
+                    // Control Settings
+                    ControlSettings {
+                        keyboardLayout = settings.keyboardLayout
+                        swipeLayout = settings.swipeLayout
+                        onKeyboardLayoutChanged = props.component::onKeyboardLayoutChanged
+                        onSwipeLayoutChanged = props.component::onSwipeLayoutChanged
+                    }
+
+                    // Audio Settings
+                    AudioSettingsSection {
+                        audioSettings = settings.audioSettings
+                        onMusicToggled = props.component::onMusicToggled
+                        onMusicVolumeChanged = props.component::onMusicVolumeChanged
+                        onMusicThemeChanged = props.component::onMusicThemeChanged
+                        onSoundEffectsToggled = props.component::onSoundEffectsToggled
+                        onSFXVolumeChanged = props.component::onSFXVolumeChanged
+                    }
+                }
+            }
+
+            // Action Buttons - Fixed at bottom
+            Box {
+                sx {
+                    position = Position.absolute
+                    bottom = 0.px
+                    left = 0.px
+                    right = 0.px
+                    display = Display.flex
+                    gap = 1.rem
+                    padding = 1.5.rem
+                    backgroundColor = Color("white")
+                    borderTop = "1px solid rgba(0, 0, 0, 0.1)".unsafeCast<BorderTop>()
+                    boxShadow = "0 -2px 10px rgba(0, 0, 0, 0.1)".unsafeCast<BoxShadow>()
+                }
+
+                Button {
+                    variant = ButtonVariant.outlined
+                    fullWidth = true
+                    disabled = !model.hasUnsavedChanges
+                    onClick = { props.component.onDiscard() }
+                    +Strings.DISCARD
+                }
+
+                Button {
+                    variant = ButtonVariant.contained
+                    fullWidth = true
+                    disabled = !model.hasUnsavedChanges || model.isSaving
+                    onClick = { props.component.onSave() }
+
+                    if (model.isSaving) {
+                        CircularProgress {
+                            size = 20
+                            sx { color = Color("white") }
+                        }
+                    } else {
+                        +Strings.SAVE
+                    }
                 }
             }
         }
     }
-}

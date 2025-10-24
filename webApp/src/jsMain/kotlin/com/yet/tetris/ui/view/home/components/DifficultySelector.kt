@@ -24,58 +24,59 @@ external interface DifficultySelectorProps : Props {
 }
 
 @OptIn(ExperimentalWasmJsInterop::class)
-val DifficultySelector = FC<DifficultySelectorProps> { props ->
-    Box {
-        sx {
-            width = 100.pct
-            maxWidth = 500.px
-            display = Display.flex
-            justifyContent = JustifyContent.center
-            paddingTop = 2.rem
-        }
-
-        ToggleButtonGroup {
-            value = props.selectedDifficulty
-            exclusive = true
-            fullWidth = true
-            onChange = { _, newValue ->
-                if (newValue != null) {
-                    props.onDifficultyChanged(newValue.unsafeCast<Difficulty>())
-                }
-            }
+val DifficultySelector =
+    FC<DifficultySelectorProps> { props ->
+        Box {
             sx {
-                backgroundColor = Color("rgba(255, 255, 255, 0.1)")
-                backdropFilter = "blur(10px)".unsafeCast<BackdropFilter>()
-                border = "1px solid rgba(255, 255, 255, 0.2)".unsafeCast<Border>()
-                borderRadius = 1.rem
-                padding = 0.5.rem
+                width = 100.pct
+                maxWidth = 500.px
+                display = Display.flex
+                justifyContent = JustifyContent.center
+                paddingTop = 2.rem
             }
 
-            Difficulty.entries.forEach { diff ->
-                ToggleButton {
-                    value = diff
-                    sx {
-                        color = Color("rgba(255, 255, 255, 0.9)")
-                        borderRadius = 0.75.rem
-                        border = "none".unsafeCast<Border>()
-                        fontWeight = integer(600)
-                        textTransform = "capitalize".unsafeCast<TextTransform>()
+            ToggleButtonGroup {
+                value = props.selectedDifficulty
+                exclusive = true
+                fullWidth = true
+                onChange = { _, newValue ->
+                    if (newValue != null) {
+                        props.onDifficultyChanged(newValue.unsafeCast<Difficulty>())
+                    }
+                }
+                sx {
+                    backgroundColor = Color("rgba(255, 255, 255, 0.1)")
+                    backdropFilter = "blur(10px)".unsafeCast<BackdropFilter>()
+                    border = "1px solid rgba(255, 255, 255, 0.2)".unsafeCast<Border>()
+                    borderRadius = 1.rem
+                    padding = 0.5.rem
+                }
 
-                        "&.Mui-selected" {
-                            backgroundColor = Color("rgba(255, 255, 255, 0.25)")
-                            color = Color("white")
+                Difficulty.entries.forEach { diff ->
+                    ToggleButton {
+                        value = diff
+                        sx {
+                            color = Color("rgba(255, 255, 255, 0.9)")
+                            borderRadius = 0.75.rem
+                            border = "none".unsafeCast<Border>()
+                            fontWeight = integer(600)
+                            textTransform = "capitalize".unsafeCast<TextTransform>()
+
+                            "&.Mui-selected" {
+                                backgroundColor = Color("rgba(255, 255, 255, 0.25)")
+                                color = Color("white")
+                                hover {
+                                    backgroundColor = Color("rgba(255, 255, 255, 0.3)")
+                                }
+                            }
+
                             hover {
-                                backgroundColor = Color("rgba(255, 255, 255, 0.3)")
+                                backgroundColor = Color("rgba(255, 255, 255, 0.15)")
                             }
                         }
-
-                        hover {
-                            backgroundColor = Color("rgba(255, 255, 255, 0.15)")
-                        }
+                        +diff.name.lowercase().replaceFirstChar { it.uppercase() }
                     }
-                    +diff.name.lowercase().replaceFirstChar { it.uppercase() }
                 }
             }
         }
     }
-}

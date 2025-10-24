@@ -19,52 +19,55 @@ external interface ControlSettingsProps : Props {
     var onSwipeLayoutChanged: (SwipeLayout) -> Unit
 }
 
-val ControlSettings = FC<ControlSettingsProps> { props ->
-    Stack {
-        spacing = responsive(4)
+val ControlSettings =
+    FC<ControlSettingsProps> { props ->
+        Stack {
+            spacing = responsive(4)
 
-        // Keyboard Layout
-        SettingsSection {
-            title = Strings.keyboardLayout
+            // Keyboard Layout
+            SettingsSection {
+                title = Strings.KEYBOARD_LAYOUT
 
-            ButtonGroup {
-                fullWidth = true
-                variant = ButtonGroupVariant.outlined
+                ButtonGroup {
+                    fullWidth = true
+                    variant = ButtonGroupVariant.outlined
 
-                KeyboardLayout.entries.forEach { layout ->
-                    Button {
-                        variant = if (props.keyboardLayout == layout) {
-                            ButtonVariant.contained
-                        } else {
-                            ButtonVariant.outlined
+                    KeyboardLayout.entries.forEach { layout ->
+                        Button {
+                            variant =
+                                if (props.keyboardLayout == layout) {
+                                    ButtonVariant.contained
+                                } else {
+                                    ButtonVariant.outlined
+                                }
+                            onClick = { props.onKeyboardLayoutChanged(layout) }
+                            +layout.name
                         }
-                        onClick = { props.onKeyboardLayoutChanged(layout) }
-                        +layout.name
                     }
                 }
             }
-        }
 
-        // Swipe Layout
-        SettingsSection {
-            title = Strings.swipeLayout
+            // Swipe Layout
+            SettingsSection {
+                title = Strings.SWIPE_LAYOUT
 
-            ButtonGroup {
-                fullWidth = true
-                variant = ButtonGroupVariant.outlined
+                ButtonGroup {
+                    fullWidth = true
+                    variant = ButtonGroupVariant.outlined
 
-                SwipeLayout.entries.forEach { layout ->
-                    Button {
-                        variant = if (props.swipeLayout == layout) {
-                            ButtonVariant.contained
-                        } else {
-                            ButtonVariant.outlined
+                    SwipeLayout.entries.forEach { layout ->
+                        Button {
+                            variant =
+                                if (props.swipeLayout == layout) {
+                                    ButtonVariant.contained
+                                } else {
+                                    ButtonVariant.outlined
+                                }
+                            onClick = { props.onSwipeLayoutChanged(layout) }
+                            +layout.name
                         }
-                        onClick = { props.onSwipeLayoutChanged(layout) }
-                        +layout.name
                     }
                 }
             }
         }
     }
-}
