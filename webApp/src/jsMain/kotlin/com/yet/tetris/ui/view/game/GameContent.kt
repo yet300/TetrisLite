@@ -247,13 +247,18 @@ val GameContent = FC<RProps<GameComponent>> { props ->
         open = activeSheet != null
         onClose = { _, _ -> props.component.onDismissSheet() }
 
+        ModalProps = unsafeJso {
+            sx {
+                zIndex = integer(1400)
+            }
+        }
+
         PaperProps = unsafeJso {
             sx {
                 borderTopLeftRadius = 16.px
                 borderTopRightRadius = 16.px
 
                 maxHeight = 90.vh
-
                 maxWidth = 600.px
 
                 marginLeft = "auto".unsafeCast<AutoLengthProperty>()
