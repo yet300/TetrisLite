@@ -1,6 +1,7 @@
 package com.yet.tetris.ui.view.game.dialog
 
 import com.yet.tetris.feature.game.GameComponent
+import com.yet.tetris.ui.strings.Strings
 import com.yet.tetris.utils.RProps
 import mui.material.Button
 import mui.material.ButtonColor
@@ -17,12 +18,12 @@ val PauseDialog = FC<RProps<GameComponent>> { props ->
         onClose = { _, _ -> props.component.onResume() }
 
         DialogTitle {
-            +"Game Paused"
+            +Strings.gamePaused
         }
 
         DialogContent {
             DialogContentText {
-                +"The game is paused. Choose an action below."
+                +Strings.pauseMessage
             }
         }
 
@@ -30,15 +31,15 @@ val PauseDialog = FC<RProps<GameComponent>> { props ->
             Button {
                 onClick = { props.component.onQuit() }
                 color = ButtonColor.error
-                +"Quit"
+                +Strings.quit
             }
             Button {
                 onClick = { props.component.onSettings() }
-                +"Settings"
+                +Strings.gameSettings
             }
             Button {
                 onClick = { props.component.onResume() }
-                +"Resume"
+                +Strings.resume
             }
         }
     }

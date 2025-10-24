@@ -6,6 +6,7 @@ import com.yet.tetris.domain.model.settings.SwipeLayout
 import com.yet.tetris.domain.model.theme.PieceStyle
 import com.yet.tetris.domain.model.theme.VisualTheme
 import com.yet.tetris.feature.settings.SettingsComponent
+import com.yet.tetris.ui.strings.Strings
 import com.yet.tetris.utils.RProps
 import com.yet.tetris.utils.useAsState
 import mui.material.Box
@@ -74,11 +75,11 @@ val SettingsSheet = FC<RProps<SettingsComponent>> { props ->
                         fontWeight = integer(700)
                         marginBottom = 1.rem
                     }
-                    +"Game Settings"
+                    +Strings.gameSettings
                 }
 
                 SettingsSection {
-                    title = "Visual Theme"
+                    title = Strings.visualTheme
 
                     Box {
                         sx {
@@ -110,7 +111,7 @@ val SettingsSheet = FC<RProps<SettingsComponent>> { props ->
 
                 // Piece Style
                 SettingsSection {
-                    title = "Piece Style"
+                    title = Strings.pieceStyle
 
                     Box {
                         sx {
@@ -142,7 +143,7 @@ val SettingsSheet = FC<RProps<SettingsComponent>> { props ->
 
                 // Keyboard Layout
                 SettingsSection {
-                    title = "Keyboard Layout"
+                    title = Strings.keyboardLayout
 
                     ButtonGroup {
                         fullWidth = true
@@ -164,7 +165,7 @@ val SettingsSheet = FC<RProps<SettingsComponent>> { props ->
 
                 // Swipe Layout
                 SettingsSection {
-                    title = "Swipe Layout"
+                    title = Strings.swipeLayout
 
                     ButtonGroup {
                         fullWidth = true
@@ -186,7 +187,7 @@ val SettingsSheet = FC<RProps<SettingsComponent>> { props ->
 
                 // Audio Settings
                 SettingsSection {
-                    title = "Audio"
+                    title = Strings.audio
 
                     Stack {
                         spacing = responsive(4)
@@ -200,7 +201,7 @@ val SettingsSheet = FC<RProps<SettingsComponent>> { props ->
                                 justifyContent = JustifyContent.spaceBetween
                             }
 
-                            Typography { +"Music" }
+                            Typography { +Strings.music }
 
                             Switch {
                                 checked = settings.audioSettings.musicEnabled
@@ -221,7 +222,7 @@ val SettingsSheet = FC<RProps<SettingsComponent>> { props ->
                                         marginBottom = 0.5.rem
                                     }
                                     div.create {
-                                        +"Music Volume"
+                                        +Strings.musicVolume
                                     }
                                     div.create {
                                         +"${(settings.audioSettings.musicVolume * 100).toInt()}%"
@@ -245,7 +246,7 @@ val SettingsSheet = FC<RProps<SettingsComponent>> { props ->
                                 Typography {
                                     variant = TypographyVariant.body2
                                     sx { marginBottom = 0.5.rem }
-                                    +"Music Theme"
+                                    +Strings.musicTheme
                                 }
 
                                 ButtonGroup {
@@ -278,7 +279,7 @@ val SettingsSheet = FC<RProps<SettingsComponent>> { props ->
                                 justifyContent = JustifyContent.spaceBetween
                             }
 
-                            Typography { +"Sound Effects" }
+                            Typography { +Strings.soundEffects }
 
                             Switch {
                                 checked = settings.audioSettings.soundEffectsEnabled
@@ -299,7 +300,7 @@ val SettingsSheet = FC<RProps<SettingsComponent>> { props ->
                                         marginBottom = 0.5.rem
                                     }
                                     div.create {
-                                        +"SFX Volume"
+                                        +Strings.sfxVolume
                                     }
                                     div.create {
                                         +"${(settings.audioSettings.sfxVolume * 100).toInt()}%"
@@ -343,7 +344,7 @@ val SettingsSheet = FC<RProps<SettingsComponent>> { props ->
                 fullWidth = true
                 disabled = !model.hasUnsavedChanges
                 onClick = { props.component.onDiscard() }
-                +"Discard"
+                +Strings.discard
             }
 
             Button {
@@ -358,7 +359,7 @@ val SettingsSheet = FC<RProps<SettingsComponent>> { props ->
                         sx { color = Color("white") }
                     }
                 } else {
-                    +"Save"
+                    +Strings.save
                 }
             }
         }

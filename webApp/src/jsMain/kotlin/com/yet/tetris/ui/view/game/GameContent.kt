@@ -4,6 +4,7 @@ import com.yet.tetris.domain.model.game.Tetromino
 import com.yet.tetris.domain.model.game.TetrominoType
 import com.yet.tetris.feature.game.GameComponent
 import com.yet.tetris.ui.components.Scaffold
+import com.yet.tetris.ui.strings.Strings
 import com.yet.tetris.ui.view.game.dialog.ErrorDialog
 import com.yet.tetris.ui.view.game.dialog.GameOverDialog
 import com.yet.tetris.ui.view.game.dialog.PauseDialog
@@ -164,17 +165,17 @@ val GameContent = FC<RProps<GameComponent>> { props ->
                     }
 
                     StatItem {
-                        label = "Score"
+                        label = Strings.score
                         value = model.gameState?.score?.toString() ?: "0"
                     }
 
                     StatItem {
-                        label = "Lines"
+                        label = Strings.lines
                         value = model.gameState?.linesCleared?.toString() ?: "0"
                     }
 
                     StatItem {
-                        label = "Time"
+                        label = Strings.time
                         value = formatTime(model.elapsedTime)
                     }
                 }
@@ -380,7 +381,7 @@ val NextPiecePreview = FC<NextPiecePreviewProps> { props ->
                 fontSize = 0.7.rem
                 whiteSpace = WhiteSpace.nowrap
             }
-            +"Next"
+            +Strings.next
         }
 
         canvas {

@@ -4,6 +4,7 @@ import com.yet.tetris.domain.model.game.Difficulty
 import com.yet.tetris.feature.home.HomeComponent
 import com.yet.tetris.ui.components.AppBarConfig
 import com.yet.tetris.ui.components.Scaffold
+import com.yet.tetris.ui.strings.Strings
 import com.yet.tetris.ui.theme.AppColors
 import com.yet.tetris.ui.view.history.HistorySheet
 import com.yet.tetris.ui.view.settings.SettingsSheet
@@ -54,7 +55,7 @@ val HomeContent = FC<RProps<HomeComponent>> { props ->
 
     Scaffold {
         appBar = AppBarConfig(
-            title = "TetrisLite",
+            title = Strings.appTitle,
             navigationIcon = {
                 IconButton {
                     sx {
@@ -215,7 +216,7 @@ val HomeContent = FC<RProps<HomeComponent>> { props ->
                                         "0 12px 40px rgba(0, 0, 0, 0.15)".unsafeCast<web.cssom.BoxShadow>()
                                 }
                             }
-                            +"Start New Game"
+                            +Strings.startNewGame
                         }
 
                         // Resume Game button (if available)
@@ -244,7 +245,7 @@ val HomeContent = FC<RProps<HomeComponent>> { props ->
                                             "2px solid rgba(255, 255, 255, 0.4)".unsafeCast<Border>()
                                     }
                                 }
-                                +"Resume Game"
+                                +Strings.resumeGame
                             }
                         }
                     }

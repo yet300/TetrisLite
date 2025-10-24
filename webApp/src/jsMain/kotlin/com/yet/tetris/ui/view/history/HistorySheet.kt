@@ -2,6 +2,7 @@ package com.yet.tetris.ui.view.history
 
 import com.yet.tetris.feature.history.DateFilter
 import com.yet.tetris.feature.history.HistoryComponent
+import com.yet.tetris.ui.strings.Strings
 import com.yet.tetris.utils.RProps
 import com.yet.tetris.utils.useAsState
 import mui.icons.material.Close
@@ -67,7 +68,7 @@ val HistorySheet = FC<RProps<HistoryComponent>> { props ->
 
             Typography {
                 variant = TypographyVariant.h5
-                +"Game History"
+                +Strings.gameHistory
             }
 
             // Close button
@@ -139,13 +140,13 @@ val HistorySheet = FC<RProps<HistoryComponent>> { props ->
                             Typography {
                                 variant = TypographyVariant.h6
                                 sx { color = Color("rgba(0, 0, 0, 0.5)") }
-                                +"No games yet"
+                                +Strings.noGamesYet
                             }
 
                             Typography {
                                 variant = TypographyVariant.body2
                                 sx { color = Color("rgba(0, 0, 0, 0.4)") }
-                                +"Start playing to see your history"
+                                +Strings.startGamePrompt
                             }
                         }
                     } else {
@@ -217,7 +218,7 @@ val HistorySheet = FC<RProps<HistoryComponent>> { props ->
                                                             color = Color("#667eea")
                                                             marginBottom = 0.25.rem
                                                         }
-                                                        +"Score: ${game.score}"
+                                                        +Strings.scoreLabel(game.score)
                                                     }
 
                                                     // Lines
@@ -226,7 +227,7 @@ val HistorySheet = FC<RProps<HistoryComponent>> { props ->
                                                         sx {
                                                             color = Color("rgba(0, 0, 0, 0.7)")
                                                         }
-                                                        +"Lines: ${game.linesCleared}"
+                                                        +Strings.linesLabel(game.linesCleared.toLong())
                                                     }
                                                 }
 

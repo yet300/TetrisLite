@@ -1,6 +1,7 @@
 package com.yet.tetris.ui.view.game.dialog
 
 import com.yet.tetris.feature.game.GameComponent
+import com.yet.tetris.ui.strings.Strings
 import mui.material.Box
 import mui.material.Button
 import mui.material.ButtonVariant
@@ -36,7 +37,7 @@ val GameOverDialog = FC<GameOverDialogProps> { props ->
             sx {
                 textAlign = TextAlign.center
             }
-            +"Game Over!"
+            +Strings.gameOver
         }
 
         DialogContent {
@@ -55,12 +56,12 @@ val GameOverDialog = FC<GameOverDialogProps> { props ->
                         color = Color("#667eea")
                         fontWeight = integer(700)
                     }
-                    +"${props.score}"
+                    +Strings.finalScore(props.score)
                 }
 
                 Typography {
                     variant = TypographyVariant.body1
-                    +"Lines Cleared: ${props.lines}"
+                    +Strings.linesCleared(props.lines)
                 }
             }
         }
@@ -69,11 +70,11 @@ val GameOverDialog = FC<GameOverDialogProps> { props ->
             Button {
                 onClick = { props.component.onRetry() }
                 variant = ButtonVariant.contained
-                +"Play Again"
+                +Strings.retry
             }
             Button {
                 onClick = { props.component.onQuit() }
-                +"Quit"
+                +Strings.quit
             }
         }
     }

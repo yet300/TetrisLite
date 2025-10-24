@@ -1,5 +1,6 @@
 package com.yet.tetris.ui.view.game.dialog
 
+import com.yet.tetris.ui.strings.Strings
 import mui.material.Button
 import mui.material.Dialog
 import mui.material.DialogActions
@@ -20,7 +21,7 @@ val ErrorDialog = FC<ErrorDialogProps> { props ->
         onClose = { _, _ -> props.onDismiss() }
 
         DialogTitle {
-            +"Error"
+            +Strings.errorTitle
         }
 
         DialogContent {
@@ -32,7 +33,7 @@ val ErrorDialog = FC<ErrorDialogProps> { props ->
         DialogActions {
             Button {
                 onClick = { props.onDismiss() }
-                +"OK"
+                +Strings.ok
             }
         }
     }
