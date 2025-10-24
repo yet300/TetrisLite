@@ -9,6 +9,7 @@ import com.yet.tetris.ui.view.history.HistorySheet
 import com.yet.tetris.ui.view.settings.SettingsSheet
 import com.yet.tetris.utils.RProps
 import com.yet.tetris.utils.useAsState
+import js.objects.unsafeJso
 import mui.icons.material.History
 import mui.icons.material.PlayArrow
 import mui.icons.material.Replay
@@ -30,6 +31,7 @@ import react.FC
 import react.create
 import react.dom.html.ReactHTML.div
 import web.cssom.AlignItems
+import web.cssom.AutoLengthProperty
 import web.cssom.BackdropFilter
 import web.cssom.BackgroundImage
 import web.cssom.Border
@@ -43,8 +45,8 @@ import web.cssom.pct
 import web.cssom.px
 import web.cssom.rem
 import web.cssom.vh
-import web.cssom.vw
 
+@OptIn(ExperimentalWasmJsInterop::class)
 val HomeContent = FC<RProps<HomeComponent>> { props ->
     val model by props.component.model.useAsState()
     val bottomSheetSlot by props.component.childBottomSheetNavigation.useAsState()
@@ -257,25 +259,31 @@ val HomeContent = FC<RProps<HomeComponent>> { props ->
         open = activeSheet != null
         onClose = { _, _ -> props.component.onDismissBottomSheet() }
 
-        Box {
+        PaperProps = unsafeJso {
             sx {
-                width = 600.px
-                maxWidth = 100.vw
+                borderTopLeftRadius = 16.px
+                borderTopRightRadius = 16.px
+
                 maxHeight = 90.vh
+
+                maxWidth = 600.px
+
+                marginLeft = "auto".unsafeCast<AutoLengthProperty>()
+                marginRight = "auto".unsafeCast<AutoLengthProperty>()
             }
+        }
 
-            activeSheet?.let { child ->
-                when (child) {
-                    is HomeComponent.BottomSheetChild.HistoryChild -> {
-                        HistorySheet {
-                            component = child.component
-                        }
+        activeSheet?.let { child ->
+            when (child) {
+                is HomeComponent.BottomSheetChild.HistoryChild -> {
+                    HistorySheet {
+                        component = child.component
                     }
+                }
 
-                    is HomeComponent.BottomSheetChild.SettingsChild -> {
-                        SettingsSheet {
-                            component = child.component
-                        }
+                is HomeComponent.BottomSheetChild.SettingsChild -> {
+                    SettingsSheet {
+                        component = child.component
                     }
                 }
             }

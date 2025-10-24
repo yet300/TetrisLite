@@ -15,6 +15,8 @@ import kotlinx.browser.window
 import mui.icons.material.Pause
 import mui.material.Box
 import mui.material.Container
+import mui.material.Drawer
+import mui.material.DrawerAnchor
 import mui.material.IconButton
 import mui.material.Typography
 import mui.material.styles.TypographyVariant
@@ -22,13 +24,13 @@ import mui.system.sx
 import react.FC
 import react.Props
 import react.dom.html.ReactHTML.canvas
-import react.dom.html.ReactHTML.div
 import react.useEffect
 import react.useEffectOnce
 import react.useRef
 import web.canvas.CanvasRenderingContext2D
 import web.canvas.ID
 import web.cssom.AlignItems
+import web.cssom.AutoLengthProperty
 import web.cssom.BackdropFilter
 import web.cssom.Border
 import web.cssom.BoxSizing
@@ -37,13 +39,10 @@ import web.cssom.Display
 import web.cssom.FlexDirection
 import web.cssom.FlexWrap
 import web.cssom.JustifyContent
-import web.cssom.MaxHeight
 import web.cssom.Overflow
 import web.cssom.Padding
-import web.cssom.Position
 import web.cssom.TextTransform
 import web.cssom.WhiteSpace
-import web.cssom.Width
 import web.cssom.integer
 import web.cssom.number
 import web.cssom.px
@@ -56,6 +55,7 @@ val GameContent = FC<RProps<GameComponent>> { props ->
     val model by props.component.model.useAsState()
     val dialogSlot by props.component.childSlot.useAsState()
     val sheetSlot by props.component.sheetSlot.useAsState()
+    val activeSheet = sheetSlot.child?.instance
 
     // Keyboard controls
     useEffectOnce {
@@ -223,6 +223,7 @@ val GameContent = FC<RProps<GameComponent>> { props ->
                     component = props.component
                 }
             }
+
             is GameComponent.DialogChild.GameOver -> {
                 GameOverDialog {
                     component = props.component
@@ -230,6 +231,7 @@ val GameContent = FC<RProps<GameComponent>> { props ->
                     lines = model.finalLinesCleared
                 }
             }
+
             is GameComponent.DialogChild.Error -> {
                 ErrorDialog {
                     message = dialog.message
@@ -240,38 +242,30 @@ val GameContent = FC<RProps<GameComponent>> { props ->
     }
 
     // Sheets
-    sheetSlot.child?.instance?.let { sheet ->
-        when (sheet) {
-            is GameComponent.SheetChild.Settings -> {
-                div {
-                    style = unsafeJso {
-                        position = "fixed".unsafeCast<Position>()
-                        top = 0.px
-                        left = 0.px
-                        right = 0.px
-                        bottom = 0.px
-                        backgroundColor = "rgba(0, 0, 0, 0.5)".unsafeCast<Color>()
-                        display = "flex".unsafeCast<Display>()
-                        alignItems = "center".unsafeCast<AlignItems>()
-                        justifyContent = "center".unsafeCast<JustifyContent>()
-                        zIndex = integer(1300)
-                    }
-                    onClick = { props.component.onDismissSheet() }
+    Drawer {
+        anchor = DrawerAnchor.bottom
+        open = activeSheet != null
+        onClose = { _, _ -> props.component.onDismissSheet() }
 
-                    div {
-                        style = unsafeJso {
-                            backgroundColor = Color("white")
-                            borderRadius = 16.px
-                            maxWidth = 600.px
-                            width = "90%".unsafeCast<Width>()
-                            maxHeight = "80vh".unsafeCast<MaxHeight>()
-                            overflow = "auto".unsafeCast<Overflow>()
-                        }
-                        onClick = { it.stopPropagation() }
+        PaperProps = unsafeJso {
+            sx {
+                borderTopLeftRadius = 16.px
+                borderTopRightRadius = 16.px
 
-                        SettingsSheet {
-                            component = sheet.component
-                        }
+                maxHeight = 90.vh
+
+                maxWidth = 600.px
+
+                marginLeft = "auto".unsafeCast<AutoLengthProperty>()
+                marginRight = "auto".unsafeCast<AutoLengthProperty>()
+            }
+        }
+
+        activeSheet?.let { child ->
+            when (child) {
+                is GameComponent.SheetChild.Settings -> {
+                    SettingsSheet {
+                        component = child.component
                     }
                 }
             }
