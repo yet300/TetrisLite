@@ -16,15 +16,22 @@ import mui.system.sx
 import react.ChildrenBuilder
 import react.FC
 import react.PropsWithChildren
-import web.cssom.BackgroundImage
+import web.cssom.AlignItems
 import web.cssom.BoxSizing
+import web.cssom.Color
 import web.cssom.Display
 import web.cssom.Flex
 import web.cssom.FlexBasis
 import web.cssom.FlexDirection
+import web.cssom.FontWeight
+import web.cssom.JustifyContent
+import web.cssom.None
 import web.cssom.Overflow
+import web.cssom.TextAlign
 import web.cssom.number
 import web.cssom.pct
+import web.cssom.px
+import web.cssom.rem
 import web.cssom.vh
 
 external interface ScaffoldProps : PropsWithChildren, PropsWithSx {
@@ -34,6 +41,7 @@ external interface ScaffoldProps : PropsWithChildren, PropsWithSx {
 data class AppBarConfig(
     val title: String,
     val onBackClick: (() -> Unit)? = null,
+    val navigationIcon: (ChildrenBuilder.() -> Unit)? = null,
     val actions: (ChildrenBuilder.() -> Unit)? = null
 )
 
@@ -45,6 +53,7 @@ val Scaffold: FC<ScaffoldProps> = FC { props ->
             boxSizing = BoxSizing.borderBox
             height = 100.vh
             width = 100.pct
+            backgroundColor = com.yet.tetris.ui.theme.AppColors.Dark.background
             +props.sx
         }
 
@@ -52,31 +61,62 @@ val Scaffold: FC<ScaffoldProps> = FC { props ->
             AppBar {
                 position = AppBarPosition.static
                 sx {
-                    backgroundImage =
-                        "linear-gradient(135deg, rgb(102, 126, 234) 0%, rgb(118, 75, 162) 100%)".unsafeCast<BackgroundImage>()
+                    backgroundColor = Color("transparent")
+                    backgroundImage = None.none
+                    boxShadow = None.none
                 }
 
                 Toolbar {
-                    if (appBar.onBackClick != null) {
-                        IconButton {
-                            size = Size.large
-                            edge = IconButtonEdge.start
-                            color = IconButtonColor.inherit
-                            onClick = { appBar.onBackClick.invoke() }
+                    sx {
+                        display = Display.flex
+                        justifyContent = JustifyContent.spaceBetween
+                        alignItems = AlignItems.center
+                        minHeight = 64.px
+                    }
 
-                            ArrowBack()
+                    // Left side - navigation icon or back button
+                    Box {
+                        sx {
+                            display = Display.flex
+                            alignItems = AlignItems.center
+                            minWidth = 48.px
+                        }
+
+                        if (appBar.navigationIcon != null) {
+                            appBar.navigationIcon.invoke(this)
+                        } else if (appBar.onBackClick != null) {
+                            IconButton {
+                                size = Size.large
+                                edge = IconButtonEdge.start
+                                color = IconButtonColor.inherit
+                                onClick = { appBar.onBackClick.invoke() }
+                                ArrowBack()
+                            }
                         }
                     }
 
+                    // Center - title
                     Typography {
                         sx {
                             flexGrow = number(1.0)
+                            textAlign = TextAlign.center
+                            fontWeight = FontWeight.bold
+                            color = Color("rgba(255, 255, 255, 0.95)")
                         }
                         variant = TypographyVariant.h6
                         +appBar.title
                     }
 
-                    appBar.actions?.invoke(this)
+                    // Right side - actions
+                    Box {
+                        sx {
+                            display = Display.flex
+                            alignItems = AlignItems.center
+                            gap = 0.5.rem
+                            minWidth = 48.px
+                        }
+                        appBar.actions?.invoke(this)
+                    }
                 }
             }
         }
