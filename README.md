@@ -21,7 +21,8 @@ A modern, cross-platform Tetris game built with Kotlin Multiplatform and Compose
 - **Android** - Touch controls with swipe gestures, baseline profiles for performance
 - **iOS** - Native SwiftUI integration with iOS-specific optimizations
 - **Desktop** - Keyboard controls with multiple layout options (Windows, macOS, Linux)
-- **Web** - Browser-based gameplay with full feature parity
+- **Web (Compose)** - Browser-based gameplay with Kotlin/JS and Compose for Web
+- **Web (Kotlin/JS + React)** - Kotlin/JS with React wrappers for type-safe web development
 
 ### 💾 Technical Features
 - **Game History** - Track all your games with detailed statistics and filtering
@@ -48,8 +49,9 @@ The project follows clean architecture principles with clear separation of conce
 
 ```
 TetrisLite/
-├── composeApp/          # Compose Multiplatform UI (Android, Desktop, iOS)
+├── composeApp/          # Compose Multiplatform UI (Android, Desktop, Web)
 ├── iosApp/              # Native iOS app entry point with SwiftUI
+├── webApp/              # Kotlin/JS + React wrappers web app
 ├── shared/              # Shared business logic and data layer
 ├── core/                # Core modules
 │   ├── domain/          # Business logic, use cases, domain models
@@ -89,9 +91,15 @@ TetrisLite/
 #### iOS
 Open `iosApp/iosApp.xcodeproj` in Xcode and run the project.
 
-#### Web
+#### Web (Compose)
 ```bash
 ./gradlew :composeApp:jsBrowserDevelopment
+```
+
+#### Web (Kotlin/JS + React)
+
+```bash
+./gradlew :webApp:jsBrowserDevelopmentRun
 ```
 
 ## Development
