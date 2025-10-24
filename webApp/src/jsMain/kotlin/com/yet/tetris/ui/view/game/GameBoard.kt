@@ -299,16 +299,19 @@ val GameBoard = FC<GameBoardProps> { props ->
 
         canvas {
             ref = canvasRef
-            width = 400.0
+            width = 300.0
             style = unsafeJso {
+                width = "min(90vw, 400px)".unsafeCast<web.cssom.Width>()
                 maxWidth = "100%".unsafeCast<MaxWidth>()
-                maxHeight = "70vh".unsafeCast<MaxHeight>()
+                maxHeight = "calc(100vh - 120px)".unsafeCast<MaxHeight>()
+                height = "auto".unsafeCast<web.cssom.Height>()
                 border = "2px solid rgba(255, 255, 255, 0.3)".unsafeCast<Border>()
                 borderRadius = 8.px
                 backgroundColor = Color("#000000")
                 boxShadow = "0 10px 40px rgba(0, 0, 0, 0.5)".unsafeCast<BoxShadow>()
                 touchAction = "none".unsafeCast<web.cssom.TouchAction>()
                 cursor = "pointer".unsafeCast<web.cssom.Cursor>()
+                display = "block".unsafeCast<Display>()
             }
         }
     }

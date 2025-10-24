@@ -31,23 +31,27 @@ import web.canvas.ID
 import web.cssom.AlignItems
 import web.cssom.BackdropFilter
 import web.cssom.Border
+import web.cssom.BoxSizing
 import web.cssom.Color
 import web.cssom.Display
 import web.cssom.FlexDirection
+import web.cssom.FlexWrap
 import web.cssom.JustifyContent
 import web.cssom.MaxHeight
 import web.cssom.Overflow
 import web.cssom.Padding
 import web.cssom.Position
 import web.cssom.TextTransform
+import web.cssom.WhiteSpace
 import web.cssom.Width
 import web.cssom.integer
 import web.cssom.number
-import web.cssom.pct
 import web.cssom.px
 import web.cssom.rem
+import web.cssom.vh
 import web.html.HTMLCanvasElement
 
+@OptIn(ExperimentalWasmJsInterop::class)
 val GameContent = FC<RProps<GameComponent>> { props ->
     val model by props.component.model.useAsState()
     val dialogSlot by props.component.childSlot.useAsState()
@@ -102,6 +106,7 @@ val GameContent = FC<RProps<GameComponent>> { props ->
     Scaffold {
         sx {
             backgroundColor = Color("#000000")
+            overflow = Overflow.hidden
         }
 
         Container {
@@ -109,8 +114,10 @@ val GameContent = FC<RProps<GameComponent>> { props ->
             sx {
                 display = Display.flex
                 flexDirection = FlexDirection.column
-                height = 100.pct
-                padding = 2.rem
+                height = 100.vh
+                padding = 0.5.rem
+                boxSizing = BoxSizing.borderBox
+                overflow = Overflow.hidden
             }
 
             // Top row: Pause button, Stats, Next piece
@@ -118,8 +125,10 @@ val GameContent = FC<RProps<GameComponent>> { props ->
                 sx {
                     display = Display.flex
                     justifyContent = JustifyContent.spaceBetween
-                    alignItems = AlignItems.center
-                    marginBottom = 2.rem
+                    alignItems = AlignItems.flexStart
+                    marginBottom = 0.5.rem
+                    gap = 0.5.rem
+                    flexWrap = FlexWrap.wrap
                 }
 
                 // Pause button (frosted glass style)
@@ -128,6 +137,8 @@ val GameContent = FC<RProps<GameComponent>> { props ->
                         backgroundColor = Color("rgba(255, 255, 255, 0.1)")
                         backdropFilter = "blur(10px)".unsafeCast<BackdropFilter>()
                         border = "1px solid rgba(255, 255, 255, 0.2)".unsafeCast<Border>()
+                        padding = 0.5.rem
+                        minWidth = "auto".unsafeCast<web.cssom.MinWidth>()
                         hover {
                             backgroundColor = Color("rgba(255, 255, 255, 0.2)")
                         }
@@ -140,12 +151,15 @@ val GameContent = FC<RProps<GameComponent>> { props ->
                 Box {
                     sx {
                         display = Display.flex
-                        gap = 2.rem
-                        padding = Padding(1.rem, 2.rem)
+                        gap = 1.rem
+                        padding = Padding(0.5.rem, 1.rem)
                         backgroundColor = Color("rgba(255, 255, 255, 0.1)")
                         backdropFilter = "blur(10px)".unsafeCast<BackdropFilter>()
                         border = "1px solid rgba(255, 255, 255, 0.2)".unsafeCast<Border>()
-                        borderRadius = 1.rem
+                        borderRadius = 0.75.rem
+                        flexGrow = number(1.0)
+                        justifyContent = JustifyContent.spaceAround
+                        minWidth = 0.px
                     }
 
                     StatItem {
@@ -173,13 +187,15 @@ val GameContent = FC<RProps<GameComponent>> { props ->
                 }
             }
 
-            // Game board - centered
+            // Game board - centered and responsive
             Box {
                 sx {
                     flexGrow = number(1.0)
                     display = Display.flex
                     alignItems = AlignItems.center
                     justifyContent = JustifyContent.center
+                    minHeight = 0.px
+                    overflow = Overflow.hidden
                 }
 
                 model.gameState?.let { gameState ->
@@ -268,12 +284,14 @@ external interface StatItemProps : Props {
     var value: String
 }
 
+@OptIn(ExperimentalWasmJsInterop::class)
 val StatItem = FC<StatItemProps> { props ->
     Box {
         sx {
             display = Display.flex
             flexDirection = FlexDirection.column
             alignItems = AlignItems.center
+            minWidth = 0.px
         }
 
         Typography {
@@ -281,7 +299,8 @@ val StatItem = FC<StatItemProps> { props ->
             sx {
                 color = Color("rgba(255, 255, 255, 0.7)")
                 textTransform = TextTransform.uppercase
-                fontSize = 0.75.rem
+                fontSize = 0.7.rem
+                whiteSpace = WhiteSpace.nowrap
             }
             +props.label
         }
@@ -291,6 +310,8 @@ val StatItem = FC<StatItemProps> { props ->
             sx {
                 fontWeight = integer(700)
                 color = Color("#39FF14") // Terminal green
+                fontSize = 1.1.rem
+                whiteSpace = WhiteSpace.nowrap
             }
             +props.value
         }
@@ -343,12 +364,12 @@ val NextPiecePreview = FC<NextPiecePreviewProps> { props ->
             display = Display.flex
             flexDirection = FlexDirection.column
             alignItems = AlignItems.center
-            gap = 0.5.rem
-            padding = 1.rem
+            gap = 0.4.rem
+            padding = 0.75.rem
             backgroundColor = Color("rgba(255, 255, 255, 0.1)")
             backdropFilter = "blur(10px)".unsafeCast<BackdropFilter>()
             border = "1px solid rgba(255, 255, 255, 0.2)".unsafeCast<Border>()
-            borderRadius = 1.rem
+            borderRadius = 0.75.rem
         }
 
         Typography {
@@ -356,15 +377,16 @@ val NextPiecePreview = FC<NextPiecePreviewProps> { props ->
             sx {
                 color = Color("rgba(255, 255, 255, 0.7)")
                 textTransform = TextTransform.uppercase
-                fontSize = 0.75.rem
+                fontSize = 0.7.rem
+                whiteSpace = WhiteSpace.nowrap
             }
             +"Next"
         }
 
         canvas {
             ref = canvasRef
-            width = 80.toDouble()
-            height = 80.toDouble()
+            width = 70.toDouble()
+            height = 70.toDouble()
             style = unsafeJso {
                 display = "block".unsafeCast<Display>()
             }
