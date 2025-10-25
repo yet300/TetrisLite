@@ -229,16 +229,13 @@ jobs:
 
       - name: Prepare for GitHub Pages
         run: |
+          cd webApp/build/dist/js/productionExecutable
+          # Create .nojekyll to prevent GitHub Pages from ignoring files
+          touch .nojekyll
           # Copy CNAME if it exists
           if [ -f ../../../../CNAME ]; then
             cp ../../../../CNAME .
             echo "CNAME file copied"
-          fi
-          # Verify WASM file exists
-          if [ -f sql-wasm.wasm ]; then
-            echo "✅ sql-wasm.wasm found ($(du -h sql-wasm.wasm | cut -f1))"
-          else
-            echo "❌ WARNING: sql-wasm.wasm not found!"
           fi
           # List all files to verify
           echo "Files being deployed:"
