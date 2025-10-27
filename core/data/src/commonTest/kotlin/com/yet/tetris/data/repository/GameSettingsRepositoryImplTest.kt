@@ -14,6 +14,9 @@ import com.yet.tetris.domain.model.settings.KeyboardLayout
 import com.yet.tetris.domain.model.theme.PieceStyle
 import com.yet.tetris.domain.model.theme.ThemeConfig
 import com.yet.tetris.domain.model.theme.VisualTheme
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.TestDispatcher
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.Json
 import kotlin.test.BeforeTest
@@ -26,17 +29,21 @@ class GameSettingsRepositoryImplTest : RobolectricTestRunner() {
     private lateinit var repository: GameSettingsRepositoryImpl
     private val settings = MapSettings()
 
-    @OptIn(ExperimentalSettingsApi::class)
+    private lateinit var testDispatcher: TestDispatcher
+
+    @OptIn(ExperimentalSettingsApi::class, ExperimentalCoroutinesApi::class)
     @BeforeTest
     fun setup() {
-        val flowSettings = settings.makeObservable().toFlowSettings()
+        testDispatcher = UnconfinedTestDispatcher()
+
+        val flowSettings = settings.makeObservable().toFlowSettings(testDispatcher)
         val json = Json { ignoreUnknownKeys = true }
         repository = GameSettingsRepositoryImpl(flowSettings, json)
     }
 
     @Test
     fun getSettings_shouldReturnDefaultWhenNoSettings() =
-        runTest {
+        runTest(testDispatcher) {
             // When
             val result = repository.getSettings()
 
@@ -48,7 +55,7 @@ class GameSettingsRepositoryImplTest : RobolectricTestRunner() {
 
     @Test
     fun saveSettings_shouldPersistSettings() =
-        runTest {
+        runTest(testDispatcher) {
             // Given
             val customSettings =
                 GameSettings(
@@ -84,7 +91,7 @@ class GameSettingsRepositoryImplTest : RobolectricTestRunner() {
 
     @Test
     fun saveSettings_shouldOverwriteExistingSettings() =
-        runTest {
+        runTest(testDispatcher) {
             // Given
             repository.saveSettings(GameSettings(difficulty = Difficulty.EASY))
 
@@ -98,7 +105,7 @@ class GameSettingsRepositoryImplTest : RobolectricTestRunner() {
 
     @Test
     fun observeSettings_shouldEmitUpdates() =
-        runTest {
+        runTest(testDispatcher) {
             // When/Then
             repository.observeSettings().test {
                 // Initial default settings
@@ -116,7 +123,7 @@ class GameSettingsRepositoryImplTest : RobolectricTestRunner() {
 
     @Test
     fun getSettings_shouldReturnDefaultOnCorruptedData() =
-        runTest {
+        runTest(testDispatcher) {
             // Given - Manually corrupt the settings
             settings.putString("game_settings", "invalid json {{{")
 
@@ -130,7 +137,7 @@ class GameSettingsRepositoryImplTest : RobolectricTestRunner() {
 
     @Test
     fun saveSettings_shouldPreserveAllFields() =
-        runTest {
+        runTest(testDispatcher) {
             // Given
             val settings =
                 GameSettings(
