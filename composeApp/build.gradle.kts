@@ -68,6 +68,10 @@ kotlin {
                 ),
             )
             implementation(libs.kotlin.browser)
+            //sql
+            implementation(devNpm("copy-webpack-plugin", "9.1.0"))
+            implementation(npm("@sqlite.org/sqlite-wasm", "3.43.2-build1"))
+            implementation(libs.sqldelight.js)
         }
     }
 }

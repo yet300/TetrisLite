@@ -5,6 +5,7 @@ plugins {
 kotlin {
     js(IR) {
         browser {
+            useCommonJs()
             commonWebpackConfig {
                 cssSupport {
                     enabled.set(true)
@@ -38,9 +39,8 @@ kotlin {
             implementation(libs.koin.core)
 
             //sql
-            implementation(npm("@cashapp/sqldelight-sqljs-worker", "2.1.0"))
-            implementation(npm("sql.js", "1.6.2"))
             implementation(devNpm("copy-webpack-plugin", "9.1.0"))
+            implementation(npm("@sqlite.org/sqlite-wasm", "3.43.2-build1"))
             implementation(libs.sqldelight.js)
         }
 

@@ -482,6 +482,11 @@
   resolved "https://registry.yarnpkg.com/@socket.io/component-emitter/-/component-emitter-3.1.2.tgz#821f8442f4175d8f0467b9daf26e3a18e2d02af2"
   integrity sha512-9BCxFwvbGg/RsZK9tjXd8s4UcwR0MWeFQ1XEKIQVVvAGJyINdrqKMcTRyLoK8Rse1GjzLV9cwjWV1olXRWEXVA==
 
+"@sqlite.org/sqlite-wasm@3.43.2-build1":
+  version "3.43.2-build1"
+  resolved "https://registry.yarnpkg.com/@sqlite.org/sqlite-wasm/-/sqlite-wasm-3.43.2-build1.tgz#5f1768e2df7328bdd9a5b9ec7c94eaa0bd36705a"
+  integrity sha512-f0qln3z0RFWV5WTwsidFRJ0e8dCeilGB4kKVUTA0IHVPIIAW75AWZKfPcI5kHiC+VIYhlT8lM3k+9MNeAcv9uA==
+
 "@tanstack/react-table@^8.21.3":
   version "8.21.3"
   resolved "https://registry.yarnpkg.com/@tanstack/react-table/-/react-table-8.21.3.tgz#2c38c747a5731c1a07174fda764b9c2b1fb5e91b"
