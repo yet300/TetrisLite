@@ -7,6 +7,7 @@ import com.arkivanov.decompose.value.Value
 import com.arkivanov.decompose.value.operator.map
 import com.arkivanov.mvikotlin.core.instancekeeper.getStore
 import com.arkivanov.mvikotlin.extensions.coroutines.labels
+import com.yet.tetris.feature.history.integration.stateToModel
 import com.yet.tetris.feature.history.store.HistoryStore
 import com.yet.tetris.feature.history.store.HistoryStoreFactory
 import kotlinx.coroutines.launch
@@ -38,16 +39,7 @@ class DefaultHistoryComponent(
     }
 
     override val model: Value<HistoryComponent.Model> =
-        store.asValue().map { state ->
-            if (state.isLoading && state.games.isEmpty()) {
-                HistoryComponent.Model.Loading
-            } else {
-                HistoryComponent.Model.Content(
-                    games = state.filteredGames,
-                    currentFilter = state.dateFilter,
-                )
-            }
-        }
+        store.asValue().map(stateToModel)
 
     override fun onDismiss() = dismiss()
 

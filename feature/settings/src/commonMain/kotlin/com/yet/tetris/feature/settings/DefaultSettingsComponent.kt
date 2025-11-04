@@ -14,6 +14,7 @@ import com.yet.tetris.domain.model.settings.SwipeLayout
 import com.yet.tetris.domain.model.settings.SwipeSensitivity
 import com.yet.tetris.domain.model.theme.PieceStyle
 import com.yet.tetris.domain.model.theme.VisualTheme
+import com.yet.tetris.feature.settings.integration.stateToModel
 import com.yet.tetris.feature.settings.store.SettingsStore
 import com.yet.tetris.feature.settings.store.SettingsStoreFactory
 import kotlinx.coroutines.launch
@@ -36,6 +37,7 @@ class DefaultSettingsComponent(
                         onSettingsSaved()
                         onDismiss()
                     }
+
                     is SettingsStore.Label.ChangesDiscarded -> onDismiss()
                     is SettingsStore.Label.ShowError -> {
                         // Handle error
@@ -46,13 +48,7 @@ class DefaultSettingsComponent(
     }
 
     override val model: Value<SettingsComponent.Model> =
-        store.asValue().map { state ->
-            SettingsComponent.Model(
-                settings = state.settings,
-                isSaving = state.isSaving,
-                hasUnsavedChanges = state.hasUnsavedChanges,
-            )
-        }
+        store.asValue().map(stateToModel)
 
     override fun onDifficultyChanged(difficulty: Difficulty) {
         store.accept(SettingsStore.Intent.ChangeDifficulty(difficulty))

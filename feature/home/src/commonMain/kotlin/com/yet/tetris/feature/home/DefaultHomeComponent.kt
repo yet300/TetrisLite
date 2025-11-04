@@ -14,6 +14,7 @@ import com.arkivanov.mvikotlin.core.instancekeeper.getStore
 import com.arkivanov.mvikotlin.extensions.coroutines.labels
 import com.yet.tetris.domain.model.game.Difficulty
 import com.yet.tetris.feature.history.DefaultHistoryComponent
+import com.yet.tetris.feature.home.integration.stateToModel
 import com.yet.tetris.feature.home.store.HomeStore
 import com.yet.tetris.feature.home.store.HomeStoreFactory
 import com.yet.tetris.feature.settings.DefaultSettingsComponent
@@ -47,16 +48,7 @@ class DefaultHomeComponent(
     }
 
     override val model: Value<HomeComponent.Model> =
-        store.asValue().map { state ->
-            if (state.isLoading) {
-                HomeComponent.Model.Loading
-            } else {
-                HomeComponent.Model.Content(
-                    settings = state.settings,
-                    hasSavedGame = state.hasSavedGame,
-                )
-            }
-        }
+        store.asValue().map(stateToModel)
     override val childBottomSheetNavigation: Value<ChildSlot<*, HomeComponent.BottomSheetChild>> =
         childSlot(
             source = bottomSheetSlot,
@@ -79,6 +71,7 @@ class DefaultHomeComponent(
                             onDismiss = ::onDismissBottomSheet,
                         ),
                 )
+
             BottomSheetConfiguration.History ->
                 HomeComponent.BottomSheetChild.HistoryChild(
                     component =
