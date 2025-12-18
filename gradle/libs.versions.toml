@@ -4,7 +4,7 @@ android-compileSdk = "36"
 android-minSdk = "24"
 android-targetSdk = "36"
 
-androidx-activity = "1.12.1"
+androidx-activity = "1.12.2"
 androidx-appcompat = "1.7.1"
 androidx-core = "1.17.0"
 
@@ -30,13 +30,13 @@ composeHotReload = "1.0.0"
 composeMultiplatform = "1.9.3"
 
 
-kotlin = "2.2.21"
-ksp = "2.3.0"
+kotlin = "2.3.0"
+ksp = "2.3.4"
 
 kotlinx-coroutines = "1.10.2"
 kotlinxDatetime = "0.7.1-0.6.x-compat"
 kotlinxSerializationJson = "1.9.0"
-jetbrainsKotlinWrappers = "2025.12.2"
+jetbrainsKotlinWrappers = "2025.12.7"
 
 koin = "4.1.1"
 koin-annotation = "2.3.1"
