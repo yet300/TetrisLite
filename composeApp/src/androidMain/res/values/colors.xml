@@ -1,0 +1,5 @@
+<resources>
+    <color name="splash_background">#FAFAFA</color>
+    <color name="splash_icon_primary">#008000</color>
+    <color name="splash_icon_shadow">#77B377</color>
+</resources>
