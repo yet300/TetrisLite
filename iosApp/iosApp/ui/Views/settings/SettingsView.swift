@@ -7,8 +7,6 @@ struct SettingsView: View {
     @StateValue
     private var model: SettingsComponentModel
     
-    @Environment(\.dismiss) private var dismiss
-    
     init(_ component: SettingsComponent) {
         self.component = component
         _model = StateValue(component.model)
@@ -28,39 +26,23 @@ struct SettingsView: View {
             #endif
             .toolbar {
                 #if os(iOS)
-                ToolbarItem(placement: .navigationBarLeading) {
-                    discardButton
-                }
-                
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    saveButton
+                    Button(action: { component.onClose() }) {
+                        Image(systemName: "xmark")
+                            .imageScale(.large)
+                    }
                 }
                 #else
                 ToolbarItem(placement: .cancellationAction) {
-                    discardButton
-                }
-                
-                ToolbarItem(placement: .confirmationAction) {
-                    saveButton
+                    Button(action: { component.onClose() }) {
+                        Image(systemName: "xmark")
+                            .imageScale(.large)
+                    }
                 }
                 #endif
             }
         }
     }
-            
-            private var discardButton: some View {
-                Button(Strings.discard) {
-                    component.onDiscard()
-                }
-                .disabled(!model.hasUnsavedChanges)
-            }
-            
-            private var saveButton: some View {
-                Button(Strings.save) {
-                    component.onSave()
-                }
-                .disabled(!model.hasUnsavedChanges || model.isSaving)
-            }
     // MARK: - Subviews
 
     private var visualThemeSection: some View {

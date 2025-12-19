@@ -7,26 +7,24 @@ import com.yet.tetris.ui.view.settings.components.ControlSettings
 import com.yet.tetris.ui.view.settings.components.ThemeSelector
 import com.yet.tetris.utils.RProps
 import com.yet.tetris.utils.useAsState
+import mui.icons.material.Close
 import mui.material.Box
-import mui.material.Button
-import mui.material.ButtonVariant
-import mui.material.CircularProgress
+import mui.material.IconButton
 import mui.material.Stack
 import mui.material.Typography
 import mui.material.styles.TypographyVariant
 import mui.system.responsive
 import mui.system.sx
 import react.FC
-import web.cssom.BorderTop
-import web.cssom.BoxShadow
+import web.cssom.AlignItems
+import web.cssom.BorderBottom
 import web.cssom.Color
 import web.cssom.Display
 import web.cssom.FlexDirection
+import web.cssom.JustifyContent
 import web.cssom.Position
-import web.cssom.integer
 import web.cssom.number
 import web.cssom.pct
-import web.cssom.px
 import web.cssom.rem
 
 val SettingsSheet =
@@ -42,26 +40,37 @@ val SettingsSheet =
                 position = Position.relative
             }
 
+            // Header with title and close button
+            Box {
+                sx {
+                    display = Display.flex
+                    alignItems = AlignItems.center
+                    justifyContent = JustifyContent.spaceBetween
+                    padding = 1.5.rem
+                    borderBottom = "1px solid rgba(0, 0, 0, 0.1)".unsafeCast<BorderBottom>()
+                    backgroundColor = Color("white")
+                }
+
+                Typography {
+                    variant = TypographyVariant.h5
+                    +Strings.GAME_SETTINGS
+                }
+
+                IconButton {
+                    onClick = { props.component.onClose() }
+                    Close()
+                }
+            }
+
             // Content - Scrollable
             Box {
                 sx {
                     flexGrow = number(1.0)
                     padding = 2.rem
-                    paddingBottom = 6.rem // Space for buttons at bottom
                 }
 
                 Stack {
                     spacing = responsive(4)
-
-                    // Title
-                    Typography {
-                        variant = TypographyVariant.h5
-                        sx {
-                            fontWeight = integer(700)
-                            marginBottom = 1.rem
-                        }
-                        +Strings.GAME_SETTINGS
-                    }
 
                     // Theme Settings
                     ThemeSelector {
@@ -87,46 +96,6 @@ val SettingsSheet =
                         onMusicThemeChanged = props.component::onMusicThemeChanged
                         onSoundEffectsToggled = props.component::onSoundEffectsToggled
                         onSFXVolumeChanged = props.component::onSFXVolumeChanged
-                    }
-                }
-            }
-
-            // Action Buttons - Fixed at bottom
-            Box {
-                sx {
-                    position = Position.absolute
-                    bottom = 0.px
-                    left = 0.px
-                    right = 0.px
-                    display = Display.flex
-                    gap = 1.rem
-                    padding = 1.5.rem
-                    backgroundColor = Color("white")
-                    borderTop = "1px solid rgba(0, 0, 0, 0.1)".unsafeCast<BorderTop>()
-                    boxShadow = "0 -2px 10px rgba(0, 0, 0, 0.1)".unsafeCast<BoxShadow>()
-                }
-
-                Button {
-                    variant = ButtonVariant.outlined
-                    fullWidth = true
-                    disabled = !model.hasUnsavedChanges
-                    onClick = { props.component.onDiscard() }
-                    +Strings.DISCARD
-                }
-
-                Button {
-                    variant = ButtonVariant.contained
-                    fullWidth = true
-                    disabled = !model.hasUnsavedChanges || model.isSaving
-                    onClick = { props.component.onSave() }
-
-                    if (model.isSaving) {
-                        CircularProgress {
-                            size = 20
-                            sx { color = Color("white") }
-                        }
-                    } else {
-                        +Strings.SAVE
                     }
                 }
             }
