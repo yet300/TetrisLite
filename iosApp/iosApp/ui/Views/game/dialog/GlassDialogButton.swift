@@ -22,6 +22,7 @@ struct GlassDialogButton: View {
                 .foregroundColor(.primaryLabel)
                 .cornerRadius(16)
         }
+        .buttonStyle(.plain)
     }
 }
 

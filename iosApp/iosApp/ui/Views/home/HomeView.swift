@@ -263,6 +263,7 @@ struct GlassButton: View {
             .clipShape(RoundedRectangle(cornerRadius: 24))
             .shadow(color: .black.opacity(0.2), radius: 10, x: 0, y: 5)
         }
+        .buttonStyle(.plain)
     }
 }
 
