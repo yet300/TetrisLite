@@ -1,3 +1,4 @@
+import com.android.build.api.dsl.androidLibrary
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
@@ -13,7 +14,13 @@ internal fun Project.configureKotlinMultiplatform(
 ) = extension.apply {
     jvmToolchain(JDK_VERSION)
 
-    androidTarget {
+    androidLibrary {
+        val moduleName = path.split(":").drop(2).joinToString(".")
+        namespace = if (moduleName.isNotEmpty()) "com.yet.$moduleName" else "com.yet.tetris"
+
+        compileSdk = libs.findVersion("android-compileSdk").get().requiredVersion.toInt()
+        minSdk = libs.findVersion("android-minSdk").get().requiredVersion.toInt()
+
         compilerOptions {
             jvmTarget.set(JVM_TARGET)
         }
