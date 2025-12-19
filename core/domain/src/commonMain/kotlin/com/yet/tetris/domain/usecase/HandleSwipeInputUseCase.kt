@@ -21,6 +21,7 @@ class HandleSwipeInputUseCase(
     companion object {
         private const val HARD_DROP_THRESHOLD = 0.5f
     }
+
     /**
      * Represents the result of processing a swipe gesture.
      */
