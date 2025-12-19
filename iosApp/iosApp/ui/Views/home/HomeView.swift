@@ -132,7 +132,9 @@ struct HomeView: View {
                 BottomSheetView(child: sheetItem.child)
             }
         }
+        #if os(iOS)
         .navigationViewStyle(.stack)
+        #endif
     }
     
     private var historyButton: some View {

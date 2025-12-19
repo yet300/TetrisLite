@@ -8,7 +8,7 @@ struct macosApp: App {
     private let root: RootComponent
 
     init() {
-        InitKoinKt.doInitKoin()
+        InitKoinKt.InitKoin()
         
 
         self.root = DefaultRootComponent(
