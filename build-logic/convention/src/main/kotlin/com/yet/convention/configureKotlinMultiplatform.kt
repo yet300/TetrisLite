@@ -3,6 +3,7 @@ import org.gradle.api.JavaVersion
 import org.gradle.api.Project
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
+import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
 
 private const val JDK_VERSION = 17
 private val JVM_TARGET = JvmTarget.JVM_17
@@ -41,6 +42,14 @@ internal fun Project.configureKotlinMultiplatform(
     macosArm64()
 
     applyDefaultHierarchyTemplate()
+
+    configurations.configureEach {
+        if (name.contains("desktop", ignoreCase = true) &&
+            (name.endsWith("CompileClasspath") || name.endsWith("RuntimeClasspath"))
+        ) {
+            attributes.attribute(KotlinPlatformType.attribute, KotlinPlatformType.jvm)
+        }
+    }
 
     //common dependencies
     sourceSets.apply {
