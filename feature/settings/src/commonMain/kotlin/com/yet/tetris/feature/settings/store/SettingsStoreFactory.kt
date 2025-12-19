@@ -7,6 +7,8 @@ import com.arkivanov.mvikotlin.core.store.StoreFactory
 import com.arkivanov.mvikotlin.extensions.coroutines.CoroutineExecutor
 import com.yet.tetris.domain.model.settings.GameSettings
 import com.yet.tetris.domain.repository.GameSettingsRepository
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -32,13 +34,12 @@ internal class SettingsStoreFactory : KoinComponent {
                 is SettingsStore.Msg.SettingsLoaded -> copy(settings = msg.settings)
                 is SettingsStore.Msg.SettingsUpdated -> copy(settings = msg.settings)
                 is SettingsStore.Msg.SavingChanged -> copy(isSaving = msg.isSaving)
-                is SettingsStore.Msg.UnsavedChangesChanged -> copy(hasUnsavedChanges = msg.hasUnsavedChanges)
             }
     }
 
     private inner class ExecutorImpl :
         CoroutineExecutor<SettingsStore.Intent, SettingsStore.Action, SettingsStore.State, SettingsStore.Msg, SettingsStore.Label>() {
-        private var originalSettings: GameSettings? = null
+        private var saveJob: Job? = null
 
         override fun executeAction(action: SettingsStore.Action) {
             when (action) {
@@ -104,8 +105,6 @@ internal class SettingsStoreFactory : KoinComponent {
                         it.copy(audioSettings = it.audioSettings.copy(selectedMusicTheme = intent.theme))
                     }
 
-                is SettingsStore.Intent.SaveSettings -> saveSettings(getState)
-                is SettingsStore.Intent.DiscardChanges -> discardChanges()
             }
         }
 
@@ -113,7 +112,6 @@ internal class SettingsStoreFactory : KoinComponent {
             scope.launch {
                 try {
                     val settings = gameSettingsRepository.getSettings()
-                    originalSettings = settings
                     dispatch(SettingsStore.Msg.SettingsLoaded(settings))
                 } catch (e: Exception) {
                     publish(SettingsStore.Label.ShowError(e.message ?: "Failed to load settings"))
@@ -126,34 +124,36 @@ internal class SettingsStoreFactory : KoinComponent {
             update: (GameSettings) -> GameSettings,
         ) {
             val updatedSettings = update(state.settings)
+            if (updatedSettings == state.settings) {
+                return
+            }
             dispatch(SettingsStore.Msg.SettingsUpdated(updatedSettings))
-            dispatch(SettingsStore.Msg.UnsavedChangesChanged(updatedSettings != originalSettings))
+            scheduleSave(updatedSettings)
         }
 
-        private fun saveSettings(state: SettingsStore.State) {
-            scope.launch {
-                try {
+        private fun scheduleSave(settings: GameSettings) {
+            saveJob?.cancel()
+            saveJob =
+                scope.launch {
+                    val currentJob = coroutineContext[Job]
                     dispatch(SettingsStore.Msg.SavingChanged(true))
-
-                    gameSettingsRepository.saveSettings(state.settings)
-                    originalSettings = state.settings
-
-                    dispatch(SettingsStore.Msg.SavingChanged(false))
-                    dispatch(SettingsStore.Msg.UnsavedChangesChanged(false))
-                    publish(SettingsStore.Label.SettingsSaved)
-                } catch (e: Exception) {
-                    dispatch(SettingsStore.Msg.SavingChanged(false))
-                    publish(SettingsStore.Label.ShowError(e.message ?: "Failed to save settings"))
+                    try {
+                        gameSettingsRepository.saveSettings(settings)
+                    } catch (_: CancellationException) {
+                        // Ignore cancellation caused by a newer update
+                    } catch (e: Exception) {
+                        publish(
+                            SettingsStore.Label.ShowError(
+                                e.message ?: "Failed to save settings"
+                            )
+                        )
+                    } finally {
+                        if (saveJob === currentJob) {
+                            saveJob = null
+                            dispatch(SettingsStore.Msg.SavingChanged(false))
+                        }
+                    }
                 }
-            }
-        }
-
-        private fun discardChanges() {
-            originalSettings?.let { original ->
-                dispatch(SettingsStore.Msg.SettingsUpdated(original))
-                dispatch(SettingsStore.Msg.UnsavedChangesChanged(false))
-                publish(SettingsStore.Label.ChangesDiscarded)
-            }
         }
     }
 }

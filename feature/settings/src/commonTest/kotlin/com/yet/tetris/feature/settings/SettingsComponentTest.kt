@@ -9,7 +9,6 @@ import com.yet.tetris.domain.model.settings.GameSettings
 import com.yet.tetris.domain.model.settings.KeyboardLayout
 import com.yet.tetris.domain.model.settings.SwipeLayout
 import com.yet.tetris.domain.model.settings.SwipeSensitivity
-import com.yet.tetris.domain.model.theme.PieceStyle
 import com.yet.tetris.domain.model.theme.VisualTheme
 import com.yet.tetris.feature.settings.store.FakeGameSettingsRepository
 import kotlinx.coroutines.Dispatchers
@@ -64,11 +63,10 @@ class SettingsComponentTest {
             val model = component.model.value
             assertEquals(GameSettings(), model.settings)
             assertFalse(model.isSaving)
-            assertFalse(model.hasUnsavedChanges)
         }
 
     @Test
-    fun WHEN_onDifficultyChanged_THEN_model_updated() =
+    fun WHEN_onDifficultyChanged_THEN_model_and_repository_updated() =
         runTest {
             val component = createComponent()
             testDispatcher.scheduler.advanceUntilIdle()
@@ -77,7 +75,7 @@ class SettingsComponentTest {
             testDispatcher.scheduler.advanceUntilIdle()
 
             assertEquals(Difficulty.HARD, component.model.value.settings.difficulty)
-            assertTrue(component.model.value.hasUnsavedChanges)
+            assertEquals(1, repository.saveSettingsCallCount)
         }
 
     @Test
@@ -90,50 +88,31 @@ class SettingsComponentTest {
             testDispatcher.scheduler.advanceUntilIdle()
 
             assertEquals(VisualTheme.NEON, component.model.value.settings.themeConfig.visualTheme)
-            assertTrue(component.model.value.hasUnsavedChanges)
         }
 
     @Test
-    fun WHEN_onPieceStyleChanged_THEN_model_updated() =
+    fun WHEN_audio_settings_changed_THEN_model_reflects_changes() =
         runTest {
             val component = createComponent()
             testDispatcher.scheduler.advanceUntilIdle()
 
-            component.onPieceStyleChanged(PieceStyle.GRADIENT)
+            component.onMusicToggled(false)
+            component.onMusicVolumeChanged(0.5f)
+            component.onMusicThemeChanged(MusicTheme.MODERN)
+            component.onSoundEffectsToggled(false)
+            component.onSFXVolumeChanged(0.7f)
             testDispatcher.scheduler.advanceUntilIdle()
 
-            assertEquals(PieceStyle.GRADIENT, component.model.value.settings.themeConfig.pieceStyle)
-            assertTrue(component.model.value.hasUnsavedChanges)
+            val audio = component.model.value.settings.audioSettings
+            assertFalse(audio.musicEnabled)
+            assertEquals(0.5f, audio.musicVolume)
+            assertEquals(MusicTheme.MODERN, audio.selectedMusicTheme)
+            assertFalse(audio.soundEffectsEnabled)
+            assertEquals(0.7f, audio.sfxVolume)
         }
 
     @Test
-    fun WHEN_onKeyboardLayoutChanged_THEN_model_updated() =
-        runTest {
-            val component = createComponent()
-            testDispatcher.scheduler.advanceUntilIdle()
-
-            component.onKeyboardLayoutChanged(KeyboardLayout.WASD)
-            testDispatcher.scheduler.advanceUntilIdle()
-
-            assertEquals(KeyboardLayout.WASD, component.model.value.settings.keyboardLayout)
-            assertTrue(component.model.value.hasUnsavedChanges)
-        }
-
-    @Test
-    fun WHEN_onSwipeLayoutChanged_THEN_model_updated() =
-        runTest {
-            val component = createComponent()
-            testDispatcher.scheduler.advanceUntilIdle()
-
-            component.onSwipeLayoutChanged(SwipeLayout.INVERTED)
-            testDispatcher.scheduler.advanceUntilIdle()
-
-            assertEquals(SwipeLayout.INVERTED, component.model.value.settings.swipeLayout)
-            assertTrue(component.model.value.hasUnsavedChanges)
-        }
-
-    @Test
-    fun WHEN_onSwipeSensitivityChanged_THEN_model_updated() =
+    fun WHEN_control_settings_changed_THEN_model_reflects_changes() =
         runTest {
             val component = createComponent()
             testDispatcher.scheduler.advanceUntilIdle()
@@ -144,183 +123,39 @@ class SettingsComponentTest {
                     verticalSensitivity = 1.2f,
                 )
 
+            component.onKeyboardLayoutChanged(KeyboardLayout.WASD)
+            component.onSwipeLayoutChanged(SwipeLayout.INVERTED)
             component.onSwipeSensitivityChanged(newSensitivity)
             testDispatcher.scheduler.advanceUntilIdle()
 
-            assertEquals(newSensitivity, component.model.value.settings.swipeSensitivity)
-            assertTrue(component.model.value.hasUnsavedChanges)
+            val settings = component.model.value.settings
+            assertEquals(KeyboardLayout.WASD, settings.keyboardLayout)
+            assertEquals(SwipeLayout.INVERTED, settings.swipeLayout)
+            assertEquals(newSensitivity, settings.swipeSensitivity)
         }
 
     @Test
-    fun WHEN_onMusicToggled_THEN_model_updated() =
+    fun WHEN_onClose_called_THEN_callback_invoked() =
         runTest {
-            val component = createComponent()
-            testDispatcher.scheduler.advanceUntilIdle()
-
-            component.onMusicToggled(false)
-            testDispatcher.scheduler.advanceUntilIdle()
-
-            assertFalse(component.model.value.settings.audioSettings.musicEnabled)
-            assertTrue(component.model.value.hasUnsavedChanges)
-        }
-
-    @Test
-    fun WHEN_onSoundEffectsToggled_THEN_model_updated() =
-        runTest {
-            val component = createComponent()
-            testDispatcher.scheduler.advanceUntilIdle()
-
-            component.onSoundEffectsToggled(false)
-            testDispatcher.scheduler.advanceUntilIdle()
-
-            assertFalse(component.model.value.settings.audioSettings.soundEffectsEnabled)
-            assertTrue(component.model.value.hasUnsavedChanges)
-        }
-
-    @Test
-    fun WHEN_onMusicVolumeChanged_THEN_model_updated() =
-        runTest {
-            val component = createComponent()
-            testDispatcher.scheduler.advanceUntilIdle()
-
-            component.onMusicVolumeChanged(0.5f)
-            testDispatcher.scheduler.advanceUntilIdle()
-
-            assertEquals(0.5f, component.model.value.settings.audioSettings.musicVolume)
-            assertTrue(component.model.value.hasUnsavedChanges)
-        }
-
-    @Test
-    fun WHEN_onSFXVolumeChanged_THEN_model_updated() =
-        runTest {
-            val component = createComponent()
-            testDispatcher.scheduler.advanceUntilIdle()
-
-            component.onSFXVolumeChanged(0.7f)
-            testDispatcher.scheduler.advanceUntilIdle()
-
-            assertEquals(0.7f, component.model.value.settings.audioSettings.sfxVolume)
-            assertTrue(component.model.value.hasUnsavedChanges)
-        }
-
-    @Test
-    fun WHEN_onMusicThemeChanged_THEN_model_updated() =
-        runTest {
-            val component = createComponent()
-            testDispatcher.scheduler.advanceUntilIdle()
-
-            component.onMusicThemeChanged(MusicTheme.MODERN)
-            testDispatcher.scheduler.advanceUntilIdle()
-
-            assertEquals(MusicTheme.MODERN, component.model.value.settings.audioSettings.selectedMusicTheme)
-            assertTrue(component.model.value.hasUnsavedChanges)
-        }
-
-    @Test
-    fun WHEN_onSave_THEN_onSettingsSaved_and_onDismiss_called() =
-        runTest {
-            var settingsSavedCalled = false
-            var dismissCalled = false
+            var closed = false
             val component =
                 createComponent(
-                    onSettingsSaved = { settingsSavedCalled = true },
-                    onDismiss = { dismissCalled = true },
+                    onClose = { closed = true },
                 )
             testDispatcher.scheduler.advanceUntilIdle()
 
-            component.onDifficultyChanged(Difficulty.HARD)
-            testDispatcher.scheduler.advanceUntilIdle()
+            component.onClose()
 
-            component.onSave()
-            testDispatcher.scheduler.advanceUntilIdle()
-
-            assertTrue(settingsSavedCalled)
-            assertTrue(dismissCalled)
+            assertTrue(closed)
         }
 
-    @Test
-    fun WHEN_onDiscard_THEN_onDismiss_called() =
-        runTest {
-            var dismissCalled = false
-            val component =
-                createComponent(
-                    onDismiss = { dismissCalled = true },
-                )
-            testDispatcher.scheduler.advanceUntilIdle()
-
-            component.onDifficultyChanged(Difficulty.HARD)
-            testDispatcher.scheduler.advanceUntilIdle()
-
-            component.onDiscard()
-            testDispatcher.scheduler.advanceUntilIdle()
-
-            assertTrue(dismissCalled)
-        }
-
-    @Test
-    fun WHEN_onDiscard_THEN_changes_reverted() =
-        runTest {
-            val initialSettings = GameSettings(difficulty = Difficulty.EASY)
-            repository.setInitialSettings(initialSettings)
-            val component = createComponent()
-            testDispatcher.scheduler.advanceUntilIdle()
-
-            component.onDifficultyChanged(Difficulty.HARD)
-            testDispatcher.scheduler.advanceUntilIdle()
-            assertTrue(component.model.value.hasUnsavedChanges)
-
-            component.onDiscard()
-            testDispatcher.scheduler.advanceUntilIdle()
-
-            assertEquals(Difficulty.EASY, component.model.value.settings.difficulty)
-            assertFalse(component.model.value.hasUnsavedChanges)
-        }
-
-    @Test
-    fun WHEN_multiple_changes_THEN_all_reflected_in_model() =
-        runTest {
-            val component = createComponent()
-            testDispatcher.scheduler.advanceUntilIdle()
-
-            component.onDifficultyChanged(Difficulty.HARD)
-            component.onMusicToggled(false)
-            component.onMusicVolumeChanged(0.5f)
-            testDispatcher.scheduler.advanceUntilIdle()
-
-            val model = component.model.value
-            assertEquals(Difficulty.HARD, model.settings.difficulty)
-            assertFalse(model.settings.audioSettings.musicEnabled)
-            assertEquals(0.5f, model.settings.audioSettings.musicVolume)
-            assertTrue(model.hasUnsavedChanges)
-        }
-
-    @Test
-    fun WHEN_onSave_THEN_settings_saved_to_repository() =
-        runTest {
-            val component = createComponent()
-            testDispatcher.scheduler.advanceUntilIdle()
-
-            component.onDifficultyChanged(Difficulty.HARD)
-            testDispatcher.scheduler.advanceUntilIdle()
-
-            component.onSave()
-            testDispatcher.scheduler.advanceUntilIdle()
-
-            assertEquals(1, repository.saveSettingsCallCount)
-            assertEquals(Difficulty.HARD, repository.getSettings().difficulty)
-        }
-
-    private fun createComponent(
-        onSettingsSaved: () -> Unit = {},
-        onDismiss: () -> Unit = {},
-    ): DefaultSettingsComponent {
+    private fun createComponent(onClose: () -> Unit = {}): DefaultSettingsComponent {
         val lifecycle = LifecycleRegistry()
         val componentContext = DefaultComponentContext(lifecycle = lifecycle)
 
         return DefaultSettingsComponent(
             componentContext = componentContext,
-            onSettingsSaved = onSettingsSaved,
-            onDismiss = onDismiss,
+            onCloseRequest = onClose,
         )
     }
 }

@@ -202,8 +202,7 @@ class DefaultGameComponent(
                 GameComponent.SheetChild.Settings(
                     DefaultSettingsComponent(
                         componentContext = componentContext,
-                        onDismiss = ::onDismissSheet,
-                        onSettingsSaved = ::onDismissSheet,
+                        onCloseRequest = ::onDismissSheet,
                     ),
                 )
         }

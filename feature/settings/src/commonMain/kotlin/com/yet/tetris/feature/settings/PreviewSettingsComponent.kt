@@ -25,7 +25,6 @@ class PreviewSettingsComponent :
             SettingsComponent.Model(
                 settings = GameSettings(),
                 isSaving = false,
-                hasUnsavedChanges = false,
             ),
         )
 
@@ -73,11 +72,7 @@ class PreviewSettingsComponent :
         TODO("Not yet implemented")
     }
 
-    override fun onSave() {
-        TODO("Not yet implemented")
-    }
-
-    override fun onDiscard() {
+    override fun onClose() {
         TODO("Not yet implemented")
     }
 }

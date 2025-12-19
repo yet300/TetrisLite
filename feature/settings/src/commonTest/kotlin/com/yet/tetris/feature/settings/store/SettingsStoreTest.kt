@@ -35,7 +35,6 @@ class SettingsStoreTest {
     private lateinit var store: SettingsStore
     private val testDispatcher = StandardTestDispatcher()
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     @BeforeTest
     fun before() {
         isAssertOnMainThreadEnabled = false
@@ -77,9 +76,10 @@ class SettingsStoreTest {
             createStore()
 
             store.accept(Intent.ChangeDifficulty(Difficulty.HARD))
+            testDispatcher.scheduler.advanceUntilIdle()
 
             assertEquals(Difficulty.HARD, store.state.settings.difficulty)
-            assertTrue(store.state.hasUnsavedChanges)
+            assertEquals(1, repository.saveSettingsCallCount)
         }
 
     @Test
@@ -88,9 +88,10 @@ class SettingsStoreTest {
             createStore()
 
             store.accept(Intent.ChangeVisualTheme(VisualTheme.NEON))
+            testDispatcher.scheduler.advanceUntilIdle()
 
             assertEquals(VisualTheme.NEON, store.state.settings.themeConfig.visualTheme)
-            assertTrue(store.state.hasUnsavedChanges)
+            assertEquals(1, repository.saveSettingsCallCount)
         }
 
     @Test
@@ -99,9 +100,10 @@ class SettingsStoreTest {
             createStore()
 
             store.accept(Intent.ChangePieceStyle(PieceStyle.GRADIENT))
+            testDispatcher.scheduler.advanceUntilIdle()
 
             assertEquals(PieceStyle.GRADIENT, store.state.settings.themeConfig.pieceStyle)
-            assertTrue(store.state.hasUnsavedChanges)
+            assertEquals(1, repository.saveSettingsCallCount)
         }
 
     @Test
@@ -110,9 +112,10 @@ class SettingsStoreTest {
             createStore()
 
             store.accept(Intent.ChangeKeyboardLayout(KeyboardLayout.WASD))
+            testDispatcher.scheduler.advanceUntilIdle()
 
             assertEquals(KeyboardLayout.WASD, store.state.settings.keyboardLayout)
-            assertTrue(store.state.hasUnsavedChanges)
+            assertEquals(1, repository.saveSettingsCallCount)
         }
 
     @Test
@@ -121,9 +124,10 @@ class SettingsStoreTest {
             createStore()
 
             store.accept(Intent.ChangeSwipeLayout(SwipeLayout.INVERTED))
+            testDispatcher.scheduler.advanceUntilIdle()
 
             assertEquals(SwipeLayout.INVERTED, store.state.settings.swipeLayout)
-            assertTrue(store.state.hasUnsavedChanges)
+            assertEquals(1, repository.saveSettingsCallCount)
         }
 
     @Test
@@ -138,132 +142,71 @@ class SettingsStoreTest {
                 )
 
             store.accept(Intent.ChangeSwipeSensitivity(newSensitivity))
+            testDispatcher.scheduler.advanceUntilIdle()
 
             assertEquals(newSensitivity, store.state.settings.swipeSensitivity)
-            assertTrue(store.state.hasUnsavedChanges)
+            assertEquals(1, repository.saveSettingsCallCount)
         }
 
     @Test
-    fun updates_music_enabled_in_state_WHEN_Intent_ToggleMusic() =
+    fun updates_audio_settings_WHEN_corresponding_Intents_sent() =
         runTest {
             createStore()
 
             store.accept(Intent.ToggleMusic(false))
-
-            assertFalse(store.state.settings.audioSettings.musicEnabled)
-            assertTrue(store.state.hasUnsavedChanges)
-        }
-
-    @Test
-    fun updates_sound_effects_enabled_in_state_WHEN_Intent_ToggleSoundEffects() =
-        runTest {
-            createStore()
-
-            store.accept(Intent.ToggleSoundEffects(false))
-
-            assertFalse(store.state.settings.audioSettings.soundEffectsEnabled)
-            assertTrue(store.state.hasUnsavedChanges)
-        }
-
-    @Test
-    fun updates_music_volume_in_state_WHEN_Intent_ChangeMusicVolume() =
-        runTest {
-            createStore()
-
+            testDispatcher.scheduler.advanceUntilIdle()
             store.accept(Intent.ChangeMusicVolume(0.5f))
-
-            assertEquals(0.5f, store.state.settings.audioSettings.musicVolume)
-            assertTrue(store.state.hasUnsavedChanges)
-        }
-
-    @Test
-    fun updates_sfx_volume_in_state_WHEN_Intent_ChangeSFXVolume() =
-        runTest {
-            createStore()
-
-            store.accept(Intent.ChangeSFXVolume(0.7f))
-
-            assertEquals(0.7f, store.state.settings.audioSettings.sfxVolume)
-            assertTrue(store.state.hasUnsavedChanges)
-        }
-
-    @Test
-    fun updates_music_theme_in_state_WHEN_Intent_ChangeMusicTheme() =
-        runTest {
-            createStore()
-
+            testDispatcher.scheduler.advanceUntilIdle()
             store.accept(Intent.ChangeMusicTheme(MusicTheme.MODERN))
+            testDispatcher.scheduler.advanceUntilIdle()
+            store.accept(Intent.ToggleSoundEffects(false))
+            testDispatcher.scheduler.advanceUntilIdle()
+            store.accept(Intent.ChangeSFXVolume(0.7f))
+            testDispatcher.scheduler.advanceUntilIdle()
 
-            assertEquals(MusicTheme.MODERN, store.state.settings.audioSettings.selectedMusicTheme)
-            assertTrue(store.state.hasUnsavedChanges)
+            val audio = store.state.settings.audioSettings
+            assertFalse(audio.musicEnabled)
+            assertEquals(0.5f, audio.musicVolume)
+            assertEquals(MusicTheme.MODERN, audio.selectedMusicTheme)
+            assertFalse(audio.soundEffectsEnabled)
+            assertEquals(0.7f, audio.sfxVolume)
+            assertEquals(5, repository.saveSettingsCallCount)
         }
 
     @Test
-    fun saves_settings_to_repository_WHEN_Intent_SaveSettings() =
+    fun auto_saves_latest_state_WHEN_multiple_changes_queued() =
         runTest {
             createStore()
-            store.accept(Intent.ChangeDifficulty(Difficulty.HARD))
 
-            store.accept(Intent.SaveSettings)
+            store.accept(Intent.ChangeDifficulty(Difficulty.NORMAL))
+            store.accept(Intent.ChangeDifficulty(Difficulty.HARD))
+            store.accept(Intent.ChangeDifficulty(Difficulty.EASY))
             testDispatcher.scheduler.advanceUntilIdle()
 
+            assertEquals(Difficulty.EASY, repository.getSettings().difficulty)
             assertEquals(1, repository.saveSettingsCallCount)
-            assertEquals(Difficulty.HARD, repository.getSettings().difficulty)
-            assertFalse(store.state.hasUnsavedChanges)
-            assertFalse(store.state.isSaving)
         }
 
     @Test
-    fun publishes_Label_SettingsSaved_WHEN_Intent_SaveSettings() =
+    fun does_not_trigger_save_WHEN_value_unchanged() =
         runTest {
             createStore()
-            val labels = store.labels.test()
-            store.accept(Intent.ChangeDifficulty(Difficulty.HARD))
 
-            store.accept(Intent.SaveSettings)
+            store.accept(Intent.ChangeDifficulty(GameSettings().difficulty))
             testDispatcher.scheduler.advanceUntilIdle()
 
-            assertTrue(labels.any { it is Label.SettingsSaved })
+            assertEquals(0, repository.saveSettingsCallCount)
         }
 
     @Test
-    fun sets_isSaving_flag_during_save_WHEN_Intent_SaveSettings() =
+    fun resets_isSaving_flag_after_auto_save() =
         runTest {
             createStore()
+
             store.accept(Intent.ChangeDifficulty(Difficulty.HARD))
+            testDispatcher.scheduler.advanceUntilIdle()
 
-            store.accept(Intent.SaveSettings)
-
-            // After save completes, isSaving should be false
             assertFalse(store.state.isSaving)
-        }
-
-    @Test
-    fun discards_changes_and_restores_original_WHEN_Intent_DiscardChanges() =
-        runTest {
-            val initialSettings = GameSettings(difficulty = Difficulty.EASY)
-            repository.setInitialSettings(initialSettings)
-            createStore()
-
-            store.accept(Intent.ChangeDifficulty(Difficulty.HARD))
-            assertTrue(store.state.hasUnsavedChanges)
-
-            store.accept(Intent.DiscardChanges)
-
-            assertEquals(Difficulty.EASY, store.state.settings.difficulty)
-            assertFalse(store.state.hasUnsavedChanges)
-        }
-
-    @Test
-    fun publishes_Label_ChangesDiscarded_WHEN_Intent_DiscardChanges() =
-        runTest {
-            createStore()
-            val labels = store.labels.test()
-            store.accept(Intent.ChangeDifficulty(Difficulty.HARD))
-
-            store.accept(Intent.DiscardChanges)
-
-            assertTrue(labels.any { it is Label.ChangesDiscarded })
         }
 
     @Test
@@ -272,13 +215,12 @@ class SettingsStoreTest {
             repository.shouldThrowOnSave = true
             createStore()
             val labels = store.labels.test()
-            store.accept(Intent.ChangeDifficulty(Difficulty.HARD))
 
-            store.accept(Intent.SaveSettings)
+            store.accept(Intent.ChangeDifficulty(Difficulty.HARD))
             testDispatcher.scheduler.advanceUntilIdle()
 
             assertTrue(labels.any { it is Label.ShowError })
-            assertFalse(store.state.isSaving)
+            assertEquals(1, repository.saveSettingsCallCount)
         }
 
     @Test
@@ -291,42 +233,6 @@ class SettingsStoreTest {
             testDispatcher.scheduler.advanceUntilIdle()
 
             assertTrue(labels.any { it is Label.ShowError })
-        }
-
-    @Test
-    fun does_not_mark_unsaved_changes_WHEN_no_changes_made() =
-        runTest {
-            createStore()
-
-            assertFalse(store.state.hasUnsavedChanges)
-        }
-
-    @Test
-    fun marks_unsaved_changes_after_multiple_updates() =
-        runTest {
-            createStore()
-
-            store.accept(Intent.ChangeDifficulty(Difficulty.HARD))
-            store.accept(Intent.ToggleMusic(false))
-            store.accept(Intent.ChangeMusicVolume(0.5f))
-
-            assertTrue(store.state.hasUnsavedChanges)
-            assertEquals(Difficulty.HARD, store.state.settings.difficulty)
-            assertFalse(store.state.settings.audioSettings.musicEnabled)
-            assertEquals(0.5f, store.state.settings.audioSettings.musicVolume)
-        }
-
-    @Test
-    fun clears_unsaved_changes_after_save() =
-        runTest {
-            createStore()
-            store.accept(Intent.ChangeDifficulty(Difficulty.HARD))
-            assertTrue(store.state.hasUnsavedChanges)
-
-            store.accept(Intent.SaveSettings)
-            testDispatcher.scheduler.advanceUntilIdle()
-
-            assertFalse(store.state.hasUnsavedChanges)
         }
 
     private fun createStore() {

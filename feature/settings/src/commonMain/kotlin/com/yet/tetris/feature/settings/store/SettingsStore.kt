@@ -12,7 +12,6 @@ internal interface SettingsStore : Store<SettingsStore.Intent, SettingsStore.Sta
     data class State(
         val settings: GameSettings = GameSettings(),
         val isSaving: Boolean = false,
-        val hasUnsavedChanges: Boolean = false,
     )
 
     sealed class Intent {
@@ -60,9 +59,6 @@ internal interface SettingsStore : Store<SettingsStore.Intent, SettingsStore.Sta
             val theme: MusicTheme,
         ) : Intent()
 
-        data object SaveSettings : Intent()
-
-        data object DiscardChanges : Intent()
     }
 
     sealed interface Action {
@@ -82,16 +78,9 @@ internal interface SettingsStore : Store<SettingsStore.Intent, SettingsStore.Sta
             val isSaving: Boolean,
         ) : Msg()
 
-        data class UnsavedChangesChanged(
-            val hasUnsavedChanges: Boolean,
-        ) : Msg()
     }
 
     sealed class Label {
-        data object SettingsSaved : Label()
-
-        data object ChangesDiscarded : Label()
-
         data class ShowError(
             val message: String,
         ) : Label()

@@ -16,7 +16,6 @@ interface SettingsComponent {
     data class Model(
         val settings: GameSettings,
         val isSaving: Boolean,
-        val hasUnsavedChanges: Boolean,
     )
 
     fun onDifficultyChanged(difficulty: Difficulty)
@@ -41,7 +40,5 @@ interface SettingsComponent {
 
     fun onMusicThemeChanged(theme: MusicTheme)
 
-    fun onSave()
-
-    fun onDiscard()
+    fun onClose()
 }

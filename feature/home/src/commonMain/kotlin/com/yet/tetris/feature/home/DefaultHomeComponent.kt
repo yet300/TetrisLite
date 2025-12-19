@@ -67,8 +67,7 @@ class DefaultHomeComponent(
                     component =
                         DefaultSettingsComponent(
                             componentContext = componentContext,
-                            onSettingsSaved = ::onDismissBottomSheet,
-                            onDismiss = ::onDismissBottomSheet,
+                            onCloseRequest = ::onDismissBottomSheet,
                         ),
                 )
 

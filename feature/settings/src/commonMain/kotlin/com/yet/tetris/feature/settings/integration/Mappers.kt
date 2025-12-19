@@ -8,6 +8,5 @@ internal val stateToModel: (SettingsStore.State) -> SettingsComponent.Model =
         SettingsComponent.Model(
             settings = state.settings,
             isSaving = state.isSaving,
-            hasUnsavedChanges = state.hasUnsavedChanges,
         )
     }

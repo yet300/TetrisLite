@@ -22,8 +22,7 @@ import org.koin.core.component.KoinComponent
 
 class DefaultSettingsComponent(
     componentContext: ComponentContext,
-    private val onSettingsSaved: () -> Unit,
-    private val onDismiss: () -> Unit,
+    private val onCloseRequest: () -> Unit,
 ) : ComponentContext by componentContext,
     SettingsComponent,
     KoinComponent {
@@ -33,12 +32,6 @@ class DefaultSettingsComponent(
         coroutineScope().launch {
             store.labels.collect {
                 when (it) {
-                    is SettingsStore.Label.SettingsSaved -> {
-                        onSettingsSaved()
-                        onDismiss()
-                    }
-
-                    is SettingsStore.Label.ChangesDiscarded -> onDismiss()
                     is SettingsStore.Label.ShowError -> {
                         // Handle error
                     }
@@ -94,11 +87,7 @@ class DefaultSettingsComponent(
         store.accept(SettingsStore.Intent.ChangeMusicTheme(theme))
     }
 
-    override fun onSave() {
-        store.accept(SettingsStore.Intent.SaveSettings)
-    }
-
-    override fun onDiscard() {
-        store.accept(SettingsStore.Intent.DiscardChanges)
+    override fun onClose() {
+        onCloseRequest()
     }
 }
