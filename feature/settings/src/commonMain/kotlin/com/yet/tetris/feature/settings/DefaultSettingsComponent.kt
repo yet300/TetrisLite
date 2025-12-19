@@ -9,9 +9,6 @@ import com.arkivanov.mvikotlin.core.instancekeeper.getStore
 import com.arkivanov.mvikotlin.extensions.coroutines.labels
 import com.yet.tetris.domain.model.audio.MusicTheme
 import com.yet.tetris.domain.model.game.Difficulty
-import com.yet.tetris.domain.model.settings.KeyboardLayout
-import com.yet.tetris.domain.model.settings.SwipeLayout
-import com.yet.tetris.domain.model.settings.SwipeSensitivity
 import com.yet.tetris.domain.model.theme.PieceStyle
 import com.yet.tetris.domain.model.theme.VisualTheme
 import com.yet.tetris.feature.settings.integration.stateToModel
@@ -53,18 +50,6 @@ class DefaultSettingsComponent(
 
     override fun onPieceStyleChanged(style: PieceStyle) {
         store.accept(SettingsStore.Intent.ChangePieceStyle(style))
-    }
-
-    override fun onKeyboardLayoutChanged(layout: KeyboardLayout) {
-        store.accept(SettingsStore.Intent.ChangeKeyboardLayout(layout))
-    }
-
-    override fun onSwipeLayoutChanged(layout: SwipeLayout) {
-        store.accept(SettingsStore.Intent.ChangeSwipeLayout(layout))
-    }
-
-    override fun onSwipeSensitivityChanged(sensitivity: SwipeSensitivity) {
-        store.accept(SettingsStore.Intent.ChangeSwipeSensitivity(sensitivity))
     }
 
     override fun onMusicToggled(enabled: Boolean) {

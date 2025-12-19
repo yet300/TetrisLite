@@ -31,8 +31,6 @@
     <string name="game_settings">Game Settings</string>
     <string name="visual_theme">Visual Theme</string>
     <string name="piece_style">Piece Style</string>
-    <string name="keyboard_layout">Keyboard Layout</string>
-    <string name="swipe_layout">Swipe Layout</string>
     <string name="music">Music</string>
     <string name="music_theme">Music Theme</string>
     <string name="sound_effects">Sound Effects</string>

@@ -4,9 +4,6 @@ import com.yet.tetris.domain.model.audio.AudioSettings
 import com.yet.tetris.domain.model.audio.MusicTheme
 import com.yet.tetris.domain.model.game.Difficulty
 import com.yet.tetris.domain.model.settings.GameSettings
-import com.yet.tetris.domain.model.settings.KeyboardLayout
-import com.yet.tetris.domain.model.settings.SwipeLayout
-import com.yet.tetris.domain.model.settings.SwipeSensitivity
 import com.yet.tetris.domain.model.theme.PieceStyle
 import com.yet.tetris.domain.model.theme.ThemeConfig
 import com.yet.tetris.domain.model.theme.VisualTheme
@@ -24,14 +21,6 @@ class GameSettingsMapperTest {
                     ThemeConfig(
                         visualTheme = VisualTheme.NEON,
                         pieceStyle = PieceStyle.GRADIENT,
-                    ),
-                keyboardLayout = KeyboardLayout.WASD,
-                swipeLayout = SwipeLayout.INVERTED,
-                swipeSensitivity =
-                    SwipeSensitivity(
-                        softDropThreshold = 0.6f,
-                        horizontalSensitivity = 1.2f,
-                        verticalSensitivity = 0.9f,
                     ),
                 audioSettings =
                     AudioSettings(
@@ -51,11 +40,6 @@ class GameSettingsMapperTest {
         assertEquals(original.difficulty, result.difficulty)
         assertEquals(original.themeConfig.visualTheme, result.themeConfig.visualTheme)
         assertEquals(original.themeConfig.pieceStyle, result.themeConfig.pieceStyle)
-        assertEquals(original.keyboardLayout, result.keyboardLayout)
-        assertEquals(original.swipeLayout, result.swipeLayout)
-        assertEquals(original.swipeSensitivity.softDropThreshold, result.swipeSensitivity.softDropThreshold)
-        assertEquals(original.swipeSensitivity.horizontalSensitivity, result.swipeSensitivity.horizontalSensitivity)
-        assertEquals(original.swipeSensitivity.verticalSensitivity, result.swipeSensitivity.verticalSensitivity)
         assertEquals(original.audioSettings.musicEnabled, result.audioSettings.musicEnabled)
         assertEquals(original.audioSettings.soundEffectsEnabled, result.audioSettings.soundEffectsEnabled)
         assertEquals(original.audioSettings.musicVolume, result.audioSettings.musicVolume)
@@ -82,50 +66,12 @@ class GameSettingsMapperTest {
     }
 
     @Test
-    fun keyboardLayout_allValues_shouldMapCorrectly() {
-        KeyboardLayout.entries.forEach { layout ->
-            val dto = layout.toDto()
-            val result = dto.toDomain()
-            assertEquals(layout, result, "Failed for $layout")
-        }
-    }
-
-    @Test
-    fun swipeLayout_allValues_shouldMapCorrectly() {
-        SwipeLayout.entries.forEach { layout ->
-            val dto = layout.toDto()
-            val result = dto.toDomain()
-            assertEquals(layout, result, "Failed for $layout")
-        }
-    }
-
-    @Test
     fun musicTheme_allValues_shouldMapCorrectly() {
         MusicTheme.entries.forEach { theme ->
             val dto = theme.toDto()
             val result = dto.toDomain()
             assertEquals(theme, result, "Failed for $theme")
         }
-    }
-
-    @Test
-    fun swipeSensitivity_shouldMapAllFields() {
-        // Given
-        val original =
-            SwipeSensitivity(
-                softDropThreshold = 0.7f,
-                horizontalSensitivity = 1.5f,
-                verticalSensitivity = 0.8f,
-            )
-
-        // When
-        val dto = original.toDto()
-        val result = dto.toDomain()
-
-        // Then
-        assertEquals(original.softDropThreshold, result.softDropThreshold)
-        assertEquals(original.horizontalSensitivity, result.horizontalSensitivity)
-        assertEquals(original.verticalSensitivity, result.verticalSensitivity)
     }
 
     @Test

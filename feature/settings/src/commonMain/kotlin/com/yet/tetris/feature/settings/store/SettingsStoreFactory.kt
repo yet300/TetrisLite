@@ -65,21 +65,6 @@ internal class SettingsStoreFactory : KoinComponent {
                         it.copy(themeConfig = it.themeConfig.copy(pieceStyle = intent.style))
                     }
 
-                is SettingsStore.Intent.ChangeKeyboardLayout ->
-                    updateSettings(getState) {
-                        it.copy(keyboardLayout = intent.layout)
-                    }
-
-                is SettingsStore.Intent.ChangeSwipeLayout ->
-                    updateSettings(getState) {
-                        it.copy(swipeLayout = intent.layout)
-                    }
-
-                is SettingsStore.Intent.ChangeSwipeSensitivity ->
-                    updateSettings(getState) {
-                        it.copy(swipeSensitivity = intent.sensitivity)
-                    }
-
                 is SettingsStore.Intent.ToggleMusic ->
                     updateSettings(getState) {
                         it.copy(audioSettings = it.audioSettings.copy(musicEnabled = intent.enabled))

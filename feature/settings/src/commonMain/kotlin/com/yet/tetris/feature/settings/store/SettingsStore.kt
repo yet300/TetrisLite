@@ -4,9 +4,6 @@ import com.arkivanov.mvikotlin.core.store.Store
 import com.yet.tetris.domain.model.audio.MusicTheme
 import com.yet.tetris.domain.model.game.Difficulty
 import com.yet.tetris.domain.model.settings.GameSettings
-import com.yet.tetris.domain.model.settings.KeyboardLayout
-import com.yet.tetris.domain.model.settings.SwipeLayout
-import com.yet.tetris.domain.model.settings.SwipeSensitivity
 
 internal interface SettingsStore : Store<SettingsStore.Intent, SettingsStore.State, SettingsStore.Label> {
     data class State(
@@ -25,18 +22,6 @@ internal interface SettingsStore : Store<SettingsStore.Intent, SettingsStore.Sta
 
         data class ChangePieceStyle(
             val style: com.yet.tetris.domain.model.theme.PieceStyle,
-        ) : Intent()
-
-        data class ChangeKeyboardLayout(
-            val layout: KeyboardLayout,
-        ) : Intent()
-
-        data class ChangeSwipeLayout(
-            val layout: SwipeLayout,
-        ) : Intent()
-
-        data class ChangeSwipeSensitivity(
-            val sensitivity: SwipeSensitivity,
         ) : Intent()
 
         data class ToggleMusic(

@@ -3,7 +3,6 @@ package com.yet.tetris.ui.view.settings
 import com.yet.tetris.feature.settings.SettingsComponent
 import com.yet.tetris.ui.strings.Strings
 import com.yet.tetris.ui.view.settings.components.AudioSettingsSection
-import com.yet.tetris.ui.view.settings.components.ControlSettings
 import com.yet.tetris.ui.view.settings.components.ThemeSelector
 import com.yet.tetris.utils.RProps
 import com.yet.tetris.utils.useAsState
@@ -78,14 +77,6 @@ val SettingsSheet =
                         pieceStyle = settings.themeConfig.pieceStyle
                         onVisualThemeChanged = props.component::onVisualThemeChanged
                         onPieceStyleChanged = props.component::onPieceStyleChanged
-                    }
-
-                    // Control Settings
-                    ControlSettings {
-                        keyboardLayout = settings.keyboardLayout
-                        swipeLayout = settings.swipeLayout
-                        onKeyboardLayoutChanged = props.component::onKeyboardLayoutChanged
-                        onSwipeLayoutChanged = props.component::onSwipeLayoutChanged
                     }
 
                     // Audio Settings

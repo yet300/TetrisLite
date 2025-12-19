@@ -10,7 +10,6 @@ import com.yet.tetris.domain.model.audio.AudioSettings
 import com.yet.tetris.domain.model.audio.MusicTheme
 import com.yet.tetris.domain.model.game.Difficulty
 import com.yet.tetris.domain.model.settings.GameSettings
-import com.yet.tetris.domain.model.settings.KeyboardLayout
 import com.yet.tetris.domain.model.theme.PieceStyle
 import com.yet.tetris.domain.model.theme.ThemeConfig
 import com.yet.tetris.domain.model.theme.VisualTheme
@@ -65,7 +64,6 @@ class GameSettingsRepositoryImplTest : RobolectricTestRunner() {
                             visualTheme = VisualTheme.NEON,
                             pieceStyle = PieceStyle.GRADIENT,
                         ),
-                    keyboardLayout = KeyboardLayout.WASD,
                     audioSettings =
                         AudioSettings(
                             musicEnabled = false,
@@ -84,7 +82,6 @@ class GameSettingsRepositoryImplTest : RobolectricTestRunner() {
             assertEquals(Difficulty.HARD, retrieved.difficulty)
             assertEquals(VisualTheme.NEON, retrieved.themeConfig.visualTheme)
             assertEquals(PieceStyle.GRADIENT, retrieved.themeConfig.pieceStyle)
-            assertEquals(KeyboardLayout.WASD, retrieved.keyboardLayout)
             assertFalse(retrieved.audioSettings.musicEnabled)
             assertEquals(MusicTheme.MODERN, retrieved.audioSettings.selectedMusicTheme)
         }

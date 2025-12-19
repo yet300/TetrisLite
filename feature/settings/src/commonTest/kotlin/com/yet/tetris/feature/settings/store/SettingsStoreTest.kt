@@ -6,9 +6,6 @@ import com.arkivanov.mvikotlin.main.store.DefaultStoreFactory
 import com.yet.tetris.domain.model.audio.MusicTheme
 import com.yet.tetris.domain.model.game.Difficulty
 import com.yet.tetris.domain.model.settings.GameSettings
-import com.yet.tetris.domain.model.settings.KeyboardLayout
-import com.yet.tetris.domain.model.settings.SwipeLayout
-import com.yet.tetris.domain.model.settings.SwipeSensitivity
 import com.yet.tetris.domain.model.theme.PieceStyle
 import com.yet.tetris.domain.model.theme.VisualTheme
 import com.yet.tetris.feature.settings.store.SettingsStore.Intent
@@ -103,48 +100,6 @@ class SettingsStoreTest {
             testDispatcher.scheduler.advanceUntilIdle()
 
             assertEquals(PieceStyle.GRADIENT, store.state.settings.themeConfig.pieceStyle)
-            assertEquals(1, repository.saveSettingsCallCount)
-        }
-
-    @Test
-    fun updates_keyboard_layout_in_state_WHEN_Intent_ChangeKeyboardLayout() =
-        runTest {
-            createStore()
-
-            store.accept(Intent.ChangeKeyboardLayout(KeyboardLayout.WASD))
-            testDispatcher.scheduler.advanceUntilIdle()
-
-            assertEquals(KeyboardLayout.WASD, store.state.settings.keyboardLayout)
-            assertEquals(1, repository.saveSettingsCallCount)
-        }
-
-    @Test
-    fun updates_swipe_layout_in_state_WHEN_Intent_ChangeSwipeLayout() =
-        runTest {
-            createStore()
-
-            store.accept(Intent.ChangeSwipeLayout(SwipeLayout.INVERTED))
-            testDispatcher.scheduler.advanceUntilIdle()
-
-            assertEquals(SwipeLayout.INVERTED, store.state.settings.swipeLayout)
-            assertEquals(1, repository.saveSettingsCallCount)
-        }
-
-    @Test
-    fun updates_swipe_sensitivity_in_state_WHEN_Intent_ChangeSwipeSensitivity() =
-        runTest {
-            createStore()
-            val newSensitivity =
-                SwipeSensitivity(
-                    softDropThreshold = 0.8f,
-                    horizontalSensitivity = 1.5f,
-                    verticalSensitivity = 1.2f,
-                )
-
-            store.accept(Intent.ChangeSwipeSensitivity(newSensitivity))
-            testDispatcher.scheduler.advanceUntilIdle()
-
-            assertEquals(newSensitivity, store.state.settings.swipeSensitivity)
             assertEquals(1, repository.saveSettingsCallCount)
         }
 

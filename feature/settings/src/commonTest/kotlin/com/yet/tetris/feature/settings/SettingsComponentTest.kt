@@ -6,9 +6,6 @@ import com.arkivanov.mvikotlin.main.store.DefaultStoreFactory
 import com.yet.tetris.domain.model.audio.MusicTheme
 import com.yet.tetris.domain.model.game.Difficulty
 import com.yet.tetris.domain.model.settings.GameSettings
-import com.yet.tetris.domain.model.settings.KeyboardLayout
-import com.yet.tetris.domain.model.settings.SwipeLayout
-import com.yet.tetris.domain.model.settings.SwipeSensitivity
 import com.yet.tetris.domain.model.theme.VisualTheme
 import com.yet.tetris.feature.settings.store.FakeGameSettingsRepository
 import kotlinx.coroutines.Dispatchers
@@ -109,29 +106,6 @@ class SettingsComponentTest {
             assertEquals(MusicTheme.MODERN, audio.selectedMusicTheme)
             assertFalse(audio.soundEffectsEnabled)
             assertEquals(0.7f, audio.sfxVolume)
-        }
-
-    @Test
-    fun WHEN_control_settings_changed_THEN_model_reflects_changes() =
-        runTest {
-            val component = createComponent()
-            testDispatcher.scheduler.advanceUntilIdle()
-            val newSensitivity =
-                SwipeSensitivity(
-                    softDropThreshold = 0.8f,
-                    horizontalSensitivity = 1.5f,
-                    verticalSensitivity = 1.2f,
-                )
-
-            component.onKeyboardLayoutChanged(KeyboardLayout.WASD)
-            component.onSwipeLayoutChanged(SwipeLayout.INVERTED)
-            component.onSwipeSensitivityChanged(newSensitivity)
-            testDispatcher.scheduler.advanceUntilIdle()
-
-            val settings = component.model.value.settings
-            assertEquals(KeyboardLayout.WASD, settings.keyboardLayout)
-            assertEquals(SwipeLayout.INVERTED, settings.swipeLayout)
-            assertEquals(newSensitivity, settings.swipeSensitivity)
         }
 
     @Test

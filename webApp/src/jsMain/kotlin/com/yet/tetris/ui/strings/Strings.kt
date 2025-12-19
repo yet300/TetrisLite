@@ -8,9 +8,6 @@ package com.yet.tetris.ui.strings
  */
 object Strings {
     // Common
-    const val SAVE = "Save"
-    const val DISCARD = "Discard"
-    const val CANCEL = "Cancel"
     const val RESUME = "Resume"
     const val QUIT = "Quit"
     const val RETRY = "Retry"
@@ -37,8 +34,6 @@ object Strings {
     const val GAME_SETTINGS = "Game Settings"
     const val VISUAL_THEME = "Visual Theme"
     const val PIECE_STYLE = "Piece Style"
-    const val KEYBOARD_LAYOUT = "Keyboard Layout"
-    const val SWIPE_LAYOUT = "Swipe Layout"
     const val MUSIC = "Music"
     const val MUSIC_THEME = "Music Theme"
     const val SOUND_EFFECTS = "Sound Effects"

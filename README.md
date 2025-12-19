@@ -13,14 +13,12 @@ A modern, cross-platform Tetris game built with Kotlin Multiplatform and Compose
 ### 🎨 Customization
 - **Visual Themes** - 9 color schemes: Classic, Modern, Neon, Retro, Pastel, Dark, Monochrome, Cyberpunk, and Nature
 - **Piece Styles** - Choose between Solid, Gradient, and Outlined piece rendering
-- **Control Layouts** - Customizable keyboard layouts (Arrows, WASD, IJKL) and swipe gestures
-- **Swipe Sensitivity** - Adjustable touch controls for mobile devices
 - **Audio Settings** - Procedurally generated music and SFX with volume control and multiple themes
 
 ### 📱 Platform-Specific Features
 - **Android** - Touch controls with swipe gestures, baseline profiles for performance
 - **iOS** - Native SwiftUI integration with iOS-specific optimizations
-- **Desktop** - Keyboard controls with multiple layout options (Windows, macOS, Linux)
+- **Desktop** - Keyboard controls that feel great on Windows, macOS, and Linux
 - **Web (Compose)** - Browser-based gameplay with Kotlin/JS and Compose for Web
 - **Web (Kotlin/JS + React)** - Kotlin/JS with React wrappers for type-safe web development
 

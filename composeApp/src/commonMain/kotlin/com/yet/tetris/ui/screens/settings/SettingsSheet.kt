@@ -38,14 +38,12 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 import tetrislite.composeapp.generated.resources.Res
 import tetrislite.composeapp.generated.resources.audio
 import tetrislite.composeapp.generated.resources.game_settings
-import tetrislite.composeapp.generated.resources.keyboard_layout
 import tetrislite.composeapp.generated.resources.music
 import tetrislite.composeapp.generated.resources.music_theme
 import tetrislite.composeapp.generated.resources.music_volume
 import tetrislite.composeapp.generated.resources.piece_style
 import tetrislite.composeapp.generated.resources.sfx_volume
 import tetrislite.composeapp.generated.resources.sound_effects
-import tetrislite.composeapp.generated.resources.swipe_layout
 import tetrislite.composeapp.generated.resources.visual_theme
 
 @Composable
@@ -112,42 +110,6 @@ private fun SettingsScreenContent(
                     onValueChange = { component.onPieceStyleChanged(it) },
                 )
             }
-        }
-
-        item {
-            // Keyboard Layout (Desktop/Web)
-            SettingsSection(title = stringResource(Res.string.keyboard_layout)) {
-                EnumSegmentedButtonRow(
-                    selectedValue = model.settings.keyboardLayout,
-                    onValueChange = { component.onKeyboardLayoutChanged(it) },
-                )
-            }
-        }
-
-        item {
-            // Swipe Layout (Mobile)
-            SettingsSection(title = stringResource(Res.string.swipe_layout)) {
-                EnumSegmentedButtonRow(
-                    selectedValue = model.settings.swipeLayout,
-                    onValueChange = { component.onSwipeLayoutChanged(it) },
-                )
-            }
-        }
-
-        item {
-//                Swipe Sensitivity
-//                        SettingsSection(title = "Swipe Sensitivity") {
-//                            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-//                                SwipeSensitivity.entries.forEach { sensitivity ->
-//                                    FilterChip(
-//                                        selected = model.settings.swipeSensitivity == sensitivity,
-//                                        onClick = { component.onSwipeSensitivityChanged(sensitivity) },
-//                                        label = { Text(sensitivity.name) },
-//                                        modifier = Modifier.fillMaxWidth()
-//                                    )
-//                                }
-//                            }
-//                        }
         }
 
         item {

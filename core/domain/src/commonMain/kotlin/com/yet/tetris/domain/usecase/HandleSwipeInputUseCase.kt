@@ -1,7 +1,6 @@
 package com.yet.tetris.domain.usecase
 
 import com.yet.tetris.domain.model.game.GameState
-import com.yet.tetris.domain.model.settings.SwipeSensitivity
 import jakarta.inject.Singleton
 import kotlin.math.abs
 
@@ -14,6 +13,14 @@ class HandleSwipeInputUseCase(
     private val movePiece: MovePieceUseCase,
     private val hardDrop: HardDropUseCase,
 ) {
+    data class Result(
+        val state: GameState,
+        val action: SwipeAction,
+    )
+
+    companion object {
+        private const val HARD_DROP_THRESHOLD = 0.5f
+    }
     /**
      * Represents the result of processing a swipe gesture.
      */
@@ -37,7 +44,6 @@ class HandleSwipeInputUseCase(
      * @param deltaY Vertical swipe distance (positive = down)
      * @param velocityX Horizontal swipe velocity
      * @param velocityY Vertical swipe velocity
-     * @param sensitivity Swipe sensitivity settings
      * @return Updated GameState or null if no valid action
      */
     operator fun invoke(
@@ -46,21 +52,19 @@ class HandleSwipeInputUseCase(
         deltaY: Float,
         velocityX: Float,
         velocityY: Float,
-        sensitivity: SwipeSensitivity,
-    ): GameState? {
-        val action = determineSwipeAction(deltaX, deltaY, velocityX, velocityY, sensitivity)
+    ): Result? {
+        val action = determineSwipeAction(deltaX, deltaY, velocityX, velocityY)
 
-        return when (action) {
-            SwipeAction.MoveLeft -> movePiece.moveLeft(state)
-            SwipeAction.MoveRight -> movePiece.moveRight(state)
-            SwipeAction.SoftDrop -> movePiece.moveDown(state)
-            SwipeAction.HardDrop -> {
-                // Hard drop moves to lowest position
-                val droppedState = hardDrop(state)
-                droppedState
+        val newState =
+            when (action) {
+                SwipeAction.MoveLeft -> movePiece.moveLeft(state)
+                SwipeAction.MoveRight -> movePiece.moveRight(state)
+                SwipeAction.SoftDrop -> movePiece.moveDown(state)
+                SwipeAction.HardDrop -> hardDrop(state)
+                SwipeAction.None -> null
             }
-            SwipeAction.None -> null
-        }
+
+        return newState?.let { Result(it, action) }
     }
 
     /**
@@ -73,7 +77,6 @@ class HandleSwipeInputUseCase(
         deltaY: Float,
         velocityX: Float,
         velocityY: Float,
-        sensitivity: SwipeSensitivity,
     ): SwipeAction {
         val absX = abs(deltaX)
         val absY = abs(deltaY)
@@ -84,8 +87,8 @@ class HandleSwipeInputUseCase(
             if (deltaX > 0) SwipeAction.MoveRight else SwipeAction.MoveLeft
         } else if (absY > absX) {
             // Vertical swipe - check velocity to determine soft vs hard drop
-            val normalizedVelocity = abs(velocityY) * sensitivity.verticalSensitivity
-            if (normalizedVelocity > sensitivity.softDropThreshold) {
+            val normalizedVelocity = abs(velocityY)
+            if (normalizedVelocity > HARD_DROP_THRESHOLD) {
                 SwipeAction.HardDrop
             } else {
                 SwipeAction.SoftDrop

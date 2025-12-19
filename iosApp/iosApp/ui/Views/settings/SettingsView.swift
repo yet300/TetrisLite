@@ -17,7 +17,6 @@ struct SettingsView: View {
             Form {
                 visualThemeSection
                 pieceStyleSection
-                controlsSection
                 audioSection
             }
             .formStyle(.grouped)
@@ -67,19 +66,6 @@ struct SettingsView: View {
             )) {
                 ForEach(PieceStyle.entries, id: \.self) { style in
                     Text(style.name).tag(style)
-                }
-            }
-        }
-    }
-    
-    private var controlsSection: some View {
-        Section("Controls") {
-            Picker("Swipe Layout", selection: Binding(
-                get: { model.settings.swipeLayout },
-                set: { component.onSwipeLayoutChanged(layout: $0) }
-            )) {
-                ForEach(SwipeLayout.entries, id: \.self) { layout in
-                    Text(layout.name).tag(layout)
                 }
             }
         }

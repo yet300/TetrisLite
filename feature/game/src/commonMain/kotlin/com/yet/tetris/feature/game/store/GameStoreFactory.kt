@@ -316,14 +316,12 @@ internal class GameStoreFactory : KoinComponent {
                         intent.deltaY,
                         intent.velocityX,
                         intent.velocityY,
-                        state.settings.swipeSensitivity,
-                    )?.let { newState ->
-                        val ghostY = calculateGhostY(newState)
-                        dispatch(GameStore.Msg.GameStateUpdated(newState, ghostY))
+                    )?.let { result ->
+                        val ghostY = calculateGhostY(result.state)
+                        dispatch(GameStore.Msg.GameStateUpdated(result.state, ghostY))
 
-                        // If it was a hard drop, lock the piece
-                        if (intent.velocityY > state.settings.swipeSensitivity.softDropThreshold) {
-                            lockPiece(state.copy(gameState = newState))
+                        if (result.action == HandleSwipeInputUseCase.SwipeAction.HardDrop) {
+                            lockPiece(state.copy(gameState = result.state))
                         }
                     }
                 }

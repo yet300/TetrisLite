@@ -2,19 +2,13 @@ package com.yet.tetris.data.mapper
 
 import com.yet.tetris.data.model.AudioSettingsDto
 import com.yet.tetris.data.model.GameSettingsDto
-import com.yet.tetris.data.model.KeyboardLayoutDto
 import com.yet.tetris.data.model.MusicThemeDto
 import com.yet.tetris.data.model.PieceStyleDto
-import com.yet.tetris.data.model.SwipeLayoutDto
-import com.yet.tetris.data.model.SwipeSensitivityDto
 import com.yet.tetris.data.model.ThemeConfigDto
 import com.yet.tetris.data.model.VisualThemeDto
 import com.yet.tetris.domain.model.audio.AudioSettings
 import com.yet.tetris.domain.model.audio.MusicTheme
 import com.yet.tetris.domain.model.settings.GameSettings
-import com.yet.tetris.domain.model.settings.KeyboardLayout
-import com.yet.tetris.domain.model.settings.SwipeLayout
-import com.yet.tetris.domain.model.settings.SwipeSensitivity
 import com.yet.tetris.domain.model.theme.PieceStyle
 import com.yet.tetris.domain.model.theme.ThemeConfig
 import com.yet.tetris.domain.model.theme.VisualTheme
@@ -24,9 +18,6 @@ fun GameSettings.toDto(): GameSettingsDto =
     GameSettingsDto(
         difficulty = difficulty.toDto(),
         themeConfig = themeConfig.toDto(),
-        keyboardLayout = keyboardLayout.toDto(),
-        swipeLayout = swipeLayout.toDto(),
-        swipeSensitivity = swipeSensitivity.toDto(),
         audioSettings = audioSettings.toDto(),
     )
 
@@ -58,27 +49,6 @@ fun PieceStyle.toDto(): PieceStyleDto =
         PieceStyle.GLASS -> PieceStyleDto.GLASS
     }
 
-fun KeyboardLayout.toDto(): KeyboardLayoutDto =
-    when (this) {
-        KeyboardLayout.ARROWS -> KeyboardLayoutDto.ARROWS
-        KeyboardLayout.WASD -> KeyboardLayoutDto.WASD
-        KeyboardLayout.CUSTOM -> KeyboardLayoutDto.CUSTOM
-    }
-
-fun SwipeLayout.toDto(): SwipeLayoutDto =
-    when (this) {
-        SwipeLayout.STANDARD -> SwipeLayoutDto.STANDARD
-        SwipeLayout.INVERTED -> SwipeLayoutDto.INVERTED
-        SwipeLayout.CUSTOM -> SwipeLayoutDto.CUSTOM
-    }
-
-fun SwipeSensitivity.toDto(): SwipeSensitivityDto =
-    SwipeSensitivityDto(
-        softDropThreshold = softDropThreshold,
-        horizontalSensitivity = horizontalSensitivity,
-        verticalSensitivity = verticalSensitivity,
-    )
-
 fun AudioSettings.toDto(): AudioSettingsDto =
     AudioSettingsDto(
         musicEnabled = musicEnabled,
@@ -101,9 +71,6 @@ fun GameSettingsDto.toDomain(): GameSettings =
     GameSettings(
         difficulty = difficulty.toDomain(),
         themeConfig = themeConfig.toDomain(),
-        keyboardLayout = keyboardLayout.toDomain(),
-        swipeLayout = swipeLayout.toDomain(),
-        swipeSensitivity = swipeSensitivity.toDomain(),
         audioSettings = audioSettings.toDomain(),
     )
 
@@ -134,27 +101,6 @@ fun PieceStyleDto.toDomain(): PieceStyle =
         PieceStyleDto.RETRO_PIXEL -> PieceStyle.RETRO_PIXEL
         PieceStyleDto.GLASS -> PieceStyle.GLASS
     }
-
-fun KeyboardLayoutDto.toDomain(): KeyboardLayout =
-    when (this) {
-        KeyboardLayoutDto.ARROWS -> KeyboardLayout.ARROWS
-        KeyboardLayoutDto.WASD -> KeyboardLayout.WASD
-        KeyboardLayoutDto.CUSTOM -> KeyboardLayout.CUSTOM
-    }
-
-fun SwipeLayoutDto.toDomain(): SwipeLayout =
-    when (this) {
-        SwipeLayoutDto.STANDARD -> SwipeLayout.STANDARD
-        SwipeLayoutDto.INVERTED -> SwipeLayout.INVERTED
-        SwipeLayoutDto.CUSTOM -> SwipeLayout.CUSTOM
-    }
-
-fun SwipeSensitivityDto.toDomain(): SwipeSensitivity =
-    SwipeSensitivity(
-        softDropThreshold = softDropThreshold,
-        horizontalSensitivity = horizontalSensitivity,
-        verticalSensitivity = verticalSensitivity,
-    )
 
 fun AudioSettingsDto.toDomain(): AudioSettings =
     AudioSettings(

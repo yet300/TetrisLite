@@ -6,9 +6,6 @@ import kotlinx.serialization.Serializable
 data class GameSettingsDto(
     val difficulty: DifficultyDto = DifficultyDto.NORMAL,
     val themeConfig: ThemeConfigDto = ThemeConfigDto(),
-    val keyboardLayout: KeyboardLayoutDto = KeyboardLayoutDto.ARROWS,
-    val swipeLayout: SwipeLayoutDto = SwipeLayoutDto.STANDARD,
-    val swipeSensitivity: SwipeSensitivityDto = SwipeSensitivityDto(),
     val audioSettings: AudioSettingsDto = AudioSettingsDto(),
 )
 
@@ -39,27 +36,6 @@ enum class PieceStyleDto {
     RETRO_PIXEL,
     GLASS,
 }
-
-@Serializable
-enum class KeyboardLayoutDto {
-    ARROWS,
-    WASD,
-    CUSTOM,
-}
-
-@Serializable
-enum class SwipeLayoutDto {
-    STANDARD,
-    INVERTED,
-    CUSTOM,
-}
-
-@Serializable
-data class SwipeSensitivityDto(
-    val softDropThreshold: Float = 0.5f,
-    val horizontalSensitivity: Float = 1.0f,
-    val verticalSensitivity: Float = 1.0f,
-)
 
 @Serializable
 data class AudioSettingsDto(

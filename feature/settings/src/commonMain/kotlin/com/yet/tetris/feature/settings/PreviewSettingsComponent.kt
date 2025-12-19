@@ -9,9 +9,6 @@ import com.arkivanov.decompose.value.Value
 import com.yet.tetris.domain.model.audio.MusicTheme
 import com.yet.tetris.domain.model.game.Difficulty
 import com.yet.tetris.domain.model.settings.GameSettings
-import com.yet.tetris.domain.model.settings.KeyboardLayout
-import com.yet.tetris.domain.model.settings.SwipeLayout
-import com.yet.tetris.domain.model.settings.SwipeSensitivity
 import com.yet.tetris.domain.model.theme.PieceStyle
 import com.yet.tetris.domain.model.theme.VisualTheme
 
@@ -37,18 +34,6 @@ class PreviewSettingsComponent :
     }
 
     override fun onPieceStyleChanged(style: PieceStyle) {
-        TODO("Not yet implemented")
-    }
-
-    override fun onKeyboardLayoutChanged(layout: KeyboardLayout) {
-        TODO("Not yet implemented")
-    }
-
-    override fun onSwipeLayoutChanged(layout: SwipeLayout) {
-        TODO("Not yet implemented")
-    }
-
-    override fun onSwipeSensitivityChanged(sensitivity: SwipeSensitivity) {
         TODO("Not yet implemented")
     }
 
