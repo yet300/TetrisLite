@@ -13,7 +13,7 @@ struct HistoryView: View {
     }
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ZStack {
                 switch model {
                 case is HistoryComponentModelLoading:

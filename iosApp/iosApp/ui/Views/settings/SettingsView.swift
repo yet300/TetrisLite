@@ -13,13 +13,14 @@ struct SettingsView: View {
     }
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             Form {
                 visualThemeSection
                 pieceStyleSection
                 controlsSection
                 audioSection
             }
+            .formStyle(.grouped)
             .navigationTitle(Strings.settings)
             #if os(iOS)
             .navigationBarTitleDisplayMode(.inline)

@@ -130,6 +130,10 @@ struct HomeView: View {
             )) { sheetItem in
                 // Разворачиваем обратно
                 BottomSheetView(child: sheetItem.child)
+                    .frame(minWidth: 400, minHeight: 500)
+                    #if os(macOS)
+                    .background(.ultraThinMaterial)
+                    #endif
             }
         }
         #if os(iOS)
