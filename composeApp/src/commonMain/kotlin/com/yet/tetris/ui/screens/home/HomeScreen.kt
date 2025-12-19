@@ -72,7 +72,7 @@ fun HomeScreen(component: HomeComponent) {
                     )
                 },
                 colors =
-                    TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    TopAppBarDefaults.topAppBarColors(
                         containerColor = Color.Transparent,
                     ),
             )
