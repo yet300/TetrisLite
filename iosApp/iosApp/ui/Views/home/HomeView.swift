@@ -30,7 +30,7 @@ struct HomeView: View {
     }
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             GeometryReader { geometry in
                 ZStack {
                     switch model {
@@ -201,20 +201,14 @@ struct DifficultySelector: View {
     let onSelect: (Difficulty) -> Void
     
     var body: some View {
-        VStack(alignment: .center, spacing: 12) {
-            Text(Strings.difficulty)
-                .font(.headline)
-                .foregroundColor(.secondaryLabel)
-
-            Picker(Strings.difficulty, selection: $selectedDifficulty) {
-                ForEach([Difficulty.easy, Difficulty.normal, Difficulty.hard], id: \.self) { difficulty in
-                    Text(difficulty.name.capitalized).tag(difficulty)
-                }
+        Picker(Strings.difficulty, selection: $selectedDifficulty) {
+            ForEach([Difficulty.easy, Difficulty.normal, Difficulty.hard], id: \.self) { difficulty in
+                Text(difficulty.name.capitalized).tag(difficulty)
             }
-            .pickerStyle(.segmented)
-            .controlSize(.large)
         }
-        .padding(.horizontal, 32)
+        .pickerStyle(.segmented)
+        .controlSize(.large)
+        .padding()
     }
 }
 
