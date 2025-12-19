@@ -12,12 +12,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -31,6 +29,7 @@ import com.arkivanov.decompose.extensions.compose.subscribeAsState
 import com.yet.tetris.feature.settings.PreviewSettingsComponent
 import com.yet.tetris.feature.settings.SettingsComponent
 import com.yet.tetris.uikit.component.button.EnumSegmentedButtonRow
+import com.yet.tetris.uikit.component.button.FrostedGlassButton
 import com.yet.tetris.uikit.component.chip.EnumFlowRowChips
 import com.yet.tetris.uikit.component.text.TitleText
 import com.yet.tetris.uikit.theme.TetrisLiteAppTheme
@@ -38,14 +37,12 @@ import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import tetrislite.composeapp.generated.resources.Res
 import tetrislite.composeapp.generated.resources.audio
-import tetrislite.composeapp.generated.resources.discard
 import tetrislite.composeapp.generated.resources.game_settings
 import tetrislite.composeapp.generated.resources.keyboard_layout
 import tetrislite.composeapp.generated.resources.music
 import tetrislite.composeapp.generated.resources.music_theme
 import tetrislite.composeapp.generated.resources.music_volume
 import tetrislite.composeapp.generated.resources.piece_style
-import tetrislite.composeapp.generated.resources.save
 import tetrislite.composeapp.generated.resources.sfx_volume
 import tetrislite.composeapp.generated.resources.sound_effects
 import tetrislite.composeapp.generated.resources.swipe_layout
@@ -63,41 +60,20 @@ fun SettingsSheet(component: SettingsComponent) {
     ) {
         SettingsScreenContent(model, component)
 
-        // Action Buttons
+        // Close Button
         Box(
             modifier =
                 Modifier
-                    .align(Alignment.BottomCenter)
+                    .align(Alignment.TopEnd)
                     .fillMaxWidth()
                     .height(64.dp)
                     .background(MaterialTheme.colorScheme.background),
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                OutlinedButton(
-                    onClick = component::onDiscard,
-                    modifier = Modifier.weight(1f),
-                    enabled = model.hasUnsavedChanges,
-                ) {
-                    Text(stringResource(Res.string.discard))
-                }
-                Button(
-                    onClick = component::onSave,
-                    modifier = Modifier.weight(1f),
-                    enabled = model.hasUnsavedChanges && !model.isSaving,
-                ) {
-                    if (model.isSaving) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(16.dp),
-                            strokeWidth = 2.dp,
-                        )
-                    } else {
-                        Text(stringResource(Res.string.save))
-                    }
-                }
-            }
+            FrostedGlassButton(
+                modifier = Modifier.align(Alignment.CenterEnd),
+                onClick = component::onClose,
+                icon = Icons.Default.Close,
+            )
         }
     }
 }
