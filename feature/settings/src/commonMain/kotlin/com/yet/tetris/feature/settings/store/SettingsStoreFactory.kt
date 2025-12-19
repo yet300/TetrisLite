@@ -104,7 +104,6 @@ internal class SettingsStoreFactory : KoinComponent {
                     updateSettings(getState) {
                         it.copy(audioSettings = it.audioSettings.copy(selectedMusicTheme = intent.theme))
                     }
-
             }
         }
 
@@ -144,8 +143,8 @@ internal class SettingsStoreFactory : KoinComponent {
                     } catch (e: Exception) {
                         publish(
                             SettingsStore.Label.ShowError(
-                                e.message ?: "Failed to save settings"
-                            )
+                                e.message ?: "Failed to save settings",
+                            ),
                         )
                     } finally {
                         if (saveJob === currentJob) {

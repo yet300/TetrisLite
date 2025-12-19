@@ -58,7 +58,6 @@ internal interface SettingsStore : Store<SettingsStore.Intent, SettingsStore.Sta
         data class ChangeMusicTheme(
             val theme: MusicTheme,
         ) : Intent()
-
     }
 
     sealed interface Action {
@@ -77,7 +76,6 @@ internal interface SettingsStore : Store<SettingsStore.Intent, SettingsStore.Sta
         data class SavingChanged(
             val isSaving: Boolean,
         ) : Msg()
-
     }
 
     sealed class Label {
