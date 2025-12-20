@@ -24,6 +24,9 @@ kotlin {
         iosSimulatorArm64(),
         macosX64(),
         macosArm64(),
+        watchosArm64(),
+        watchosSimulatorArm64(),
+        watchosX64(),
     ).forEach { iosTarget ->
         iosTarget.binaries.framework {
             baseName = "Shared"

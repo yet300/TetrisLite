@@ -41,6 +41,10 @@ internal fun Project.configureKotlinMultiplatform(
     macosX64()
     macosArm64()
 
+    watchosArm64()
+    watchosSimulatorArm64()
+    watchosX64()
+
     applyDefaultHierarchyTemplate()
 
     configurations.configureEach {
