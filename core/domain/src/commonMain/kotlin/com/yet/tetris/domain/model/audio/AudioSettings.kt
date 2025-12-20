@@ -6,8 +6,8 @@ package com.yet.tetris.domain.model.audio
 data class AudioSettings(
     val musicEnabled: Boolean = true,
     val soundEffectsEnabled: Boolean = true,
-    val musicVolume: Float = 0.7f, // 0.0 to 1.0
-    val sfxVolume: Float = 0.8f, // 0.0 to 1.0
+    val musicVolume: Float = 0.1f, // 0.0 to 1.0
+    val sfxVolume: Float = 0.2f, // 0.0 to 1.0
     val selectedMusicTheme: MusicTheme = MusicTheme.CLASSIC,
 )
 

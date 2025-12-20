@@ -41,8 +41,8 @@ enum class PieceStyleDto {
 data class AudioSettingsDto(
     val musicEnabled: Boolean = true,
     val soundEffectsEnabled: Boolean = true,
-    val musicVolume: Float = 0.7f,
-    val sfxVolume: Float = 0.8f,
+    val musicVolume: Float = 0.1f,
+    val sfxVolume: Float = 0.2f,
     val selectedMusicTheme: MusicThemeDto = MusicThemeDto.CLASSIC,
 )
 
