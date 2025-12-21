@@ -48,9 +48,8 @@ import com.yet.tetris.uikit.component.button.FrostedGlassButton
 import com.yet.tetris.uikit.component.swipe.SwipeContent
 import com.yet.tetris.uikit.component.swipe.SwipeableActionsBox
 import com.yet.tetris.uikit.component.text.TitleText
+import com.yet.tetris.uikit.format.formatTimestamp
 import com.yet.tetris.uikit.theme.TetrisLiteAppTheme
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import tetrislite.composeapp.generated.resources.Res
@@ -59,8 +58,6 @@ import tetrislite.composeapp.generated.resources.lines_label
 import tetrislite.composeapp.generated.resources.no_games_yet
 import tetrislite.composeapp.generated.resources.score_label
 import tetrislite.composeapp.generated.resources.start_game_prompt
-import kotlin.time.ExperimentalTime
-import kotlin.time.Instant
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -286,13 +283,6 @@ private fun GameRecordCard(
             )
         }
     }
-}
-
-@OptIn(ExperimentalTime::class)
-private fun formatTimestamp(timestamp: Long): String {
-    val instant = Instant.fromEpochMilliseconds(timestamp)
-    val dateTime = instant.toLocalDateTime(TimeZone.currentSystemDefault())
-    return "${dateTime.date} ${dateTime.hour}:${dateTime.minute.toString().padStart(2, '0')}"
 }
 
 @Composable
