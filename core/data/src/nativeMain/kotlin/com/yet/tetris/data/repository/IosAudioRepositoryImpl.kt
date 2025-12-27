@@ -9,8 +9,10 @@ import com.yet.tetris.domain.repository.AudioRepository
 import kotlinx.cinterop.BetaInteropApi
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.ObjCObjectVar
+import kotlinx.cinterop.UnsafeNumber
 import kotlinx.cinterop.addressOf
 import kotlinx.cinterop.alloc
+import kotlinx.cinterop.convert
 import kotlinx.cinterop.get
 import kotlinx.cinterop.memScoped
 import kotlinx.cinterop.ptr
@@ -30,7 +32,7 @@ import platform.AVFAudio.AVAudioPlayerNode
 import platform.Foundation.NSError
 import platform.posix.memcpy
 
-@OptIn(ExperimentalForeignApi::class, BetaInteropApi::class)
+@OptIn(ExperimentalForeignApi::class, BetaInteropApi::class, UnsafeNumber::class)
 class IosAudioRepositoryImpl(
     private val cacheManager: AudioCacheManager,
 ) : AudioRepository {
@@ -198,7 +200,11 @@ class IosAudioRepositoryImpl(
         val channelData = buffer.floatChannelData?.get(0)
         if (channelData != null) {
             pcmData.usePinned { pinned ->
-                memcpy(channelData, pinned.addressOf(0), (pcmData.size * Float.SIZE_BYTES).toULong())
+                memcpy(
+                    channelData,
+                    pinned.addressOf(0),
+                    (pcmData.size * Float.SIZE_BYTES).convert()
+                )
             }
         }
     }
@@ -210,7 +216,7 @@ class IosAudioRepositoryImpl(
         format: AVAudioFormat,
         pcmData: FloatArray,
     ): AVAudioPCMBuffer {
-        val buffer = AVAudioPCMBuffer(pCMFormat = format, frameCapacity = pcmData.size.toUInt())!!
+        val buffer = AVAudioPCMBuffer(pCMFormat = format, frameCapacity = pcmData.size.toUInt())
         fillPcmBuffer(buffer, pcmData)
         return buffer
     }
