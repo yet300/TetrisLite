@@ -7,11 +7,37 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		D48B484A2F13965D002112B4 /* watchApp Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = D48B48402F13965C002112B4 /* watchApp Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		D4A673CA2E98F2FE00BFCA5E /* libsqlite3.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = D4A673C92E98F2E300BFCA5E /* libsqlite3.tbd */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		D48B48482F13965D002112B4 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = AD4D0B4F236066C1B874543D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D48B483F2F13965C002112B4;
+			remoteInfo = "watchApp Watch App";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		D48B484B2F13965D002112B4 /* Embed Watch Content */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
+			dstSubfolderSpec = 16;
+			files = (
+				D48B484A2F13965D002112B4 /* watchApp Watch App.app in Embed Watch Content */,
+			);
+			name = "Embed Watch Content";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		4F04A6F93E27EF56276DC1D7 /* TetrisLite.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TetrisLite.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		D48B48402F13965C002112B4 /* watchApp Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "watchApp Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		D4A673C92E98F2E300BFCA5E /* libsqlite3.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libsqlite3.tbd; path = usr/lib/libsqlite3.tbd; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
@@ -48,6 +74,11 @@
 			path = iosApp;
 			sourceTree = "<group>";
 		};
+		D48B48412F13965C002112B4 /* watchApp Watch App */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "watchApp Watch App";
+			sourceTree = "<group>";
+		};
 		FA7F4B5EC044113742F5AD78 /* Configuration */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = Configuration;
@@ -64,6 +95,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		D48B483D2F13965C002112B4 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -71,6 +109,7 @@
 			isa = PBXGroup;
 			children = (
 				4F04A6F93E27EF56276DC1D7 /* TetrisLite.app */,
+				D48B48402F13965C002112B4 /* watchApp Watch App.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -79,6 +118,7 @@
 			isa = PBXGroup;
 			children = (
 				FA7F4B5EC044113742F5AD78 /* Configuration */,
+				D48B48412F13965C002112B4 /* watchApp Watch App */,
 				0CB9379909047BF150640F6D /* Products */,
 				7291D45327638A8E2B819CE0 /* iosApp */,
 				D4A673C82E98F2E300BFCA5E /* Frameworks */,
@@ -104,10 +144,12 @@
 				168A1DB28BD6C9140CE4CFD0 /* Sources */,
 				1ACCAF34950AEA6D528EE54A /* Frameworks */,
 				60EB5AA7A81ED5581BD46896 /* Resources */,
+				D48B484B2F13965D002112B4 /* Embed Watch Content */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				D48B48492F13965D002112B4 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				7291D45327638A8E2B819CE0 /* iosApp */,
@@ -119,6 +161,29 @@
 			productReference = 4F04A6F93E27EF56276DC1D7 /* TetrisLite.app */;
 			productType = "com.apple.product-type.application";
 		};
+		D48B483F2F13965C002112B4 /* watchApp Watch App */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D48B484E2F13965D002112B4 /* Build configuration list for PBXNativeTarget "watchApp Watch App" */;
+			buildPhases = (
+				D48B483C2F13965C002112B4 /* Sources */,
+				D48B483D2F13965C002112B4 /* Frameworks */,
+				D48B483E2F13965C002112B4 /* Resources */,
+				D48B485D2F139CB6002112B4 /* Compile Kotlin Framework */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				D48B48412F13965C002112B4 /* watchApp Watch App */,
+			);
+			name = "watchApp Watch App";
+			packageProductDependencies = (
+			);
+			productName = "watchApp Watch App";
+			productReference = D48B48402F13965C002112B4 /* watchApp Watch App.app */;
+			productType = "com.apple.product-type.application";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -126,11 +191,14 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 1620;
+				LastSwiftUpdateCheck = 2600;
 				LastUpgradeCheck = 1620;
 				TargetAttributes = {
 					354742016CE9FB21B381A60A = {
 						CreatedOnToolsVersion = 16.2;
+					};
+					D48B483F2F13965C002112B4 = {
+						CreatedOnToolsVersion = 26.0.1;
 					};
 				};
 			};
@@ -149,12 +217,20 @@
 			projectRoot = "";
 			targets = (
 				354742016CE9FB21B381A60A /* iosApp */,
+				D48B483F2F13965C002112B4 /* watchApp Watch App */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		60EB5AA7A81ED5581BD46896 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D48B483E2F13965C002112B4 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -183,6 +259,24 @@
 			shellPath = /bin/sh;
 			shellScript = "if [ \"YES\" = \"$OVERRIDE_KOTLIN_BUILD_IDE_SUPPORTED\" ]; then\n  echo \"Skipping Gradle build task invocation due to OVERRIDE_KOTLIN_BUILD_IDE_SUPPORTED environment variable set to \\\"YES\\\"\"\n  exit 0\nfi\ncd \"$SRCROOT/..\"\n./gradlew :shared:embedAndSignAppleFrameworkForXcode\n";
 		};
+		D48B485D2F139CB6002112B4 /* Compile Kotlin Framework */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Compile Kotlin Framework";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "if [ \"YES\" = \"$OVERRIDE_KOTLIN_BUILD_IDE_SUPPORTED\" ]; then\n  echo \"Skipping Gradle build task invocation due to OVERRIDE_KOTLIN_BUILD_IDE_SUPPORTED environment variable set to \\\"YES\\\"\"\n  exit 0\nfi\ncd \"$SRCROOT/..\"\n./gradlew :shared:embedAndSignAppleFrameworkForXcode\n\n";
+		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -193,7 +287,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		D48B483C2F13965C002112B4 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		D48B48492F13965D002112B4 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D48B483F2F13965C002112B4 /* watchApp Watch App */;
+			targetProxy = D48B48482F13965D002112B4 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		4B8AE8C09EB437C182582E48 /* Release */ = {
@@ -389,6 +498,76 @@
 			};
 			name = Release;
 		};
+		D48B484C2F13965D002112B4 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 3KKQ642Q9H;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = watchApp;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.yet.tetris.TetrisLite;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.yet.tetris.TetrisLite.watchkitapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 26.0;
+			};
+			name = Debug;
+		};
+		D48B484D2F13965D002112B4 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 3KKQ642Q9H;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = watchApp;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.yet.tetris.TetrisLite;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.yet.tetris.TetrisLite.watchkitapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 26.0;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -406,6 +585,15 @@
 			buildConfigurations = (
 				61EB21E6D1FC089C75EC4A11 /* Debug */,
 				C5D638B9A97175D039CA9066 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D48B484E2F13965D002112B4 /* Build configuration list for PBXNativeTarget "watchApp Watch App" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D48B484C2F13965D002112B4 /* Debug */,
+				D48B484D2F13965D002112B4 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
