@@ -27,7 +27,7 @@ ktlint = "14.0.1"
 detekt = "1.23.8"
 
 composeHotReload = "1.0.0"
-composeMultiplatform = "1.9.3"
+composeMultiplatform = "1.10.0"
 
 
 kotlin = "2.3.0"
