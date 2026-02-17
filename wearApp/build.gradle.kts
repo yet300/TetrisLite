@@ -1,8 +1,5 @@
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-
 plugins {
     alias(libs.plugins.androidApplication)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.composeCompiler)
 }
 
@@ -49,23 +46,16 @@ dependencies {
     implementation(libs.decompose.compose)
 
     implementation(platform(libs.compose.bom))
-    implementation(libs.compose.runtime)
-    implementation(libs.compose.ui)
-    implementation(libs.compose.foundation)
-    implementation(libs.compose.material3)
-    implementation(libs.compose.materialIconsExtended)
-    implementation(libs.compose.ui.toolingPreview)
-    debugImplementation(libs.compose.ui.tooling)
+    implementation(libs.androidx.compose.runtime)
+    implementation(libs.androidx.compose.ui)
+    implementation(libs.androidx.compose.foundation)
+    implementation(libs.androidx.compose.material3)
+    implementation(libs.compose.material.icons.extended)
+    implementation(libs.androidx.compose.ui.toolingPreview)
+    debugImplementation(libs.androidx.compose.ui.tooling)
 
     implementation(libs.koin.android)
 
     implementation(libs.androidx.wear.compose.foundation)
     implementation(libs.androidx.wear.compose.navigation)
-}
-
-kotlin {
-    jvmToolchain(17)
-    compilerOptions {
-        jvmTarget.set(JvmTarget.JVM_17)
-    }
 }
