@@ -3,17 +3,23 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
-    alias(libs.plugins.androidApplication)
+    alias(libs.plugins.android.kotlin.multiplatform.library)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.composeHotReload)
-    alias(libs.plugins.baselineprofile)
 }
 
 kotlin {
-    androidTarget {
+    androidLibrary {
+        namespace = "com.yet.tetris.composeApp"
+        compileSdk = libs.versions.android.compileSdk.get().toInt()
+        minSdk = libs.versions.android.minSdk.get().toInt()
+
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_17)
+        }
+        androidResources {
+            enable = true
         }
     }
 
@@ -30,11 +36,6 @@ kotlin {
     jvm()
 
     sourceSets {
-        androidMain.dependencies {
-            implementation(compose.preview)
-            implementation(libs.androidx.activity.compose)
-            implementation(libs.koin.android)
-        }
         commonMain.dependencies {
             implementation(projects.core.uikit)
 
@@ -74,91 +75,6 @@ kotlin {
             implementation(libs.sqldelight.js)
         }
     }
-}
-
-android {
-    namespace = "com.yet.tetris"
-    compileSdk =
-        libs.versions.android.compileSdk
-            .get()
-            .toInt()
-
-    defaultConfig {
-        applicationId = "com.yet.tetris"
-        minSdk =
-            libs.versions.android.minSdk
-                .get()
-                .toInt()
-        targetSdk =
-            libs.versions.android.targetSdk
-                .get()
-                .toInt()
-        versionCode = 3
-        versionName = "1.2"
-    }
-
-    packaging {
-        resources {
-            excludes += "/META-INF/{AL2.0,LGPL2.1}"
-            excludes += "/META-INF/INDEX.LIST"
-            excludes += "/META-INF/DEPENDENCIES"
-            excludes += "/META-INF/LICENSE*"
-            excludes += "/META-INF/NOTICE*"
-            excludes += "META-INF/com/android/build/gradle/*"
-            excludes += "DebugProbesKt.bin"
-
-            excludes += "**/*.kotlin_metadata"
-            excludes += "**/*.version"
-            excludes += "**/kotlin/**"
-
-            // Exclude SQLite native libraries for non-Android platforms
-            excludes += "org/sqlite/native/Mac/**"
-            excludes += "org/sqlite/native/Windows/**"
-            excludes += "org/sqlite/native/Linux/**"
-            excludes += "org/sqlite/native/FreeBSD/**"
-        }
-
-        jniLibs {
-            useLegacyPackaging = true
-        }
-    }
-
-//    val keystorePropertiesFile = rootProject.file("keystore.properties")
-//    val keystoreProperties = Properties()
-//    keystoreProperties.load(FileInputStream(keystorePropertiesFile))
-//
-//    signingConfigs {
-//        create("release") {
-//            storeFile = File(keystoreProperties["RELEASE_STORE_FILE"] as String)
-//
-//            keyPassword =  keystoreProperties["RELEASE_STORE_PASSWORD"] as String
-//            keyAlias =  keystoreProperties["RELEASE_KEY_ALIAS"] as String
-//            storePassword =  keystoreProperties["RELEASE_KEY_PASSWORD"] as String
-//        }
-//    }
-    buildTypes {
-        release {
-            applicationIdSuffix = ".release"
-
-            isMinifyEnabled = true
-            isShrinkResources = true
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro",
-            )
-//            signingConfig = signingConfigs.getByName("release")
-        }
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
-}
-
-dependencies {
-    implementation(libs.androidx.profileinstaller)
-    "baselineProfile"(project(":baselineprofile"))
-    debugImplementation(compose.uiTooling)
 }
 
 compose.desktop {

@@ -77,7 +77,7 @@ TetrisLite/
 
 #### Android
 ```bash
-./gradlew :composeApp:assembleDebug
+./gradlew :androidApp:assembleDebug
 ./gradlew :composeApp:installDebug
 ```
 
