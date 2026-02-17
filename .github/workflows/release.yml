@@ -73,7 +73,7 @@ jobs:
           java-version: '17'
 
       - name: Setup Gradle
-        uses: gradle/gradle-build-action@v3
+        uses: gradle/actions/setup-gradle@v4
 
       - name: Decode Keystore
         id: decode_keystore
@@ -84,7 +84,7 @@ jobs:
 
       - name: Build Signed Release APK & AAB
         run: |
-          ./gradlew :composeApp:assembleRelease :composeApp:bundleRelease \
+          ./gradlew :androidApp:assembleRelease :androidApp:bundleRelease \
             -Pandroid.injected.signing.store.file=${{ steps.decode_keystore.outputs.filePath }} \
             -Pandroid.injected.signing.store.password=${{ secrets.KEYSTORE_PASSWORD }} \
             -Pandroid.injected.signing.key.alias=${{ secrets.KEY_ALIAS }} \
@@ -97,7 +97,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.create-release.outputs.upload_url }}
-          asset_path: composeApp/build/outputs/apk/release/composeApp-release.apk
+          asset_path: androidApp/build/outputs/apk/release/androidApp-release.apk
           asset_name: TetrisLite-${{ needs.create-release.outputs.version }}-android.apk
           asset_content_type: application/vnd.android.package-archive
 
@@ -107,7 +107,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.create-release.outputs.upload_url }}
-          asset_path: composeApp/build/outputs/bundle/release/composeApp-release.aab
+          asset_path: androidApp/build/outputs/bundle/release/androidApp-release.aab
           asset_name: TetrisLite-${{ needs.create-release.outputs.version }}-android.aab
           asset_content_type: application/octet-stream
 
@@ -146,7 +146,7 @@ jobs:
           java-version: '17'
 
       - name: Setup Gradle
-        uses: gradle/gradle-build-action@v3
+        uses: gradle/actions/setup-gradle@v4
 
       - name: Build Desktop Package
         run: ./gradlew :composeApp:package${{ matrix.target }} --no-daemon
@@ -222,7 +222,7 @@ jobs:
           java-version: '17'
 
       - name: Setup Gradle
-        uses: gradle/gradle-build-action@v3
+        uses: gradle/actions/setup-gradle@v4
 
       - name: Build React + Kotlin/JS Web App
         run: ./gradlew :webApp:jsBrowserDistribution --no-daemon
