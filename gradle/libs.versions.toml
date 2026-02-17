@@ -1,5 +1,5 @@
 [versions]
-agp = "8.11.2"
+agp = "9.0.0"
 android-compileSdk = "36"
 android-minSdk = "24"
 android-targetSdk = "36"
@@ -20,14 +20,14 @@ coreKtx = "1.7.0"
 
 uiautomator = "2.3.0"
 benchmarkMacroJunit4 = "1.4.1"
-baselineprofile = "1.4.1"
+baselineprofile = "1.5.0-alpha03"
 profileinstaller = "1.4.1"
 
 ktlint = "14.0.1"
 detekt = "1.23.8"
 
 composeHotReload = "1.0.0"
-composeMultiplatform = "1.10.0"
+composeMultiplatform = "1.10.1"
 
 
 kotlin = "2.3.0"
