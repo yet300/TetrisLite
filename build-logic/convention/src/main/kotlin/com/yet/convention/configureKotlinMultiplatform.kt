@@ -1,12 +1,10 @@
-import com.android.build.api.dsl.androidLibrary
+import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryExtension
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
 
 private const val JDK_VERSION = 17
-private val JVM_TARGET = JvmTarget.JVM_17
 val JAVA_VERSION = JavaVersion.VERSION_17
 
 
@@ -15,16 +13,13 @@ internal fun Project.configureKotlinMultiplatform(
 ) = extension.apply {
     jvmToolchain(JDK_VERSION)
 
-    androidLibrary {
+    extensions.configure<KotlinMultiplatformAndroidLibraryExtension>("android") {
         val moduleName = path.split(":").drop(2).joinToString(".")
         namespace = if (moduleName.isNotEmpty()) "com.yet.$moduleName" else "com.yet.tetris"
 
         compileSdk = libs.findVersion("android-compileSdk").get().requiredVersion.toInt()
         minSdk = libs.findVersion("android-minSdk").get().requiredVersion.toInt()
 
-        compilerOptions {
-            jvmTarget.set(JVM_TARGET)
-        }
     }
 
     jvm("desktop")

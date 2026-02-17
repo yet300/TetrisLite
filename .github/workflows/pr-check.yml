@@ -29,7 +29,7 @@ jobs:
           java-version: '17'
       
       - name: Setup Gradle
-        uses: gradle/gradle-build-action@v3
+        uses: gradle/actions/setup-gradle@v4
         with:
           cache-read-only: ${{ github.ref != 'refs/heads/main' }}
       
@@ -66,7 +66,7 @@ jobs:
           java-version: '17'
       
       - name: Setup Gradle
-        uses: gradle/gradle-build-action@v3
+        uses: gradle/actions/setup-gradle@v4
         with:
           cache-read-only: ${{ github.ref != 'refs/heads/main' }}
       
@@ -112,18 +112,18 @@ jobs:
           java-version: '17'
       
       - name: Setup Gradle
-        uses: gradle/gradle-build-action@v3
+        uses: gradle/actions/setup-gradle@v4
         with:
           cache-read-only: ${{ github.ref != 'refs/heads/main' }}
       
       - name: Build Android Debug APK
-        run: ./gradlew :composeApp:assembleDebug --no-daemon
+        run: ./gradlew :androidApp:assembleDebug --no-daemon
       
       - name: Upload Android APK
         uses: actions/upload-artifact@v4
         with:
           name: android-debug-apk
-          path: composeApp/build/outputs/apk/debug/*.apk
+          path: androidApp/build/outputs/apk/debug/*.apk
           retention-days: 7
 
   build-desktop:
@@ -147,7 +147,7 @@ jobs:
           java-version: '17'
       
       - name: Setup Gradle
-        uses: gradle/gradle-build-action@v3
+        uses: gradle/actions/setup-gradle@v4
         with:
           cache-read-only: ${{ github.ref != 'refs/heads/main' }}
       
@@ -178,7 +178,7 @@ jobs:
           java-version: '17'
       
       - name: Setup Gradle
-        uses: gradle/gradle-build-action@v3
+        uses: gradle/actions/setup-gradle@v4
         with:
           cache-read-only: ${{ github.ref != 'refs/heads/main' }}
       

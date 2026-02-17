@@ -40,6 +40,7 @@ plugins {
 }
 
 include(":composeApp")
+include(":androidApp")
 include(":webApp")
 include(":wearApp")
 

@@ -28,7 +28,7 @@ jobs:
           java-version: '17'
       
       - name: Setup Gradle
-        uses: gradle/gradle-build-action@v3
+        uses: gradle/actions/setup-gradle@v4
       
       - name: Run Detekt
         run: ./gradlew detekt --no-daemon
@@ -64,7 +64,7 @@ jobs:
           java-version: '17'
       
       - name: Setup Gradle
-        uses: gradle/gradle-build-action@v3
+        uses: gradle/actions/setup-gradle@v4
       
       - name: Run Ktlint
         run: ./gradlew ktlintCheck --no-daemon
@@ -94,7 +94,7 @@ jobs:
           java-version: '17'
       
       - name: Setup Gradle
-        uses: gradle/gradle-build-action@v3
+        uses: gradle/actions/setup-gradle@v4
       
       - name: Check dependencies
         run: ./gradlew dependencyUpdates --no-daemon
@@ -124,10 +124,10 @@ jobs:
           java-version: '17'
       
       - name: Setup Gradle
-        uses: gradle/gradle-build-action@v3
+        uses: gradle/actions/setup-gradle@v4
       
       - name: Validate Gradle wrapper
-        uses: gradle/wrapper-validation-action@v2
+        uses: gradle/actions/wrapper-validation@v4
         continue-on-error: true
       
       - name: Check build configuration

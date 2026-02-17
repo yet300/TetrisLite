@@ -8,7 +8,7 @@ kotlin {
         commonMain.dependencies {
             implementation(projects.core.domain)
 
-            implementation(compose.components.uiToolingPreview)
+            implementation(libs.compose.components.ui.tooling.preview)
         }
     }
 }
