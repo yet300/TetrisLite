@@ -203,7 +203,7 @@ class IosAudioRepositoryImpl(
                 memcpy(
                     channelData,
                     pinned.addressOf(0),
-                    (pcmData.size * Float.SIZE_BYTES).convert()
+                    (pcmData.size * Float.SIZE_BYTES).convert(),
                 )
             }
         }

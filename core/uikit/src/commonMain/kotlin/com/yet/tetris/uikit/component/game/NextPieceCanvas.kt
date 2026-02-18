@@ -21,9 +21,10 @@ fun NextPieceCanvas(
         val minX = nextPiece.blocks.minOfOrNull { it.x } ?: 0
         val minY = nextPiece.blocks.minOfOrNull { it.y } ?: 0
 
-        val blocksNormalized = nextPiece.blocks.map {
-            it.copy(x = it.x - minX, y = it.y - minY)
-        }
+        val blocksNormalized =
+            nextPiece.blocks.map {
+                it.copy(x = it.x - minX, y = it.y - minY)
+            }
 
         val widthInBlocks = (blocksNormalized.maxOfOrNull { it.x } ?: 0) + 1
         val heightInBlocks = (blocksNormalized.maxOfOrNull { it.y } ?: 0) + 1
@@ -36,10 +37,11 @@ fun NextPieceCanvas(
         blocksNormalized.forEach { block ->
             drawRect(
                 color = color,
-                topLeft = Offset(
-                    x = offsetX + block.x * cellSize,
-                    y = offsetY + block.y * cellSize,
-                ),
+                topLeft =
+                    Offset(
+                        x = offsetX + block.x * cellSize,
+                        y = offsetY + block.y * cellSize,
+                    ),
                 size = Size(cellSize - 1f, cellSize - 1f),
             )
         }
