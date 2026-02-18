@@ -41,6 +41,9 @@ plugins {
 
 include(":composeApp")
 include(":androidApp")
+include(":webApp")
+include(":wearApp")
+
 include(":shared")
 include(":core")
 include(":core:domain")
@@ -56,4 +59,3 @@ include(":feature:history")
 include(":feature:home")
 include(":core:uikit")
 include(":baselineprofile")
-include(":webApp")

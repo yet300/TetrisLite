@@ -1,3 +1,4 @@
+import io.gitlab.arturbosch.detekt.Detekt
 import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
 
 plugins {
@@ -42,5 +43,10 @@ allprojects {
         buildUponDefaultConfig = true
 
         allRules = false
+    }
+
+    tasks.withType<Detekt>().configureEach {
+        // Detekt 1.23.x does not support JVM target 23 yet.
+        jvmTarget = "17"
     }
 }

@@ -2,7 +2,6 @@ package com.yet.tetris.ui.screens.game
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -30,32 +29,26 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
-import com.yet.tetris.domain.model.game.GameState
-import com.yet.tetris.domain.model.game.Position
 import com.yet.tetris.domain.model.game.Tetromino
 import com.yet.tetris.domain.model.game.TetrominoType
 import com.yet.tetris.domain.model.settings.GameSettings
-import com.yet.tetris.domain.model.theme.PieceStyle
 import com.yet.tetris.feature.game.GameComponent
 import com.yet.tetris.feature.game.PreviewGameComponent
 import com.yet.tetris.ui.screens.game.dialog.ErrorDialog
 import com.yet.tetris.ui.screens.game.dialog.GameOverDialog
 import com.yet.tetris.ui.screens.game.dialog.PauseDialog
 import com.yet.tetris.ui.screens.settings.SettingsSheet
-import com.yet.tetris.ui.theme.getBackgroundComposeColor
 import com.yet.tetris.ui.theme.getTetrominoComposeColor
-import com.yet.tetris.ui.theme.getTetrominoDarkColor
-import com.yet.tetris.ui.theme.getTetrominoLightColor
 import com.yet.tetris.uikit.component.button.FrostedGlassButton
 import com.yet.tetris.uikit.component.modifier.glassPanel
 import com.yet.tetris.uikit.component.sheet.ModalBottomSheet
+import com.yet.tetris.uikit.game.TetrisBoard
 import com.yet.tetris.uikit.theme.TetrisLiteAppTheme
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -191,11 +184,13 @@ private fun GamePlayingContent(
         }
 
         // Game board - centered with border
-        GameBoardWithBorder(
+        TetrisBoard(
             modifier =
                 Modifier
                     .weight(1f)
                     .widthIn(max = 400.dp)
+                    .aspectRatio(gameState.board.width.toFloat() / gameState.board.height.toFloat())
+                    .fillMaxWidth()
                     .onSizeChanged { size ->
                         component.onBoardSizeChanged(size.height.toFloat())
                     }.pointerInput(Unit) {
@@ -318,238 +313,10 @@ private fun NextPiecePreview(
     }
 }
 
-@Composable
-private fun GameBoardWithBorder(
-    modifier: Modifier = Modifier,
-    gameState: GameState,
-    settings: GameSettings,
-    ghostPieceY: Int?,
-) {
-    Canvas(
-        modifier =
-            modifier
-                .aspectRatio(gameState.board.width.toFloat() / gameState.board.height.toFloat())
-                .fillMaxWidth()
-                .background(settings.themeConfig.getBackgroundComposeColor())
-                .border(
-                    width = 2.dp,
-                    color = MaterialTheme.colorScheme.outline,
-                ),
-    ) {
-        val cellSize = size.width / gameState.board.width
-
-        // Draw locked blocks
-        gameState.board.cells.forEach { (pos, type) ->
-            if (pos.y >= 0) {
-                drawStyledBlock(
-                    type = type,
-                    settings = settings,
-                    topLeft = Offset(pos.x * cellSize, pos.y * cellSize),
-                    cellSize = cellSize,
-                )
-            }
-        }
-
-        // Draw ghost piece
-        gameState.currentPiece?.let { piece ->
-            ghostPieceY?.let { landingY ->
-                if (landingY > gameState.currentPosition.y) {
-                    piece.blocks.forEach { blockPos ->
-                        val absolutePos =
-                            Position(
-                                gameState.currentPosition.x + blockPos.x,
-                                landingY + blockPos.y,
-                            )
-                        if (absolutePos.y >= 0 && absolutePos.y < gameState.board.height) {
-                            drawStyledBlock(
-                                type = piece.type,
-                                settings = settings,
-                                topLeft =
-                                    Offset(
-                                        absolutePos.x * cellSize,
-                                        absolutePos.y * cellSize,
-                                    ),
-                                cellSize = cellSize,
-                                alpha = 0.3f,
-                            )
-                        }
-                    }
-                }
-            }
-        }
-
-        // Draw current piece
-        gameState.currentPiece?.let { piece ->
-            piece.blocks.forEach { blockPos ->
-                val absolutePos =
-                    Position(
-                        gameState.currentPosition.x + blockPos.x,
-                        gameState.currentPosition.y + blockPos.y,
-                    )
-                if (absolutePos.y >= 0 && absolutePos.y < gameState.board.height) {
-                    drawStyledBlock(
-                        type = piece.type,
-                        settings = settings,
-                        topLeft =
-                            Offset(
-                                absolutePos.x * cellSize,
-                                absolutePos.y * cellSize,
-                            ),
-                        cellSize = cellSize,
-                    )
-                }
-            }
-        }
-
-        // Draw grid lines
-        for (x in 0..gameState.board.width) {
-            drawLine(
-                color = Color.Gray.copy(alpha = 0.2f),
-                start = Offset(x * cellSize, 0f),
-                end = Offset(x * cellSize, size.height),
-                strokeWidth = 1f,
-            )
-        }
-        for (y in 0..gameState.board.height) {
-            drawLine(
-                color = Color.Gray.copy(alpha = 0.2f),
-                start = Offset(0f, y * cellSize),
-                end = Offset(size.width, y * cellSize),
-                strokeWidth = 1f,
-            )
-        }
-    }
-}
-
 private fun getTetrominoColor(
     type: TetrominoType,
     settings: GameSettings,
 ): Color = settings.themeConfig.getTetrominoComposeColor(type)
-
-private fun DrawScope.drawStyledBlock(
-    type: TetrominoType,
-    settings: GameSettings,
-    topLeft: Offset,
-    cellSize: Float,
-    alpha: Float = 1f,
-) {
-    val baseColor = getTetrominoColor(type, settings).copy(alpha = alpha)
-    val lightColor = settings.themeConfig.getTetrominoLightColor(type).copy(alpha = alpha)
-    val darkColor = settings.themeConfig.getTetrominoDarkColor(type).copy(alpha = alpha)
-    val blockSize = Size(cellSize - 1, cellSize - 1)
-
-    when (settings.themeConfig.pieceStyle) {
-        PieceStyle.SOLID -> {
-            // Simple solid block
-            drawRect(
-                color = baseColor,
-                topLeft = topLeft,
-                size = blockSize,
-            )
-        }
-
-        PieceStyle.BORDERED -> {
-            // Solid block with border
-            drawRect(
-                color = baseColor,
-                topLeft = topLeft,
-                size = blockSize,
-            )
-            // Draw border
-            drawRect(
-                color = lightColor,
-                topLeft = topLeft,
-                size = Size(blockSize.width, 2f),
-            )
-            drawRect(
-                color = lightColor,
-                topLeft = topLeft,
-                size = Size(2f, blockSize.height),
-            )
-            drawRect(
-                color = darkColor,
-                topLeft = Offset(topLeft.x, topLeft.y + blockSize.height - 2f),
-                size = Size(blockSize.width, 2f),
-            )
-            drawRect(
-                color = darkColor,
-                topLeft = Offset(topLeft.x + blockSize.width - 2f, topLeft.y),
-                size = Size(2f, blockSize.height),
-            )
-        }
-
-        PieceStyle.GRADIENT -> {
-            // Gradient effect using multiple rectangles
-            drawRect(
-                color = baseColor,
-                topLeft = topLeft,
-                size = blockSize,
-            )
-            // Top-left highlight
-            drawRect(
-                color = lightColor.copy(alpha = alpha * 0.5f),
-                topLeft = topLeft,
-                size = Size(blockSize.width * 0.5f, blockSize.height * 0.5f),
-            )
-            // Bottom-right shadow
-            drawRect(
-                color = darkColor.copy(alpha = alpha * 0.3f),
-                topLeft =
-                    Offset(
-                        topLeft.x + blockSize.width * 0.5f,
-                        topLeft.y + blockSize.height * 0.5f,
-                    ),
-                size = Size(blockSize.width * 0.5f, blockSize.height * 0.5f),
-            )
-        }
-
-        PieceStyle.RETRO_PIXEL -> {
-            // Pixelated retro style with smaller blocks
-            val pixelSize = cellSize / 4f
-            for (py in 0..3) {
-                for (px in 0..3) {
-                    // Create checkerboard pattern
-                    val isLight = (px + py) % 2 == 0
-                    drawRect(
-                        color = if (isLight) baseColor else darkColor,
-                        topLeft =
-                            Offset(
-                                topLeft.x + px * pixelSize,
-                                topLeft.y + py * pixelSize,
-                            ),
-                        size = Size(pixelSize - 0.5f, pixelSize - 0.5f),
-                    )
-                }
-            }
-        }
-
-        PieceStyle.GLASS -> {
-            // Translucent glass effect
-            drawRect(
-                color = baseColor.copy(alpha = alpha * 0.6f),
-                topLeft = topLeft,
-                size = blockSize,
-            )
-            // Shine effect on top
-            drawRect(
-                color = Color.White.copy(alpha = alpha * 0.3f),
-                topLeft = topLeft,
-                size = Size(blockSize.width, blockSize.height * 0.3f),
-            )
-            // Border
-            drawRect(
-                color = lightColor.copy(alpha = alpha * 0.8f),
-                topLeft = topLeft,
-                size = Size(blockSize.width, 1f),
-            )
-            drawRect(
-                color = lightColor.copy(alpha = alpha * 0.8f),
-                topLeft = topLeft,
-                size = Size(1f, blockSize.height),
-            )
-        }
-    }
-}
 
 private fun formatTime(milliseconds: Long): String {
     val seconds = (milliseconds / 1000) % 60

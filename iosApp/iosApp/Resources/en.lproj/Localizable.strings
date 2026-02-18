@@ -7,13 +7,23 @@
 "retry" = "Retry";
 "ok" = "OK";
 "error_title" = "Error";
+"loading" = "Loading...";
+"done" = "Done";
 
 /* Home Screen */
 "app_title" = "Tetris Lite";
 "start_new_game" = "Start New Game";
 "resume_game" = "Resume Game";
 "difficulty" = "Difficulty";
+"audio" = "Audio";
+"music" = "Music";
+"sfx" = "SFX";
+"complication" = "Complication";
+"glance" = "Glance";
+"refresh" = "Refresh";
+"filter" = "Filter";
 "keyboard_hint" = "Use arrow keys or WASD to play";
+"new_game" = "New Game";
 
 /* Game Screen */
 "next" = "Next";
@@ -25,11 +35,16 @@
 "lines_cleared" = "Lines Cleared: %d";
 "back_to_home" = "Back to Home";
 "game_paused" = "Game Paused";
+"paused" = "Paused";
 
 /* Settings Screen */
-"settings_valume" = "Settings";
+"settings_volume" = "Settings";
+"game" = "Game";
 "music_volume" = "Music Volume";
 "sfx_volume" = "SFX Volume";
+"visual_theme" = "Visual Theme";
+"piece_style" = "Piece Style";
+"music_theme" = "Music Theme";
 
 /* History Screen */
 "history_value" = "History Game";
@@ -38,3 +53,5 @@
 "score_label" = "Score: %d";
 "lines_label" = "Lines: %d";
 "difficulty_label" = "Difficulty: %@";
+"loading_history" = "Loading History...";
+"history_title" = "History";
