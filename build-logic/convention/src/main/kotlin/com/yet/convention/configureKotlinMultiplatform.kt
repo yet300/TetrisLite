@@ -11,6 +11,7 @@ val JAVA_VERSION = JavaVersion.VERSION_17
 internal fun Project.configureKotlinMultiplatform(
     extension: KotlinMultiplatformExtension,
 ) = extension.apply {
+    val targetsConfig: MultiplatformTargetsConfig = multiplatformTargetsConfig()
     jvmToolchain(JDK_VERSION)
 
     extensions.configure<KotlinMultiplatformAndroidLibraryExtension>("android") {
@@ -29,16 +30,22 @@ internal fun Project.configureKotlinMultiplatform(
         binaries.executable()
     }
 
-    iosArm64()
-    iosX64()
-    iosSimulatorArm64()
+    if (targetsConfig.iosEnabled) {
+        iosArm64()
+        iosX64()
+        iosSimulatorArm64()
+    }
 
-    macosX64()
-    macosArm64()
+    if (targetsConfig.macosEnabled) {
+        macosX64()
+        macosArm64()
+    }
 
-    watchosArm64()
-    watchosSimulatorArm64()
-    watchosX64()
+    if (targetsConfig.watchosEnabled) {
+        watchosArm64()
+        watchosSimulatorArm64()
+        watchosX64()
+    }
 
     applyDefaultHierarchyTemplate()
 
