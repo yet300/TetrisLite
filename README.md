@@ -4,9 +4,9 @@
 
 A modern, cross-platform Tetris game built with Kotlin Multiplatform and Compose Multiplatform, demonstrating true code sharing across Android, iOS, Desktop, and Web platforms.
 
-![Kotlin](https://img.shields.io/badge/Kotlin-2.2.20-blue.svg)
-![Compose](https://img.shields.io/badge/Compose-1.9.0-green.svg)
-![Platforms](https://img.shields.io/badge/Platforms-Android%20%7C%20iOS%20%7C%20Desktop%20%7C%20Web-orange.svg)
+![Kotlin](https://img.shields.io/badge/Kotlin-2.3.0-blue.svg)
+![Compose](https://img.shields.io/badge/Compose-1.10.1-green.svg)
+![Platforms](https://img.shields.io/badge/Platforms-Android%20%7C%20iOS%20%7C%20Desktop%20%7C%20Web%20%7C%20Watch%20%7C%20Wear-orange.svg)
 
 ## Features
 
