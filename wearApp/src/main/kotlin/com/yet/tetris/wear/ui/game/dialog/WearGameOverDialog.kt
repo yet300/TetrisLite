@@ -39,7 +39,7 @@ fun WearGameOverDialog(
             style = MaterialTheme.typography.caption1,
             color = MaterialTheme.colors.secondary
         )
-        Spacer(modifier = Modifier.Companion.size(8.dp))
+        Spacer(modifier = Modifier.size(8.dp))
         Chip(
             label = { Text(stringResource(R.string.play_again)) },
             icon = { Icon(Icons.Default.Refresh, null) },

@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -45,6 +46,20 @@ import com.yet.tetris.uikit.component.game.NextPieceCanvas
 import com.yet.tetris.uikit.game.TetrisBoard
 import com.yet.tetris.wear.R
 
+private const val BOARD_WEIGHT = 0.65f
+private const val SIDEBAR_WEIGHT = 0.35f
+private const val BOARD_ASPECT_RATIO = 0.5f
+private val BOARD_CORNER_RADIUS = 4.dp
+private const val BOARD_BACKGROUND_ALPHA = 0.1f
+private val CONTENT_PADDING = 24.dp
+private val CONTENT_SPACING = 4.dp
+private val NEXT_PIECE_SPACING = 2.dp
+private val NEXT_PIECE_SIZE = 20.dp
+private val PAUSE_BUTTON_SIZE = 24.dp
+private val PAUSE_ICON_SIZE = 14.dp
+private val STATS_LABEL_FONT_SIZE = 8.sp
+private val STATS_VALUE_FONT_SIZE = 11.sp
+
 @Composable
 fun WearGamePlayingContent(
     model: GameComponent.Model,
@@ -53,7 +68,6 @@ fun WearGamePlayingContent(
 ) {
     val state = model.gameState ?: return
 
-    // Logic for Rotary Input and Focus
     val focusRequester = remember { FocusRequester() }
     LaunchedEffect(Unit) {
         focusRequester.requestFocus()
@@ -63,109 +77,89 @@ fun WearGamePlayingContent(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.Black)
-            // Rotary Input (Crown rotation)
-            .onRotaryScrollEvent {
-                if (it.verticalScrollPixels > 0) component.onMoveRight()
-                else if (it.verticalScrollPixels < 0) component.onMoveLeft()
-                true
-            }
-            .focusRequester(focusRequester)
-            .focusable()
-            // Touch Gestures
-            .pointerInput(Unit) {
-                detectTapGestures(
-                    onTap = { component.onRotate() },
-                    onLongPress = { component.onHardDrop() }
-                )
-            }
-            .pointerInput(Unit) {
-                detectDragGestures(
-                    onDragStart = { component.onDragStarted() },
-                    onDragEnd = component::onDragEnded,
-                    onDrag = { change, dragAmount ->
-                        change.consume()
-                        component.onDragged(dragAmount.x, dragAmount.y)
-                    },
-                )
-            },
+            .wearGameInputHandlers(component, focusRequester),
     ) {
-        // Layout: Left (Board) | Right (Info)
         Row(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(24.dp),
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .padding(CONTENT_PADDING),
+            horizontalArrangement = Arrangement.spacedBy(CONTENT_SPACING),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            // LEFT: Game Board
-            Box(
-                modifier = Modifier
-                    .weight(0.65f)
-                    .fillMaxHeight(),
-                contentAlignment = Alignment.Center
-            ) {
-                // Board Container with Aspect Ratio
-                Box(
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .aspectRatio(10f / 20f)
-                        .clip(RoundedCornerShape(4.dp))
-                        .background(MaterialTheme.colors.surface.copy(alpha = 0.1f))
-                ) {
-                    TetrisBoard(
-                        modifier = Modifier.fillMaxSize(),
-                        gameState = state,
-                        settings = model.settings,
-                        ghostPieceY = model.ghostPieceY,
-                        borderWidth = 0.dp,
-                    )
-                }
-            }
-
-            // RIGHT: Sidebar (Next, Stats, Pause)
-            Column(
-                modifier = Modifier
-                    .weight(0.35f)
-                    .fillMaxHeight(),
-                verticalArrangement = Arrangement.SpaceBetween,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                // Next Piece
-                WearNextPiece(
-                    nextPiece = state.nextPiece,
-                    settings = model.settings
-                )
-
-                // Stats
-                WearGameStats(
-                    score = state.score,
-                    lines = state.linesCleared
-                )
-
-                // Pause Button
-                CompactPauseButton(onClick = onPauseClick)
-            }
+            WearBoardSection(state = state, model = model)
+            WearSidebarSection(state = state, model = model, onPauseClick = onPauseClick)
         }
     }
 }
 
 @Composable
-private fun WearNextPiece(
-    nextPiece: Tetromino,
-    settings: GameSettings
+private fun RowScope.WearBoardSection(
+    state: com.yet.tetris.domain.model.game.GameState,
+    model: GameComponent.Model,
 ) {
+    Box(
+        modifier = Modifier
+            .weight(BOARD_WEIGHT)
+            .fillMaxHeight(),
+        contentAlignment = Alignment.Center,
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxHeight()
+                .aspectRatio(BOARD_ASPECT_RATIO)
+                .clip(RoundedCornerShape(BOARD_CORNER_RADIUS))
+                .background(MaterialTheme.colors.surface.copy(alpha = BOARD_BACKGROUND_ALPHA)),
+        ) {
+            TetrisBoard(
+                modifier = Modifier.fillMaxSize(),
+                gameState = state,
+                settings = model.settings,
+                ghostPieceY = model.ghostPieceY,
+                borderWidth = 0.dp,
+            )
+        }
+    }
+}
+
+@Composable
+private fun RowScope.WearSidebarSection(
+    state: com.yet.tetris.domain.model.game.GameState,
+    model: GameComponent.Model,
+    onPauseClick: () -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .weight(SIDEBAR_WEIGHT)
+            .fillMaxHeight(),
+        verticalArrangement = Arrangement.SpaceBetween,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        WearNextPiece(
+            nextPiece = state.nextPiece,
+            settings = model.settings,
+        )
+        WearGameStats(
+            score = state.score,
+            lines = state.linesCleared,
+        )
+        CompactPauseButton(onClick = onPauseClick)
+    }
+}
+
+@Composable
+private fun WearNextPiece(nextPiece: Tetromino, settings: GameSettings) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
             text = stringResource(R.string.next_label),
             style = MaterialTheme.typography.caption2,
             color = MaterialTheme.colors.primary,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
         )
-        Spacer(modifier = Modifier.height(2.dp))
+        Spacer(modifier = Modifier.height(NEXT_PIECE_SPACING))
         NextPieceCanvas(
             nextPiece = nextPiece,
             settings = settings,
-            modifier = Modifier.size(20.dp)
+            modifier = Modifier.size(NEXT_PIECE_SIZE),
         )
     }
 }
@@ -186,14 +180,14 @@ private fun StatItem(label: String, value: String) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
             text = label,
-            fontSize = 8.sp,
+            fontSize = STATS_LABEL_FONT_SIZE,
             color = MaterialTheme.colors.secondary,
         )
         Text(
             text = value,
-            fontSize = 11.sp,
+            fontSize = STATS_VALUE_FONT_SIZE,
             color = Color.White,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
         )
     }
 }
@@ -202,13 +196,41 @@ private fun StatItem(label: String, value: String) {
 private fun CompactPauseButton(onClick: () -> Unit) {
     Button(
         onClick = onClick,
-        modifier = Modifier.size(24.dp),
-        colors = ButtonDefaults.secondaryButtonColors()
+        modifier = Modifier.size(PAUSE_BUTTON_SIZE),
+        colors = ButtonDefaults.secondaryButtonColors(),
     ) {
         Icon(
-            imageVector = Icons.Default.Settings, // Или Pause/Menu
+            imageVector = Icons.Default.Settings,
             contentDescription = stringResource(R.string.settings),
-            modifier = Modifier.size(14.dp)
+            modifier = Modifier.size(PAUSE_ICON_SIZE),
         )
     }
 }
+
+private fun Modifier.wearGameInputHandlers(
+    component: GameComponent,
+    focusRequester: FocusRequester,
+): Modifier = this
+    .onRotaryScrollEvent {
+        if (it.verticalScrollPixels > 0) component.onMoveRight()
+        else if (it.verticalScrollPixels < 0) component.onMoveLeft()
+        true
+    }
+    .focusRequester(focusRequester)
+    .focusable()
+    .pointerInput(Unit) {
+        detectTapGestures(
+            onTap = { component.onRotate() },
+            onLongPress = { component.onHardDrop() },
+        )
+    }
+    .pointerInput(Unit) {
+        detectDragGestures(
+            onDragStart = { component.onDragStarted() },
+            onDragEnd = component::onDragEnded,
+            onDrag = { change, dragAmount ->
+                change.consume()
+                component.onDragged(dragAmount.x, dragAmount.y)
+            },
+        )
+    }

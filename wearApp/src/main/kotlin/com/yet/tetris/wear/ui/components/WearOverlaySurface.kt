@@ -28,6 +28,9 @@ import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.Text
 import com.yet.tetris.wear.R
 
+private const val OVERLAY_ALPHA = 0.65f
+private const val OVERLAY_WIDTH_FRACTION = 0.92f
+
 @Composable
 fun WearOverlaySurface(
     title: String,
@@ -40,13 +43,13 @@ fun WearOverlaySurface(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Black.copy(alpha = 0.65f)),
+            .background(Color.Black.copy(alpha = OVERLAY_ALPHA)),
         contentAlignment = Alignment.Center,
     ) {
         Surface(
-            modifier = Modifier.fillMaxWidth(0.92f),
+            modifier = Modifier.fillMaxWidth(OVERLAY_WIDTH_FRACTION),
             shape = RoundedCornerShape(16.dp),
-            color = Color(0xFF111315),
+            color = MaterialTheme.colors.surface,
         ) {
             Column(
                 modifier = Modifier

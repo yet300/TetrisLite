@@ -16,6 +16,8 @@ import com.yet.tetris.feature.history.HistoryComponent
 import com.yet.tetris.wear.R
 import com.yet.tetris.wear.ui.components.WearOverlaySurface
 
+private const val MAX_HISTORY_ITEMS = 10
+
 @Composable
 fun WearHistoryOverlay(
     component: HistoryComponent,
@@ -48,14 +50,13 @@ fun WearHistoryOverlay(
                         textAlign = TextAlign.Center,
                     )
                 } else {
-                    state.games.take(10).forEach { record ->
+                    state.games.take(MAX_HISTORY_ITEMS).forEach { record ->
                         HistoryRecordCard(
                             record = record,
                             onDelete = component::onDeleteGame,
                         )
                     }
                 }
-
             }
         }
     }

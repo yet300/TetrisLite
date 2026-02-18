@@ -15,6 +15,9 @@ import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.Text
 import kotlin.math.roundToInt
 
+private const val SLIDER_SCALE = 10f
+private const val SLIDER_STEPS = 9
+
 @Composable
 fun VolumeSlider(
     label: String,
@@ -27,17 +30,17 @@ fun VolumeSlider(
         Text(
             text = "$label ${(value * 100).roundToInt()}%",
             style = MaterialTheme.typography.caption2,
-            color = MaterialTheme.colors.secondary
+            color = MaterialTheme.colors.secondary,
         )
         InlineSlider(
-            value = value * 10, // Scale 0.0-1.0 to 0-10
-            onValueChange = { onValueChange(it / 10f) },
-            valueRange = 0f..10f,
-            steps = 9, // 10 intervals = 9 steps in between
+            value = value * SLIDER_SCALE,
+            onValueChange = { onValueChange(it / SLIDER_SCALE) },
+            valueRange = 0f..SLIDER_SCALE,
+            steps = SLIDER_STEPS,
             segmented = true,
-            decreaseIcon = { Icon(Icons.Default.Remove, "Decrease Volume") }, // Standard Icon
-            increaseIcon = { Icon(Icons.Default.Add, "Increase Volume") },   // Standard Icon
-            modifier = Modifier.fillMaxWidth()
+            decreaseIcon = { Icon(Icons.Default.Remove, "Decrease Volume") },
+            increaseIcon = { Icon(Icons.Default.Add, "Increase Volume") },
+            modifier = Modifier.fillMaxWidth(),
         )
     }
 }

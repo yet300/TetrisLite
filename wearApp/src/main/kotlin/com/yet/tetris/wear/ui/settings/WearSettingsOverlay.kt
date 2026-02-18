@@ -28,6 +28,7 @@ fun WearSettingsOverlay(
     onDismissRequest: () -> Unit,
 ) {
     val model by component.model.subscribeAsState()
+    val callbacks = rememberCallbacks(component)
 
     WearOverlaySurface(
         title = stringResource(R.string.settings),
@@ -38,55 +39,37 @@ fun WearSettingsOverlay(
     ) {
         WearSettingsContent(
             model = model,
-            onVisualThemeChanged = component::onVisualThemeChanged,
-            onPieceStyleChanged = component::onPieceStyleChanged,
-            onMusicToggled = component::onMusicToggled,
-            onMusicVolumeChanged = component::onMusicVolumeChanged,
-            onMusicThemeChanged = component::onMusicThemeChanged,
-            onSoundEffectsToggled = component::onSoundEffectsToggled,
-            onSFXVolumeChanged = component::onSFXVolumeChanged
+            callbacks = callbacks,
         )
     }
 }
 
-
 @Composable
 private fun WearSettingsContent(
     model: SettingsComponent.Model,
-    onVisualThemeChanged: (VisualTheme) -> Unit,
-    onPieceStyleChanged: (PieceStyle) -> Unit,
-    onMusicToggled: (Boolean) -> Unit,
-    onMusicVolumeChanged: (Float) -> Unit,
-    onMusicThemeChanged: (MusicTheme) -> Unit,
-    onSoundEffectsToggled: (Boolean) -> Unit,
-    onSFXVolumeChanged: (Float) -> Unit
+    callbacks: SettingsCallbacks,
 ) {
     VisualSettingsSection(
         currentTheme = model.settings.themeConfig.visualTheme,
         currentPieceStyle = model.settings.themeConfig.pieceStyle,
-        onThemeChanged = onVisualThemeChanged,
-        onStyleChanged = onPieceStyleChanged
+        onThemeChanged = callbacks.onVisualThemeChanged,
+        onStyleChanged = callbacks.onPieceStyleChanged,
     )
 
     Spacer(modifier = Modifier.height(8.dp))
 
     AudioSettingsSection(
         audioSettings = model.settings.audioSettings,
-        onMusicToggled = onMusicToggled,
-        onMusicVolumeChanged = onMusicVolumeChanged,
-        onMusicThemeChanged = onMusicThemeChanged,
-        onSoundEffectsToggled = onSoundEffectsToggled,
-        onSFXVolumeChanged = onSFXVolumeChanged
+        callbacks = callbacks,
     )
 }
-
 
 @Composable
 private fun VisualSettingsSection(
     currentTheme: VisualTheme,
     currentPieceStyle: PieceStyle,
     onThemeChanged: (VisualTheme) -> Unit,
-    onStyleChanged: (PieceStyle) -> Unit
+    onStyleChanged: (PieceStyle) -> Unit,
 ) {
     EnumChipGroup(
         label = stringResource(R.string.theme),
@@ -108,96 +91,98 @@ private fun VisualSettingsSection(
 @Composable
 private fun AudioSettingsSection(
     audioSettings: AudioSettings,
-    onMusicToggled: (Boolean) -> Unit,
-    onMusicVolumeChanged: (Float) -> Unit,
-    onMusicThemeChanged: (MusicTheme) -> Unit,
-    onSoundEffectsToggled: (Boolean) -> Unit,
-    onSFXVolumeChanged: (Float) -> Unit
+    callbacks: SettingsCallbacks,
 ) {
-    // Music Control
     MusicControlGroup(
-        isEnabled = audioSettings.musicEnabled,
-        volume = audioSettings.musicVolume,
-        selectedTheme = audioSettings.selectedMusicTheme,
-        onToggle = onMusicToggled,
-        onVolumeChange = onMusicVolumeChanged,
-        onThemeChange = onMusicThemeChanged
+        audioSettings = audioSettings,
+        callbacks = callbacks,
     )
 
     Spacer(modifier = Modifier.height(4.dp))
 
-    // SFX Control
     SfxControlGroup(
-        isEnabled = audioSettings.soundEffectsEnabled,
-        volume = audioSettings.sfxVolume,
-        onToggle = onSoundEffectsToggled,
-        onVolumeChange = onSFXVolumeChanged
+        audioSettings = audioSettings,
+        callbacks = callbacks,
     )
 }
 
 @Composable
 private fun MusicControlGroup(
-    isEnabled: Boolean,
-    volume: Float,
-    selectedTheme: MusicTheme,
-    onToggle: (Boolean) -> Unit,
-    onVolumeChange: (Float) -> Unit,
-    onThemeChange: (MusicTheme) -> Unit
+    audioSettings: AudioSettings,
+    callbacks: SettingsCallbacks,
 ) {
     ToggleChip(
         modifier = Modifier.fillMaxWidth(),
-        checked = isEnabled,
-        onCheckedChange = onToggle,
+        checked = audioSettings.musicEnabled,
+        onCheckedChange = callbacks.onMusicToggled,
         label = { Text(stringResource(R.string.music)) },
         toggleControl = {
             Switch(
-                checked = isEnabled,
+                checked = audioSettings.musicEnabled,
                 onCheckedChange = null,
             )
         },
     )
 
-    if (isEnabled) {
+    if (audioSettings.musicEnabled) {
         VolumeSlider(
             label = stringResource(R.string.music_volume),
-            value = volume,
-            onValueChange = onVolumeChange,
+            value = audioSettings.musicVolume,
+            onValueChange = callbacks.onMusicVolumeChanged,
         )
 
         EnumChipGroup(
             label = stringResource(R.string.music_style),
             values = MusicTheme.entries,
-            selected = selectedTheme,
-            onSelected = onThemeChange,
+            selected = audioSettings.selectedMusicTheme,
+            onSelected = callbacks.onMusicThemeChanged,
         )
     }
 }
 
 @Composable
 private fun SfxControlGroup(
-    isEnabled: Boolean,
-    volume: Float,
-    onToggle: (Boolean) -> Unit,
-    onVolumeChange: (Float) -> Unit
+    audioSettings: AudioSettings,
+    callbacks: SettingsCallbacks,
 ) {
     ToggleChip(
         modifier = Modifier.fillMaxWidth(),
-        checked = isEnabled,
-        onCheckedChange = onToggle,
+        checked = audioSettings.soundEffectsEnabled,
+        onCheckedChange = callbacks.onSoundEffectsToggled,
         label = { Text(stringResource(R.string.sound_effects)) },
         toggleControl = {
             Switch(
-                checked = isEnabled,
+                checked = audioSettings.soundEffectsEnabled,
                 onCheckedChange = null,
             )
         },
     )
 
-    if (isEnabled) {
+    if (audioSettings.soundEffectsEnabled) {
         VolumeSlider(
             label = stringResource(R.string.sfx_volume),
-            value = volume,
-            onValueChange = onVolumeChange,
+            value = audioSettings.sfxVolume,
+            onValueChange = callbacks.onSFXVolumeChanged,
         )
     }
 }
+
+private data class SettingsCallbacks(
+    val onVisualThemeChanged: (VisualTheme) -> Unit,
+    val onPieceStyleChanged: (PieceStyle) -> Unit,
+    val onMusicToggled: (Boolean) -> Unit,
+    val onMusicVolumeChanged: (Float) -> Unit,
+    val onMusicThemeChanged: (MusicTheme) -> Unit,
+    val onSoundEffectsToggled: (Boolean) -> Unit,
+    val onSFXVolumeChanged: (Float) -> Unit,
+)
+
+private fun rememberCallbacks(component: SettingsComponent): SettingsCallbacks = SettingsCallbacks(
+    onVisualThemeChanged = component::onVisualThemeChanged,
+    onPieceStyleChanged = component::onPieceStyleChanged,
+    onMusicToggled = component::onMusicToggled,
+    onMusicVolumeChanged = component::onMusicVolumeChanged,
+    onMusicThemeChanged = component::onMusicThemeChanged,
+    onSoundEffectsToggled = component::onSoundEffectsToggled,
+    onSFXVolumeChanged = component::onSFXVolumeChanged,
+)

@@ -54,6 +54,7 @@ import com.yet.tetris.wear.ui.settings.WearSettingsOverlay
 fun WearHomeScreen(component: HomeComponent) {
     val model by component.model.subscribeAsState()
     val listState = rememberScalingLazyListState()
+    val actions = rememberHomeActions(component)
 
     Scaffold(
         timeText = { TimeText() },
@@ -75,11 +76,7 @@ fun WearHomeScreen(component: HomeComponent) {
                     listState = listState,
                     hasSavedGame = state.hasSavedGame,
                     difficulty = state.settings.difficulty,
-                    onOpenHistory = component::onOpenHistory,
-                    onOpenSettings = component::onOpenSettings,
-                    onStartNewGame = component::onStartNewGame,
-                    onResumeGame = component::onResumeGame,
-                    onDifficultyChanged = component::onDifficultyChanged
+                    actions = actions,
                 )
             }
         }
@@ -93,11 +90,7 @@ private fun WearHomeContent(
     listState: ScalingLazyListState,
     hasSavedGame: Boolean,
     difficulty: Difficulty,
-    onOpenHistory: () -> Unit,
-    onOpenSettings: () -> Unit,
-    onStartNewGame: () -> Unit,
-    onResumeGame: () -> Unit,
-    onDifficultyChanged: (Difficulty) -> Unit
+    actions: HomeActions,
 ) {
     ScalingLazyColumn(
         state = listState,
@@ -119,10 +112,7 @@ private fun WearHomeContent(
         item {
             HomeActionsRow(
                 hasSavedGame = hasSavedGame,
-                onOpenHistory = onOpenHistory,
-                onOpenSettings = onOpenSettings,
-                onStartNewGame = onStartNewGame,
-                onResumeGame = onResumeGame
+                actions = actions,
             )
         }
 
@@ -137,11 +127,11 @@ private fun WearHomeContent(
                             text = stringResource(R.string.new_game),
                             style = MaterialTheme.typography.caption2,
                             textAlign = TextAlign.Center,
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier.fillMaxWidth(),
                         )
                     },
-                    onClick = onStartNewGame,
-                    colors = ChipDefaults.secondaryChipColors()
+                    onClick = actions.onStartNewGame,
+                    colors = ChipDefaults.secondaryChipColors(),
                 )
             }
         }
@@ -153,7 +143,7 @@ private fun WearHomeContent(
         item {
             DifficultySelector(
                 difficulty = difficulty,
-                onDifficultyChanged = onDifficultyChanged
+                onDifficultyChanged = actions.onDifficultyChanged,
             )
         }
     }
@@ -162,10 +152,7 @@ private fun WearHomeContent(
 @Composable
 private fun HomeActionsRow(
     hasSavedGame: Boolean,
-    onOpenHistory: () -> Unit,
-    onOpenSettings: () -> Unit,
-    onStartNewGame: () -> Unit,
-    onResumeGame: () -> Unit
+    actions: HomeActions,
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -174,7 +161,7 @@ private fun HomeActionsRow(
     ) {
         // History
         Button(
-            onClick = onOpenHistory,
+            onClick = actions.onOpenHistory,
             colors = ButtonDefaults.secondaryButtonColors(),
             modifier = Modifier.size(ButtonDefaults.SmallButtonSize)
         ) {
@@ -184,7 +171,7 @@ private fun HomeActionsRow(
             )
         }
 
-        val mainAction = if (hasSavedGame) onResumeGame else onStartNewGame
+        val mainAction = if (hasSavedGame) actions.onResumeGame else actions.onStartNewGame
         val mainIcon = if (hasSavedGame) Icons.Default.PlayArrow else Icons.Default.PlayArrow
         val mainDesc = if (hasSavedGame) R.string.resume_game else R.string.new_game
 
@@ -205,7 +192,7 @@ private fun HomeActionsRow(
 
         // Settings
         Button(
-            onClick = onOpenSettings,
+            onClick = actions.onOpenSettings,
             colors = ButtonDefaults.secondaryButtonColors(),
             modifier = Modifier.size(ButtonDefaults.SmallButtonSize)
         ) {
@@ -235,7 +222,7 @@ private fun DifficultySelector(
         Text(
             text = difficultyName,
             style = MaterialTheme.typography.caption1,
-            color = MaterialTheme.colors.secondary
+            color = MaterialTheme.colors.secondary,
         )
         InlineSlider(
             value = sliderValue,
@@ -250,7 +237,7 @@ private fun DifficultySelector(
             segmented = true,
             decreaseIcon = { Icon(Icons.Default.Remove, "Decrease difficulty") },
             increaseIcon = { Icon(Icons.Default.Add, "Increase difficulty") },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
         )
     }
 }
@@ -275,3 +262,19 @@ fun WearHomeSheet(component: HomeComponent) {
         }
     }
 }
+
+private data class HomeActions(
+    val onOpenHistory: () -> Unit,
+    val onOpenSettings: () -> Unit,
+    val onStartNewGame: () -> Unit,
+    val onResumeGame: () -> Unit,
+    val onDifficultyChanged: (Difficulty) -> Unit,
+)
+
+private fun rememberHomeActions(component: HomeComponent): HomeActions = HomeActions(
+    onOpenHistory = component::onOpenHistory,
+    onOpenSettings = component::onOpenSettings,
+    onStartNewGame = component::onStartNewGame,
+    onResumeGame = component::onResumeGame,
+    onDifficultyChanged = component::onDifficultyChanged,
+)
