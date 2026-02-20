@@ -65,8 +65,8 @@ jobs:
             runner: macos-13
           - api-level: 33
             target: google_apis
-            arch: arm64-v8a
-            runner: macos-latest
+            arch: x86_64
+            runner: ubuntu-latest
     
     steps:
       - name: Checkout
@@ -80,6 +80,13 @@ jobs:
       
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
+
+      - name: Enable KVM
+        if: matrix.runner == 'ubuntu-latest'
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
       
       - name: AVD cache
         uses: actions/cache@v4
@@ -98,7 +105,7 @@ jobs:
           target: ${{ matrix.target }}
           arch: ${{ matrix.arch }}
           force-avd-creation: false
-          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          emulator-options: -no-metrics -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: false
           script: echo "Generated AVD snapshot for caching."
       
@@ -109,7 +116,7 @@ jobs:
           target: ${{ matrix.target }}
           arch: ${{ matrix.arch }}
           force-avd-creation: false
-          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          emulator-options: -no-metrics -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
           script: ./gradlew :androidApp:connectedDebugAndroidTest --no-daemon
       
