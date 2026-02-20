@@ -23,6 +23,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -61,6 +62,14 @@ import tetrislite.composeapp.generated.resources.time
 @Composable
 fun GameScreen(component: GameComponent) {
     val model by component.model.subscribeAsState()
+    val juiceOverlayState = rememberJuiceOverlayState()
+
+    LaunchedEffect(model.visualEffectFeed.sequence) {
+        model.visualEffectFeed.latest?.let {
+            juiceOverlayState.dispatchBurst(it)
+            component.onVisualEffectConsumed(model.visualEffectFeed.sequence)
+        }
+    }
 
     Box(
         modifier =
@@ -75,16 +84,31 @@ fun GameScreen(component: GameComponent) {
                 )
             }
             model.gameState != null -> {
-                GamePlayingContent(
-                    model = model,
-                    component = component,
-                    onPauseClick = {
-                        component.onPause()
-                    },
-                )
+                Box(
+                    modifier =
+                        Modifier.graphicsLayer {
+                            translationX = juiceOverlayState.shakeOffsetX
+                            translationY = juiceOverlayState.shakeOffsetY
+                            scaleX = juiceOverlayState.contentScale
+                            scaleY = juiceOverlayState.contentScale
+                        },
+                ) {
+                    GamePlayingContent(
+                        model = model,
+                        component = component,
+                        onPauseClick = {
+                            component.onPause()
+                        },
+                    )
 
-                GameDialog(component, model)
-                GameSheet(component)
+                    GameDialog(component, model)
+                    GameSheet(component)
+                }
+
+                JuiceOverlay(
+                    state = juiceOverlayState,
+                    modifier = Modifier.fillMaxSize(),
+                )
             }
         }
     }
