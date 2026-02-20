@@ -91,6 +91,7 @@ val HistorySheet =
 
                     DateFilter.entries.forEach { filter ->
                         MenuItem {
+                            key = filter.name
                             onClick = {
                                 props.component.onFilterChanged(filter)
                                 setFilterMenuAnchor(null)
@@ -154,6 +155,7 @@ val GamesList =
             List {
                 props.games.forEach { game ->
                     GameRecordItem {
+                        key = game.id
                         this.game = game
                         this.onDelete = { props.onDeleteGame(game.id) }
                     }

@@ -1,6 +1,6 @@
 import com.yet.tetris.domain.model.game.TetrominoType;
 
-CREATE TABLE BoardCells (
+CREATE TABLE IF NOT EXISTS BoardCells (
     positionX INTEGER NOT NULL,
     positionY INTEGER NOT NULL,
     pieceType TEXT AS TetrominoType NOT NULL,

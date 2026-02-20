@@ -1,6 +1,6 @@
 import com.yet.tetris.domain.model.game.Difficulty;
 
-CREATE TABLE GameHistory (
+CREATE TABLE IF NOT EXISTS GameHistory (
     id TEXT NOT NULL PRIMARY KEY,
     score INTEGER NOT NULL,
     linesCleared INTEGER NOT NULL,

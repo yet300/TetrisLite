@@ -43,6 +43,7 @@ val ThemeSelector =
 
                     VisualTheme.entries.forEach { theme ->
                         Chip {
+                            key = theme.name
                             label =
                                 div.create {
                                     +theme.name.lowercase().replaceFirstChar { it.uppercase() }
@@ -78,6 +79,7 @@ val ThemeSelector =
 
                     PieceStyle.entries.forEach { style ->
                         Chip {
+                            key = style.name
                             label =
                                 div.create {
                                     +style.name.lowercase().replaceFirstChar { it.uppercase() }

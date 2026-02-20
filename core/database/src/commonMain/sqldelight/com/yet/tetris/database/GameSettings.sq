@@ -1,7 +1,7 @@
 import com.yet.tetris.domain.model.game.Difficulty;
 
 
-CREATE TABLE GameSettings (
+CREATE TABLE IF NOT EXISTS GameSettings (
     id INTEGER NOT NULL PRIMARY KEY DEFAULT 1,
     difficulty TEXT AS Difficulty NOT NULL
     -- Добавьте сюда другие настройки по аналогии

@@ -105,6 +105,7 @@ val AudioSettingsSection =
 
                             MusicTheme.entries.forEach { theme ->
                                 Button {
+                                    key = theme.name
                                     variant =
                                         if (props.audioSettings.selectedMusicTheme == theme) {
                                             ButtonVariant.contained
