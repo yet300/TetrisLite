@@ -14,5 +14,7 @@ internal val stateToModel: (GameStore.State) -> GameComponent.Model =
             finalScore = state.gameState?.score ?: 0,
             finalLinesCleared = state.gameState?.linesCleared ?: 0,
             ghostPieceY = state.ghostPieceY,
+            comboStreak = state.comboStreak,
+            visualEffectFeed = state.visualEffectFeed,
         )
     }

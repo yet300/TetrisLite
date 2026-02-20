@@ -6,6 +6,9 @@ import com.arkivanov.mvikotlin.core.store.Store
 import com.arkivanov.mvikotlin.core.store.StoreFactory
 import com.arkivanov.mvikotlin.extensions.coroutines.CoroutineExecutor
 import com.yet.tetris.domain.model.audio.SoundEffect
+import com.yet.tetris.domain.model.effects.VisualEffectBurst
+import com.yet.tetris.domain.model.effects.VisualEffectEvent
+import com.yet.tetris.domain.model.effects.VisualEffectFeed
 import com.yet.tetris.domain.model.game.GameState
 import com.yet.tetris.domain.model.history.GameRecord
 import com.yet.tetris.domain.model.settings.GameSettings
@@ -23,6 +26,7 @@ import com.yet.tetris.domain.usecase.HandleSwipeInputUseCase
 import com.yet.tetris.domain.usecase.HardDropUseCase
 import com.yet.tetris.domain.usecase.LockPieceUseCase
 import com.yet.tetris.domain.usecase.MovePieceUseCase
+import com.yet.tetris.domain.usecase.PlanVisualFeedbackUseCase
 import com.yet.tetris.domain.usecase.RotatePieceUseCase
 import com.yet.tetris.domain.usecase.StartGameUseCase
 import kotlinx.coroutines.flow.drop
@@ -48,6 +52,7 @@ internal class GameStoreFactory : KoinComponent {
     private val handleSwipeInputUseCase: HandleSwipeInputUseCase by inject()
     private val calculateGhostPositionUseCase: CalculateGhostPositionUseCase by inject()
     private val gestureHandlingUseCase: GestureHandlingUseCase by inject()
+    private val planVisualFeedbackUseCase: PlanVisualFeedbackUseCase by inject()
 
     fun create(): GameStore =
         object :
@@ -69,6 +74,8 @@ internal class GameStoreFactory : KoinComponent {
                         gameState = msg.gameState,
                         settings = msg.settings,
                         elapsedTime = 0L,
+                        comboStreak = 0,
+                        visualEffectFeed = VisualEffectFeed(),
                     )
                 is GameStore.Msg.GameStateUpdated ->
                     copy(
@@ -79,6 +86,19 @@ internal class GameStoreFactory : KoinComponent {
                 is GameStore.Msg.ElapsedTimeUpdated -> copy(elapsedTime = msg.elapsedTime)
                 is GameStore.Msg.LoadingChanged -> copy(isLoading = msg.isLoading)
                 is GameStore.Msg.SettingsUpdated -> copy(settings = msg.settings)
+                is GameStore.Msg.ComboStreakUpdated -> copy(comboStreak = msg.comboStreak)
+                is GameStore.Msg.VisualEffectFeedUpdated ->
+                    copy(
+                        comboStreak = msg.comboStreak,
+                        visualEffectFeed = msg.visualEffectFeed,
+                    )
+
+                is GameStore.Msg.VisualEffectConsumed ->
+                    if (visualEffectFeed.sequence == msg.sequence) {
+                        copy(visualEffectFeed = visualEffectFeed.copy(latest = null))
+                    } else {
+                        this
+                    }
             }
     }
 
@@ -151,6 +171,10 @@ internal class GameStoreFactory : KoinComponent {
                 }
                 is GameStore.Intent.DragEnded -> {
                     handleGestureEvent(GestureEvent.DragEnded, getState)
+                }
+
+                is GameStore.Intent.VisualEffectConsumed -> {
+                    dispatch(GameStore.Msg.VisualEffectConsumed(intent.sequence))
                 }
             }
         }
@@ -333,10 +357,37 @@ internal class GameStoreFactory : KoinComponent {
                 val oldLines = gameState.linesCleared
                 val newState = lockPieceUseCase(gameState)
 
-                val linesCleared = newState.linesCleared - oldLines
+                val linesCleared = (newState.linesCleared - oldLines).toInt()
+                val visualFeedbackResult =
+                    planVisualFeedbackUseCase(
+                        currentComboStreak = state.comboStreak,
+                        linesClearedThisLock = linesCleared,
+                    )
+
+                visualFeedbackResult.burst?.let { burstSpec ->
+                    val nextSequence = state.visualEffectFeed.sequence + 1
+                    val mappedBurst =
+                        mapToVisualEffectBurst(
+                            id = nextSequence,
+                            burstSpec = burstSpec,
+                        )
+                    dispatch(
+                        GameStore.Msg.VisualEffectFeedUpdated(
+                            comboStreak = visualFeedbackResult.nextComboStreak,
+                            visualEffectFeed =
+                                VisualEffectFeed(
+                                    sequence = nextSequence,
+                                    latest = mappedBurst,
+                                ),
+                        ),
+                    )
+                } ?: dispatch(
+                    GameStore.Msg.ComboStreakUpdated(visualFeedbackResult.nextComboStreak),
+                )
+
                 when (linesCleared) {
-                    0L -> audioRepository.playSoundEffect(SoundEffect.PIECE_DROP)
-                    4L -> audioRepository.playSoundEffect(SoundEffect.TETRIS)
+                    0 -> audioRepository.playSoundEffect(SoundEffect.PIECE_DROP)
+                    4 -> audioRepository.playSoundEffect(SoundEffect.TETRIS)
                     else -> audioRepository.playSoundEffect(SoundEffect.LINE_CLEAR)
                 }
 
@@ -362,11 +413,54 @@ internal class GameStoreFactory : KoinComponent {
                 )
             }
 
+        private fun mapToVisualEffectBurst(
+            id: Long,
+            burstSpec: PlanVisualFeedbackUseCase.BurstSpec,
+        ): VisualEffectBurst =
+            VisualEffectBurst(
+                id = id,
+                linesCleared = burstSpec.linesCleared,
+                comboStreak = burstSpec.comboStreak,
+                intensity = burstSpec.intensity,
+                power = burstSpec.power,
+                events =
+                    burstSpec.events.map { event ->
+                        when (event) {
+                            is VisualEffectEvent.ScreenShake ->
+                                VisualEffectEvent.ScreenShake(
+                                    intensity = event.intensity,
+                                    power = event.power,
+                                )
+
+                            is VisualEffectEvent.FloatingText ->
+                                VisualEffectEvent.FloatingText(
+                                    intensity = event.intensity,
+                                    power = event.power,
+                                    textKey = event.textKey,
+                                )
+
+                            is VisualEffectEvent.ScreenFlash ->
+                                VisualEffectEvent.ScreenFlash(
+                                    intensity = event.intensity,
+                                    power = event.power,
+                                )
+
+                            is VisualEffectEvent.Explosion ->
+                                VisualEffectEvent.Explosion(
+                                    intensity = event.intensity,
+                                    power = event.power,
+                                    particleCount = event.particleCount,
+                                )
+                        }
+                    },
+            )
+
         private fun handleGameOver(
             gameState: GameState,
             settings: GameSettings,
         ) {
             gameLoopUseCase.stop()
+            dispatch(GameStore.Msg.ComboStreakUpdated(0))
 
             audioRepository.stopMusic()
             audioRepository.playSoundEffect(SoundEffect.GAME_OVER)

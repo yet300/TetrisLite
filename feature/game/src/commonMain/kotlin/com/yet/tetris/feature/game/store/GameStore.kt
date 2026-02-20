@@ -1,6 +1,7 @@
 package com.yet.tetris.feature.game.store
 
 import com.arkivanov.mvikotlin.core.store.Store
+import com.yet.tetris.domain.model.effects.VisualEffectFeed
 import com.yet.tetris.domain.model.game.GameState
 import com.yet.tetris.domain.model.settings.GameSettings
 
@@ -12,6 +13,8 @@ internal interface GameStore : Store<GameStore.Intent, GameStore.State, GameStor
         val elapsedTime: Long = 0, // milliseconds
         val isLoading: Boolean = false,
         val ghostPieceY: Int? = null,
+        val comboStreak: Int = 0,
+        val visualEffectFeed: VisualEffectFeed = VisualEffectFeed(),
     )
 
     sealed class Intent {
@@ -52,6 +55,10 @@ internal interface GameStore : Store<GameStore.Intent, GameStore.State, GameStor
         ) : Intent()
 
         data object DragEnded : Intent()
+
+        data class VisualEffectConsumed(
+            val sequence: Long,
+        ) : Intent()
     }
 
     sealed interface Action {
@@ -85,6 +92,19 @@ internal interface GameStore : Store<GameStore.Intent, GameStore.State, GameStor
 
         data class SettingsUpdated(
             val settings: GameSettings,
+        ) : Msg()
+
+        data class ComboStreakUpdated(
+            val comboStreak: Int,
+        ) : Msg()
+
+        data class VisualEffectFeedUpdated(
+            val comboStreak: Int,
+            val visualEffectFeed: VisualEffectFeed,
+        ) : Msg()
+
+        data class VisualEffectConsumed(
+            val sequence: Long,
         ) : Msg()
     }
 

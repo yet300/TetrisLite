@@ -96,4 +96,8 @@ class PreviewGameComponent :
     override fun onDragEnded() {
         TODO("Not yet implemented")
     }
+
+    override fun onVisualEffectConsumed(sequence: Long) {
+        TODO("Not yet implemented")
+    }
 }
