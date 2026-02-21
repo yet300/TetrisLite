@@ -17,6 +17,12 @@ struct WatchGameView: View {
     @State private var crownValue: Double = 0.0
     @State private var isDragging: Bool = false
     @State private var lastTranslation: CGSize = .zero
+    @State private var shakePhase: CGFloat = 0
+    @State private var shakeAmount: CGFloat = 0
+    @State private var contentScale: CGFloat = 1
+    @State private var flashOpacity: Double = 0
+    @State private var floatingTexts: [WatchJuiceFloatingTextEntry] = []
+    @State private var particleBursts: [WatchJuiceParticleBurstEntry] = []
 
     init(_ component: GameComponent) {
         self.component = component
@@ -162,7 +168,20 @@ struct WatchGameView: View {
                     .frame(width: 28)
                 }
                 .padding(.horizontal, 1)
+                .modifier(
+                    WatchJuiceModifier(
+                        shakePhase: shakePhase,
+                        shakeAmount: shakeAmount,
+                        scale: contentScale
+                    )
+                )
             }
+
+            WatchJuiceOverlayView(
+                flashOpacity: flashOpacity,
+                floatingTexts: floatingTexts,
+                particleBursts: particleBursts
+            )
 
             if let child = dialog.child?.instance {
                 WatchDialogView(component: component, model: model, child: child)
@@ -199,6 +218,149 @@ struct WatchGameView: View {
                 }
             }
         }
+        .onChange(of: model.visualEffectFeed.sequence) { _, newSequence in
+            handleVisualEffectFeedChange(newSequence)
+        }
+    }
+
+    private func handleVisualEffectFeedChange(_ sequence: Int64) {
+        guard let burst = model.visualEffectFeed.latest else {
+            return
+        }
+        triggerJuice(burst)
+        component.onVisualEffectConsumed(sequence: sequence)
+    }
+
+    private func triggerJuice(_ burst: VisualEffectBurst) {
+        for event in burst.events {
+            switch event {
+            case let shake as VisualEffectEventScreenShake:
+                triggerShake(
+                    intensity: shake.intensity,
+                    power: CGFloat(shake.power)
+                )
+            case let flash as VisualEffectEventScreenFlash:
+                triggerFlash(power: CGFloat(flash.power))
+            case let text as VisualEffectEventFloatingText:
+                addFloatingText(
+                    resolveFloatingTextMessage(
+                        text.textKey,
+                        comboStreak: Int(burst.comboStreak)
+                    ),
+                    intensity: text.intensity,
+                    power: CGFloat(text.power)
+                )
+            case let explosion as VisualEffectEventExplosion:
+                addParticleBurst(
+                    burstId: burst.id,
+                    intensity: explosion.intensity,
+                    power: CGFloat(explosion.power),
+                    particleCount: Int(explosion.particleCount)
+                )
+            default:
+                continue
+            }
+        }
+    }
+
+    private func triggerShake(
+        intensity: IntensityLevel,
+        power: CGFloat
+    ) {
+        let isHigh = intensity == .high
+        let amplitude = isHigh ? 6 + (9 * power) : 1.8 + (3.2 * power)
+
+        shakeAmount = amplitude
+        withAnimation(.linear(duration: isHigh ? 0.24 : 0.17)) {
+            shakePhase += 1
+        }
+
+        withAnimation(.spring(response: 0.24, dampingFraction: 0.66)) {
+            contentScale = isHigh ? 1.03 : 1.015
+        }
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.18) {
+            withAnimation(.spring(response: 0.20, dampingFraction: 0.84)) {
+                contentScale = 1
+            }
+        }
+    }
+
+    private func triggerFlash(power: CGFloat) {
+        flashOpacity = Double(0.34 + (0.34 * power))
+        withAnimation(.easeOut(duration: 0.16)) {
+            flashOpacity = 0
+        }
+    }
+
+    private func addFloatingText(
+        _ text: String,
+        intensity: IntensityLevel,
+        power: CGFloat
+    ) {
+        let isHigh = intensity == .high
+        let entry = WatchJuiceFloatingTextEntry(
+            id: UUID().uuidString,
+            text: text,
+            isHigh: isHigh,
+            power: power,
+            createdAt: Date(),
+            duration: isHigh ? 0.95 : 0.65
+        )
+        floatingTexts.append(entry)
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + entry.duration + 0.08) {
+            floatingTexts.removeAll {
+                $0.id == entry.id
+            }
+        }
+    }
+
+    private func addParticleBurst(
+        burstId: Int64,
+        intensity: IntensityLevel,
+        power: CGFloat,
+        particleCount: Int
+    ) {
+        let entry = WatchJuiceParticleBurstEntry(
+            id: "\(burstId)-\(UUID().uuidString)",
+            isHigh: intensity == .high,
+            power: power,
+            particleCount: max(16, min(64, particleCount)),
+            seed: Int(burstId),
+            createdAt: Date(),
+            duration: 0.5
+        )
+        particleBursts.append(entry)
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + entry.duration + 0.08) {
+            particleBursts.removeAll {
+                $0.id == entry.id
+            }
+        }
+    }
+
+    private func resolveFloatingTextMessage(_ textKey: VisualTextKey, comboStreak: Int) -> String {
+        let base: String
+        switch textKey {
+        case .single:
+            base = "SINGLE!"
+        case .double_:
+            base = "DOUBLE!"
+        case .triple:
+            base = "TRIPLE!"
+        case .tetris:
+            base = "TETRIS!!!"
+        case .clear:
+            base = "CLEAR!"
+        default:
+            base = "CLEAR!"
+        }
+
+        if comboStreak >= 2 {
+            return "\(base) COMBO x\(comboStreak)!"
+        }
+        return base
     }
 
     private func formatElapsedTime(_ milliseconds: Int64) -> String {
@@ -644,6 +806,193 @@ extension View {
         case .forest: return Color(red: 0.1, green: 0.8, blue: 0.1)
         default: return WatchPalette.accent
         }
+    }
+}
+
+private struct WatchJuiceShakeEffect: GeometryEffect {
+    var amount: CGFloat
+    var phase: CGFloat
+
+    var animatableData: CGFloat {
+        get {
+            phase
+        }
+        set {
+            phase = newValue
+        }
+    }
+
+    func effectValue(size: CGSize) -> ProjectionTransform {
+        let x = amount * sin(phase * .pi * 12)
+        let y = amount * 0.32 * cos(phase * .pi * 9)
+        return ProjectionTransform(CGAffineTransform(translationX: x, y: y))
+    }
+}
+
+private struct WatchJuiceModifier: ViewModifier {
+    let shakePhase: CGFloat
+    let shakeAmount: CGFloat
+    let scale: CGFloat
+
+    func body(content: Content) -> some View {
+        content
+            .modifier(WatchJuiceShakeEffect(amount: shakeAmount, phase: shakePhase))
+            .scaleEffect(scale)
+    }
+}
+
+private struct WatchJuiceFloatingTextEntry: Identifiable {
+    let id: String
+    let text: String
+    let isHigh: Bool
+    let power: CGFloat
+    let createdAt: Date
+    let duration: TimeInterval
+
+    func progress(at date: Date) -> CGFloat {
+        guard duration > 0 else {
+            return 1
+        }
+        let elapsed = date.timeIntervalSince(createdAt)
+        let raw = elapsed / duration
+        return CGFloat(min(max(raw, 0), 1))
+    }
+}
+
+private struct WatchJuiceParticleBurstEntry: Identifiable {
+    let id: String
+    let isHigh: Bool
+    let power: CGFloat
+    let particleCount: Int
+    let seed: Int
+    let createdAt: Date
+    let duration: TimeInterval
+
+    func progress(at date: Date) -> CGFloat {
+        guard duration > 0 else {
+            return 1
+        }
+        let elapsed = date.timeIntervalSince(createdAt)
+        let raw = elapsed / duration
+        return CGFloat(min(max(raw, 0), 1))
+    }
+}
+
+private struct WatchJuiceOverlayView: View {
+    let flashOpacity: Double
+    let floatingTexts: [WatchJuiceFloatingTextEntry]
+    let particleBursts: [WatchJuiceParticleBurstEntry]
+
+    var body: some View {
+        ZStack {
+            if flashOpacity > 0.001 {
+                Color.white
+                    .opacity(flashOpacity)
+                    .ignoresSafeArea()
+            }
+
+            TimelineView(.animation(minimumInterval: 1.0 / 45.0)) { timeline in
+                ZStack {
+                    ForEach(floatingTexts) { entry in
+                        let progress = entry.progress(at: timeline.date)
+                        if progress < 1 {
+                            let pulse =
+                                entry.isHigh
+                                    ? 1 + (sin(progress * .pi * 8) * 0.08 * (1 - progress))
+                                    : 1 + ((1 - progress) * 0.02)
+                            let fontSize = entry.isHigh ? 18 + (4 * entry.power) : 11 + (2 * entry.power)
+                            let rise = entry.isHigh ? 40.0 : 24.0
+
+                            Text(entry.text)
+                                .font(
+                                    .system(
+                                        size: fontSize,
+                                        weight: .black,
+                                        design: .rounded
+                                    )
+                                )
+                                .foregroundStyle(entry.isHigh ? Color.yellow : Color.white)
+                                .kerning(entry.isHigh ? 0.8 : 0.4)
+                                .watchGameStroke(
+                                    color: entry.isHigh ? Color(red: 0.2, green: 0.08, blue: 0) : Color.black.opacity(0.95),
+                                    width: entry.isHigh ? 1.8 : 1.2
+                                )
+                                .scaleEffect(pulse)
+                                .offset(y: -(rise * progress))
+                                .opacity(1 - progress)
+                        }
+                    }
+
+                    Canvas { context, size in
+                        let center = CGPoint(x: size.width / 2, y: size.height / 2)
+
+                        for burst in particleBursts {
+                            let progress = burst.progress(at: timeline.date)
+                            guard progress < 1 else {
+                                continue
+                            }
+
+                            let maxRadius: CGFloat = 22 + ((48 - 22) * burst.power)
+                            let alpha = (1 - progress) * (0.6 + (0.3 * burst.power))
+
+                            for index in 0..<burst.particleCount {
+                                let angle = watchSeededFloat(seed: burst.seed, index: index, salt: 11) * (.pi * 2)
+                                let speedScale = 0.45 + (watchSeededFloat(seed: burst.seed, index: index, salt: 23) * 0.75)
+                                let radius = maxRadius * progress * speedScale
+                                let x = center.x + cos(angle) * radius
+                                let y = center.y + sin(angle) * radius - (progress * 8)
+                                let particleRadius = 0.8 + (watchSeededFloat(seed: burst.seed, index: index, salt: 37) * 1.6)
+
+                                let rect = CGRect(
+                                    x: x - particleRadius,
+                                    y: y - particleRadius,
+                                    width: particleRadius * 2,
+                                    height: particleRadius * 2
+                                )
+
+                                context.fill(
+                                    Path(ellipseIn: rect),
+                                    with: .color((burst.isHigh ? Color(red: 1, green: 0.95, blue: 0.7) : .white).opacity(alpha))
+                                )
+                            }
+                        }
+                    }
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            }
+        }
+        .allowsHitTesting(false)
+    }
+}
+
+private func watchSeededFloat(
+    seed: Int,
+    index: Int,
+    salt: Int
+) -> CGFloat {
+    var value = Int64(seed) * 1_103_515_245 + Int64(index) * 12_345 + Int64(salt) * 1_013_904_223
+    value ^= (value << 13)
+    value ^= (value >> 17)
+    value ^= (value << 5)
+
+    let positive = value & 0x7fff_ffff
+    return CGFloat(Double(positive) / Double(0x7fff_ffff))
+}
+
+private extension View {
+    func watchGameStroke(
+        color: Color,
+        width: CGFloat
+    ) -> some View {
+        self
+            .shadow(color: color, radius: 0, x: width, y: 0)
+            .shadow(color: color, radius: 0, x: -width, y: 0)
+            .shadow(color: color, radius: 0, x: 0, y: width)
+            .shadow(color: color, radius: 0, x: 0, y: -width)
+            .shadow(color: color, radius: 0, x: width * 0.7, y: width * 0.7)
+            .shadow(color: color, radius: 0, x: -width * 0.7, y: width * 0.7)
+            .shadow(color: color, radius: 0, x: width * 0.7, y: -width * 0.7)
+            .shadow(color: color, radius: 0, x: -width * 0.7, y: -width * 0.7)
     }
 }
 
