@@ -1,3 +1,5 @@
+@file:Suppress("MagicNumber", "TooManyFunctions")
+
 package com.yet.tetris.wear.ui.game
 
 import androidx.compose.animation.core.Animatable
@@ -6,6 +8,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -170,112 +173,142 @@ fun WearJuiceOverlay(
     }
 
     Box(modifier = modifier.fillMaxSize()) {
-        if (state.flashAlpha.value > 0.001f) {
-            Box(
-                modifier =
-                    Modifier
-                        .fillMaxSize()
-                        .background(Color.White.copy(alpha = state.flashAlpha.value)),
+        WearFlashLayer(alpha = state.flashAlpha.value)
+        WearFloatingTextLayer(
+            activeTexts = state.activeTexts,
+            frameTimeMillis = frameTimeMillis,
+        )
+        WearParticleLayer(
+            activeBursts = state.activeBursts,
+            frameTimeMillis = frameTimeMillis,
+        )
+    }
+}
+
+@Composable
+private fun WearFlashLayer(alpha: Float) {
+    if (alpha <= 0.001f) return
+
+    Box(
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(Color.White.copy(alpha = alpha)),
+    )
+}
+
+@Composable
+private fun BoxScope.WearFloatingTextLayer(
+    activeTexts: List<WearJuiceFloatingText>,
+    frameTimeMillis: Long,
+) {
+    activeTexts.forEach { entry ->
+        val progress = entry.progressAt(frameTimeMillis)
+        if (progress < 1f) {
+            WearFloatingTextEntry(entry = entry, progress = progress)
+        }
+    }
+}
+
+@Composable
+private fun BoxScope.WearFloatingTextEntry(
+    entry: WearJuiceFloatingText,
+    progress: Float,
+) {
+    val isHigh = entry.intensity == IntensityLevel.HIGH
+    val rise = if (isHigh) 48f else 30f
+    val pulse =
+        if (isHigh) {
+            1f + (sin(progress * PI.toFloat() * 9f) * 0.09f * (1f - progress))
+        } else {
+            1f + (0.03f * (1f - progress))
+        }
+    val fontSize = if (isHigh) lerp(18f, 24f, entry.power) else lerp(11f, 15f, entry.power)
+    val outlineColor = if (isHigh) Color(0xFF2D1200) else Color.Black
+    val outlineThickness = if (isHigh) 2f else 1.3f
+    val baseAlpha = 1f - progress
+
+    outlineOffsets.forEach { offset ->
+        Text(
+            modifier =
+                Modifier
+                    .align(Alignment.Center)
+                    .graphicsLayer {
+                        translationX = offset.x * outlineThickness
+                        translationY = (-rise * progress) + (offset.y * outlineThickness)
+                        scaleX = pulse
+                        scaleY = pulse
+                        alpha = baseAlpha
+                    },
+            text = entry.message,
+            color = outlineColor,
+            fontWeight = FontWeight.Black,
+            fontSize = fontSize.sp,
+        )
+    }
+
+    Text(
+        modifier =
+            Modifier
+                .align(Alignment.Center)
+                .graphicsLayer {
+                    translationY = -rise * progress
+                    scaleX = pulse
+                    scaleY = pulse
+                    alpha = baseAlpha
+                },
+        text = entry.message,
+        color = if (isHigh) Color(0xFFFFD54F) else Color.White,
+        fontWeight = FontWeight.Black,
+        fontSize = fontSize.sp,
+    )
+}
+
+@Composable
+private fun WearParticleLayer(
+    activeBursts: List<WearJuiceParticleBurst>,
+    frameTimeMillis: Long,
+) {
+    Canvas(modifier = Modifier.fillMaxSize()) {
+        val centerX = size.width / 2f
+        val centerY = size.height / 2f
+
+        activeBursts.forEach { burst ->
+            drawWearParticleBurst(
+                burst = burst,
+                frameTimeMillis = frameTimeMillis,
+                centerX = centerX,
+                centerY = centerY,
             )
         }
+    }
+}
 
-        state.activeTexts.forEach { text ->
-            val progress =
-                ((frameTimeMillis - text.createdAtMillis).toFloat() / text.durationMillis)
-                    .coerceIn(0f, 1f)
-            if (progress < 1f) {
-                val isHigh = text.intensity == IntensityLevel.HIGH
-                val rise = if (isHigh) 48f else 30f
-                val pulse =
-                    if (isHigh) {
-                        1f + (sin(progress * PI.toFloat() * 9f) * 0.09f * (1f - progress))
-                    } else {
-                        1f + (0.03f * (1f - progress))
-                    }
-                val fontSize =
-                    if (isHigh) lerp(18f, 24f, text.power) else lerp(11f, 15f, text.power)
-                val outlineColor = if (isHigh) Color(0xFF2D1200) else Color.Black
-                val outlineThickness = if (isHigh) 2f else 1.3f
-                val baseAlpha = 1f - progress
+private fun androidx.compose.ui.graphics.drawscope.DrawScope.drawWearParticleBurst(
+    burst: WearJuiceParticleBurst,
+    frameTimeMillis: Long,
+    centerX: Float,
+    centerY: Float,
+) {
+    val progress = burst.progressAt(frameTimeMillis)
+    if (progress >= 1f) return
 
-                listOf(
-                    Offset(-1f, 0f),
-                    Offset(1f, 0f),
-                    Offset(0f, -1f),
-                    Offset(0f, 1f),
-                    Offset(-0.8f, -0.8f),
-                    Offset(0.8f, -0.8f),
-                    Offset(-0.8f, 0.8f),
-                    Offset(0.8f, 0.8f),
-                ).forEach { offset ->
-                    Text(
-                        modifier =
-                            Modifier
-                                .align(Alignment.Center)
-                                .graphicsLayer {
-                                    translationX = offset.x * outlineThickness
-                                    translationY =
-                                        (-rise * progress) + (offset.y * outlineThickness)
-                                    scaleX = pulse
-                                    scaleY = pulse
-                                    alpha = baseAlpha
-                                },
-                        text = text.message,
-                        color = outlineColor,
-                        fontWeight = FontWeight.Black,
-                        fontSize = fontSize.sp,
-                    )
-                }
+    val maxRadius = lerp(32f, 74f, burst.power)
+    val alpha = (1f - progress) * lerp(0.55f, 0.95f, burst.power)
 
-                Text(
-                    modifier =
-                        Modifier
-                            .align(Alignment.Center)
-                            .graphicsLayer {
-                                translationY = -rise * progress
-                                scaleX = pulse
-                                scaleY = pulse
-                                alpha = baseAlpha
-                            },
-                    text = text.message,
-                    color = if (isHigh) Color(0xFFFFD54F) else Color.White,
-                    fontWeight = FontWeight.Black,
-                    fontSize = fontSize.sp,
-                )
-            }
-        }
+    for (index in 0 until burst.particleCount) {
+        val angle = seededFloat(burst.seed, index, 11) * (PI.toFloat() * 2f)
+        val speedScale = 0.45f + seededFloat(burst.seed, index, 23) * 0.75f
+        val radius = maxRadius * progress * speedScale
+        val x = centerX + cos(angle) * radius
+        val y = centerY + sin(angle) * radius - (progress * 10f)
+        val particleRadius = 1.2f + seededFloat(burst.seed, index, 37) * 2f
 
-        Canvas(modifier = Modifier.fillMaxSize()) {
-            val centerX = size.width / 2f
-            val centerY = size.height / 2f
-
-            state.activeBursts.forEach { burst ->
-                val progress =
-                    ((frameTimeMillis - burst.createdAtMillis).toFloat() / burst.durationMillis)
-                        .coerceIn(0f, 1f)
-                if (progress >= 1f) {
-                    return@forEach
-                }
-
-                val maxRadius = lerp(32f, 74f, burst.power)
-                val alpha = (1f - progress) * lerp(0.55f, 0.95f, burst.power)
-
-                for (index in 0 until burst.particleCount) {
-                    val angle = seededFloat(burst.seed, index, 11) * (PI.toFloat() * 2f)
-                    val speedScale = 0.45f + seededFloat(burst.seed, index, 23) * 0.75f
-                    val radius = maxRadius * progress * speedScale
-                    val x = centerX + cos(angle) * radius
-                    val y = centerY + sin(angle) * radius - (progress * 10f)
-                    val particleRadius = 1.2f + seededFloat(burst.seed, index, 37) * 2f
-
-                    drawCircle(
-                        color = Color(0xFFFFF0B2).copy(alpha = alpha),
-                        radius = particleRadius,
-                        center = Offset(x, y),
-                    )
-                }
-            }
-        }
+        drawCircle(
+            color = Color(0xFFFFF0B2).copy(alpha = alpha),
+            radius = particleRadius,
+            center = Offset(x, y),
+        )
     }
 }
 
@@ -296,6 +329,24 @@ data class WearJuiceParticleBurst(
     val createdAtMillis: Long,
     val durationMillis: Long,
 )
+
+private val outlineOffsets =
+    listOf(
+        Offset(-1f, 0f),
+        Offset(1f, 0f),
+        Offset(0f, -1f),
+        Offset(0f, 1f),
+        Offset(-0.8f, -0.8f),
+        Offset(0.8f, -0.8f),
+        Offset(-0.8f, 0.8f),
+        Offset(0.8f, 0.8f),
+    )
+
+private fun WearJuiceFloatingText.progressAt(frameTimeMillis: Long): Float =
+    ((frameTimeMillis - createdAtMillis).toFloat() / durationMillis).coerceIn(0f, 1f)
+
+private fun WearJuiceParticleBurst.progressAt(frameTimeMillis: Long): Float =
+    ((frameTimeMillis - createdAtMillis).toFloat() / durationMillis).coerceIn(0f, 1f)
 
 private fun resolveWearText(
     textKey: VisualTextKey,

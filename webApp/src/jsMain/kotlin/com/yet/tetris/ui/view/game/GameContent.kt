@@ -467,18 +467,23 @@ val GameContent =
                                         index = index,
                                         salt = 11,
                                     ) * (PI * 2)
-                                val distance =
-                                    (80 + ((210 - 80) * burst.power)) *
+                                val distanceScale =
+                                    0.45 +
                                             (
-                                                    0.45 +
-                                                            (
-                                                                    seededFloat(
-                                                                        seed = burst.seed,
-                                                                        index = index,
-                                                                        salt = 23,
-                                                                    ) * 0.75
-                                                                    )
+                                                    seededFloat(
+                                                        seed = burst.seed,
+                                                        index = index,
+                                                        salt = 23,
+                                                    ) * 0.75
                                                     )
+                                val distance =
+                                    (80 + ((210 - 80) * burst.power)) * distanceScale
+                                val sizeScale =
+                                    if (burst.isHigh) {
+                                        6
+                                    } else {
+                                        3
+                                    }
                                 val dx = cos(angle) * distance
                                 val dy = sin(angle) * distance - 36
                                 val size =
@@ -487,12 +492,7 @@ val GameContent =
                                                 seed = burst.seed,
                                                 index = index,
                                                 salt = 37,
-                                            ) *
-                                            if (burst.isHigh) {
-                                                6
-                                            } else {
-                                                3
-                                            }
+                                            ) * sizeScale
                                 Box {
                                     key = "${burst.id}-$index"
                                     className = "juice-particle-burst".toClassName()
