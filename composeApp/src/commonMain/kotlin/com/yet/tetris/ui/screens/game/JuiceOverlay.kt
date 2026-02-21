@@ -324,13 +324,18 @@ fun JuiceOverlay(
                     val radius = maxRadius * progress * speedScale
                     val x = centerX + cos(angle) * radius
                     val y = centerY + sin(angle) * radius - progress * 36f
+                    val particleScale =
+                        if (burst.intensity == IntensityLevel.HIGH) {
+                            6f
+                        } else {
+                            3f
+                        }
                     val particleSize =
-                        2f + seededFloat(seed = burst.seed, index = index, salt = 37) *
-                                if (burst.intensity == IntensityLevel.HIGH) {
-                                    6f
-                                } else {
-                                    3f
-                                }
+                        2f + seededFloat(
+                            seed = burst.seed,
+                            index = index,
+                            salt = 37
+                        ) * particleScale
 
                     val color =
                         if (burst.intensity == IntensityLevel.HIGH) {
