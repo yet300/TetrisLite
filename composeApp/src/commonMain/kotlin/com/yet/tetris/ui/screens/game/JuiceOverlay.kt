@@ -240,11 +240,17 @@ fun JuiceOverlay(
                 val outlineColor = if (isHigh) Color(0xFF3A1800) else Color(0xFF0B1220)
                 val outlineThickness = if (isHigh) 3.4f else 2.1f
                 val fontSize =
-                    (if (isHigh) lerp(44f, 56f, floatingText.power) else lerp(
-                        24f,
-                        30f,
-                        floatingText.power
-                    )).sp
+                    (
+                            if (isHigh) {
+                                lerp(44f, 56f, floatingText.power)
+                            } else {
+                                lerp(
+                                    24f,
+                                    30f,
+                                    floatingText.power,
+                                )
+                            }
+                            ).sp
 
                 listOf(
                     Offset(-1f, 0f),
@@ -309,11 +315,12 @@ fun JuiceOverlay(
                 val baseAlpha = (1f - progress) * lerp(0.65f, 1f, burst.power)
 
                 for (index in 0 until burst.particleCount) {
-                    val angle = seededFloat(
-                        seed = burst.seed,
-                        index = index,
-                        salt = 11
-                    ) * (PI.toFloat() * 2f)
+                    val angle =
+                        seededFloat(
+                            seed = burst.seed,
+                            index = index,
+                            salt = 11,
+                        ) * (PI.toFloat() * 2f)
                     val speedScale =
                         0.45f + seededFloat(seed = burst.seed, index = index, salt = 23) * 0.75f
                     val radius = maxRadius * progress * speedScale

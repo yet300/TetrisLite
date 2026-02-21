@@ -93,8 +93,8 @@ class PlanVisualFeedbackUseCase {
                     add(
                         VisualEffectEvent.ScreenFlash(
                             intensity = IntensityLevel.HIGH,
-                            power = power
-                        )
+                            power = power,
+                        ),
                     )
                     add(
                         VisualEffectEvent.Explosion(

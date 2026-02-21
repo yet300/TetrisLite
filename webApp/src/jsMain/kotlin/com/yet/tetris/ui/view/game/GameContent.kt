@@ -184,10 +184,11 @@ val GameContent =
         ) {
             burst.events.forEach { event ->
                 when (event) {
-                    is VisualEffectEvent.ScreenShake -> triggerScreenShake(
-                        event.intensity,
-                        event.power
-                    )
+                    is VisualEffectEvent.ScreenShake ->
+                        triggerScreenShake(
+                            event.intensity,
+                            event.power,
+                        )
 
                     is VisualEffectEvent.ScreenFlash -> triggerScreenFlash(event.power)
                     is VisualEffectEvent.FloatingText ->
@@ -460,18 +461,23 @@ val GameContent =
 
                         particleBursts.forEach { burst ->
                             for (index in 0 until burst.particleCount) {
-                                val angle = seededFloat(
-                                    seed = burst.seed,
-                                    index = index,
-                                    salt = 11
-                                ) * (PI * 2)
+                                val angle =
+                                    seededFloat(
+                                        seed = burst.seed,
+                                        index = index,
+                                        salt = 11,
+                                    ) * (PI * 2)
                                 val distance =
                                     (80 + ((210 - 80) * burst.power)) *
-                                            (0.45 + (seededFloat(
-                                                seed = burst.seed,
-                                                index = index,
-                                                salt = 23
-                                            ) * 0.75))
+                                            (
+                                                    0.45 + (
+                                                            seededFloat(
+                                                                seed = burst.seed,
+                                                                index = index,
+                                                                salt = 23,
+                                                            ) * 0.75
+                                                            )
+                                                    )
                                 val dx = cos(angle) * distance
                                 val dy = sin(angle) * distance - 36
                                 val size =
@@ -479,7 +485,7 @@ val GameContent =
                                             seededFloat(
                                                 seed = burst.seed,
                                                 index = index,
-                                                salt = 37
+                                                salt = 37,
                                             ) *
                                             if (burst.isHigh) {
                                                 6
