@@ -151,7 +151,7 @@ struct GameView: View {
                 }
             }
         }
-        .navigationBarBackButtonHidden(true)
+        .gameNavigationBackButtonHidden()
         .sheet(item: Binding<SheetItem?>(
             get: {
                 if let child = sheet.child?.instance {
@@ -316,6 +316,17 @@ struct GameView: View {
             return "\(base) COMBO x\(comboStreak)!"
         }
         return base
+    }
+}
+
+private extension View {
+    @ViewBuilder
+    func gameNavigationBackButtonHidden() -> some View {
+        #if os(iOS) || os(macOS)
+        navigationBarBackButtonHidden(true)
+        #else
+        self
+        #endif
     }
 }
 
