@@ -240,17 +240,15 @@ fun JuiceOverlay(
                 val outlineColor = if (isHigh) Color(0xFF3A1800) else Color(0xFF0B1220)
                 val outlineThickness = if (isHigh) 3.4f else 2.1f
                 val fontSize =
-                    (
-                            if (isHigh) {
-                                lerp(44f, 56f, floatingText.power)
-                            } else {
-                                lerp(
-                                    24f,
-                                    30f,
-                                    floatingText.power,
-                                )
-                            }
-                            ).sp
+                    if (isHigh) {
+                        lerp(44f, 56f, floatingText.power)
+                    } else {
+                        lerp(
+                            24f,
+                            30f,
+                            floatingText.power,
+                        )
+                    }.sp
 
                 listOf(
                     Offset(-1f, 0f),

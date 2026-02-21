@@ -470,13 +470,14 @@ val GameContent =
                                 val distance =
                                     (80 + ((210 - 80) * burst.power)) *
                                             (
-                                                    0.45 + (
-                                                            seededFloat(
-                                                                seed = burst.seed,
-                                                                index = index,
-                                                                salt = 23,
-                                                            ) * 0.75
-                                                            )
+                                                    0.45 +
+                                                            (
+                                                                    seededFloat(
+                                                                        seed = burst.seed,
+                                                                        index = index,
+                                                                        salt = 23,
+                                                                    ) * 0.75
+                                                                    )
                                                     )
                                 val dx = cos(angle) * distance
                                 val dy = sin(angle) * distance - 36
