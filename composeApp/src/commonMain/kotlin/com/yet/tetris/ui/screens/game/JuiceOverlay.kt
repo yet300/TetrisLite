@@ -334,7 +334,7 @@ fun JuiceOverlay(
                         2f + seededFloat(
                             seed = burst.seed,
                             index = index,
-                            salt = 37
+                            salt = 37,
                         ) * particleScale
 
                     val color =
