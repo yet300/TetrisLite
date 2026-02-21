@@ -3,9 +3,11 @@ package com.yet.tetris.wear.ui.game
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.wear.compose.material.CircularProgressIndicator
 import androidx.wear.compose.material.Scaffold
 import androidx.wear.compose.material.TimeText
@@ -21,6 +23,14 @@ import com.yet.tetris.wear.ui.settings.WearSettingsOverlay
 @Composable
 fun WearGameScreen(component: GameComponent) {
     val model by component.model.subscribeAsState()
+    val juiceOverlayState = rememberWearJuiceOverlayState()
+
+    LaunchedEffect(model.visualEffectFeed.sequence) {
+        model.visualEffectFeed.latest?.let { burst ->
+            juiceOverlayState.dispatchBurst(burst)
+            component.onVisualEffectConsumed(model.visualEffectFeed.sequence)
+        }
+    }
 
     Scaffold(
         timeText = { TimeText() },
@@ -37,11 +47,30 @@ fun WearGameScreen(component: GameComponent) {
             }
 
             model.gameState != null -> {
-                WearGamePlayingContent(
-                    model = model,
-                    component = component,
-                    onPauseClick = component::onPause
-                )
+                Box(modifier = Modifier.fillMaxSize()) {
+                    Box(
+                        modifier =
+                            Modifier
+                                .fillMaxSize()
+                                .graphicsLayer {
+                                    translationX = juiceOverlayState.shakeOffsetX
+                                    translationY = juiceOverlayState.shakeOffsetY
+                                    scaleX = juiceOverlayState.contentScale
+                                    scaleY = juiceOverlayState.contentScale
+                                },
+                    ) {
+                        WearGamePlayingContent(
+                            model = model,
+                            component = component,
+                            onPauseClick = component::onPause
+                        )
+                    }
+
+                    WearJuiceOverlay(
+                        state = juiceOverlayState,
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                }
             }
         }
 
