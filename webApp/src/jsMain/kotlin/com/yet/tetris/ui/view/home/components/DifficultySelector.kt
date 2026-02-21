@@ -54,6 +54,7 @@ val DifficultySelector =
 
                 Difficulty.entries.forEach { diff ->
                     ToggleButton {
+                        key = diff.name
                         value = diff
                         sx {
                             color = Color("rgba(255, 255, 255, 0.9)")

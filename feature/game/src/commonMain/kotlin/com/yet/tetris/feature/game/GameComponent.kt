@@ -4,6 +4,7 @@ import com.arkivanov.decompose.ExperimentalDecomposeApi
 import com.arkivanov.decompose.router.slot.ChildSlot
 import com.arkivanov.decompose.value.Value
 import com.arkivanov.essenty.backhandler.BackHandlerOwner
+import com.yet.tetris.domain.model.effects.VisualEffectFeed
 import com.yet.tetris.domain.model.game.GameState
 import com.yet.tetris.domain.model.settings.GameSettings
 import com.yet.tetris.feature.settings.SettingsComponent
@@ -25,6 +26,8 @@ interface GameComponent : BackHandlerOwner {
         val finalScore: Long = 0,
         val finalLinesCleared: Long = 0,
         val ghostPieceY: Int? = null,
+        val comboStreak: Int = 0,
+        val visualEffectFeed: VisualEffectFeed = VisualEffectFeed(),
     )
 
     fun onDismissDialog()
@@ -70,6 +73,8 @@ interface GameComponent : BackHandlerOwner {
     )
 
     fun onDragEnded()
+
+    fun onVisualEffectConsumed(sequence: Long)
 
     sealed interface DialogChild {
         class Pause : DialogChild

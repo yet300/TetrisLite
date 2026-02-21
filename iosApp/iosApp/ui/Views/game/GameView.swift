@@ -1,3 +1,4 @@
+import Foundation
 import SwiftUI
 import Shared
 
@@ -22,6 +23,12 @@ struct GameView: View {
     
     @State private var lastDragTranslation: CGSize = .zero
     @State private var didStartDragging = false
+    @State private var shakePhase: CGFloat = 0
+    @State private var shakeAmount: CGFloat = 0
+    @State private var contentScale: CGFloat = 1
+    @State private var flashOpacity: Double = 0
+    @State private var floatingTexts: [JuiceFloatingTextEntry] = []
+    @State private var particleBursts: [JuiceParticleBurstEntry] = []
 
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
     @Environment(\.verticalSizeClass) var verticalSizeClass
@@ -117,11 +124,24 @@ struct GameView: View {
                     Spacer()
                 }
                     .frame(maxWidth: isIPadOrLandscape ? 600 : .infinity)
-
-                    if isIPadOrLandscape {
-                        Spacer()
-                    }
+                    .modifier(
+                        JuiceModifier(
+                            shakePhase: shakePhase,
+                            shakeAmount: shakeAmount,
+                            scale: contentScale
+                        )
+                    )
                 }
+
+                if isIPadOrLandscape {
+                    Spacer()
+                }
+
+                JuiceOverlayView(
+                    flashOpacity: flashOpacity,
+                    floatingTexts: floatingTexts,
+                    particleBursts: particleBursts
+                )
                 
                 if let child = dialog.child?.instance {
                     GlassDialogContainer {
@@ -131,7 +151,7 @@ struct GameView: View {
                 }
             }
         }
-        .navigationBarBackButtonHidden(true)
+        .gameNavigationBackButtonHidden()
         .sheet(item: Binding<SheetItem?>(
             get: {
                 if let child = sheet.child?.instance {
@@ -160,6 +180,153 @@ struct GameView: View {
             default: break
             }
         }
+        .onChange(of: model.visualEffectFeed.sequence) { _, newSequence in
+            handleVisualEffectFeedChange(newSequence)
+        }
+    }
+
+    private func handleVisualEffectFeedChange(_ sequence: Int64) {
+        guard let burst = model.visualEffectFeed.latest else {
+            return
+        }
+        triggerJuice(burst)
+        component.onVisualEffectConsumed(sequence: sequence)
+    }
+
+    private func triggerJuice(_ burst: VisualEffectBurst) {
+        for event in burst.events {
+            switch event {
+            case let shake as VisualEffectEventScreenShake:
+                triggerShake(intensity: shake.intensity, power: CGFloat(shake.power))
+            case let flash as VisualEffectEventScreenFlash:
+                triggerFlash(power: CGFloat(flash.power))
+            case let text as VisualEffectEventFloatingText:
+                addFloatingText(
+                    resolveFloatingTextMessage(text.textKey, comboStreak: Int(burst.comboStreak)),
+                    intensity: text.intensity,
+                    power: CGFloat(text.power)
+                )
+            case let explosion as VisualEffectEventExplosion:
+                addParticleBurst(
+                    burstId: burst.id,
+                    intensity: explosion.intensity,
+                    power: CGFloat(explosion.power),
+                    particleCount: Int(explosion.particleCount)
+                )
+            default:
+                continue
+            }
+        }
+    }
+
+    private func triggerShake(
+        intensity: IntensityLevel,
+        power: CGFloat
+    ) {
+        let isHigh = intensity == .high
+        let amplitude = isHigh ? 10 + (14 * power) : 3 + (5 * power)
+
+        shakeAmount = amplitude
+        withAnimation(.linear(duration: isHigh ? 0.30 : 0.20)) {
+            shakePhase += 1
+        }
+
+        withAnimation(.spring(response: 0.30, dampingFraction: 0.65)) {
+            contentScale = isHigh ? 1.04 : 1.02
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.22) {
+            withAnimation(.spring(response: 0.25, dampingFraction: 0.82)) {
+                contentScale = 1
+            }
+        }
+    }
+
+    private func triggerFlash(power: CGFloat) {
+        flashOpacity = Double(0.45 + (0.4 * power))
+        withAnimation(.easeOut(duration: 0.18)) {
+            flashOpacity = 0
+        }
+    }
+
+    private func addFloatingText(
+        _ text: String,
+        intensity: IntensityLevel,
+        power: CGFloat
+    ) {
+        let isHigh = intensity == .high
+        let entry = JuiceFloatingTextEntry(
+            id: UUID().uuidString,
+            text: text,
+            isHigh: isHigh,
+            power: power,
+            createdAt: Date(),
+            duration: isHigh ? 1.1 : 0.78
+        )
+        floatingTexts.append(entry)
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + entry.duration + 0.1) {
+            floatingTexts.removeAll {
+                $0.id == entry.id
+            }
+        }
+    }
+
+    private func addParticleBurst(
+        burstId: Int64,
+        intensity: IntensityLevel,
+        power: CGFloat,
+        particleCount: Int
+    ) {
+        let entry = JuiceParticleBurstEntry(
+            id: "\(burstId)-\(UUID().uuidString)",
+            isHigh: intensity == .high,
+            power: power,
+            particleCount: particleCount,
+            seed: Int(burstId),
+            createdAt: Date(),
+            duration: 0.55
+        )
+        particleBursts.append(entry)
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + entry.duration + 0.1) {
+            particleBursts.removeAll {
+                $0.id == entry.id
+            }
+        }
+    }
+
+    private func resolveFloatingTextMessage(_ textKey: VisualTextKey, comboStreak: Int) -> String {
+        let base: String
+        switch textKey {
+        case .single:
+            base = "SINGLE!"
+        case .double_:
+            base = "DOUBLE!"
+        case .triple:
+            base = "TRIPLE!"
+        case .tetris:
+            base = "TETRIS!!!"
+        case .clear:
+            base = "CLEAR!"
+        default:
+            base = "CLEAR!"
+        }
+
+        if comboStreak >= 2 {
+            return "\(base) COMBO x\(comboStreak)!"
+        }
+        return base
+    }
+}
+
+private extension View {
+    @ViewBuilder
+    func gameNavigationBackButtonHidden() -> some View {
+        #if os(iOS) || os(macOS)
+        navigationBarBackButtonHidden(true)
+        #else
+        self
+        #endif
     }
 }
 

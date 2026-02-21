@@ -4,6 +4,11 @@ import com.arkivanov.decompose.DefaultComponentContext
 import com.arkivanov.essenty.lifecycle.LifecycleRegistry
 import com.arkivanov.essenty.lifecycle.resume
 import com.arkivanov.mvikotlin.main.store.DefaultStoreFactory
+import com.yet.tetris.domain.model.game.GameBoard
+import com.yet.tetris.domain.model.game.GameState
+import com.yet.tetris.domain.model.game.Position
+import com.yet.tetris.domain.model.game.Tetromino
+import com.yet.tetris.domain.model.game.TetrominoType
 import com.yet.tetris.domain.usecase.CalculateGhostPositionUseCase
 import com.yet.tetris.domain.usecase.CalculateScoreUseCase
 import com.yet.tetris.domain.usecase.CheckCollisionUseCase
@@ -13,6 +18,7 @@ import com.yet.tetris.domain.usecase.HandleSwipeInputUseCase
 import com.yet.tetris.domain.usecase.HardDropUseCase
 import com.yet.tetris.domain.usecase.LockPieceUseCase
 import com.yet.tetris.domain.usecase.MovePieceUseCase
+import com.yet.tetris.domain.usecase.PlanVisualFeedbackUseCase
 import com.yet.tetris.domain.usecase.RotatePieceUseCase
 import com.yet.tetris.domain.usecase.StartGameUseCase
 import com.yet.tetris.feature.game.store.FakeAudioRepository
@@ -24,6 +30,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.koin.core.context.startKoin
@@ -33,6 +40,7 @@ import org.koin.test.KoinTest
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertNotNull
@@ -71,6 +79,7 @@ class GameComponentTest : KoinTest {
         val handleSwipe = HandleSwipeInputUseCase(movePiece, hardDrop)
         val calculateGhost = CalculateGhostPositionUseCase()
         val gestureHandling = GestureHandlingUseCase()
+        val planVisualFeedback = PlanVisualFeedbackUseCase()
 
         startKoin {
             modules(
@@ -88,6 +97,7 @@ class GameComponentTest : KoinTest {
                     single { handleSwipe }
                     single { calculateGhost }
                     single { gestureHandling }
+                    single { planVisualFeedback }
                 },
             )
         }
@@ -456,4 +466,48 @@ class GameComponentTest : KoinTest {
             val newTime = component.model.value.elapsedTime
             assertTrue(newTime >= initialTime)
         }
+
+    @Test
+    fun WHEN_visual_effect_occurs_THEN_feed_sequence_and_latest_are_updated() =
+        runTest(testDispatcher) {
+            gameStateRepository.setSavedState(createSingleLineClearState())
+            val component = createComponent()
+            lifecycle.resume()
+            runCurrent()
+
+            val initialFeed = component.model.value.visualEffectFeed
+            assertEquals(0L, initialFeed.sequence)
+
+            component.onMoveDown()
+            runCurrent()
+
+            val updatedFeed = component.model.value.visualEffectFeed
+            assertTrue(updatedFeed.sequence > initialFeed.sequence)
+            assertNotNull(updatedFeed.latest)
+            val latest = requireNotNull(updatedFeed.latest)
+            assertEquals(1, latest.linesCleared)
+        }
+
+    private fun createSingleLineClearState(): GameState {
+        val filledRow =
+            (2 until 10).associate { x ->
+                Position(x = x, y = 19) to TetrominoType.I
+            }
+
+        return GameState(
+            board =
+                GameBoard(
+                    width = 10,
+                    height = 20,
+                    cells = filledRow,
+                ),
+            currentPiece = Tetromino.create(TetrominoType.O),
+            currentPosition = Position(x = 0, y = 18),
+            nextPiece = Tetromino.create(TetrominoType.T),
+            score = 0,
+            linesCleared = 0,
+            isGameOver = false,
+            isPaused = false,
+        )
+    }
 }

@@ -183,6 +183,10 @@ class DefaultGameComponent(
         store.accept(GameStore.Intent.DragEnded)
     }
 
+    override fun onVisualEffectConsumed(sequence: Long) {
+        store.accept(GameStore.Intent.VisualEffectConsumed(sequence))
+    }
+
     private fun createDialogChild(
         config: DialogConfig,
         componentContext: ComponentContext,

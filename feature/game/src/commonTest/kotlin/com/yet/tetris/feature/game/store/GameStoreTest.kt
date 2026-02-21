@@ -3,6 +3,7 @@ package com.yet.tetris.feature.game.store
 import com.arkivanov.mvikotlin.core.utils.isAssertOnMainThreadEnabled
 import com.arkivanov.mvikotlin.extensions.coroutines.labels
 import com.arkivanov.mvikotlin.main.store.DefaultStoreFactory
+import com.yet.tetris.domain.model.effects.IntensityLevel
 import com.yet.tetris.domain.model.game.Difficulty
 import com.yet.tetris.domain.model.game.GameBoard
 import com.yet.tetris.domain.model.game.GameState
@@ -19,6 +20,7 @@ import com.yet.tetris.domain.usecase.HandleSwipeInputUseCase
 import com.yet.tetris.domain.usecase.HardDropUseCase
 import com.yet.tetris.domain.usecase.LockPieceUseCase
 import com.yet.tetris.domain.usecase.MovePieceUseCase
+import com.yet.tetris.domain.usecase.PlanVisualFeedbackUseCase
 import com.yet.tetris.domain.usecase.RotatePieceUseCase
 import com.yet.tetris.domain.usecase.StartGameUseCase
 import com.yet.tetris.feature.game.store.GameStore.Intent
@@ -30,6 +32,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.koin.core.context.startKoin
@@ -74,6 +77,7 @@ class GameStoreTest {
         val handleSwipe = HandleSwipeInputUseCase(movePiece, hardDrop)
         val calculateGhost = CalculateGhostPositionUseCase()
         val gestureHandling = GestureHandlingUseCase()
+        val planVisualFeedback = PlanVisualFeedbackUseCase()
 
         startKoin {
             modules(
@@ -91,6 +95,7 @@ class GameStoreTest {
                     single { handleSwipe }
                     single { calculateGhost }
                     single { gestureHandling }
+                    single { planVisualFeedback }
                 },
             )
         }
@@ -362,6 +367,59 @@ class GameStoreTest {
             assertTrue(audioRepository.applySettingsCallCount > 0)
         }
 
+    @Test
+    fun updates_visual_effect_feed_WHEN_line_is_cleared() =
+        runTest {
+            gameStateRepository.setSavedState(createSingleLineClearState())
+            store = GameStoreFactory().create()
+            runCurrent()
+
+            store.accept(Intent.MoveDown)
+            runCurrent()
+
+            assertEquals(1, store.state.comboStreak)
+            assertEquals(1L, store.state.visualEffectFeed.sequence)
+            val burst = store.state.visualEffectFeed.latest
+            assertNotNull(burst)
+            assertEquals(1, burst.linesCleared)
+            assertEquals(IntensityLevel.LOW, burst.intensity)
+        }
+
+    @Test
+    fun keeps_visual_effect_feed_unchanged_WHEN_no_lines_are_cleared() =
+        runTest {
+            gameStateRepository.setSavedState(createNoLineClearLockState())
+            store = GameStoreFactory().create()
+            runCurrent()
+
+            store.accept(Intent.MoveDown)
+            runCurrent()
+
+            assertEquals(0, store.state.comboStreak)
+            assertEquals(0L, store.state.visualEffectFeed.sequence)
+            assertEquals(null, store.state.visualEffectFeed.latest)
+        }
+
+    @Test
+    fun clears_latest_effect_WHEN_visual_effect_consumed() =
+        runTest {
+            gameStateRepository.setSavedState(createSingleLineClearState())
+            store = GameStoreFactory().create()
+            runCurrent()
+
+            store.accept(Intent.MoveDown)
+            runCurrent()
+
+            val emittedSequence = store.state.visualEffectFeed.sequence
+            assertNotNull(store.state.visualEffectFeed.latest)
+
+            store.accept(Intent.VisualEffectConsumed(emittedSequence))
+            runCurrent()
+
+            assertEquals(emittedSequence, store.state.visualEffectFeed.sequence)
+            assertEquals(null, store.state.visualEffectFeed.latest)
+        }
+
     private fun createStore() {
         store = GameStoreFactory().create()
         testDispatcher.scheduler.advanceUntilIdle()
@@ -374,6 +432,41 @@ class GameStoreTest {
             currentPosition = Position(x = 4, y = 0),
             nextPiece = Tetromino.create(TetrominoType.T),
             score = score,
+            linesCleared = 0,
+            isGameOver = false,
+            isPaused = false,
+        )
+
+    private fun createSingleLineClearState(): GameState {
+        val filledRow =
+            (2 until 10).associate { x ->
+                Position(x = x, y = 19) to TetrominoType.I
+            }
+
+        return GameState(
+            board =
+                GameBoard(
+                    width = 10,
+                    height = 20,
+                    cells = filledRow,
+                ),
+            currentPiece = Tetromino.create(TetrominoType.O),
+            currentPosition = Position(x = 0, y = 18),
+            nextPiece = Tetromino.create(TetrominoType.T),
+            score = 0,
+            linesCleared = 0,
+            isGameOver = false,
+            isPaused = false,
+        )
+    }
+
+    private fun createNoLineClearLockState(): GameState =
+        GameState(
+            board = GameBoard(width = 10, height = 20),
+            currentPiece = Tetromino.create(TetrominoType.O),
+            currentPosition = Position(x = 0, y = 18),
+            nextPiece = Tetromino.create(TetrominoType.T),
+            score = 0,
             linesCleared = 0,
             isGameOver = false,
             isPaused = false,

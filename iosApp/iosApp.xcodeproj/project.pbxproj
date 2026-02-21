@@ -8,7 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		D412B32E2F45BF99008C8A73 /* libsqlite3.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = D412B32D2F45BF99008C8A73 /* libsqlite3.tbd */; };
-		D48B484A2F13965D002112B4 /* watchApp Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = D48B48402F13965C002112B4 /* watchApp Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		D48B484A2F13965D002112B4 /* watchApp Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = D48B48402F13965C002112B4 /* watchApp Watch App.app */; platformFilter = ios; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		D4A673CA2E98F2FE00BFCA5E /* libsqlite3.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = D4A673C92E98F2E300BFCA5E /* libsqlite3.tbd */; };
 /* End PBXBuildFile section */
 
@@ -60,8 +60,6 @@
 			isa = PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet;
 			buildPhase = 60EB5AA7A81ED5581BD46896 /* Resources */;
 			membershipExceptions = (
-				DecomposeHelpers/MutableValue.swift,
-				DecomposeHelpers/SimpleChildStack.swift,
 			);
 		};
 /* End PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
@@ -169,10 +167,10 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = D48B484E2F13965D002112B4 /* Build configuration list for PBXNativeTarget "watchApp Watch App" */;
 			buildPhases = (
+				D48B485D2F139CB6002112B4 /* Compile Kotlin Framework */,
 				D48B483C2F13965C002112B4 /* Sources */,
 				D48B483D2F13965C002112B4 /* Frameworks */,
 				D48B483E2F13965C002112B4 /* Resources */,
-				D48B485D2F139CB6002112B4 /* Compile Kotlin Framework */,
 			);
 			buildRules = (
 			);
@@ -246,22 +244,27 @@
 /* Begin PBXShellScriptBuildPhase section */
 		A9F461EEEC79D16DB8CEF430 /* Compile Kotlin Framework */ = {
 			isa = PBXShellScriptBuildPhase;
-			alwaysOutOfDate = 1;
+			alwaysOutOfDate = 0;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputFileListPaths = (
 			);
 			inputPaths = (
+				"$(SRCROOT)/../shared/build.gradle.kts",
+				"$(SRCROOT)/../gradle.properties",
 			);
 			name = "Compile Kotlin Framework";
 			outputFileListPaths = (
 			);
 			outputPaths = (
+				"$(BUILT_PRODUCTS_DIR)/Shared.framework/Shared",
+				"$(BUILT_PRODUCTS_DIR)/Shared.framework/Info.plist",
+				"$(DERIVED_FILE_DIR)/kotlin_shared_$(CONFIGURATION)_$(SDK_NAME)_$(ARCHS).stamp",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "if [ \"YES\" = \"$OVERRIDE_KOTLIN_BUILD_IDE_SUPPORTED\" ]; then\n  echo \"Skipping Gradle build task invocation due to OVERRIDE_KOTLIN_BUILD_IDE_SUPPORTED environment variable set to \\\"YES\\\"\"\n  exit 0\nfi\ncd \"$SRCROOT/..\"\n./gradlew :shared:embedAndSignAppleFrameworkForXcode\n";
+			shellScript = "if [ \"YES\" = \"$OVERRIDE_KOTLIN_BUILD_IDE_SUPPORTED\" ]; then\n  echo \"Skipping Gradle build task invocation due to OVERRIDE_KOTLIN_BUILD_IDE_SUPPORTED environment variable set to \\\"YES\\\"\"\n  exit 0\nfi\nset -eu\ncd \"$SRCROOT/..\"\n\ncase \"${CONFIGURATION:-Debug}\" in\n  *Release*)\n    BUILD_TYPE=\"Release\"\n    FRAMEWORK_DIR=\"releaseFramework\"\n    ;;\n  *)\n    BUILD_TYPE=\"Debug\"\n    FRAMEWORK_DIR=\"debugFramework\"\n    ;;\nesac\n\nMULTI_ARCH_WATCHSIM=0\nWATCHSIM_ARM64_BIN=\"\"\nWATCHSIM_X64_BIN=\"\"\n\ncase \"${SDK_NAME:-}\" in\n  iphoneos*)\n    TARGET_TASKS=\":shared:link${BUILD_TYPE}FrameworkIosArm64\"\n    TARGET_DIR=\"iosArm64\"\n    ;;\n  iphonesimulator*)\n    TARGET_TASKS=\":shared:link${BUILD_TYPE}FrameworkIosSimulatorArm64\"\n    TARGET_DIR=\"iosSimulatorArm64\"\n    ;;\n  watchos*)\n    TARGET_TASKS=\":shared:link${BUILD_TYPE}FrameworkWatchosArm64\"\n    TARGET_DIR=\"watchosArm64\"\n    ;;\n  watchsimulator*)\n    case \" ${ARCHS:-} \" in\n      *\" x86_64 \"*)\n        case \" ${ARCHS:-} \" in\n          *\" arm64 \"*)\n            MULTI_ARCH_WATCHSIM=1\n            TARGET_TASKS=\":shared:link${BUILD_TYPE}FrameworkWatchosSimulatorArm64 :shared:link${BUILD_TYPE}FrameworkWatchosX64\"\n            TARGET_DIR=\"watchosSimulatorArm64\"\n            WATCHSIM_ARM64_BIN=\"$SRCROOT/../shared/build/bin/watchosSimulatorArm64/${FRAMEWORK_DIR}/Shared.framework/Shared\"\n            WATCHSIM_X64_BIN=\"$SRCROOT/../shared/build/bin/watchosX64/${FRAMEWORK_DIR}/Shared.framework/Shared\"\n            ;;\n          *)\n            TARGET_TASKS=\":shared:link${BUILD_TYPE}FrameworkWatchosX64\"\n            TARGET_DIR=\"watchosX64\"\n            ;;\n        esac\n        ;;\n      *)\n        TARGET_TASKS=\":shared:link${BUILD_TYPE}FrameworkWatchosSimulatorArm64\"\n        TARGET_DIR=\"watchosSimulatorArm64\"\n        ;;\n    esac\n    ;;\n  macosx*)\n    case \" ${ARCHS:-} \" in\n      *\" x86_64 \"*)\n        TARGET_TASKS=\":shared:link${BUILD_TYPE}FrameworkMacosX64\"\n        TARGET_DIR=\"macosX64\"\n        ;;\n      *)\n        TARGET_TASKS=\":shared:link${BUILD_TYPE}FrameworkMacosArm64\"\n        TARGET_DIR=\"macosArm64\"\n        ;;\n    esac\n    ;;\n  *)\n    echo \"Unsupported SDK_NAME '${SDK_NAME:-}' for Shared framework build\"\n    exit 1\n    ;;\nesac\n\n./gradlew $TARGET_TASKS\n\nSHARED_FRAMEWORK_PATH=\"$SRCROOT/../shared/build/bin/$TARGET_DIR/${FRAMEWORK_DIR}/Shared.framework\"\nif [ ! -d \"$SHARED_FRAMEWORK_PATH\" ]; then\n  echo \"Shared framework not found at $SHARED_FRAMEWORK_PATH\"\n  exit 1\nfi\n\nrsync -a --delete \"$SHARED_FRAMEWORK_PATH\" \"$BUILT_PRODUCTS_DIR/\"\n\nif [ \"$MULTI_ARCH_WATCHSIM\" -eq 1 ]; then\n  lipo -create \"$WATCHSIM_ARM64_BIN\" \"$WATCHSIM_X64_BIN\" -output \"$BUILT_PRODUCTS_DIR/Shared.framework/Shared\"\nfi\n\nSTAMP_FILE=\"$DERIVED_FILE_DIR/kotlin_shared_${CONFIGURATION:-Debug}_${SDK_NAME:-unknown}_${ARCHS:-unknown}.stamp\"\nmkdir -p \"$DERIVED_FILE_DIR\"\ntouch \"$STAMP_FILE\"\n";
 		};
 		D48B485D2F139CB6002112B4 /* Compile Kotlin Framework */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -271,15 +274,20 @@
 			inputFileListPaths = (
 			);
 			inputPaths = (
+				"$(SRCROOT)/../shared/build.gradle.kts",
+				"$(SRCROOT)/../gradle.properties",
 			);
 			name = "Compile Kotlin Framework";
 			outputFileListPaths = (
 			);
 			outputPaths = (
+				"$(BUILT_PRODUCTS_DIR)/Shared.framework/Shared",
+				"$(BUILT_PRODUCTS_DIR)/Shared.framework/Info.plist",
+				"$(DERIVED_FILE_DIR)/kotlin_shared_$(CONFIGURATION)_$(SDK_NAME)_$(ARCHS).stamp",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "if [ \"YES\" = \"$OVERRIDE_KOTLIN_BUILD_IDE_SUPPORTED\" ]; then\n  echo \"Skipping Gradle build task invocation due to OVERRIDE_KOTLIN_BUILD_IDE_SUPPORTED environment variable set to \\\"YES\\\"\"\n  exit 0\nfi\ncd \"$SRCROOT/..\"\n./gradlew :shared:embedAndSignAppleFrameworkForXcode\n\n";
+			shellScript = "if [ \"YES\" = \"$OVERRIDE_KOTLIN_BUILD_IDE_SUPPORTED\" ]; then\n  echo \"Skipping Gradle build task invocation due to OVERRIDE_KOTLIN_BUILD_IDE_SUPPORTED environment variable set to \\\"YES\\\"\"\n  exit 0\nfi\nset -eu\ncd \"$SRCROOT/..\"\n\ncase \"${CONFIGURATION:-Debug}\" in\n  *Release*)\n    BUILD_TYPE=\"Release\"\n    FRAMEWORK_DIR=\"releaseFramework\"\n    ;;\n  *)\n    BUILD_TYPE=\"Debug\"\n    FRAMEWORK_DIR=\"debugFramework\"\n    ;;\nesac\n\nMULTI_ARCH_WATCHSIM=0\nWATCHSIM_ARM64_BIN=\"\"\nWATCHSIM_X64_BIN=\"\"\n\ncase \"${SDK_NAME:-}\" in\n  iphoneos*)\n    TARGET_TASKS=\":shared:link${BUILD_TYPE}FrameworkIosArm64\"\n    TARGET_DIR=\"iosArm64\"\n    ;;\n  iphonesimulator*)\n    TARGET_TASKS=\":shared:link${BUILD_TYPE}FrameworkIosSimulatorArm64\"\n    TARGET_DIR=\"iosSimulatorArm64\"\n    ;;\n  watchos*)\n    TARGET_TASKS=\":shared:link${BUILD_TYPE}FrameworkWatchosArm64\"\n    TARGET_DIR=\"watchosArm64\"\n    ;;\n  watchsimulator*)\n    case \" ${ARCHS:-} \" in\n      *\" x86_64 \"*)\n        case \" ${ARCHS:-} \" in\n          *\" arm64 \"*)\n            MULTI_ARCH_WATCHSIM=1\n            TARGET_TASKS=\":shared:link${BUILD_TYPE}FrameworkWatchosSimulatorArm64 :shared:link${BUILD_TYPE}FrameworkWatchosX64\"\n            TARGET_DIR=\"watchosSimulatorArm64\"\n            WATCHSIM_ARM64_BIN=\"$SRCROOT/../shared/build/bin/watchosSimulatorArm64/${FRAMEWORK_DIR}/Shared.framework/Shared\"\n            WATCHSIM_X64_BIN=\"$SRCROOT/../shared/build/bin/watchosX64/${FRAMEWORK_DIR}/Shared.framework/Shared\"\n            ;;\n          *)\n            TARGET_TASKS=\":shared:link${BUILD_TYPE}FrameworkWatchosX64\"\n            TARGET_DIR=\"watchosX64\"\n            ;;\n        esac\n        ;;\n      *)\n        TARGET_TASKS=\":shared:link${BUILD_TYPE}FrameworkWatchosSimulatorArm64\"\n        TARGET_DIR=\"watchosSimulatorArm64\"\n        ;;\n    esac\n    ;;\n  macosx*)\n    case \" ${ARCHS:-} \" in\n      *\" x86_64 \"*)\n        TARGET_TASKS=\":shared:link${BUILD_TYPE}FrameworkMacosX64\"\n        TARGET_DIR=\"macosX64\"\n        ;;\n      *)\n        TARGET_TASKS=\":shared:link${BUILD_TYPE}FrameworkMacosArm64\"\n        TARGET_DIR=\"macosArm64\"\n        ;;\n    esac\n    ;;\n  *)\n    echo \"Unsupported SDK_NAME '${SDK_NAME:-}' for Shared framework build\"\n    exit 1\n    ;;\nesac\n\n./gradlew $TARGET_TASKS\n\nSHARED_FRAMEWORK_PATH=\"$SRCROOT/../shared/build/bin/$TARGET_DIR/${FRAMEWORK_DIR}/Shared.framework\"\nif [ ! -d \"$SHARED_FRAMEWORK_PATH\" ]; then\n  echo \"Shared framework not found at $SHARED_FRAMEWORK_PATH\"\n  exit 1\nfi\n\nrsync -a --delete \"$SHARED_FRAMEWORK_PATH\" \"$BUILT_PRODUCTS_DIR/\"\n\nif [ \"$MULTI_ARCH_WATCHSIM\" -eq 1 ]; then\n  lipo -create \"$WATCHSIM_ARM64_BIN\" \"$WATCHSIM_X64_BIN\" -output \"$BUILT_PRODUCTS_DIR/Shared.framework/Shared\"\nfi\n\nSTAMP_FILE=\"$DERIVED_FILE_DIR/kotlin_shared_${CONFIGURATION:-Debug}_${SDK_NAME:-unknown}_${ARCHS:-unknown}.stamp\"\nmkdir -p \"$DERIVED_FILE_DIR\"\ntouch \"$STAMP_FILE\"\n\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -303,6 +311,7 @@
 /* Begin PBXTargetDependency section */
 		D48B48492F13965D002112B4 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
+			platformFilter = ios;
 			target = D48B483F2F13965C002112B4 /* watchApp Watch App */;
 			targetProxy = D48B48482F13965D002112B4 /* PBXContainerItemProxy */;
 		};
@@ -329,12 +338,17 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
-				SUPPORTS_MACCATALYST = NO;
+					LD_RUNPATH_SEARCH_PATHS = (
+						"$(inherited)",
+						"@executable_path/Frameworks",
+					);
+					OTHER_LDFLAGS = (
+						"$(inherited)",
+						"-framework",
+						Shared,
+					);
+					SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+					SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -430,12 +444,17 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
-				REGISTER_APP_GROUPS = YES;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+					LD_RUNPATH_SEARCH_PATHS = (
+						"$(inherited)",
+						"@executable_path/Frameworks",
+					);
+					OTHER_LDFLAGS = (
+						"$(inherited)",
+						"-framework",
+						Shared,
+					);
+					REGISTER_APP_GROUPS = YES;
+					SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -507,6 +526,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				"ARCHS[sdk=watchos*]" = arm64_32;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -517,12 +537,17 @@
 				INFOPLIST_KEY_CFBundleDisplayName = watchApp;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.yet.tetris.TetrisLite;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.yet.tetris.TetrisLite.watchkitapp;
+					LD_RUNPATH_SEARCH_PATHS = (
+						"$(inherited)",
+						"@executable_path/Frameworks",
+					);
+					OTHER_LDFLAGS = (
+						"$(inherited)",
+						"-framework",
+						Shared,
+					);
+					MARKETING_VERSION = 1.0;
+					PRODUCT_BUNDLE_IDENTIFIER = com.yet.tetris.TetrisLite.watchkitapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
@@ -542,6 +567,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				"ARCHS[sdk=watchos*]" = arm64_32;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -552,12 +578,17 @@
 				INFOPLIST_KEY_CFBundleDisplayName = watchApp;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.yet.tetris.TetrisLite;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.yet.tetris.TetrisLite.watchkitapp;
+					LD_RUNPATH_SEARCH_PATHS = (
+						"$(inherited)",
+						"@executable_path/Frameworks",
+					);
+					OTHER_LDFLAGS = (
+						"$(inherited)",
+						"-framework",
+						Shared,
+					);
+					MARKETING_VERSION = 1.0;
+					PRODUCT_BUNDLE_IDENTIFIER = com.yet.tetris.TetrisLite.watchkitapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
