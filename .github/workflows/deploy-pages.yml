@@ -42,9 +42,11 @@ jobs:
           cd webApp/build/dist/js/productionExecutable
           # Create .nojekyll to prevent GitHub Pages from ignoring files
           touch .nojekyll
+          # Enable SPA fallback on GitHub Pages
+          cp index.html 404.html
           # Copy CNAME if it exists
-          if [ -f ../../../../CNAME ]; then
-            cp ../../../../CNAME .
+          if [ -f ../../../../../CNAME ]; then
+            cp ../../../../../CNAME .
             echo "CNAME file copied"
           fi
           # List all files to verify
