@@ -137,6 +137,16 @@ struct WatchGameView: View {
                         }
 
                         VStack(spacing: 0) {
+                            Text(Strings.level.uppercased())
+                                .font(.system(size: 6, weight: .bold))
+                                .foregroundStyle(getAccentColor(for: model.settings.themeConfig.visualTheme))
+                            Text("\(model.gameState?.level ?? Int32(1))")
+                                .font(.system(size: 9, weight: .bold, design: .monospaced))
+                                .minimumScaleFactor(0.5)
+                                .lineLimit(1)
+                        }
+
+                        VStack(spacing: 0) {
                             Text(Strings.time.uppercased())
                                 .font(.system(size: 6, weight: .bold))
                                 .foregroundStyle(getAccentColor(for: model.settings.themeConfig.visualTheme))

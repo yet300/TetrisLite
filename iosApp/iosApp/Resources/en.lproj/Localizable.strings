@@ -29,6 +29,7 @@
 "next" = "Next";
 "score" = "Score";
 "lines" = "Lines";
+"level" = "Level";
 "time" = "Time";
 "game_over" = "Game Over";
 "final_score" = "Final Score: %d";
