@@ -357,6 +357,11 @@ val GameContent =
                                 }
 
                                 StatItem {
+                                    label = Strings.LEVEL
+                                    value = model.gameState?.level?.toString() ?: "1"
+                                }
+
+                                StatItem {
                                     label = Strings.TIME
                                     value = formatTime(model.elapsedTime)
                                 }
