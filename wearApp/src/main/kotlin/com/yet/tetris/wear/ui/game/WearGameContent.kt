@@ -141,6 +141,7 @@ private fun RowScope.WearSidebarSection(
         WearGameStats(
             score = state.score,
             lines = state.linesCleared,
+            level = state.level,
         )
         CompactPauseButton(onClick = onPauseClick)
     }
@@ -165,12 +166,17 @@ private fun WearNextPiece(nextPiece: Tetromino, settings: GameSettings) {
 }
 
 @Composable
-private fun WearGameStats(score: Long, lines: Long) {
+private fun WearGameStats(
+    score: Long,
+    lines: Long,
+    level: Int,
+) {
     Column(
         verticalArrangement = Arrangement.spacedBy(4.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         StatItem(stringResource(R.string.score_label), score.toString())
+        StatItem(stringResource(R.string.level_label), level.toString())
         StatItem(stringResource(R.string.lines_label), lines.toString())
     }
 }
