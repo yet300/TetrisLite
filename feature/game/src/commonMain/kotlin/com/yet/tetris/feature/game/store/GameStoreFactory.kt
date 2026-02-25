@@ -203,7 +203,7 @@ internal class GameStoreFactory : KoinComponent {
                     dispatch(GameStore.Msg.LoadingChanged(false))
 
                     // Start the game loop and timer via the UseCase.
-                    gameLoopUseCase.start(settings)
+                    gameLoopUseCase.start(settings, initialLevel = gameState.level)
 
                     if (settings.audioSettings.musicEnabled) {
                         audioRepository.playMusic(settings.audioSettings.selectedMusicTheme)
@@ -391,9 +391,11 @@ internal class GameStoreFactory : KoinComponent {
                     else -> audioRepository.playSoundEffect(SoundEffect.LINE_CLEAR)
                 }
 
-//                if (newState.level > gameState.level) {
-//                    audioRepository.playSoundEffect(SoundEffect.LEVEL_UP)
-//                }
+                if (newState.level > gameState.level) {
+                    audioRepository.playSoundEffect(SoundEffect.LEVEL_UP)
+                }
+
+                gameLoopUseCase.updateLevel(newState.level)
 
                 val ghostY = calculateGhostY(newState)
                 dispatch(GameStore.Msg.GameStateUpdated(newState, ghostY))

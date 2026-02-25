@@ -10,6 +10,7 @@ data class GameStateDto(
     val nextPiece: TetrominoDto,
     val score: Long = 0,
     val linesCleared: Long = 0,
+    val level: Int = 1,
     val isGameOver: Boolean = false,
     val isPaused: Boolean = false,
 )

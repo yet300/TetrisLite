@@ -24,6 +24,7 @@ object Strings {
     const val NEXT = "Next"
     const val SCORE = "Score"
     const val LINES = "Lines"
+    const val LEVEL = "Level"
     const val TIME = "Time"
     const val GAME_OVER = "Game Over"
     const val BACK_TO_HOME = "Back to Home"

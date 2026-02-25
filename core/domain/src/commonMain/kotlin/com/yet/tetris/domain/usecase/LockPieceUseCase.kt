@@ -1,6 +1,7 @@
 package com.yet.tetris.domain.usecase
 
 import com.yet.tetris.domain.model.game.GameState
+import com.yet.tetris.domain.model.game.LevelProgression
 import com.yet.tetris.domain.model.game.Position
 import jakarta.inject.Singleton
 
@@ -45,6 +46,7 @@ class LockPieceUseCase(
         val scoreIncrement = calculateScore(linesCleared)
         val newScore = state.score + scoreIncrement
         val newLinesCleared = state.linesCleared + linesCleared
+        val newLevel = LevelProgression.levelForLines(newLinesCleared)
 
         // 4. Spawn next piece
         val newCurrentPiece = state.nextPiece
@@ -61,6 +63,7 @@ class LockPieceUseCase(
             nextPiece = newNextPiece,
             score = newScore,
             linesCleared = newLinesCleared,
+            level = newLevel,
             isGameOver = isGameOver,
         )
     }

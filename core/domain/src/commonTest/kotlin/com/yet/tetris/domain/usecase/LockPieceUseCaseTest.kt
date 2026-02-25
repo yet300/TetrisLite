@@ -24,6 +24,7 @@ class LockPieceUseCaseTest {
         piece: Tetromino = Tetromino.create(TetrominoType.T),
         score: Long = 0,
         linesCleared: Long = 0,
+        level: Int = 1,
     ): GameState =
         GameState(
             board = board,
@@ -32,6 +33,7 @@ class LockPieceUseCaseTest {
             nextPiece = Tetromino.create(TetrominoType.I),
             score = score,
             linesCleared = linesCleared,
+            level = level,
             isGameOver = false,
             isPaused = false,
         )
@@ -196,6 +198,32 @@ class LockPieceUseCaseTest {
 
         // Then
         assertEquals(11, newState.linesCleared)
+    }
+
+    @Test
+    fun invoke_shouldIncreaseLevelEveryTenLines() {
+        // Given
+        val cells =
+            (0 until 6).associate { x ->
+                Position(x, 19) to TetrominoType.I
+            }
+        val board = GameBoard(cells = cells)
+        val piece = Tetromino.create(TetrominoType.I, 0)
+        val state =
+            createTestState(
+                position = Position(6, 18),
+                board = board,
+                piece = piece,
+                linesCleared = 9,
+                level = 1,
+            )
+
+        // When
+        val newState = useCase(state)
+
+        // Then
+        assertEquals(10, newState.linesCleared)
+        assertEquals(2, newState.level)
     }
 
     @Test

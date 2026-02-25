@@ -22,6 +22,7 @@ fun GameState.toDto(): GameStateDto =
         nextPiece = nextPiece.toDto(),
         score = score,
         linesCleared = linesCleared,
+        level = level,
         isGameOver = isGameOver,
         isPaused = isPaused,
     )
@@ -69,6 +70,7 @@ fun GameStateDto.toDomain(): GameState =
         nextPiece = nextPiece.toDomain(),
         score = score,
         linesCleared = linesCleared,
+        level = level,
         isGameOver = isGameOver,
         isPaused = isPaused,
     )

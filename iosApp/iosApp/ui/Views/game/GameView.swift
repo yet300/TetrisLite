@@ -73,6 +73,7 @@ struct GameView: View {
                             GameStatsView(
                                 score: gameState.score,
                                 lines: Int32(gameState.linesCleared),
+                                level: gameState.level,
                                 time: model.elapsedTime
                             )
 
@@ -384,12 +385,14 @@ private typealias SettingsChild = GameComponentSheetChildSettings
 struct GameStatsView: View {
     let score: Int64
     let lines: Int32
+    let level: Int32
     let time: Int64
     
     var body: some View {
         HStack(spacing: 16) {
             StatItem(label: Strings.score, value: "\(score)")
             StatItem(label: Strings.lines, value: "\(lines)")
+            StatItem(label: Strings.level, value: "\(level)")
             StatItem(label: Strings.time, value: formatTime(time))
         }
         .padding(12)

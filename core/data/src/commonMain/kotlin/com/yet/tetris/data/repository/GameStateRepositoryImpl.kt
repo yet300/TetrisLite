@@ -23,6 +23,7 @@ class GameStateRepositoryImpl(
             gameStateDao.saveGameState(
                 score = data.score,
                 linesCleared = data.linesCleared,
+                level = data.level,
                 currentPieceType = data.currentPieceType,
                 currentPieceRotation = data.currentPieceRotation,
                 currentPositionX = data.currentPositionX,

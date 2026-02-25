@@ -2,6 +2,7 @@ package com.yet.tetris.domain.usecase
 
 import com.yet.tetris.domain.model.game.GameBoard
 import com.yet.tetris.domain.model.game.GameState
+import com.yet.tetris.domain.model.game.LevelProgression
 import com.yet.tetris.domain.model.game.Position
 import com.yet.tetris.domain.model.settings.GameSettings
 import jakarta.inject.Singleton
@@ -41,6 +42,7 @@ class StartGameUseCase(
             nextPiece = nextPiece,
             score = 0,
             linesCleared = 0,
+            level = LevelProgression.START_LEVEL,
             isGameOver = false,
             isPaused = false,
         )

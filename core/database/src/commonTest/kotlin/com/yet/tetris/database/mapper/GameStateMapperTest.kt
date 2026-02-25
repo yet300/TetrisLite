@@ -21,6 +21,7 @@ class GameStateMapperTest {
                 id = 1,
                 score = 1000,
                 linesCleared = 10,
+                level = 2,
                 currentPieceType = TetrominoType.T,
                 currentPieceRotation = 1,
                 currentPositionX = 5,
@@ -44,6 +45,7 @@ class GameStateMapperTest {
         // Then
         assertEquals(1000, domain.score)
         assertEquals(10, domain.linesCleared)
+        assertEquals(2, domain.level)
         assertNotNull(domain.currentPiece)
         assertEquals(TetrominoType.T, domain.currentPiece?.type)
         assertEquals(1, domain.currentPiece?.rotation)
@@ -66,6 +68,7 @@ class GameStateMapperTest {
                 id = 1,
                 score = 500,
                 linesCleared = 5,
+                level = 1,
                 currentPieceType = null,
                 currentPieceRotation = 0,
                 currentPositionX = 0,
@@ -84,6 +87,7 @@ class GameStateMapperTest {
         // Then
         assertNull(domain.currentPiece)
         assertEquals(TetrominoType.I, domain.nextPiece.type)
+        assertEquals(1, domain.level)
         assertEquals(true, domain.isGameOver)
     }
 
@@ -111,6 +115,7 @@ class GameStateMapperTest {
                 nextPiece = nextPiece,
                 score = 2000,
                 linesCleared = 20,
+                level = 3,
                 isGameOver = false,
                 isPaused = true,
             )
@@ -121,6 +126,7 @@ class GameStateMapperTest {
         // Then
         assertEquals(2000, entities.gameState.score)
         assertEquals(20, entities.gameState.linesCleared)
+        assertEquals(3, entities.gameState.level)
         assertEquals(TetrominoType.S, entities.gameState.currentPieceType)
         assertEquals(1, entities.gameState.currentPieceRotation)
         assertEquals(5, entities.gameState.currentPositionX)
@@ -147,6 +153,7 @@ class GameStateMapperTest {
                 nextPiece = nextPiece,
                 score = 0,
                 linesCleared = 0,
+                level = 1,
                 isGameOver = true,
                 isPaused = false,
             )
@@ -156,6 +163,7 @@ class GameStateMapperTest {
 
         // Then
         assertNull(entities.gameState.currentPieceType)
+        assertEquals(1, entities.gameState.level)
         assertEquals(0, entities.gameState.currentPieceRotation)
         assertEquals(TetrominoType.I, entities.gameState.nextPieceType)
         assertEquals(0, entities.boardCells.size)
@@ -182,6 +190,7 @@ class GameStateMapperTest {
                 nextPiece = Tetromino.create(TetrominoType.L, 2),
                 score = 3000,
                 linesCleared = 30,
+                level = 4,
                 isGameOver = false,
                 isPaused = false,
             )
@@ -193,6 +202,7 @@ class GameStateMapperTest {
                 id = 1,
                 score = entities.gameState.score,
                 linesCleared = entities.gameState.linesCleared,
+                level = entities.gameState.level,
                 currentPieceType = entities.gameState.currentPieceType,
                 currentPieceRotation = entities.gameState.currentPieceRotation,
                 currentPositionX = entities.gameState.currentPositionX,
@@ -209,6 +219,7 @@ class GameStateMapperTest {
         // Then
         assertEquals(originalState.score, result.score)
         assertEquals(originalState.linesCleared, result.linesCleared)
+        assertEquals(originalState.level, result.level)
         assertEquals(originalState.currentPiece?.type, result.currentPiece?.type)
         assertEquals(originalState.currentPiece?.rotation, result.currentPiece?.rotation)
         assertEquals(originalState.currentPosition, result.currentPosition)

@@ -65,6 +65,20 @@ class GameLoopUseCaseTest {
         }
 
     @Test
+    fun `updateLevel can be called during an active loop`() =
+        runTest {
+            val useCase = GameLoopUseCase(this)
+            val settings = GameSettings(difficulty = Difficulty.NORMAL)
+
+            useCase.start(settings, initialLevel = 1)
+            useCase.updateLevel(5)
+            useCase.stop()
+
+            // Test passes if no exception is thrown
+            assertTrue(true)
+        }
+
+    @Test
     fun `pause when already paused is safe`() =
         runTest {
             val useCase = GameLoopUseCase(this)
