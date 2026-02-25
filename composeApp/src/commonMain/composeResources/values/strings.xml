@@ -19,6 +19,7 @@
     <string name="next">Next</string>
     <string name="score">Score</string>
     <string name="lines">Lines</string>
+    <string name="level">Level</string>
     <string name="time">Time</string>
     <string name="game_over">Game Over</string>
     <string name="final_score">Final Score: %1$d</string>

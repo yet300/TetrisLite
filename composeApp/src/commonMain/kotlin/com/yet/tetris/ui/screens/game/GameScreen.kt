@@ -54,6 +54,7 @@ import com.yet.tetris.uikit.theme.TetrisLiteAppTheme
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import tetrislite.composeapp.generated.resources.Res
+import tetrislite.composeapp.generated.resources.level
 import tetrislite.composeapp.generated.resources.lines
 import tetrislite.composeapp.generated.resources.next
 import tetrislite.composeapp.generated.resources.score
@@ -197,6 +198,7 @@ private fun GamePlayingContent(
             GameStatsRow(
                 score = gameState.score,
                 lines = gameState.linesCleared,
+                level = gameState.level,
                 time = model.elapsedTime,
             )
 
@@ -246,6 +248,7 @@ private fun GamePlayingContent(
 private fun GameStatsRow(
     score: Long,
     lines: Long,
+    level: Int,
     time: Long,
 ) {
     Row(
@@ -259,6 +262,7 @@ private fun GameStatsRow(
     ) {
         StatItem(stringResource(Res.string.score), score.toString())
         StatItem(stringResource(Res.string.lines), lines.toString())
+        StatItem(stringResource(Res.string.level), level.toString())
         StatItem(stringResource(Res.string.time), formatTime(time))
     }
 }
