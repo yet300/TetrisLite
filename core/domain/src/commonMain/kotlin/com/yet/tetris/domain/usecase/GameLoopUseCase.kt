@@ -41,22 +41,29 @@ class GameLoopUseCase(
     private var totalPausedDuration: Long = 0
 
     private var isPaused = false
+    private var currentSettings: GameSettings? = null
+    private var currentFallDelayMs: Long = 0
 
     /**
      * Starts the game loop and the timer.
      * @param settings The current game settings, used to determine the fall delay.
      */
-    fun start(settings: GameSettings) {
+    fun start(
+        settings: GameSettings,
+        initialLevel: Int = 1,
+    ) {
         stop() // Ensure previous loops are stopped
 
         isPaused = false
         gameStartTime = Clock.System.now().toEpochMilliseconds()
         totalPausedDuration = 0
+        currentSettings = settings
+        currentFallDelayMs = settings.difficulty.fallDelayForLevel(initialLevel)
 
         gameLoopJob =
             scope.launch {
                 while (isActive) {
-                    delay(settings.difficulty.fallDelayMs)
+                    delay(currentFallDelayMs)
                     if (!isPaused) {
                         _events.emit(GameLoopEvent.GameTick)
                     }
@@ -78,6 +85,11 @@ class GameLoopUseCase(
                     }
                 }
             }
+    }
+
+    fun updateLevel(level: Int) {
+        val settings = currentSettings ?: return
+        currentFallDelayMs = settings.difficulty.fallDelayForLevel(level)
     }
 
     /**
@@ -107,5 +119,7 @@ class GameLoopUseCase(
         gameLoopJob = null
         timerJob = null
         isPaused = false
+        currentSettings = null
+        currentFallDelayMs = 0
     }
 }

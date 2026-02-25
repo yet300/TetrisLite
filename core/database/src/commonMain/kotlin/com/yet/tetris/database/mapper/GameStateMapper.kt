@@ -38,6 +38,7 @@ fun CurrentGameState.toDomain(boardCells: List<BoardCells>): GameState {
         nextPiece = nextPiece,
         score = score,
         linesCleared = linesCleared,
+        level = level.toInt(),
         isGameOver = isGameOver,
         isPaused = isPaused,
     )
@@ -52,6 +53,7 @@ data class GameStateEntities(
 data class CurrentGameStateData(
     val score: Long,
     val linesCleared: Long,
+    val level: Long,
     val currentPieceType: TetrominoType?,
     val currentPieceRotation: Long,
     val currentPositionX: Long,
@@ -78,6 +80,7 @@ fun GameState.toEntities(): GameStateEntities {
         CurrentGameStateData(
             score = score,
             linesCleared = linesCleared,
+            level = level.toLong(),
             currentPieceType = currentPiece?.type,
             currentPieceRotation = (currentPiece?.rotation ?: 0).toLong(),
             currentPositionX = currentPosition.x.toLong(),

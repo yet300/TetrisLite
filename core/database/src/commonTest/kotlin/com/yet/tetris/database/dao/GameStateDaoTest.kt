@@ -46,6 +46,7 @@ class GameStateDaoTest : RobolectricTestRunner() {
             dao.saveGameState(
                 score = 1000,
                 linesCleared = 10,
+                level = 2,
                 currentPieceType = TetrominoType.T,
                 currentPieceRotation = 1,
                 currentPositionX = 5,
@@ -64,6 +65,7 @@ class GameStateDaoTest : RobolectricTestRunner() {
             assertNotNull(state)
             assertEquals(1000, state.score)
             assertEquals(10, state.linesCleared)
+            assertEquals(2, state.level)
             assertEquals(TetrominoType.T, state.currentPieceType)
             assertEquals(1, state.currentPieceRotation)
             assertEquals(5, state.currentPositionX)
@@ -87,6 +89,7 @@ class GameStateDaoTest : RobolectricTestRunner() {
             dao.saveGameState(
                 score = 1000,
                 linesCleared = 10,
+                level = 2,
                 currentPieceType = TetrominoType.T,
                 currentPieceRotation = 0,
                 currentPositionX = 5,
@@ -108,6 +111,7 @@ class GameStateDaoTest : RobolectricTestRunner() {
             dao.saveGameState(
                 score = 2000,
                 linesCleared = 20,
+                level = 3,
                 currentPieceType = TetrominoType.S,
                 currentPieceRotation = 2,
                 currentPositionX = 7,
@@ -126,6 +130,7 @@ class GameStateDaoTest : RobolectricTestRunner() {
             assertNotNull(state)
             assertEquals(2000, state.score)
             assertEquals(20, state.linesCleared)
+            assertEquals(3, state.level)
             assertEquals(TetrominoType.S, state.currentPieceType)
             assertTrue(state.isGameOver)
             assertTrue(state.isPaused)
@@ -166,6 +171,7 @@ class GameStateDaoTest : RobolectricTestRunner() {
             dao.saveGameState(
                 score = 1000,
                 linesCleared = 10,
+                level = 2,
                 currentPieceType = TetrominoType.T,
                 currentPieceRotation = 0,
                 currentPositionX = 5,
@@ -196,6 +202,7 @@ class GameStateDaoTest : RobolectricTestRunner() {
             dao.saveGameState(
                 score = 1000,
                 linesCleared = 10,
+                level = 2,
                 currentPieceType = TetrominoType.T,
                 currentPieceRotation = 0,
                 currentPositionX = 5,
@@ -239,6 +246,7 @@ class GameStateDaoTest : RobolectricTestRunner() {
                 dao.saveGameState(
                     score = 1000,
                     linesCleared = 10,
+                    level = 2,
                     currentPieceType = TetrominoType.T,
                     currentPieceRotation = 0,
                     currentPositionX = 5,
@@ -267,6 +275,7 @@ class GameStateDaoTest : RobolectricTestRunner() {
             dao.saveGameState(
                 score = 500,
                 linesCleared = 5,
+                level = 1,
                 currentPieceType = null,
                 currentPieceRotation = 0,
                 currentPositionX = 0,

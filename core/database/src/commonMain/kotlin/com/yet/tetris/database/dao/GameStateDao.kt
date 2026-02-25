@@ -23,6 +23,7 @@ class GameStateDao(
     suspend fun saveGameState(
         score: Long,
         linesCleared: Long,
+        level: Long,
         currentPieceType: TetrominoType?,
         currentPieceRotation: Long,
         currentPositionX: Long,
@@ -40,6 +41,7 @@ class GameStateDao(
             databaseManager.getDb().currentGameStateQueries.insertOrReplaceGameState(
                 score = score,
                 linesCleared = linesCleared,
+                level = level,
                 currentPieceType = currentPieceType,
                 currentPieceRotation = currentPieceRotation,
                 currentPositionX = currentPositionX,

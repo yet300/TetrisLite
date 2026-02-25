@@ -26,6 +26,7 @@ class StartGameUseCaseTest {
         assertNotNull(state.nextPiece)
         assertEquals(0, state.score)
         assertEquals(0, state.linesCleared)
+        assertEquals(1, state.level)
         assertFalse(state.isGameOver)
         assertFalse(state.isPaused)
     }
@@ -94,6 +95,7 @@ class StartGameUseCaseTest {
         assertNotNull(state)
         assertEquals(0, state.score)
         assertEquals(0, state.linesCleared)
+        assertEquals(1, state.level)
         assertFalse(state.isGameOver)
     }
 
