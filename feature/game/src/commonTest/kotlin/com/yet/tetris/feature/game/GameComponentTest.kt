@@ -9,6 +9,7 @@ import com.yet.tetris.domain.model.game.GameState
 import com.yet.tetris.domain.model.game.Position
 import com.yet.tetris.domain.model.game.Tetromino
 import com.yet.tetris.domain.model.game.TetrominoType
+import com.yet.tetris.domain.usecase.AdvanceGameTickUseCase
 import com.yet.tetris.domain.usecase.CalculateGhostPositionUseCase
 import com.yet.tetris.domain.usecase.CalculateScoreUseCase
 import com.yet.tetris.domain.usecase.CheckCollisionUseCase
@@ -16,9 +17,12 @@ import com.yet.tetris.domain.usecase.GenerateTetrominoUseCase
 import com.yet.tetris.domain.usecase.GestureHandlingUseCase
 import com.yet.tetris.domain.usecase.HandleSwipeInputUseCase
 import com.yet.tetris.domain.usecase.HardDropUseCase
+import com.yet.tetris.domain.usecase.InitializeGameSessionUseCase
 import com.yet.tetris.domain.usecase.LockPieceUseCase
 import com.yet.tetris.domain.usecase.MovePieceUseCase
+import com.yet.tetris.domain.usecase.PersistGameAudioUseCase
 import com.yet.tetris.domain.usecase.PlanVisualFeedbackUseCase
+import com.yet.tetris.domain.usecase.ProcessLockedPieceUseCase
 import com.yet.tetris.domain.usecase.RotatePieceUseCase
 import com.yet.tetris.domain.usecase.StartGameUseCase
 import com.yet.tetris.feature.game.store.FakeAudioRepository
@@ -54,15 +58,15 @@ class GameComponentTest {
     private lateinit var gameStateRepository: FakeGameStateRepository
     private lateinit var gameHistoryRepository: FakeGameHistoryRepository
     private lateinit var audioRepository: FakeAudioRepository
-    private lateinit var startGameUseCase: StartGameUseCase
     private lateinit var movePieceUseCase: MovePieceUseCase
     private lateinit var rotatePieceUseCase: RotatePieceUseCase
     private lateinit var hardDropUseCase: HardDropUseCase
-    private lateinit var lockPieceUseCase: LockPieceUseCase
     private lateinit var handleSwipeInputUseCase: HandleSwipeInputUseCase
-    private lateinit var calculateGhostPositionUseCase: CalculateGhostPositionUseCase
     private lateinit var gestureHandlingUseCase: GestureHandlingUseCase
-    private lateinit var planVisualFeedbackUseCase: PlanVisualFeedbackUseCase
+    private lateinit var initializeGameSessionUseCase: InitializeGameSessionUseCase
+    private lateinit var advanceGameTickUseCase: AdvanceGameTickUseCase
+    private lateinit var processLockedPieceUseCase: ProcessLockedPieceUseCase
+    private lateinit var persistGameAudioUseCase: PersistGameAudioUseCase
     private var navigateBackCalled = false
 
     @BeforeTest
@@ -83,15 +87,38 @@ class GameComponentTest {
         val calculateScore = CalculateScoreUseCase()
         val generateTetromino = GenerateTetrominoUseCase()
         val lockPiece = LockPieceUseCase(calculateScore, generateTetromino, checkCollision)
-        startGameUseCase = StartGameUseCase(generateTetromino)
         movePieceUseCase = movePiece
         rotatePieceUseCase = rotatePiece
         hardDropUseCase = hardDrop
-        lockPieceUseCase = lockPiece
         handleSwipeInputUseCase = HandleSwipeInputUseCase(movePiece, hardDrop)
-        calculateGhostPositionUseCase = CalculateGhostPositionUseCase()
         gestureHandlingUseCase = GestureHandlingUseCase()
-        planVisualFeedbackUseCase = PlanVisualFeedbackUseCase()
+
+        val startGameUseCase = StartGameUseCase(generateTetromino)
+        val calculateGhostPositionUseCase = CalculateGhostPositionUseCase()
+        val planVisualFeedbackUseCase = PlanVisualFeedbackUseCase()
+        initializeGameSessionUseCase =
+            InitializeGameSessionUseCase(
+                gameSettingsRepository = settingsRepository,
+                gameStateRepository = gameStateRepository,
+                startGameUseCase = startGameUseCase,
+            )
+        advanceGameTickUseCase =
+            AdvanceGameTickUseCase(
+                movePieceUseCase = movePiece,
+                calculateGhostPositionUseCase = calculateGhostPositionUseCase,
+            )
+        processLockedPieceUseCase =
+            ProcessLockedPieceUseCase(
+                lockPieceUseCase = lockPiece,
+                planVisualFeedbackUseCase = planVisualFeedbackUseCase,
+                advanceGameTickUseCase = advanceGameTickUseCase,
+            )
+        persistGameAudioUseCase =
+            PersistGameAudioUseCase(
+                gameStateRepository = gameStateRepository,
+                gameHistoryRepository = gameHistoryRepository,
+                audioRepository = audioRepository,
+            )
     }
 
     @AfterTest
@@ -116,18 +143,15 @@ class GameComponentTest {
         GameStoreFactory(
             storeFactory = DefaultStoreFactory(),
             gameSettingsRepository = settingsRepository,
-            gameStateRepository = gameStateRepository,
-            gameHistoryRepository = gameHistoryRepository,
-            audioRepository = audioRepository,
-            startGameUseCase = startGameUseCase,
             movePieceUseCase = movePieceUseCase,
             rotatePieceUseCase = rotatePieceUseCase,
             hardDropUseCase = hardDropUseCase,
-            lockPieceUseCase = lockPieceUseCase,
             handleSwipeInputUseCase = handleSwipeInputUseCase,
-            calculateGhostPositionUseCase = calculateGhostPositionUseCase,
             gestureHandlingUseCase = gestureHandlingUseCase,
-            planVisualFeedbackUseCase = planVisualFeedbackUseCase,
+            initializeGameSessionUseCase = initializeGameSessionUseCase,
+            advanceGameTickUseCase = advanceGameTickUseCase,
+            processLockedPieceUseCase = processLockedPieceUseCase,
+            persistGameAudioUseCase = persistGameAudioUseCase,
         )
 
     @Test
