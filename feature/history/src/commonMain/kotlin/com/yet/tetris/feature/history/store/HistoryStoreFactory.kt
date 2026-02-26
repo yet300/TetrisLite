@@ -5,19 +5,12 @@ import com.arkivanov.mvikotlin.core.store.SimpleBootstrapper
 import com.arkivanov.mvikotlin.core.store.Store
 import com.arkivanov.mvikotlin.core.store.StoreFactory
 import com.arkivanov.mvikotlin.extensions.coroutines.CoroutineExecutor
-import com.yet.tetris.domain.model.history.GameRecord
 import com.yet.tetris.domain.repository.GameHistoryRepository
 import com.yet.tetris.feature.history.DateFilter
 import jakarta.inject.Inject
 import kotlinx.coroutines.launch
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
 import org.koin.core.annotation.Factory
 import org.koin.core.annotation.Provided
-import kotlin.time.Clock
-import kotlin.time.Duration.Companion.days
-import kotlin.time.ExperimentalTime
-import kotlin.time.Instant
 
 @Factory
 internal class HistoryStoreFactory
@@ -38,7 +31,6 @@ constructor(
                 reducer = ReducerImpl,
             ) {}
 
-    @OptIn(ExperimentalTime::class)
     private inner class ExecutorImpl :
         CoroutineExecutor<HistoryStore.Intent, HistoryStore.Action, HistoryStore.State, HistoryStore.Msg, HistoryStore.Label>() {
         override fun executeAction(action: HistoryStore.Action) {
@@ -61,10 +53,7 @@ constructor(
                     dispatch(HistoryStore.Msg.LoadingChanged(true))
 
                     val games = gameHistoryRepository.getAllGames()
-                    val activeFilter = state().dateFilter
-                    val filteredGames = applyFilter(games = games, filter = activeFilter)
                     dispatch(HistoryStore.Msg.GamesLoaded(games))
-                    dispatch(HistoryStore.Msg.FilterChanged(activeFilter, filteredGames))
 
                     dispatch(HistoryStore.Msg.LoadingChanged(false))
                 } catch (e: Exception) {
@@ -75,9 +64,7 @@ constructor(
         }
 
         private fun filterByDate(filter: DateFilter) {
-            val state = state()
-            val filteredGames = applyFilter(games = state.games, filter = filter)
-            dispatch(HistoryStore.Msg.FilterChanged(filter, filteredGames))
+            dispatch(HistoryStore.Msg.FilterChanged(filter))
         }
 
         private fun deleteGame(id: String) {
@@ -94,79 +81,20 @@ constructor(
                 }
             }
         }
-
-        private fun filterToday(games: List<GameRecord>): List<GameRecord> {
-            val now = Clock.System.now()
-            val today = now.toLocalDateTime(TimeZone.currentSystemDefault()).date
-
-            return games.filter { game ->
-                val gameDate =
-                    Instant
-                        .fromEpochMilliseconds(game.timestamp)
-                        .toLocalDateTime(TimeZone.currentSystemDefault())
-                        .date
-                gameDate == today
-            }
-        }
-
-        private fun filterThisWeek(games: List<GameRecord>): List<GameRecord> {
-            val now = Clock.System.now()
-            val weekAgo = now.minus(7.days)
-
-            return games.filter { game ->
-                game.timestamp >= weekAgo.toEpochMilliseconds()
-            }
-        }
-
-        private fun filterThisMonth(games: List<GameRecord>): List<GameRecord> {
-            val now = Clock.System.now()
-            val currentMonth =
-                now.toLocalDateTime(TimeZone.currentSystemDefault()).month
-            val currentYear =
-                now.toLocalDateTime(TimeZone.currentSystemDefault()).year
-
-            return games.filter { game ->
-                val gameDateTime =
-                    Instant
-                        .fromEpochMilliseconds(game.timestamp)
-                        .toLocalDateTime(TimeZone.currentSystemDefault())
-                gameDateTime.month == currentMonth && gameDateTime.year == currentYear
-            }
-        }
-
-        private fun applyFilter(
-            games: List<GameRecord>,
-            filter: DateFilter,
-        ): List<GameRecord> =
-            when (filter) {
-                DateFilter.ALL -> games
-                DateFilter.TODAY -> filterToday(games)
-                DateFilter.THIS_WEEK -> filterThisWeek(games)
-                DateFilter.THIS_MONTH -> filterThisMonth(games)
-            }
     }
 
     private object ReducerImpl : Reducer<HistoryStore.State, HistoryStore.Msg> {
         override fun HistoryStore.State.reduce(msg: HistoryStore.Msg): HistoryStore.State =
             when (msg) {
-                is HistoryStore.Msg.GamesLoaded -> {
-                    val filtered =
-                        when (dateFilter) {
-                            DateFilter.ALL -> msg.games
-                            else -> filteredGames // Keep current filter
-                        }
-                    copy(games = msg.games, filteredGames = filtered)
-                }
+                is HistoryStore.Msg.GamesLoaded -> copy(games = msg.games)
                 is HistoryStore.Msg.FilterChanged ->
                     copy(
                         dateFilter = msg.filter,
-                        filteredGames = msg.filteredGames,
                     )
                 is HistoryStore.Msg.LoadingChanged -> copy(isLoading = msg.isLoading)
                 is HistoryStore.Msg.GameDeleted -> {
                     val updatedGames = games.filter { it.id != msg.id }
-                    val updatedFiltered = filteredGames.filter { it.id != msg.id }
-                    copy(games = updatedGames, filteredGames = updatedFiltered)
+                    copy(games = updatedGames)
                 }
             }
     }

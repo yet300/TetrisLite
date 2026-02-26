@@ -3,14 +3,19 @@ package com.yet.tetris.feature.history.store
 import com.arkivanov.mvikotlin.core.store.Store
 import com.yet.tetris.domain.model.history.GameRecord
 import com.yet.tetris.feature.history.DateFilter
+import com.yet.tetris.feature.history.utils.applyHistoryDateFilter
+import kotlin.time.ExperimentalTime
 
 internal interface HistoryStore : Store<HistoryStore.Intent, HistoryStore.State, HistoryStore.Label> {
     data class State(
         val games: List<GameRecord> = emptyList(),
-        val filteredGames: List<GameRecord> = emptyList(),
         val dateFilter: DateFilter = DateFilter.ALL,
         val isLoading: Boolean = true,
-    )
+    ) {
+        @OptIn(ExperimentalTime::class)
+        val filteredGames: List<GameRecord>
+            get() = applyHistoryDateFilter(games = games, filter = dateFilter)
+    }
 
     sealed class Intent {
         data object Refresh : Intent()
@@ -31,7 +36,6 @@ internal interface HistoryStore : Store<HistoryStore.Intent, HistoryStore.State,
 
         data class FilterChanged(
             val filter: DateFilter,
-            val filteredGames: List<GameRecord>,
         ) : Msg()
 
         data class LoadingChanged(
