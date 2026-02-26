@@ -18,18 +18,21 @@ import com.arkivanov.mvikotlin.extensions.coroutines.labels
 import com.yet.tetris.feature.game.integration.stateToModel
 import com.yet.tetris.feature.game.store.GameStore
 import com.yet.tetris.feature.game.store.GameStoreFactory
-import com.yet.tetris.feature.settings.DefaultSettingsComponent
+import com.yet.tetris.feature.settings.SettingsComponent
+import jakarta.inject.Inject
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
-import org.koin.core.component.KoinComponent
+import org.koin.core.annotation.Factory
+import org.koin.core.annotation.Provided
 
-class DefaultGameComponent(
+internal class DefaultGameComponent(
     componentContext: ComponentContext,
     private val navigateBack: () -> Unit,
+    private val gameStoreFactory: GameStoreFactory,
+    private val settingsComponentFactory: SettingsComponent.Factory,
 ) : ComponentContext by componentContext,
-    GameComponent,
-    KoinComponent {
-    private val store = instanceKeeper.getStore { GameStoreFactory().create() }
+    GameComponent {
+    private val store = instanceKeeper.getStore { gameStoreFactory.create() }
 
     private val dialogNavigation = SlotNavigation<DialogConfig>()
 
@@ -204,7 +207,7 @@ class DefaultGameComponent(
         when (config) {
             is SheetConfig.Settings ->
                 GameComponent.SheetChild.Settings(
-                    DefaultSettingsComponent(
+                    settingsComponentFactory(
                         componentContext = componentContext,
                         onCloseRequest = ::onDismissSheet,
                     ),
@@ -233,4 +236,23 @@ class DefaultGameComponent(
         @Serializable
         data object Settings : SheetConfig
     }
+}
+
+@Factory
+internal class DefaultGameComponentFactory
+@Inject
+constructor(
+    private val gameStoreFactory: GameStoreFactory,
+    @Provided private val settingsComponentFactory: SettingsComponent.Factory,
+) : GameComponent.Factory {
+    override fun invoke(
+        componentContext: ComponentContext,
+        navigateBack: () -> Unit,
+    ): GameComponent =
+        DefaultGameComponent(
+            componentContext = componentContext,
+            navigateBack = navigateBack,
+            gameStoreFactory = gameStoreFactory,
+            settingsComponentFactory = settingsComponentFactory,
+        )
 }

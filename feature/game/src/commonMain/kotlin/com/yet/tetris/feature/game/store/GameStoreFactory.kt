@@ -29,30 +29,35 @@ import com.yet.tetris.domain.usecase.MovePieceUseCase
 import com.yet.tetris.domain.usecase.PlanVisualFeedbackUseCase
 import com.yet.tetris.domain.usecase.RotatePieceUseCase
 import com.yet.tetris.domain.usecase.StartGameUseCase
+import jakarta.inject.Inject
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import org.koin.core.annotation.Factory
+import org.koin.core.annotation.Provided
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
-internal class GameStoreFactory : KoinComponent {
-    private val storeFactory: StoreFactory by inject()
-    private val gameSettingsRepository: GameSettingsRepository by inject()
-    private val gameStateRepository: GameStateRepository by inject()
-    private val gameHistoryRepository: GameHistoryRepository by inject()
-    private val audioRepository: AudioRepository by inject()
-    private val startGameUseCase: StartGameUseCase by inject()
-    private val movePieceUseCase: MovePieceUseCase by inject()
-    private val rotatePieceUseCase: RotatePieceUseCase by inject()
-    private val hardDropUseCase: HardDropUseCase by inject()
-    private val lockPieceUseCase: LockPieceUseCase by inject()
-    private val handleSwipeInputUseCase: HandleSwipeInputUseCase by inject()
-    private val calculateGhostPositionUseCase: CalculateGhostPositionUseCase by inject()
-    private val gestureHandlingUseCase: GestureHandlingUseCase by inject()
-    private val planVisualFeedbackUseCase: PlanVisualFeedbackUseCase by inject()
+@Factory
+internal class GameStoreFactory
+@Inject
+constructor(
+    @Provided private val storeFactory: StoreFactory,
+    @Provided private val gameSettingsRepository: GameSettingsRepository,
+    @Provided private val gameStateRepository: GameStateRepository,
+    @Provided private val gameHistoryRepository: GameHistoryRepository,
+    @Provided private val audioRepository: AudioRepository,
+    @Provided private val startGameUseCase: StartGameUseCase,
+    @Provided private val movePieceUseCase: MovePieceUseCase,
+    @Provided private val rotatePieceUseCase: RotatePieceUseCase,
+    @Provided private val hardDropUseCase: HardDropUseCase,
+    @Provided private val lockPieceUseCase: LockPieceUseCase,
+    @Provided private val handleSwipeInputUseCase: HandleSwipeInputUseCase,
+    @Provided private val calculateGhostPositionUseCase: CalculateGhostPositionUseCase,
+    @Provided private val gestureHandlingUseCase: GestureHandlingUseCase,
+    @Provided private val planVisualFeedbackUseCase: PlanVisualFeedbackUseCase,
+) {
 
     fun create(): GameStore =
         object :

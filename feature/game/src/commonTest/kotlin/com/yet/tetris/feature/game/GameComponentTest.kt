@@ -25,6 +25,9 @@ import com.yet.tetris.feature.game.store.FakeAudioRepository
 import com.yet.tetris.feature.game.store.FakeGameHistoryRepository
 import com.yet.tetris.feature.game.store.FakeGameSettingsRepository
 import com.yet.tetris.feature.game.store.FakeGameStateRepository
+import com.yet.tetris.feature.game.store.GameStoreFactory
+import com.yet.tetris.feature.settings.PreviewSettingsComponent
+import com.yet.tetris.feature.settings.SettingsComponent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -33,10 +36,6 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import org.koin.core.context.startKoin
-import org.koin.core.context.stopKoin
-import org.koin.dsl.module
-import org.koin.test.KoinTest
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -48,13 +47,22 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class GameComponentTest : KoinTest {
+class GameComponentTest {
     private val testDispatcher = StandardTestDispatcher()
     private lateinit var lifecycle: LifecycleRegistry
     private lateinit var settingsRepository: FakeGameSettingsRepository
     private lateinit var gameStateRepository: FakeGameStateRepository
     private lateinit var gameHistoryRepository: FakeGameHistoryRepository
     private lateinit var audioRepository: FakeAudioRepository
+    private lateinit var startGameUseCase: StartGameUseCase
+    private lateinit var movePieceUseCase: MovePieceUseCase
+    private lateinit var rotatePieceUseCase: RotatePieceUseCase
+    private lateinit var hardDropUseCase: HardDropUseCase
+    private lateinit var lockPieceUseCase: LockPieceUseCase
+    private lateinit var handleSwipeInputUseCase: HandleSwipeInputUseCase
+    private lateinit var calculateGhostPositionUseCase: CalculateGhostPositionUseCase
+    private lateinit var gestureHandlingUseCase: GestureHandlingUseCase
+    private lateinit var planVisualFeedbackUseCase: PlanVisualFeedbackUseCase
     private var navigateBackCalled = false
 
     @BeforeTest
@@ -75,37 +83,19 @@ class GameComponentTest : KoinTest {
         val calculateScore = CalculateScoreUseCase()
         val generateTetromino = GenerateTetrominoUseCase()
         val lockPiece = LockPieceUseCase(calculateScore, generateTetromino, checkCollision)
-        val startGame = StartGameUseCase(generateTetromino)
-        val handleSwipe = HandleSwipeInputUseCase(movePiece, hardDrop)
-        val calculateGhost = CalculateGhostPositionUseCase()
-        val gestureHandling = GestureHandlingUseCase()
-        val planVisualFeedback = PlanVisualFeedbackUseCase()
-
-        startKoin {
-            modules(
-                module {
-                    single<com.arkivanov.mvikotlin.core.store.StoreFactory> { DefaultStoreFactory() }
-                    single<com.yet.tetris.domain.repository.GameSettingsRepository> { settingsRepository }
-                    single<com.yet.tetris.domain.repository.GameStateRepository> { gameStateRepository }
-                    single<com.yet.tetris.domain.repository.GameHistoryRepository> { gameHistoryRepository }
-                    single<com.yet.tetris.domain.repository.AudioRepository> { audioRepository }
-                    single { startGame }
-                    single { movePiece }
-                    single { rotatePiece }
-                    single { hardDrop }
-                    single { lockPiece }
-                    single { handleSwipe }
-                    single { calculateGhost }
-                    single { gestureHandling }
-                    single { planVisualFeedback }
-                },
-            )
-        }
+        startGameUseCase = StartGameUseCase(generateTetromino)
+        movePieceUseCase = movePiece
+        rotatePieceUseCase = rotatePiece
+        hardDropUseCase = hardDrop
+        lockPieceUseCase = lockPiece
+        handleSwipeInputUseCase = HandleSwipeInputUseCase(movePiece, hardDrop)
+        calculateGhostPositionUseCase = CalculateGhostPositionUseCase()
+        gestureHandlingUseCase = GestureHandlingUseCase()
+        planVisualFeedbackUseCase = PlanVisualFeedbackUseCase()
     }
 
     @AfterTest
     fun tearDown() {
-        stopKoin()
         Dispatchers.resetMain()
     }
 
@@ -113,6 +103,31 @@ class GameComponentTest : KoinTest {
         DefaultGameComponent(
             componentContext = DefaultComponentContext(lifecycle = lifecycle),
             navigateBack = { navigateBackCalled = true },
+            gameStoreFactory = createGameStoreFactory(),
+            settingsComponentFactory = createSettingsComponentFactory(),
+        )
+
+    private fun createSettingsComponentFactory(): SettingsComponent.Factory =
+        SettingsComponent.Factory { _, _ ->
+            PreviewSettingsComponent()
+        }
+
+    private fun createGameStoreFactory(): GameStoreFactory =
+        GameStoreFactory(
+            storeFactory = DefaultStoreFactory(),
+            gameSettingsRepository = settingsRepository,
+            gameStateRepository = gameStateRepository,
+            gameHistoryRepository = gameHistoryRepository,
+            audioRepository = audioRepository,
+            startGameUseCase = startGameUseCase,
+            movePieceUseCase = movePieceUseCase,
+            rotatePieceUseCase = rotatePieceUseCase,
+            hardDropUseCase = hardDropUseCase,
+            lockPieceUseCase = lockPieceUseCase,
+            handleSwipeInputUseCase = handleSwipeInputUseCase,
+            calculateGhostPositionUseCase = calculateGhostPositionUseCase,
+            gestureHandlingUseCase = gestureHandlingUseCase,
+            planVisualFeedbackUseCase = planVisualFeedbackUseCase,
         )
 
     @Test
