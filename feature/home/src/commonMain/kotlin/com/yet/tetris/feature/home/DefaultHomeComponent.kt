@@ -13,22 +13,26 @@ import com.arkivanov.decompose.value.operator.map
 import com.arkivanov.mvikotlin.core.instancekeeper.getStore
 import com.arkivanov.mvikotlin.extensions.coroutines.labels
 import com.yet.tetris.domain.model.game.Difficulty
-import com.yet.tetris.feature.history.DefaultHistoryComponent
+import com.yet.tetris.feature.history.HistoryComponent
 import com.yet.tetris.feature.home.integration.stateToModel
 import com.yet.tetris.feature.home.store.HomeStore
 import com.yet.tetris.feature.home.store.HomeStoreFactory
-import com.yet.tetris.feature.settings.DefaultSettingsComponent
+import com.yet.tetris.feature.settings.SettingsComponent
+import jakarta.inject.Inject
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
-import org.koin.core.component.KoinComponent
+import org.koin.core.annotation.Factory
+import org.koin.core.annotation.Provided
 
-class DefaultHomeComponent(
+internal class DefaultHomeComponent(
     componentContext: ComponentContext,
     private val navigateToGame: () -> Unit,
+    private val homeStoreFactory: HomeStoreFactory,
+    private val settingsComponentFactory: SettingsComponent.Factory,
+    private val historyComponentFactory: HistoryComponent.Factory,
 ) : ComponentContext by componentContext,
-    HomeComponent,
-    KoinComponent {
-    private val store = instanceKeeper.getStore { HomeStoreFactory().create() }
+    HomeComponent {
+    private val store = instanceKeeper.getStore { homeStoreFactory.create() }
 
     private val bottomSheetSlot = SlotNavigation<BottomSheetConfiguration>()
 
@@ -65,7 +69,7 @@ class DefaultHomeComponent(
             BottomSheetConfiguration.Settings ->
                 HomeComponent.BottomSheetChild.SettingsChild(
                     component =
-                        DefaultSettingsComponent(
+                        settingsComponentFactory(
                             componentContext = componentContext,
                             onCloseRequest = ::onDismissBottomSheet,
                         ),
@@ -74,7 +78,7 @@ class DefaultHomeComponent(
             BottomSheetConfiguration.History ->
                 HomeComponent.BottomSheetChild.HistoryChild(
                     component =
-                        DefaultHistoryComponent(
+                        historyComponentFactory(
                             componentContext = componentContext,
                             dismiss = ::onDismissBottomSheet,
                         ),
@@ -113,4 +117,25 @@ class DefaultHomeComponent(
         @Serializable
         data object History : BottomSheetConfiguration
     }
+}
+
+@Factory
+internal class DefaultHomeComponentFactory
+@Inject
+constructor(
+    private val homeStoreFactory: HomeStoreFactory,
+    @Provided private val settingsComponentFactory: SettingsComponent.Factory,
+    @Provided private val historyComponentFactory: HistoryComponent.Factory,
+) : HomeComponent.Factory {
+    override fun invoke(
+        componentContext: ComponentContext,
+        navigateToGame: () -> Unit,
+    ): HomeComponent =
+        DefaultHomeComponent(
+            componentContext = componentContext,
+            navigateToGame = navigateToGame,
+            homeStoreFactory = homeStoreFactory,
+            settingsComponentFactory = settingsComponentFactory,
+            historyComponentFactory = historyComponentFactory,
+        )
 }

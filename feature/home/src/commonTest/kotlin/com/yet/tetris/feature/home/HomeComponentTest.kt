@@ -5,17 +5,19 @@ import com.arkivanov.essenty.lifecycle.LifecycleRegistry
 import com.arkivanov.mvikotlin.main.store.DefaultStoreFactory
 import com.yet.tetris.domain.model.game.Difficulty
 import com.yet.tetris.domain.model.settings.GameSettings
+import com.yet.tetris.feature.history.HistoryComponent
+import com.yet.tetris.feature.history.PreviewHistoryComponent
 import com.yet.tetris.feature.home.store.FakeGameSettingsRepository
 import com.yet.tetris.feature.home.store.FakeGameStateRepository
+import com.yet.tetris.feature.home.store.HomeStoreFactory
+import com.yet.tetris.feature.settings.PreviewSettingsComponent
+import com.yet.tetris.feature.settings.SettingsComponent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import org.koin.core.context.startKoin
-import org.koin.core.context.stopKoin
-import org.koin.dsl.module
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -37,21 +39,10 @@ class HomeComponentTest {
 
         settingsRepository = FakeGameSettingsRepository()
         gameStateRepository = FakeGameStateRepository()
-
-        startKoin {
-            modules(
-                module {
-                    single<com.arkivanov.mvikotlin.core.store.StoreFactory> { DefaultStoreFactory() }
-                    single<com.yet.tetris.domain.repository.GameSettingsRepository> { settingsRepository }
-                    single<com.yet.tetris.domain.repository.GameStateRepository> { gameStateRepository }
-                },
-            )
-        }
     }
 
     @AfterTest
     fun after() {
-        stopKoin()
         Dispatchers.resetMain()
     }
 
@@ -238,6 +229,26 @@ class HomeComponentTest {
         return DefaultHomeComponent(
             componentContext = componentContext,
             navigateToGame = navigateToGame,
+            homeStoreFactory = createHomeStoreFactory(),
+            settingsComponentFactory = createSettingsComponentFactory(),
+            historyComponentFactory = createHistoryComponentFactory(),
         )
     }
+
+    private fun createHomeStoreFactory(): HomeStoreFactory =
+        HomeStoreFactory(
+            storeFactory = DefaultStoreFactory(),
+            gameSettingsRepository = settingsRepository,
+            gameStateRepository = gameStateRepository,
+        )
+
+    private fun createSettingsComponentFactory(): SettingsComponent.Factory =
+        SettingsComponent.Factory { _, _ ->
+            PreviewSettingsComponent()
+        }
+
+    private fun createHistoryComponentFactory(): HistoryComponent.Factory =
+        HistoryComponent.Factory { _, _ ->
+            PreviewHistoryComponent()
+        }
 }
