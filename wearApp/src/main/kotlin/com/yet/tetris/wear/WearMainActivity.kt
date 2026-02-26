@@ -5,7 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.core.view.WindowCompat
 import com.arkivanov.decompose.defaultComponentContext
-import com.yet.tetris.feature.root.createDefaultRootComponent
+import com.yet.tetris.feature.root.DefaultRootComponent
 import com.yet.tetris.wear.ui.WearApp
 
 class WearMainActivity : ComponentActivity() {
@@ -14,7 +14,7 @@ class WearMainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         val root =
-            createDefaultRootComponent(
+            DefaultRootComponent(
                 componentContext = defaultComponentContext(),
             )
 

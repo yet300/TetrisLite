@@ -6,7 +6,7 @@ import androidx.compose.ui.window.application
 import com.arkivanov.decompose.DefaultComponentContext
 import com.arkivanov.essenty.lifecycle.LifecycleRegistry
 import com.yet.tetris.di.InitKoin
-import com.yet.tetris.feature.root.createDefaultRootComponent
+import com.yet.tetris.feature.root.DefaultRootComponent
 import java.awt.Dimension
 import javax.swing.SwingUtilities
 
@@ -18,7 +18,7 @@ fun main() =
 
         val root =
             runOnUiThread {
-                createDefaultRootComponent(
+                DefaultRootComponent(
                     componentContext = DefaultComponentContext(lifecycle = lifecycle),
                 )
             }

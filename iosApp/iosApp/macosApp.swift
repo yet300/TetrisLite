@@ -11,7 +11,7 @@ struct macosApp: App {
         InitKoinKt.InitKoin()
 
 
-        self.root = CreateDefaultRootComponentKt.createDefaultRootComponent(
+        self.root = DefaultRootComponent(
             componentContext: DefaultComponentContext(
                 lifecycle: LifecycleRegistryKt.LifecycleRegistry(),
                 stateKeeper: nil,

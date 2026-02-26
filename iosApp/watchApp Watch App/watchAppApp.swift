@@ -14,7 +14,7 @@ struct watchApp_Watch_AppApp: App {
 
     init() {
         InitKoinKt.InitKoin()
-        self.root = CreateDefaultRootComponentKt.createDefaultRootComponent(
+        self.root = DefaultRootComponent(
             componentContext: DefaultComponentContext(
                 lifecycle: LifecycleRegistryKt.LifecycleRegistry(),
                 stateKeeper: nil,

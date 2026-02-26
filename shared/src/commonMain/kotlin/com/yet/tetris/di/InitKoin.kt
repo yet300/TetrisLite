@@ -5,7 +5,6 @@ import com.yet.tetris.data.di.DataModule
 import com.yet.tetris.feature.game.di.GameFeatureModule
 import com.yet.tetris.feature.history.di.HistoryFeatureModule
 import com.yet.tetris.feature.home.di.HomeFeatureModule
-import com.yet.tetris.feature.root.di.RootFeatureModule
 import com.yet.tetris.feature.settings.di.SettingsFeatureModule
 import org.koin.core.context.startKoin
 import org.koin.dsl.KoinAppDeclaration
@@ -24,7 +23,6 @@ fun InitKoin(config: KoinAppDeclaration? = null) {
             GameFeatureModule().module,
             HomeFeatureModule().module,
             HistoryFeatureModule().module,
-            RootFeatureModule().module,
             SettingsFeatureModule().module,
         )
         config?.invoke(this)

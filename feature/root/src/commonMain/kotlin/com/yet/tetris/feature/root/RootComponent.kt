@@ -1,6 +1,5 @@
 package com.yet.tetris.feature.root
 
-import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.ExperimentalDecomposeApi
 import com.arkivanov.decompose.router.stack.ChildStack
 import com.arkivanov.decompose.router.webhistory.WebNavigationOwner
@@ -25,9 +24,5 @@ interface RootComponent :
         data class Game(
             val component: GameComponent,
         ) : Child()
-    }
-
-    fun interface Factory {
-        operator fun invoke(componentContext: ComponentContext): RootComponent
     }
 }
