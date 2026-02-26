@@ -61,9 +61,11 @@ constructor(
                     dispatch(HistoryStore.Msg.LoadingChanged(true))
 
                     val games = gameHistoryRepository.getAllGames()
+                    val activeFilter = state().dateFilter
+                    val filteredGames = applyFilter(games = games, filter = activeFilter)
                     dispatch(HistoryStore.Msg.GamesLoaded(games))
+                    dispatch(HistoryStore.Msg.FilterChanged(activeFilter, filteredGames))
 
-                    // Apply current filter
                     dispatch(HistoryStore.Msg.LoadingChanged(false))
                 } catch (e: Exception) {
                     dispatch(HistoryStore.Msg.LoadingChanged(false))
@@ -74,13 +76,7 @@ constructor(
 
         private fun filterByDate(filter: DateFilter) {
             val state = state()
-            val filteredGames =
-                when (filter) {
-                    DateFilter.ALL -> state.games
-                    DateFilter.TODAY -> filterToday(state.games)
-                    DateFilter.THIS_WEEK -> filterThisWeek(state.games)
-                    DateFilter.THIS_MONTH -> filterThisMonth(state.games)
-                }
+            val filteredGames = applyFilter(games = state.games, filter = filter)
             dispatch(HistoryStore.Msg.FilterChanged(filter, filteredGames))
         }
 
@@ -137,6 +133,17 @@ constructor(
                 gameDateTime.month == currentMonth && gameDateTime.year == currentYear
             }
         }
+
+        private fun applyFilter(
+            games: List<GameRecord>,
+            filter: DateFilter,
+        ): List<GameRecord> =
+            when (filter) {
+                DateFilter.ALL -> games
+                DateFilter.TODAY -> filterToday(games)
+                DateFilter.THIS_WEEK -> filterThisWeek(games)
+                DateFilter.THIS_MONTH -> filterThisMonth(games)
+            }
     }
 
     private object ReducerImpl : Reducer<HistoryStore.State, HistoryStore.Msg> {
