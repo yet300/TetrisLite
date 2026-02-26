@@ -3,13 +3,11 @@ package com.yet.tetris.domain.usecase
 import com.yet.tetris.domain.model.game.GameState
 import com.yet.tetris.domain.model.game.Position
 import com.yet.tetris.domain.model.game.Tetromino
-import jakarta.inject.Singleton
 
 /**
  * Calculates the landing position (Y coordinate) for the ghost piece preview.
  * The ghost piece shows where the current piece will land if dropped.
  */
-@Singleton
 class CalculateGhostPositionUseCase {
     /**
      * Calculate the Y position where the piece would land if hard dropped

@@ -3,13 +3,11 @@ package com.yet.tetris.domain.usecase
 import com.yet.tetris.domain.model.game.GameState
 import com.yet.tetris.domain.model.game.Position
 import com.yet.tetris.domain.model.game.Tetromino
-import jakarta.inject.Singleton
 
 /**
  * Use case for rotating tetrominoes with SRS (Super Rotation System) wall kicks.
  * Wall kicks allow pieces to rotate near walls and other blocks by trying offset positions.
  */
-@Singleton
 class RotatePieceUseCase(
     private val checkCollision: CheckCollisionUseCase,
 ) {

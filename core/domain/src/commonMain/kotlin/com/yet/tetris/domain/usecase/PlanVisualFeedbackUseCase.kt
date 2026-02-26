@@ -3,10 +3,8 @@ package com.yet.tetris.domain.usecase
 import com.yet.tetris.domain.model.effects.IntensityLevel
 import com.yet.tetris.domain.model.effects.VisualEffectEvent
 import com.yet.tetris.domain.model.effects.VisualTextKey
-import jakarta.inject.Singleton
 import kotlin.math.floor
 
-@Singleton
 class PlanVisualFeedbackUseCase {
     data class BurstSpec(
         val linesCleared: Int,
