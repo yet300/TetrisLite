@@ -8,19 +8,24 @@ import com.arkivanov.mvikotlin.extensions.coroutines.CoroutineExecutor
 import com.yet.tetris.domain.model.history.GameRecord
 import com.yet.tetris.domain.repository.GameHistoryRepository
 import com.yet.tetris.feature.history.DateFilter
+import jakarta.inject.Inject
 import kotlinx.coroutines.launch
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import org.koin.core.annotation.Factory
+import org.koin.core.annotation.Provided
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.days
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
-internal class HistoryStoreFactory : KoinComponent {
-    private val storeFactory: StoreFactory by inject()
-    private val gameHistoryRepository: GameHistoryRepository by inject()
+@Factory
+internal class HistoryStoreFactory
+@Inject
+constructor(
+    @Provided private val storeFactory: StoreFactory,
+    @Provided private val gameHistoryRepository: GameHistoryRepository,
+) {
 
     fun create(): HistoryStore =
         object :

@@ -10,16 +10,17 @@ import com.arkivanov.mvikotlin.extensions.coroutines.labels
 import com.yet.tetris.feature.history.integration.stateToModel
 import com.yet.tetris.feature.history.store.HistoryStore
 import com.yet.tetris.feature.history.store.HistoryStoreFactory
+import jakarta.inject.Inject
 import kotlinx.coroutines.launch
-import org.koin.core.component.KoinComponent
+import org.koin.core.annotation.Factory
 
-class DefaultHistoryComponent(
+internal class DefaultHistoryComponent(
     componentContext: ComponentContext,
     private val dismiss: () -> Unit,
+    private val historyStoreFactory: HistoryStoreFactory,
 ) : ComponentContext by componentContext,
-    HistoryComponent,
-    KoinComponent {
-    private val store = instanceKeeper.getStore { HistoryStoreFactory().create() }
+    HistoryComponent {
+    private val store = instanceKeeper.getStore { historyStoreFactory.create() }
 
     init {
         coroutineScope().launch {
@@ -54,4 +55,21 @@ class DefaultHistoryComponent(
     override fun onDeleteGame(id: String) {
         store.accept(HistoryStore.Intent.DeleteGame(id))
     }
+}
+
+@Factory
+internal class DefaultHistoryComponentFactory
+@Inject
+constructor(
+    private val historyStoreFactory: HistoryStoreFactory,
+) : HistoryComponent.Factory {
+    override fun invoke(
+        componentContext: ComponentContext,
+        dismiss: () -> Unit,
+    ): HistoryComponent =
+        DefaultHistoryComponent(
+            componentContext = componentContext,
+            dismiss = dismiss,
+            historyStoreFactory = historyStoreFactory,
+        )
 }
