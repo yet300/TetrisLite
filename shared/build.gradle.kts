@@ -1,22 +1,9 @@
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-
 plugins {
-    alias(libs.plugins.kotlinMultiplatform)
-    alias(libs.plugins.android.kotlin.multiplatform.library)
-    alias(libs.plugins.ksp)
+    alias(libs.plugins.local.kotlin.multiplatform)
+    alias(libs.plugins.local.koin)
 }
 
 kotlin {
-    androidLibrary {
-        namespace = "com.yet.tetris.shared"
-
-        compileSdk = libs.versions.android.compileSdk.get().toInt()
-        minSdk = libs.versions.android.minSdk.get().toInt()
-
-        compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_17)
-        }
-    }
 
     listOf(
         iosArm64(),
@@ -43,17 +30,6 @@ kotlin {
         }
     }
 
-    jvm()
-
-    js {
-        outputModuleName = "shared"
-        browser()
-        binaries.library()
-        generateTypeScriptDefinitions()
-        compilerOptions {
-            target = "es2015"
-        }
-    }
 
     sourceSets {
         commonMain.dependencies {
@@ -68,11 +44,6 @@ kotlin {
             api(projects.feature.history)
 
             api(libs.bundles.decompose)
-
-            implementation(libs.koin.core)
-        }
-        commonTest.dependencies {
-            implementation(libs.kotlin.test)
         }
     }
 }
