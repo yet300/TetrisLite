@@ -9,9 +9,9 @@ struct macosApp: App {
 
     init() {
         InitKoinKt.InitKoin()
-        
 
-        self.root = DefaultRootComponent(
+
+        self.root = CreateDefaultRootComponentKt.createDefaultRootComponent(
             componentContext: DefaultComponentContext(
                 lifecycle: LifecycleRegistryKt.LifecycleRegistry(),
                 stateKeeper: nil,

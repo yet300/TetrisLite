@@ -10,7 +10,7 @@ import com.arkivanov.essenty.lifecycle.resume
 import com.arkivanov.essenty.lifecycle.stop
 import com.yet.tetris.App
 import com.yet.tetris.di.InitKoin
-import com.yet.tetris.feature.root.DefaultRootComponent
+import com.yet.tetris.feature.root.createDefaultRootComponent
 import org.jetbrains.skiko.wasm.onWasmReady
 import web.dom.DocumentVisibilityState
 import web.dom.visible
@@ -24,7 +24,7 @@ fun main() {
 
     val root =
         withWebHistory { stateKeeper, deepLink ->
-            DefaultRootComponent(
+            createDefaultRootComponent(
                 componentContext =
                     DefaultComponentContext(
                         lifecycle = lifecycle,
