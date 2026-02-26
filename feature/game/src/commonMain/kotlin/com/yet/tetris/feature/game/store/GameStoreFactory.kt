@@ -111,6 +111,7 @@ constructor(
     private inner class ExecutorImpl :
         CoroutineExecutor<GameStore.Intent, GameStore.Action, GameStore.State, GameStore.Msg, GameStore.Label>() {
         private val gameLoopUseCase = GameLoopUseCase(scope = this.scope)
+        private var boardHeightPx: Float = 0f
 
         init {
             scope.launch {
@@ -165,11 +166,12 @@ constructor(
                 is GameStore.Intent.HandleSwipe -> handleSwipe(intent, getState)
 
                 is GameStore.Intent.OnBoardSizeChanged -> {
-                    handleGestureEvent(GestureEvent.DragStarted(intent.height), getState)
+                    boardHeightPx = intent.height
                 }
                 is GameStore.Intent.DragStarted -> {
-                    // Assuming board size is already known from OnBoardSizeChanged
-                    handleGestureEvent(GestureEvent.DragStarted(0f), getState)
+                    if (boardHeightPx > 0f) {
+                        handleGestureEvent(GestureEvent.DragStarted(boardHeightPx), getState)
+                    }
                 }
                 is GameStore.Intent.Dragged -> {
                     handleGestureEvent(GestureEvent.Dragged(intent.deltaX, intent.deltaY), getState)

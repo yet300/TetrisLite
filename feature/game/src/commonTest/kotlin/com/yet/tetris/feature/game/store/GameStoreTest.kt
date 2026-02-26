@@ -325,6 +325,29 @@ class GameStoreTest {
         }
 
     @Test
+    fun uses_board_height_from_OnBoardSizeChanged_WHEN_processing_drag() =
+        runTest {
+            gameStateRepository.setSavedState(
+                createTestGameState().copy(currentPosition = Position(x = 4, y = 5)),
+            )
+            store = createStoreFactory().create()
+            runCurrent()
+
+            val initialY = store.state.gameState!!.currentPosition.y
+            val initialSoundEffects = audioRepository.playSoundEffectCallCount
+
+            store.accept(Intent.OnBoardSizeChanged(height = 800f))
+            store.accept(Intent.DragStarted)
+            store.accept(Intent.Dragged(deltaX = 0f, deltaY = 60f))
+            store.accept(Intent.DragEnded)
+            runCurrent()
+
+            // 60px downward drag on an 800px board should be interpreted as soft drop, not hard drop.
+            assertEquals(initialY + 1, store.state.gameState!!.currentPosition.y)
+            assertEquals(initialSoundEffects, audioRepository.playSoundEffectCallCount)
+        }
+
+    @Test
     fun publishes_Label_ShowError_WHEN_initialization_fails() =
         runTest {
             settingsRepository.shouldThrowOnGet = true
