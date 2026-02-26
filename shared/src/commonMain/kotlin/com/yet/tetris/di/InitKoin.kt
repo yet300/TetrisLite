@@ -21,7 +21,6 @@ fun InitKoin(config: KoinAppDeclaration? = null) {
             DomainModule().module,
             DataModule().module,
             CommonModule().module,
-
             GameFeatureModule().module,
             HomeFeatureModule().module,
             HistoryFeatureModule().module,

@@ -88,43 +88,45 @@ class DomainModule {
     fun provideAdvanceGameTickUseCase(
         @Provided movePieceUseCase: MovePieceUseCase,
         @Provided calculateGhostPositionUseCase: CalculateGhostPositionUseCase,
-    ): AdvanceGameTickUseCase = AdvanceGameTickUseCase(
-        movePieceUseCase = movePieceUseCase,
-        calculateGhostPositionUseCase = calculateGhostPositionUseCase
-    )
+    ): AdvanceGameTickUseCase =
+        AdvanceGameTickUseCase(
+            movePieceUseCase = movePieceUseCase,
+            calculateGhostPositionUseCase = calculateGhostPositionUseCase,
+        )
 
     @Factory
     fun providePersistGameAudioUseCase(
         @Provided gameStateRepository: GameStateRepository,
         @Provided gameHistoryRepository: GameHistoryRepository,
-        @Provided audioRepository: AudioRepository
-    ) = PersistGameAudioUseCase(
-        gameStateRepository = gameStateRepository,
-        gameHistoryRepository = gameHistoryRepository,
-        audioRepository = audioRepository
-    )
+        @Provided audioRepository: AudioRepository,
+    ): PersistGameAudioUseCase =
+        PersistGameAudioUseCase(
+            gameStateRepository = gameStateRepository,
+            gameHistoryRepository = gameHistoryRepository,
+            audioRepository = audioRepository,
+        )
 
     @Factory
     fun provideInitializeGameSessionUseCase(
         @Provided gameSettingsRepository: GameSettingsRepository,
         @Provided gameStateRepository: GameStateRepository,
-        @Provided startGameUseCase: StartGameUseCase
+        @Provided startGameUseCase: StartGameUseCase,
     ): InitializeGameSessionUseCase =
         InitializeGameSessionUseCase(
             gameSettingsRepository = gameSettingsRepository,
             gameStateRepository = gameStateRepository,
-            startGameUseCase = startGameUseCase
+            startGameUseCase = startGameUseCase,
         )
 
     @Factory
     fun provideProcessLockedPieceUseCase(
         @Provided lockPieceUseCase: LockPieceUseCase,
         @Provided planVisualFeedbackUseCase: PlanVisualFeedbackUseCase,
-        @Provided advanceGameTickUseCase: AdvanceGameTickUseCase
-    ): ProcessLockedPieceUseCase = ProcessLockedPieceUseCase(
-        lockPieceUseCase = lockPieceUseCase,
-        planVisualFeedbackUseCase = planVisualFeedbackUseCase,
-        advanceGameTickUseCase = advanceGameTickUseCase,
-    )
-
+        @Provided advanceGameTickUseCase: AdvanceGameTickUseCase,
+    ): ProcessLockedPieceUseCase =
+        ProcessLockedPieceUseCase(
+            lockPieceUseCase = lockPieceUseCase,
+            planVisualFeedbackUseCase = planVisualFeedbackUseCase,
+            advanceGameTickUseCase = advanceGameTickUseCase,
+        )
 }
