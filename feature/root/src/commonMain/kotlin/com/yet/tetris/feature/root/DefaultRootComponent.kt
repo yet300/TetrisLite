@@ -11,16 +11,19 @@ import com.arkivanov.decompose.router.stack.pop
 import com.arkivanov.decompose.router.stack.push
 import com.arkivanov.decompose.router.webhistory.WebNavigation
 import com.arkivanov.decompose.value.Value
-import com.yet.tetris.feature.game.DefaultGameComponent
-import com.yet.tetris.feature.home.DefaultHomeComponent
+import com.yet.tetris.feature.game.GameComponent
+import com.yet.tetris.feature.home.HomeComponent
+import jakarta.inject.Inject
 import kotlinx.serialization.Serializable
-import org.koin.core.component.KoinComponent
+import org.koin.core.annotation.Factory
+import org.koin.core.annotation.Provided
 
-class DefaultRootComponent(
+internal class DefaultRootComponent(
     componentContext: ComponentContext,
+    private val homeComponentFactory: HomeComponent.Factory,
+    private val gameComponentFactory: GameComponent.Factory,
 ) : ComponentContext by componentContext,
-    RootComponent,
-    KoinComponent {
+    RootComponent {
     private val navigation = StackNavigation<Configuration>()
 
     private val stack =
@@ -61,7 +64,7 @@ class DefaultRootComponent(
             Configuration.HomeScreen ->
                 RootComponent.Child.Home(
                     component =
-                        DefaultHomeComponent(
+                        homeComponentFactory(
                             componentContext = componentContext,
                             navigateToGame = { navigation.push(Configuration.GameScreen) },
                         ),
@@ -70,7 +73,7 @@ class DefaultRootComponent(
             Configuration.GameScreen ->
                 RootComponent.Child.Game(
                     component =
-                        DefaultGameComponent(
+                        gameComponentFactory(
                             componentContext = componentContext,
                             navigateBack = { navigation.pop() },
                         ),
@@ -85,4 +88,19 @@ class DefaultRootComponent(
         @Serializable
         data object GameScreen : Configuration()
     }
+}
+
+@Factory
+internal class DefaultRootComponentFactory
+@Inject
+constructor(
+    @Provided private val homeComponentFactory: HomeComponent.Factory,
+    @Provided private val gameComponentFactory: GameComponent.Factory,
+) : RootComponent.Factory {
+    override fun invoke(componentContext: ComponentContext): RootComponent =
+        DefaultRootComponent(
+            componentContext = componentContext,
+            homeComponentFactory = homeComponentFactory,
+            gameComponentFactory = gameComponentFactory,
+        )
 }
