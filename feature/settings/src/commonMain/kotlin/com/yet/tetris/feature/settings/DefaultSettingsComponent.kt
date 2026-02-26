@@ -14,16 +14,17 @@ import com.yet.tetris.domain.model.theme.VisualTheme
 import com.yet.tetris.feature.settings.integration.stateToModel
 import com.yet.tetris.feature.settings.store.SettingsStore
 import com.yet.tetris.feature.settings.store.SettingsStoreFactory
+import jakarta.inject.Inject
 import kotlinx.coroutines.launch
-import org.koin.core.component.KoinComponent
+import org.koin.core.annotation.Factory
 
-class DefaultSettingsComponent(
+internal class DefaultSettingsComponent(
     componentContext: ComponentContext,
     private val onCloseRequest: () -> Unit,
+    private val settingsStoreFactory: SettingsStoreFactory,
 ) : ComponentContext by componentContext,
-    SettingsComponent,
-    KoinComponent {
-    private val store = instanceKeeper.getStore { SettingsStoreFactory().create() }
+    SettingsComponent {
+    private val store = instanceKeeper.getStore { settingsStoreFactory.create() }
 
     init {
         coroutineScope().launch {
@@ -75,4 +76,21 @@ class DefaultSettingsComponent(
     override fun onClose() {
         onCloseRequest()
     }
+}
+
+@Factory
+internal class DefaultSettingsComponentFactory
+@Inject
+constructor(
+    private val settingsStoreFactory: SettingsStoreFactory,
+) : SettingsComponent.Factory {
+    override fun invoke(
+        componentContext: ComponentContext,
+        onCloseRequest: () -> Unit,
+    ): SettingsComponent =
+        DefaultSettingsComponent(
+            componentContext = componentContext,
+            onCloseRequest = onCloseRequest,
+            settingsStoreFactory = settingsStoreFactory,
+        )
 }

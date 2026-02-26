@@ -7,15 +7,20 @@ import com.arkivanov.mvikotlin.core.store.StoreFactory
 import com.arkivanov.mvikotlin.extensions.coroutines.CoroutineExecutor
 import com.yet.tetris.domain.model.settings.GameSettings
 import com.yet.tetris.domain.repository.GameSettingsRepository
+import jakarta.inject.Inject
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import org.koin.core.annotation.Factory
+import org.koin.core.annotation.Provided
 
-internal class SettingsStoreFactory : KoinComponent {
-    private val storeFactory: StoreFactory by inject()
-    private val gameSettingsRepository: GameSettingsRepository by inject()
+@Factory
+internal class SettingsStoreFactory
+@Inject
+constructor(
+    @Provided private val storeFactory: StoreFactory,
+    @Provided private val gameSettingsRepository: GameSettingsRepository,
+) {
 
     fun create(): SettingsStore =
         object :
