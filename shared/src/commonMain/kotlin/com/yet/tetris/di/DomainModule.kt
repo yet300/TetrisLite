@@ -79,10 +79,10 @@ class DomainModule {
         CalculateGhostPositionUseCase()
 
     @Singleton
-    fun provideGestureHandlingUseCase(): GestureHandlingUseCase = GestureHandlingUseCase()
-
-    @Singleton
     fun providePlanVisualFeedbackUseCase(): PlanVisualFeedbackUseCase = PlanVisualFeedbackUseCase()
+
+    @Factory
+    fun provideGestureHandlingUseCase(): GestureHandlingUseCase = GestureHandlingUseCase()
 
     @Factory
     fun provideAdvanceGameTickUseCase(
