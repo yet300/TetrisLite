@@ -73,7 +73,7 @@ constructor(
                         gameState = msg.gameState,
                         ghostPieceY = msg.ghostPieceY,
                     )
-                is GameStore.Msg.PausedChanged -> copy(isPaused = msg.isPaused)
+                is GameStore.Msg.PausedChanged -> copy(gameState = gameState?.copy(isPaused = msg.isPaused))
                 is GameStore.Msg.ElapsedTimeUpdated -> copy(elapsedTime = msg.elapsedTime)
                 is GameStore.Msg.LoadingChanged -> copy(isLoading = msg.isLoading)
                 is GameStore.Msg.SettingsUpdated -> copy(settings = msg.settings)
@@ -178,10 +178,16 @@ constructor(
 
                     val gameSession = initializeGameSessionUseCase(forceNewGame)
                     persistGameAudioUseCase.applyAudioSettings(gameSession.settings)
+                    val gameState =
+                        if (gameSession.gameState.isPaused) {
+                            gameSession.gameState.copy(isPaused = false)
+                        } else {
+                            gameSession.gameState
+                        }
 
                     dispatch(
                         GameStore.Msg.GameInitialized(
-                            gameSession.gameState,
+                            gameState,
                             gameSession.settings
                         )
                     )
@@ -189,7 +195,7 @@ constructor(
 
                     gameLoopUseCase.start(
                         gameSession.settings,
-                        initialLevel = gameSession.gameState.level
+                        initialLevel = gameState.level
                     )
                     persistGameAudioUseCase.playMusicIfEnabled(gameSession.settings)
                 } catch (e: Exception) {
@@ -217,7 +223,7 @@ constructor(
             dispatch(GameStore.Msg.PausedChanged(true))
 
             scope.launch {
-                persistGameAudioUseCase.saveCurrentState(state.gameState)
+                persistGameAudioUseCase.saveCurrentState(state.gameState?.copy(isPaused = true))
             }
             publish(GameStore.Label.GamePaused)
             persistGameAudioUseCase.stopMusic()
