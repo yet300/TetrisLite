@@ -30,6 +30,15 @@ kotlin {
         }
     }
 
+    js {
+        outputModuleName = "shared"
+        browser()
+        binaries.library()
+        generateTypeScriptDefinitions()
+        compilerOptions {
+            target = "es2015"
+        }
+    }
 
     sourceSets {
         commonMain.dependencies {
