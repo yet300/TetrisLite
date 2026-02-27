@@ -15,11 +15,14 @@ import com.arkivanov.essenty.backhandler.BackCallback
 import com.arkivanov.essenty.lifecycle.subscribe
 import com.arkivanov.mvikotlin.core.instancekeeper.getStore
 import com.arkivanov.mvikotlin.extensions.coroutines.labels
+import com.yet.tetris.feature.game.di.GAME_COMPONENT_FACTORY_QUALIFIER
 import com.yet.tetris.feature.game.integration.stateToModel
 import com.yet.tetris.feature.game.store.GameStore
 import com.yet.tetris.feature.game.store.GameStoreFactory
 import com.yet.tetris.feature.settings.SettingsComponent
+import com.yet.tetris.feature.settings.di.SETTINGS_COMPONENT_FACTORY_QUALIFIER
 import jakarta.inject.Inject
+import jakarta.inject.Named
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import org.koin.core.annotation.Factory
@@ -239,11 +242,14 @@ internal class DefaultGameComponent(
 }
 
 @Factory
+@Named(GAME_COMPONENT_FACTORY_QUALIFIER)
 internal class DefaultGameComponentFactory
 @Inject
 constructor(
     private val gameStoreFactory: GameStoreFactory,
-    @Provided private val settingsComponentFactory: SettingsComponent.Factory,
+    @Named(SETTINGS_COMPONENT_FACTORY_QUALIFIER)
+    @Provided
+    private val settingsComponentFactory: SettingsComponent.Factory,
 ) : GameComponent.Factory {
     override fun invoke(
         componentContext: ComponentContext,

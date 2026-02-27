@@ -11,10 +11,12 @@ import com.yet.tetris.domain.model.audio.MusicTheme
 import com.yet.tetris.domain.model.game.Difficulty
 import com.yet.tetris.domain.model.theme.PieceStyle
 import com.yet.tetris.domain.model.theme.VisualTheme
+import com.yet.tetris.feature.settings.di.SETTINGS_COMPONENT_FACTORY_QUALIFIER
 import com.yet.tetris.feature.settings.integration.stateToModel
 import com.yet.tetris.feature.settings.store.SettingsStore
 import com.yet.tetris.feature.settings.store.SettingsStoreFactory
 import jakarta.inject.Inject
+import jakarta.inject.Named
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.Factory
 
@@ -79,6 +81,7 @@ internal class DefaultSettingsComponent(
 }
 
 @Factory
+@Named(SETTINGS_COMPONENT_FACTORY_QUALIFIER)
 internal class DefaultSettingsComponentFactory
 @Inject
 constructor(

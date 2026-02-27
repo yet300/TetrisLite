@@ -14,11 +14,15 @@ import com.arkivanov.mvikotlin.core.instancekeeper.getStore
 import com.arkivanov.mvikotlin.extensions.coroutines.labels
 import com.yet.tetris.domain.model.game.Difficulty
 import com.yet.tetris.feature.history.HistoryComponent
+import com.yet.tetris.feature.history.di.HISTORY_COMPONENT_FACTORY_QUALIFIER
+import com.yet.tetris.feature.home.di.HOME_COMPONENT_FACTORY_QUALIFIER
 import com.yet.tetris.feature.home.integration.stateToModel
 import com.yet.tetris.feature.home.store.HomeStore
 import com.yet.tetris.feature.home.store.HomeStoreFactory
 import com.yet.tetris.feature.settings.SettingsComponent
+import com.yet.tetris.feature.settings.di.SETTINGS_COMPONENT_FACTORY_QUALIFIER
 import jakarta.inject.Inject
+import jakarta.inject.Named
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import org.koin.core.annotation.Factory
@@ -120,12 +124,17 @@ internal class DefaultHomeComponent(
 }
 
 @Factory
+@Named(HOME_COMPONENT_FACTORY_QUALIFIER)
 internal class DefaultHomeComponentFactory
 @Inject
 constructor(
     private val homeStoreFactory: HomeStoreFactory,
-    @Provided private val settingsComponentFactory: SettingsComponent.Factory,
-    @Provided private val historyComponentFactory: HistoryComponent.Factory,
+    @Named(SETTINGS_COMPONENT_FACTORY_QUALIFIER)
+    @Provided
+    private val settingsComponentFactory: SettingsComponent.Factory,
+    @Named(HISTORY_COMPONENT_FACTORY_QUALIFIER)
+    @Provided
+    private val historyComponentFactory: HistoryComponent.Factory,
 ) : HomeComponent.Factory {
     override fun invoke(
         componentContext: ComponentContext,
