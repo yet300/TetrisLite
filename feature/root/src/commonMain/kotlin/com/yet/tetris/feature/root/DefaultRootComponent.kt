@@ -13,8 +13,8 @@ import com.arkivanov.decompose.router.webhistory.WebNavigation
 import com.arkivanov.decompose.value.Value
 import com.yet.tetris.feature.game.GameComponent
 import com.yet.tetris.feature.game.di.GAME_COMPONENT_FACTORY_QUALIFIER
-import com.yet.tetris.feature.home.HOME_COMPONENT_FACTORY_QUALIFIER
 import com.yet.tetris.feature.home.HomeComponent
+import com.yet.tetris.feature.home.di.HOME_COMPONENT_FACTORY_QUALIFIER
 import kotlinx.serialization.Serializable
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
