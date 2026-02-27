@@ -75,8 +75,7 @@ class DomainModule {
         )
 
     @Singleton
-    fun provideCalculateGhostPositionUseCase(): CalculateGhostPositionUseCase =
-        CalculateGhostPositionUseCase()
+    fun provideCalculateGhostPositionUseCase(): CalculateGhostPositionUseCase = CalculateGhostPositionUseCase()
 
     @Singleton
     fun providePlanVisualFeedbackUseCase(): PlanVisualFeedbackUseCase = PlanVisualFeedbackUseCase()
