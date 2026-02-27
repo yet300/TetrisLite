@@ -126,25 +126,25 @@ internal class DefaultHomeComponent(
 @Factory
 @Named(HOME_COMPONENT_FACTORY_QUALIFIER)
 internal class DefaultHomeComponentFactory
-@Inject
-constructor(
-    private val homeStoreFactory: HomeStoreFactory,
-    @Named(SETTINGS_COMPONENT_FACTORY_QUALIFIER)
-    @Provided
-    private val settingsComponentFactory: SettingsComponent.Factory,
-    @Named(HISTORY_COMPONENT_FACTORY_QUALIFIER)
-    @Provided
-    private val historyComponentFactory: HistoryComponent.Factory,
-) : HomeComponent.Factory {
-    override fun invoke(
-        componentContext: ComponentContext,
-        navigateToGame: () -> Unit,
-    ): HomeComponent =
-        DefaultHomeComponent(
-            componentContext = componentContext,
-            navigateToGame = navigateToGame,
-            homeStoreFactory = homeStoreFactory,
-            settingsComponentFactory = settingsComponentFactory,
-            historyComponentFactory = historyComponentFactory,
-        )
-}
+    @Inject
+    constructor(
+        private val homeStoreFactory: HomeStoreFactory,
+        @Named(SETTINGS_COMPONENT_FACTORY_QUALIFIER)
+        @Provided
+        private val settingsComponentFactory: SettingsComponent.Factory,
+        @Named(HISTORY_COMPONENT_FACTORY_QUALIFIER)
+        @Provided
+        private val historyComponentFactory: HistoryComponent.Factory,
+    ) : HomeComponent.Factory {
+        override fun invoke(
+            componentContext: ComponentContext,
+            navigateToGame: () -> Unit,
+        ): HomeComponent =
+            DefaultHomeComponent(
+                componentContext = componentContext,
+                navigateToGame = navigateToGame,
+                homeStoreFactory = homeStoreFactory,
+                settingsComponentFactory = settingsComponentFactory,
+                historyComponentFactory = historyComponentFactory,
+            )
+    }

@@ -244,21 +244,21 @@ internal class DefaultGameComponent(
 @Factory
 @Named(GAME_COMPONENT_FACTORY_QUALIFIER)
 internal class DefaultGameComponentFactory
-@Inject
-constructor(
-    private val gameStoreFactory: GameStoreFactory,
-    @Named(SETTINGS_COMPONENT_FACTORY_QUALIFIER)
-    @Provided
-    private val settingsComponentFactory: SettingsComponent.Factory,
-) : GameComponent.Factory {
-    override fun invoke(
-        componentContext: ComponentContext,
-        navigateBack: () -> Unit,
-    ): GameComponent =
-        DefaultGameComponent(
-            componentContext = componentContext,
-            navigateBack = navigateBack,
-            gameStoreFactory = gameStoreFactory,
-            settingsComponentFactory = settingsComponentFactory,
-        )
-}
+    @Inject
+    constructor(
+        private val gameStoreFactory: GameStoreFactory,
+        @Named(SETTINGS_COMPONENT_FACTORY_QUALIFIER)
+        @Provided
+        private val settingsComponentFactory: SettingsComponent.Factory,
+    ) : GameComponent.Factory {
+        override fun invoke(
+            componentContext: ComponentContext,
+            navigateBack: () -> Unit,
+        ): GameComponent =
+            DefaultGameComponent(
+                componentContext = componentContext,
+                navigateBack = navigateBack,
+                gameStoreFactory = gameStoreFactory,
+                settingsComponentFactory = settingsComponentFactory,
+            )
+    }

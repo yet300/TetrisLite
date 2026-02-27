@@ -223,8 +223,7 @@ class PersistGameAudioUseCaseTest {
 
         override suspend fun getAllGames(): List<GameRecord> = savedRecords.toList()
 
-        override suspend fun getGameById(id: String): GameRecord? =
-            savedRecords.firstOrNull { it.id == id }
+        override suspend fun getGameById(id: String): GameRecord? = savedRecords.firstOrNull { it.id == id }
 
         override fun observeGames(): Flow<List<GameRecord>> = flowOf(savedRecords.toList())
 

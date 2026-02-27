@@ -62,17 +62,17 @@ internal class DefaultHistoryComponent(
 @Factory
 @Named(HISTORY_COMPONENT_FACTORY_QUALIFIER)
 internal class DefaultHistoryComponentFactory
-@Inject
-constructor(
-    private val historyStoreFactory: HistoryStoreFactory,
-) : HistoryComponent.Factory {
-    override fun invoke(
-        componentContext: ComponentContext,
-        dismiss: () -> Unit,
-    ): HistoryComponent =
-        DefaultHistoryComponent(
-            componentContext = componentContext,
-            dismiss = dismiss,
-            historyStoreFactory = historyStoreFactory,
-        )
-}
+    @Inject
+    constructor(
+        private val historyStoreFactory: HistoryStoreFactory,
+    ) : HistoryComponent.Factory {
+        override fun invoke(
+            componentContext: ComponentContext,
+            dismiss: () -> Unit,
+        ): HistoryComponent =
+            DefaultHistoryComponent(
+                componentContext = componentContext,
+                dismiss = dismiss,
+                historyStoreFactory = historyStoreFactory,
+            )
+    }

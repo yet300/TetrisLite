@@ -83,17 +83,17 @@ internal class DefaultSettingsComponent(
 @Factory
 @Named(SETTINGS_COMPONENT_FACTORY_QUALIFIER)
 internal class DefaultSettingsComponentFactory
-@Inject
-constructor(
-    private val settingsStoreFactory: SettingsStoreFactory,
-) : SettingsComponent.Factory {
-    override fun invoke(
-        componentContext: ComponentContext,
-        onCloseRequest: () -> Unit,
-    ): SettingsComponent =
-        DefaultSettingsComponent(
-            componentContext = componentContext,
-            onCloseRequest = onCloseRequest,
-            settingsStoreFactory = settingsStoreFactory,
-        )
-}
+    @Inject
+    constructor(
+        private val settingsStoreFactory: SettingsStoreFactory,
+    ) : SettingsComponent.Factory {
+        override fun invoke(
+            componentContext: ComponentContext,
+            onCloseRequest: () -> Unit,
+        ): SettingsComponent =
+            DefaultSettingsComponent(
+                componentContext = componentContext,
+                onCloseRequest = onCloseRequest,
+                settingsStoreFactory = settingsStoreFactory,
+            )
+    }
