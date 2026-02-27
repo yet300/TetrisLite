@@ -56,3 +56,7 @@ kotlin {
         }
     }
 }
+
+tasks.named("jsBrowserProductionWebpack") {
+    dependsOn("jsProductionLibraryCompileSync")
+}
