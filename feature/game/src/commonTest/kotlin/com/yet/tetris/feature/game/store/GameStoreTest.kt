@@ -360,7 +360,9 @@ class GameStoreTest {
             store = createStoreFactory().create()
             runCurrent()
 
-            val initialY = store.state.gameState!!.currentPosition.y
+            val initialY =
+                store.state.gameState!!
+                    .currentPosition.y
             val initialSoundEffects = audioRepository.playSoundEffectCallCount
 
             store.accept(Intent.OnBoardSizeChanged(height = 800f))
@@ -370,7 +372,11 @@ class GameStoreTest {
             runCurrent()
 
             // 60px downward drag on an 800px board should be interpreted as soft drop, not hard drop.
-            assertEquals(initialY + 1, store.state.gameState!!.currentPosition.y)
+            assertEquals(
+                initialY + 1,
+                store.state.gameState!!
+                    .currentPosition.y,
+            )
             assertEquals(initialSoundEffects, audioRepository.playSoundEffectCallCount)
         }
 

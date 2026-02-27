@@ -5,7 +5,6 @@ import com.yet.tetris.domain.model.settings.GameSettings
 import com.yet.tetris.domain.repository.GameSettingsRepository
 import com.yet.tetris.domain.repository.GameStateRepository
 
-
 class InitializeGameSessionUseCase(
     private val gameSettingsRepository: GameSettingsRepository,
     private val gameStateRepository: GameStateRepository,

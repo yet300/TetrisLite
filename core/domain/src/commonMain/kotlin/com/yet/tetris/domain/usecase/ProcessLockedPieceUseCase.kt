@@ -4,7 +4,6 @@ import com.yet.tetris.domain.model.effects.VisualEffectBurst
 import com.yet.tetris.domain.model.effects.VisualEffectFeed
 import com.yet.tetris.domain.model.game.GameState
 
-
 class ProcessLockedPieceUseCase(
     private val lockPieceUseCase: LockPieceUseCase,
     private val planVisualFeedbackUseCase: PlanVisualFeedbackUseCase,

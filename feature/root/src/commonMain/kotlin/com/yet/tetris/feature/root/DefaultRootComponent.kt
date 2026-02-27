@@ -20,7 +20,8 @@ import org.koin.core.component.inject
 class DefaultRootComponent(
     componentContext: ComponentContext,
 ) : ComponentContext by componentContext,
-    RootComponent, KoinComponent {
+    RootComponent,
+    KoinComponent {
     private val homeComponentFactory: HomeComponent.Factory by inject()
     private val gameComponentFactory: GameComponent.Factory by inject()
     private val navigation = StackNavigation<Configuration>()

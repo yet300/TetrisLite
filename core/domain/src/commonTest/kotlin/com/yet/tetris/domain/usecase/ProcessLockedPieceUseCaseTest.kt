@@ -28,10 +28,11 @@ class ProcessLockedPieceUseCaseTest {
         ProcessLockedPieceUseCase(
             lockPieceUseCase = lockPieceUseCase,
             planVisualFeedbackUseCase = PlanVisualFeedbackUseCase(),
-            advanceGameTickUseCase = AdvanceGameTickUseCase(
-                movePieceUseCase,
-                calculateGhostPositionUseCase
-            ),
+            advanceGameTickUseCase =
+                AdvanceGameTickUseCase(
+                    movePieceUseCase,
+                    calculateGhostPositionUseCase,
+                ),
         )
 
     @Test

@@ -280,12 +280,12 @@ class HistoryStoreTest {
                     createGameRecord(
                         id = "3",
                         score = 300,
-                        timestamp = now.minus(10.days).toEpochMilliseconds()
+                        timestamp = now.minus(10.days).toEpochMilliseconds(),
                     ),
                     createGameRecord(
                         id = "4",
                         score = 400,
-                        timestamp = now.minus(12.days).toEpochMilliseconds()
+                        timestamp = now.minus(12.days).toEpochMilliseconds(),
                     ),
                 )
             repository.setGames(reloadedGames)

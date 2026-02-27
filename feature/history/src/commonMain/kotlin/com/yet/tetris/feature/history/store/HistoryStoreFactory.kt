@@ -19,7 +19,6 @@ constructor(
     @Provided private val storeFactory: StoreFactory,
     @Provided private val gameHistoryRepository: GameHistoryRepository,
 ) {
-
     fun create(): HistoryStore =
         object :
             HistoryStore,
@@ -91,6 +90,7 @@ constructor(
                     copy(
                         dateFilter = msg.filter,
                     )
+
                 is HistoryStore.Msg.LoadingChanged -> copy(isLoading = msg.isLoading)
                 is HistoryStore.Msg.GameDeleted -> {
                     val updatedGames = games.filter { it.id != msg.id }

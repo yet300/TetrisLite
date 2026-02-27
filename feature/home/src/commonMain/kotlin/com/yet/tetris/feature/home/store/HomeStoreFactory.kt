@@ -21,7 +21,6 @@ constructor(
     @Provided private val gameSettingsRepository: GameSettingsRepository,
     @Provided private val gameStateRepository: GameStateRepository,
 ) {
-
     fun create(): HomeStore =
         object :
             HomeStore,

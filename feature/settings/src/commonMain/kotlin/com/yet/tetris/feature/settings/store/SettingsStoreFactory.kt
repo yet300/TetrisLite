@@ -21,7 +21,6 @@ constructor(
     @Provided private val storeFactory: StoreFactory,
     @Provided private val gameSettingsRepository: GameSettingsRepository,
 ) {
-
     fun create(): SettingsStore =
         object :
             SettingsStore,

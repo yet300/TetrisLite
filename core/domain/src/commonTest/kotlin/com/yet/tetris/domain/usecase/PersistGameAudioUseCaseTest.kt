@@ -80,18 +80,20 @@ class PersistGameAudioUseCaseTest {
 
             useCase.playMusicIfEnabled(
                 GameSettings(
-                    audioSettings = AudioSettings(
-                        musicEnabled = true,
-                        selectedMusicTheme = MusicTheme.MODERN
-                    )
+                    audioSettings =
+                        AudioSettings(
+                            musicEnabled = true,
+                            selectedMusicTheme = MusicTheme.MODERN,
+                        ),
                 ),
             )
             useCase.playMusicIfEnabled(
                 GameSettings(
-                    audioSettings = AudioSettings(
-                        musicEnabled = false,
-                        selectedMusicTheme = MusicTheme.CLASSIC
-                    )
+                    audioSettings =
+                        AudioSettings(
+                            musicEnabled = false,
+                            selectedMusicTheme = MusicTheme.CLASSIC,
+                        ),
                 ),
             )
 

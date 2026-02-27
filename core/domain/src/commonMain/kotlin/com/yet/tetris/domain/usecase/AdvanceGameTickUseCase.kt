@@ -2,7 +2,6 @@ package com.yet.tetris.domain.usecase
 
 import com.yet.tetris.domain.model.game.GameState
 
-
 class AdvanceGameTickUseCase(
     private val movePieceUseCase: MovePieceUseCase,
     private val calculateGhostPositionUseCase: CalculateGhostPositionUseCase,

@@ -44,7 +44,6 @@ constructor(
     @Provided private val processLockedPieceUseCase: ProcessLockedPieceUseCase,
     @Provided private val persistGameAudioUseCase: PersistGameAudioUseCase,
 ) {
-
     fun create(): GameStore =
         object :
             GameStore,
@@ -68,11 +67,13 @@ constructor(
                         comboStreak = 0,
                         visualEffectFeed = VisualEffectFeed(),
                     )
+
                 is GameStore.Msg.GameStateUpdated ->
                     copy(
                         gameState = msg.gameState,
                         ghostPieceY = msg.ghostPieceY,
                     )
+
                 is GameStore.Msg.PausedChanged -> copy(gameState = gameState?.copy(isPaused = msg.isPaused))
                 is GameStore.Msg.ElapsedTimeUpdated -> copy(elapsedTime = msg.elapsedTime)
                 is GameStore.Msg.LoadingChanged -> copy(isLoading = msg.isLoading)
@@ -142,6 +143,7 @@ constructor(
                     gameLoopUseCase.stop()
                     initializeGame(forceNewGame = true)
                 }
+
                 is GameStore.Intent.MoveLeft -> moveLeft(getState)
                 is GameStore.Intent.MoveRight -> moveRight(getState)
                 is GameStore.Intent.MoveDown -> moveDown(getState)
@@ -152,14 +154,17 @@ constructor(
                 is GameStore.Intent.OnBoardSizeChanged -> {
                     boardHeightPx = intent.height
                 }
+
                 is GameStore.Intent.DragStarted -> {
                     if (boardHeightPx > 0f) {
                         handleGestureEvent(GestureEvent.DragStarted(boardHeightPx), getState)
                     }
                 }
+
                 is GameStore.Intent.Dragged -> {
                     handleGestureEvent(GestureEvent.Dragged(intent.deltaX, intent.deltaY), getState)
                 }
+
                 is GameStore.Intent.DragEnded -> {
                     handleGestureEvent(GestureEvent.DragEnded, getState)
                 }
@@ -188,14 +193,14 @@ constructor(
                     dispatch(
                         GameStore.Msg.GameInitialized(
                             gameState,
-                            gameSession.settings
-                        )
+                            gameSession.settings,
+                        ),
                     )
                     dispatch(GameStore.Msg.LoadingChanged(false))
 
                     gameLoopUseCase.start(
                         gameSession.settings,
-                        initialLevel = gameState.level
+                        initialLevel = gameState.level,
                     )
                     persistGameAudioUseCase.playMusicIfEnabled(gameSession.settings)
                 } catch (e: Exception) {
