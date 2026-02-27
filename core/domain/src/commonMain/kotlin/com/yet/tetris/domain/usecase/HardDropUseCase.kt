@@ -2,13 +2,11 @@ package com.yet.tetris.domain.usecase
 
 import com.yet.tetris.domain.model.game.GameState
 import com.yet.tetris.domain.model.game.Position
-import jakarta.inject.Singleton
 
 /**
  * Use case for performing a hard drop - instantly dropping the piece to the lowest valid position.
  * This is a key Tetris mechanic that allows players to quickly place pieces.
  */
-@Singleton
 class HardDropUseCase(
     private val checkCollision: CheckCollisionUseCase,
 ) {

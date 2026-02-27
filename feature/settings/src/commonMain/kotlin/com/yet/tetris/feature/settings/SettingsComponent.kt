@@ -1,5 +1,6 @@
 package com.yet.tetris.feature.settings
 
+import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.value.Value
 import com.yet.tetris.domain.model.audio.MusicTheme
 import com.yet.tetris.domain.model.game.Difficulty
@@ -32,4 +33,11 @@ interface SettingsComponent {
     fun onMusicThemeChanged(theme: MusicTheme)
 
     fun onClose()
+
+    fun interface Factory {
+        operator fun invoke(
+            componentContext: ComponentContext,
+            onCloseRequest: () -> Unit,
+        ): SettingsComponent
+    }
 }

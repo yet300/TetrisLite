@@ -1,5 +1,6 @@
 package com.yet.tetris.feature.home
 
+import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.router.slot.ChildSlot
 import com.arkivanov.decompose.value.Value
 import com.yet.tetris.domain.model.game.Difficulty
@@ -41,5 +42,12 @@ interface HomeComponent {
         class SettingsChild(
             val component: SettingsComponent,
         ) : BottomSheetChild
+    }
+
+    fun interface Factory {
+        operator fun invoke(
+            componentContext: ComponentContext,
+            navigateToGame: () -> Unit,
+        ): HomeComponent
     }
 }

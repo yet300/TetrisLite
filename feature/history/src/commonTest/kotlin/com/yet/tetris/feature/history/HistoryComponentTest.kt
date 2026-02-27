@@ -6,15 +6,13 @@ import com.arkivanov.mvikotlin.main.store.DefaultStoreFactory
 import com.yet.tetris.domain.model.game.Difficulty
 import com.yet.tetris.domain.model.history.GameRecord
 import com.yet.tetris.feature.history.store.FakeGameHistoryRepository
+import com.yet.tetris.feature.history.store.HistoryStoreFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import org.koin.core.context.startKoin
-import org.koin.core.context.stopKoin
-import org.koin.dsl.module
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -35,20 +33,10 @@ class HistoryComponentTest {
         Dispatchers.setMain(testDispatcher)
 
         repository = FakeGameHistoryRepository()
-
-        startKoin {
-            modules(
-                module {
-                    single<com.arkivanov.mvikotlin.core.store.StoreFactory> { DefaultStoreFactory() }
-                    single<com.yet.tetris.domain.repository.GameHistoryRepository> { repository }
-                },
-            )
-        }
     }
 
     @AfterTest
     fun after() {
-        stopKoin()
         Dispatchers.resetMain()
     }
 
@@ -277,8 +265,15 @@ class HistoryComponentTest {
         return DefaultHistoryComponent(
             componentContext = componentContext,
             dismiss = dismiss,
+            historyStoreFactory = createStoreFactory(),
         )
     }
+
+    private fun createStoreFactory(): HistoryStoreFactory =
+        HistoryStoreFactory(
+            storeFactory = DefaultStoreFactory(),
+            gameHistoryRepository = repository,
+        )
 
     private fun createGameRecord(
         id: String,

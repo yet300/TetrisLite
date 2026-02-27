@@ -11,6 +11,7 @@ import com.yet.tetris.domain.model.game.Position
 import com.yet.tetris.domain.model.game.Tetromino
 import com.yet.tetris.domain.model.game.TetrominoType
 import com.yet.tetris.domain.model.settings.GameSettings
+import com.yet.tetris.domain.usecase.AdvanceGameTickUseCase
 import com.yet.tetris.domain.usecase.CalculateGhostPositionUseCase
 import com.yet.tetris.domain.usecase.CalculateScoreUseCase
 import com.yet.tetris.domain.usecase.CheckCollisionUseCase
@@ -18,9 +19,12 @@ import com.yet.tetris.domain.usecase.GenerateTetrominoUseCase
 import com.yet.tetris.domain.usecase.GestureHandlingUseCase
 import com.yet.tetris.domain.usecase.HandleSwipeInputUseCase
 import com.yet.tetris.domain.usecase.HardDropUseCase
+import com.yet.tetris.domain.usecase.InitializeGameSessionUseCase
 import com.yet.tetris.domain.usecase.LockPieceUseCase
 import com.yet.tetris.domain.usecase.MovePieceUseCase
+import com.yet.tetris.domain.usecase.PersistGameAudioUseCase
 import com.yet.tetris.domain.usecase.PlanVisualFeedbackUseCase
+import com.yet.tetris.domain.usecase.ProcessLockedPieceUseCase
 import com.yet.tetris.domain.usecase.RotatePieceUseCase
 import com.yet.tetris.domain.usecase.StartGameUseCase
 import com.yet.tetris.feature.game.store.GameStore.Intent
@@ -35,9 +39,6 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import org.koin.core.context.startKoin
-import org.koin.core.context.stopKoin
-import org.koin.dsl.module
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -52,6 +53,15 @@ class GameStoreTest {
     private lateinit var gameStateRepository: FakeGameStateRepository
     private lateinit var gameHistoryRepository: FakeGameHistoryRepository
     private lateinit var audioRepository: FakeAudioRepository
+    private lateinit var movePieceUseCase: MovePieceUseCase
+    private lateinit var rotatePieceUseCase: RotatePieceUseCase
+    private lateinit var hardDropUseCase: HardDropUseCase
+    private lateinit var handleSwipeInputUseCase: HandleSwipeInputUseCase
+    private lateinit var gestureHandlingUseCase: GestureHandlingUseCase
+    private lateinit var initializeGameSessionUseCase: InitializeGameSessionUseCase
+    private lateinit var advanceGameTickUseCase: AdvanceGameTickUseCase
+    private lateinit var processLockedPieceUseCase: ProcessLockedPieceUseCase
+    private lateinit var persistGameAudioUseCase: PersistGameAudioUseCase
     private lateinit var store: GameStore
     private val testDispatcher = StandardTestDispatcher()
 
@@ -73,37 +83,42 @@ class GameStoreTest {
         val calculateScore = CalculateScoreUseCase()
         val generateTetromino = GenerateTetrominoUseCase()
         val lockPiece = LockPieceUseCase(calculateScore, generateTetromino, checkCollision)
-        val startGame = StartGameUseCase(generateTetromino)
-        val handleSwipe = HandleSwipeInputUseCase(movePiece, hardDrop)
-        val calculateGhost = CalculateGhostPositionUseCase()
-        val gestureHandling = GestureHandlingUseCase()
-        val planVisualFeedback = PlanVisualFeedbackUseCase()
+        movePieceUseCase = movePiece
+        rotatePieceUseCase = rotatePiece
+        hardDropUseCase = hardDrop
+        handleSwipeInputUseCase = HandleSwipeInputUseCase(movePiece, hardDrop)
+        gestureHandlingUseCase = GestureHandlingUseCase()
 
-        startKoin {
-            modules(
-                module {
-                    single<com.arkivanov.mvikotlin.core.store.StoreFactory> { DefaultStoreFactory() }
-                    single<com.yet.tetris.domain.repository.GameSettingsRepository> { settingsRepository }
-                    single<com.yet.tetris.domain.repository.GameStateRepository> { gameStateRepository }
-                    single<com.yet.tetris.domain.repository.GameHistoryRepository> { gameHistoryRepository }
-                    single<com.yet.tetris.domain.repository.AudioRepository> { audioRepository }
-                    single { startGame }
-                    single { movePiece }
-                    single { rotatePiece }
-                    single { hardDrop }
-                    single { lockPiece }
-                    single { handleSwipe }
-                    single { calculateGhost }
-                    single { gestureHandling }
-                    single { planVisualFeedback }
-                },
+        val startGameUseCase = StartGameUseCase(generateTetromino)
+        val calculateGhostPositionUseCase = CalculateGhostPositionUseCase()
+        val planVisualFeedbackUseCase = PlanVisualFeedbackUseCase()
+        initializeGameSessionUseCase =
+            InitializeGameSessionUseCase(
+                gameSettingsRepository = settingsRepository,
+                gameStateRepository = gameStateRepository,
+                startGameUseCase = startGameUseCase,
             )
-        }
+        advanceGameTickUseCase =
+            AdvanceGameTickUseCase(
+                movePieceUseCase = movePiece,
+                calculateGhostPositionUseCase = calculateGhostPositionUseCase,
+            )
+        processLockedPieceUseCase =
+            ProcessLockedPieceUseCase(
+                lockPieceUseCase = lockPiece,
+                planVisualFeedbackUseCase = planVisualFeedbackUseCase,
+                advanceGameTickUseCase = advanceGameTickUseCase,
+            )
+        persistGameAudioUseCase =
+            PersistGameAudioUseCase(
+                gameStateRepository = gameStateRepository,
+                gameHistoryRepository = gameHistoryRepository,
+                audioRepository = audioRepository,
+            )
     }
 
     @AfterTest
     fun after() {
-        stopKoin()
         Dispatchers.resetMain()
         isAssertOnMainThreadEnabled = true
     }
@@ -337,11 +352,40 @@ class GameStoreTest {
         }
 
     @Test
+    fun uses_board_height_from_OnBoardSizeChanged_WHEN_processing_drag() =
+        runTest {
+            gameStateRepository.setSavedState(
+                createTestGameState().copy(currentPosition = Position(x = 4, y = 5)),
+            )
+            store = createStoreFactory().create()
+            runCurrent()
+
+            val initialY =
+                store.state.gameState!!
+                    .currentPosition.y
+            val initialSoundEffects = audioRepository.playSoundEffectCallCount
+
+            store.accept(Intent.OnBoardSizeChanged(height = 800f))
+            store.accept(Intent.DragStarted)
+            store.accept(Intent.Dragged(deltaX = 0f, deltaY = 60f))
+            store.accept(Intent.DragEnded)
+            runCurrent()
+
+            // 60px downward drag on an 800px board should be interpreted as soft drop, not hard drop.
+            assertEquals(
+                initialY + 1,
+                store.state.gameState!!
+                    .currentPosition.y,
+            )
+            assertEquals(initialSoundEffects, audioRepository.playSoundEffectCallCount)
+        }
+
+    @Test
     fun publishes_Label_ShowError_WHEN_initialization_fails() =
         runTest {
             settingsRepository.shouldThrowOnGet = true
 
-            store = GameStoreFactory().create()
+            store = createStoreFactory().create()
             val labels = store.labels.test()
             testDispatcher.scheduler.advanceUntilIdle()
 
@@ -371,7 +415,7 @@ class GameStoreTest {
     fun updates_visual_effect_feed_WHEN_line_is_cleared() =
         runTest {
             gameStateRepository.setSavedState(createSingleLineClearState())
-            store = GameStoreFactory().create()
+            store = createStoreFactory().create()
             runCurrent()
 
             store.accept(Intent.MoveDown)
@@ -389,7 +433,7 @@ class GameStoreTest {
     fun keeps_visual_effect_feed_unchanged_WHEN_no_lines_are_cleared() =
         runTest {
             gameStateRepository.setSavedState(createNoLineClearLockState())
-            store = GameStoreFactory().create()
+            store = createStoreFactory().create()
             runCurrent()
 
             store.accept(Intent.MoveDown)
@@ -404,7 +448,7 @@ class GameStoreTest {
     fun clears_latest_effect_WHEN_visual_effect_consumed() =
         runTest {
             gameStateRepository.setSavedState(createSingleLineClearState())
-            store = GameStoreFactory().create()
+            store = createStoreFactory().create()
             runCurrent()
 
             store.accept(Intent.MoveDown)
@@ -421,9 +465,24 @@ class GameStoreTest {
         }
 
     private fun createStore() {
-        store = GameStoreFactory().create()
+        store = createStoreFactory().create()
         testDispatcher.scheduler.advanceUntilIdle()
     }
+
+    private fun createStoreFactory(): GameStoreFactory =
+        GameStoreFactory(
+            storeFactory = DefaultStoreFactory(),
+            gameSettingsRepository = settingsRepository,
+            movePieceUseCase = movePieceUseCase,
+            rotatePieceUseCase = rotatePieceUseCase,
+            hardDropUseCase = hardDropUseCase,
+            handleSwipeInputUseCase = handleSwipeInputUseCase,
+            gestureHandlingUseCase = gestureHandlingUseCase,
+            initializeGameSessionUseCase = initializeGameSessionUseCase,
+            advanceGameTickUseCase = advanceGameTickUseCase,
+            processLockedPieceUseCase = processLockedPieceUseCase,
+            persistGameAudioUseCase = persistGameAudioUseCase,
+        )
 
     private fun createTestGameState(score: Long = 0): GameState =
         GameState(

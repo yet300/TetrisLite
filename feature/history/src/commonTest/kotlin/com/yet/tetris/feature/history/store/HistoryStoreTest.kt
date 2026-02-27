@@ -17,9 +17,6 @@ import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import org.koin.core.context.startKoin
-import org.koin.core.context.stopKoin
-import org.koin.dsl.module
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -42,20 +39,10 @@ class HistoryStoreTest {
         Dispatchers.setMain(testDispatcher)
 
         repository = FakeGameHistoryRepository()
-
-        startKoin {
-            modules(
-                module {
-                    single<com.arkivanov.mvikotlin.core.store.StoreFactory> { DefaultStoreFactory() }
-                    single<com.yet.tetris.domain.repository.GameHistoryRepository> { repository }
-                },
-            )
-        }
     }
 
     @AfterTest
     fun after() {
-        stopKoin()
         Dispatchers.resetMain()
         isAssertOnMainThreadEnabled = true
     }
@@ -249,7 +236,7 @@ class HistoryStoreTest {
         runTest {
             repository.shouldThrowOnGetAll = true
 
-            store = HistoryStoreFactory().create()
+            store = createStoreFactory().create()
             val labels = store.labels.test()
             testDispatcher.scheduler.advanceUntilIdle()
 
@@ -276,23 +263,38 @@ class HistoryStoreTest {
     fun maintains_filter_after_reload() =
         runTest {
             val now = Clock.System.now()
-            val games =
+            val initialGames =
                 listOf(
                     createGameRecord(id = "1", score = 100, timestamp = now.toEpochMilliseconds()),
                     createGameRecord(id = "2", score = 200, timestamp = now.minus(10.days).toEpochMilliseconds()),
                 )
-            repository.setGames(games)
+            repository.setGames(initialGames)
             createStore()
 
             store.accept(Intent.FilterByDate(DateFilter.THIS_WEEK))
             testDispatcher.scheduler.advanceUntilIdle()
-            assertEquals(1, store.state.filteredGames.size)
+            assertEquals(listOf("1"), store.state.filteredGames.map { it.id })
+
+            val reloadedGames =
+                listOf(
+                    createGameRecord(
+                        id = "3",
+                        score = 300,
+                        timestamp = now.minus(10.days).toEpochMilliseconds(),
+                    ),
+                    createGameRecord(
+                        id = "4",
+                        score = 400,
+                        timestamp = now.minus(12.days).toEpochMilliseconds(),
+                    ),
+                )
+            repository.setGames(reloadedGames)
 
             store.accept(Intent.Refresh)
             testDispatcher.scheduler.advanceUntilIdle()
 
-            // Filter should still be THIS_WEEK but games list should be reloaded
             assertEquals(DateFilter.THIS_WEEK, store.state.dateFilter)
+            assertTrue(store.state.filteredGames.isEmpty())
         }
 
     @Test
@@ -330,9 +332,15 @@ class HistoryStoreTest {
         }
 
     private fun createStore() {
-        store = HistoryStoreFactory().create()
+        store = createStoreFactory().create()
         testDispatcher.scheduler.advanceUntilIdle()
     }
+
+    private fun createStoreFactory(): HistoryStoreFactory =
+        HistoryStoreFactory(
+            storeFactory = DefaultStoreFactory(),
+            gameHistoryRepository = repository,
+        )
 
     private fun createGameRecord(
         id: String,

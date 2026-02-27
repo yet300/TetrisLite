@@ -5,18 +5,11 @@ import com.arkivanov.mvikotlin.core.store.SimpleBootstrapper
 import com.arkivanov.mvikotlin.core.store.Store
 import com.arkivanov.mvikotlin.core.store.StoreFactory
 import com.arkivanov.mvikotlin.extensions.coroutines.CoroutineExecutor
-import com.yet.tetris.domain.model.audio.SoundEffect
-import com.yet.tetris.domain.model.effects.VisualEffectBurst
-import com.yet.tetris.domain.model.effects.VisualEffectEvent
 import com.yet.tetris.domain.model.effects.VisualEffectFeed
 import com.yet.tetris.domain.model.game.GameState
-import com.yet.tetris.domain.model.history.GameRecord
 import com.yet.tetris.domain.model.settings.GameSettings
-import com.yet.tetris.domain.repository.AudioRepository
-import com.yet.tetris.domain.repository.GameHistoryRepository
 import com.yet.tetris.domain.repository.GameSettingsRepository
-import com.yet.tetris.domain.repository.GameStateRepository
-import com.yet.tetris.domain.usecase.CalculateGhostPositionUseCase
+import com.yet.tetris.domain.usecase.AdvanceGameTickUseCase
 import com.yet.tetris.domain.usecase.GameLoopEvent
 import com.yet.tetris.domain.usecase.GameLoopUseCase
 import com.yet.tetris.domain.usecase.GestureEvent
@@ -24,486 +17,406 @@ import com.yet.tetris.domain.usecase.GestureHandlingUseCase
 import com.yet.tetris.domain.usecase.GestureResult
 import com.yet.tetris.domain.usecase.HandleSwipeInputUseCase
 import com.yet.tetris.domain.usecase.HardDropUseCase
-import com.yet.tetris.domain.usecase.LockPieceUseCase
+import com.yet.tetris.domain.usecase.InitializeGameSessionUseCase
 import com.yet.tetris.domain.usecase.MovePieceUseCase
-import com.yet.tetris.domain.usecase.PlanVisualFeedbackUseCase
+import com.yet.tetris.domain.usecase.PersistGameAudioUseCase
+import com.yet.tetris.domain.usecase.ProcessLockedPieceUseCase
 import com.yet.tetris.domain.usecase.RotatePieceUseCase
-import com.yet.tetris.domain.usecase.StartGameUseCase
+import jakarta.inject.Inject
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
-import kotlin.time.Clock
-import kotlin.time.ExperimentalTime
-import kotlin.uuid.ExperimentalUuidApi
-import kotlin.uuid.Uuid
+import org.koin.core.annotation.Factory
+import org.koin.core.annotation.Provided
 
-internal class GameStoreFactory : KoinComponent {
-    private val storeFactory: StoreFactory by inject()
-    private val gameSettingsRepository: GameSettingsRepository by inject()
-    private val gameStateRepository: GameStateRepository by inject()
-    private val gameHistoryRepository: GameHistoryRepository by inject()
-    private val audioRepository: AudioRepository by inject()
-    private val startGameUseCase: StartGameUseCase by inject()
-    private val movePieceUseCase: MovePieceUseCase by inject()
-    private val rotatePieceUseCase: RotatePieceUseCase by inject()
-    private val hardDropUseCase: HardDropUseCase by inject()
-    private val lockPieceUseCase: LockPieceUseCase by inject()
-    private val handleSwipeInputUseCase: HandleSwipeInputUseCase by inject()
-    private val calculateGhostPositionUseCase: CalculateGhostPositionUseCase by inject()
-    private val gestureHandlingUseCase: GestureHandlingUseCase by inject()
-    private val planVisualFeedbackUseCase: PlanVisualFeedbackUseCase by inject()
+@Factory
+internal class GameStoreFactory
+    @Inject
+    constructor(
+        @Provided private val storeFactory: StoreFactory,
+        @Provided private val gameSettingsRepository: GameSettingsRepository,
+        @Provided private val movePieceUseCase: MovePieceUseCase,
+        @Provided private val rotatePieceUseCase: RotatePieceUseCase,
+        @Provided private val hardDropUseCase: HardDropUseCase,
+        @Provided private val handleSwipeInputUseCase: HandleSwipeInputUseCase,
+        @Provided private val gestureHandlingUseCase: GestureHandlingUseCase,
+        @Provided private val initializeGameSessionUseCase: InitializeGameSessionUseCase,
+        @Provided private val advanceGameTickUseCase: AdvanceGameTickUseCase,
+        @Provided private val processLockedPieceUseCase: ProcessLockedPieceUseCase,
+        @Provided private val persistGameAudioUseCase: PersistGameAudioUseCase,
+    ) {
+        fun create(): GameStore =
+            object :
+                GameStore,
+                Store<GameStore.Intent, GameStore.State, GameStore.Label> by storeFactory.create(
+                    name = "GameStore",
+                    initialState = GameStore.State(),
+                    bootstrapper = SimpleBootstrapper(GameStore.Action.GameLoadStarted(forceNewGame = false)),
+                    executorFactory = ::ExecutorImpl,
+                    reducer = ReducerImpl,
+                ) {}
 
-    fun create(): GameStore =
-        object :
-            GameStore,
-            Store<GameStore.Intent, GameStore.State, GameStore.Label> by storeFactory.create(
-                name = "GameStore",
-                initialState = GameStore.State(),
-                bootstrapper = SimpleBootstrapper(GameStore.Action.GameLoadStarted(forceNewGame = false)),
-                executorFactory = ::ExecutorImpl,
-                reducer = ReducerImpl,
-            ) {}
-
-    private object ReducerImpl : Reducer<GameStore.State, GameStore.Msg> {
-        override fun GameStore.State.reduce(msg: GameStore.Msg): GameStore.State =
-            when (msg) {
-                is GameStore.Msg.GameInitialized ->
-                    copy(
-                        isLoading = false,
-                        gameState = msg.gameState,
-                        settings = msg.settings,
-                        elapsedTime = 0L,
-                        comboStreak = 0,
-                        visualEffectFeed = VisualEffectFeed(),
-                    )
-                is GameStore.Msg.GameStateUpdated ->
-                    copy(
-                        gameState = msg.gameState,
-                        ghostPieceY = msg.ghostPieceY,
-                    )
-                is GameStore.Msg.PausedChanged -> copy(isPaused = msg.isPaused)
-                is GameStore.Msg.ElapsedTimeUpdated -> copy(elapsedTime = msg.elapsedTime)
-                is GameStore.Msg.LoadingChanged -> copy(isLoading = msg.isLoading)
-                is GameStore.Msg.SettingsUpdated -> copy(settings = msg.settings)
-                is GameStore.Msg.ComboStreakUpdated -> copy(comboStreak = msg.comboStreak)
-                is GameStore.Msg.VisualEffectFeedUpdated ->
-                    copy(
-                        comboStreak = msg.comboStreak,
-                        visualEffectFeed = msg.visualEffectFeed,
-                    )
-
-                is GameStore.Msg.VisualEffectConsumed ->
-                    if (visualEffectFeed.sequence == msg.sequence) {
-                        copy(visualEffectFeed = visualEffectFeed.copy(latest = null))
-                    } else {
-                        this
-                    }
-            }
-    }
-
-    @OptIn(ExperimentalTime::class, ExperimentalUuidApi::class)
-    private inner class ExecutorImpl :
-        CoroutineExecutor<GameStore.Intent, GameStore.Action, GameStore.State, GameStore.Msg, GameStore.Label>() {
-        private val gameLoopUseCase = GameLoopUseCase(scope = this.scope)
-
-        init {
-            scope.launch {
-                gameLoopUseCase.events.collect { event ->
-                    when (event) {
-                        is GameLoopEvent.GameTick -> {
-                            // When the game loop ticks, we trigger the move down logic
-                            autoMoveDown(state())
-                        }
-
-                        is GameLoopEvent.TimerUpdated -> {
-                            // When the timer updates, we dispatch a message to update the state
-                            dispatch(GameStore.Msg.ElapsedTimeUpdated(event.elapsedTime))
-                        }
-                    }
-                }
-            }
-
-            scope.launch {
-                gameSettingsRepository
-                    .observeSettings()
-                    .drop(1)
-                    .collect { newSettings ->
-                        dispatch(GameStore.Msg.SettingsUpdated(newSettings))
-
-                        audioRepository.applySettings(newSettings.audioSettings)
-                    }
-            }
-        }
-
-        override fun executeAction(action: GameStore.Action) {
-            when (action) {
-                is GameStore.Action.GameLoadStarted -> initializeGame(action.forceNewGame)
-            }
-        }
-
-        override fun executeIntent(intent: GameStore.Intent) {
-            val getState = state()
-            when (intent) {
-                is GameStore.Intent.PauseGame -> pauseGame(getState)
-                is GameStore.Intent.ResumeGame -> resumeGame(getState)
-                is GameStore.Intent.QuitGame -> quitGame(getState)
-                is GameStore.Intent.RetryGame -> {
-                    gameLoopUseCase.stop()
-                    initializeGame(forceNewGame = true)
-                }
-                is GameStore.Intent.MoveLeft -> moveLeft(getState)
-                is GameStore.Intent.MoveRight -> moveRight(getState)
-                is GameStore.Intent.MoveDown -> moveDown(getState)
-                is GameStore.Intent.Rotate -> rotate(getState)
-                is GameStore.Intent.HardDrop -> hardDrop(getState)
-                is GameStore.Intent.HandleSwipe -> handleSwipe(intent, getState)
-
-                is GameStore.Intent.OnBoardSizeChanged -> {
-                    handleGestureEvent(GestureEvent.DragStarted(intent.height), getState)
-                }
-                is GameStore.Intent.DragStarted -> {
-                    // Assuming board size is already known from OnBoardSizeChanged
-                    handleGestureEvent(GestureEvent.DragStarted(0f), getState)
-                }
-                is GameStore.Intent.Dragged -> {
-                    handleGestureEvent(GestureEvent.Dragged(intent.deltaX, intent.deltaY), getState)
-                }
-                is GameStore.Intent.DragEnded -> {
-                    handleGestureEvent(GestureEvent.DragEnded, getState)
-                }
-
-                is GameStore.Intent.VisualEffectConsumed -> {
-                    dispatch(GameStore.Msg.VisualEffectConsumed(intent.sequence))
-                }
-            }
-        }
-
-        private fun initializeGame(forceNewGame: Boolean) {
-            scope.launch {
-                try {
-                    dispatch(GameStore.Msg.LoadingChanged(true))
-                    audioRepository.initialize()
-
-                    // Load settings
-                    val settings = gameSettingsRepository.getSettings()
-
-                    audioRepository.applySettings(settings.audioSettings)
-
-                    // Try to load saved game state, otherwise start new game
-                    val gameState =
-                        if (forceNewGame) {
-                            gameStateRepository.clearGameState()
-                            startGameUseCase(settings)
-                        } else {
-                            gameStateRepository.loadGameState() ?: startGameUseCase(settings)
-                        }
-
-                    dispatch(GameStore.Msg.GameInitialized(gameState, settings))
-                    dispatch(GameStore.Msg.LoadingChanged(false))
-
-                    // Start the game loop and timer via the UseCase.
-                    gameLoopUseCase.start(settings, initialLevel = gameState.level)
-
-                    if (settings.audioSettings.musicEnabled) {
-                        audioRepository.playMusic(settings.audioSettings.selectedMusicTheme)
-                    }
-                } catch (e: Exception) {
-                    dispatch(GameStore.Msg.LoadingChanged(false))
-                    publish(GameStore.Label.ShowError(e.message ?: "Failed to initialize game"))
-                }
-            }
-        }
-
-        /**
-         * Handles the auto-move down event from the game loop tick.
-         */
-        private fun autoMoveDown(state: GameStore.State) {
-            if (!state.isPaused && state.gameState != null && !state.gameState.isGameOver) {
-                val newState = movePieceUseCase.moveDown(state.gameState)
-                if (newState != null) {
-                    val ghostY = calculateGhostY(newState)
-                    dispatch(GameStore.Msg.GameStateUpdated(newState, ghostY))
-                } else {
-                    // Piece can't move down, so lock it.
-                    lockPiece(state)
-                }
-            }
-        }
-
-        private fun pauseGame(state: GameStore.State) {
-            gameLoopUseCase.pause()
-            dispatch(GameStore.Msg.PausedChanged(true))
-
-            // Save game state
-            scope.launch {
-                state.gameState?.let { gameStateRepository.saveGameState(it) }
-            }
-            publish(GameStore.Label.GamePaused)
-            audioRepository.stopMusic()
-        }
-
-        private fun resumeGame(state: GameStore.State) {
-            gameLoopUseCase.resume()
-            dispatch(GameStore.Msg.PausedChanged(false))
-            if (state.settings.audioSettings.musicEnabled) {
-                scope.launch {
-                    audioRepository.playMusic(state.settings.audioSettings.selectedMusicTheme)
-                }
-            }
-            publish(GameStore.Label.ResumeGame)
-        }
-
-        private fun quitGame(state: GameStore.State) {
-            gameLoopUseCase.stop()
-
-            audioRepository.stopMusic()
-
-            // Save game state before quitting.
-            scope.launch {
-                state.gameState?.let { gameStateRepository.saveGameState(it) }
-            }
-
-            publish(GameStore.Label.NavigateBack)
-        }
-
-        private fun moveLeft(state: GameStore.State) {
-            state.gameState?.let { gameState ->
-                if (!state.isPaused && !gameState.isGameOver) {
-                    movePieceUseCase.moveLeft(gameState)?.let { newState ->
-                        audioRepository.playSoundEffect(SoundEffect.PIECE_MOVE)
-                        val ghostY = calculateGhostY(newState)
-                        dispatch(GameStore.Msg.GameStateUpdated(newState, ghostY))
-                    }
-                }
-            }
-        }
-
-        private fun moveRight(state: GameStore.State) {
-            state.gameState?.let { gameState ->
-                if (!state.isPaused && !gameState.isGameOver) {
-                    movePieceUseCase.moveRight(gameState)?.let { newState ->
-                        val ghostY = calculateGhostY(newState)
-                        dispatch(GameStore.Msg.GameStateUpdated(newState, ghostY))
-                    }
-                }
-            }
-        }
-
-        private fun moveDown(state: GameStore.State) {
-            state.gameState?.let { gameState ->
-                if (!state.isPaused && !gameState.isGameOver) {
-                    val newState = movePieceUseCase.moveDown(gameState)
-                    if (newState != null) {
-                        val ghostY = calculateGhostY(newState)
-                        dispatch(GameStore.Msg.GameStateUpdated(newState, ghostY))
-                    } else {
-                        lockPiece(state)
-                    }
-                }
-            }
-        }
-
-        private fun rotate(state: GameStore.State) {
-            state.gameState?.let { gameState ->
-                if (!state.isPaused && !gameState.isGameOver) {
-                    rotatePieceUseCase(gameState)?.let { newState ->
-                        val ghostY = calculateGhostY(newState)
-                        dispatch(GameStore.Msg.GameStateUpdated(newState, ghostY))
-                    }
-                }
-            }
-        }
-
-        private fun hardDrop(state: GameStore.State) {
-            state.gameState?.let { gameState ->
-                if (!state.isPaused && !gameState.isGameOver) {
-                    hardDropUseCase(gameState)?.let { droppedState ->
-                        val ghostY = calculateGhostY(droppedState)
-                        dispatch(GameStore.Msg.GameStateUpdated(droppedState, ghostY))
-                        // Lock the piece immediately after hard drop
-                        lockPiece(state.copy(gameState = droppedState))
-                    }
-                }
-            }
-        }
-
-        private fun handleSwipe(
-            intent: GameStore.Intent.HandleSwipe,
-            state: GameStore.State,
-        ) {
-            state.gameState?.let { gameState ->
-                if (!state.isPaused && !gameState.isGameOver) {
-                    handleSwipeInputUseCase(
-                        gameState,
-                        intent.deltaX,
-                        intent.deltaY,
-                        intent.velocityX,
-                        intent.velocityY,
-                    )?.let { result ->
-                        val ghostY = calculateGhostY(result.state)
-                        dispatch(GameStore.Msg.GameStateUpdated(result.state, ghostY))
-
-                        if (result.action == HandleSwipeInputUseCase.SwipeAction.HardDrop) {
-                            lockPiece(state.copy(gameState = result.state))
-                        }
-                    }
-                }
-            }
-        }
-
-        private fun lockPiece(state: GameStore.State) {
-            state.gameState?.let { gameState ->
-                val oldLines = gameState.linesCleared
-                val newState = lockPieceUseCase(gameState)
-
-                val linesCleared = (newState.linesCleared - oldLines).toInt()
-                val visualFeedbackResult =
-                    planVisualFeedbackUseCase(
-                        currentComboStreak = state.comboStreak,
-                        linesClearedThisLock = linesCleared,
-                    )
-
-                visualFeedbackResult.burst?.let { burstSpec ->
-                    val nextSequence = state.visualEffectFeed.sequence + 1
-                    val mappedBurst =
-                        mapToVisualEffectBurst(
-                            id = nextSequence,
-                            burstSpec = burstSpec,
+        private object ReducerImpl : Reducer<GameStore.State, GameStore.Msg> {
+            override fun GameStore.State.reduce(msg: GameStore.Msg): GameStore.State =
+                when (msg) {
+                    is GameStore.Msg.GameInitialized ->
+                        copy(
+                            isLoading = false,
+                            gameState = msg.gameState,
+                            settings = msg.settings,
+                            elapsedTime = 0L,
+                            comboStreak = 0,
+                            visualEffectFeed = VisualEffectFeed(),
                         )
+
+                    is GameStore.Msg.GameStateUpdated ->
+                        copy(
+                            gameState = msg.gameState,
+                            ghostPieceY = msg.ghostPieceY,
+                        )
+
+                    is GameStore.Msg.PausedChanged -> copy(gameState = gameState?.copy(isPaused = msg.isPaused))
+                    is GameStore.Msg.ElapsedTimeUpdated -> copy(elapsedTime = msg.elapsedTime)
+                    is GameStore.Msg.LoadingChanged -> copy(isLoading = msg.isLoading)
+                    is GameStore.Msg.SettingsUpdated -> copy(settings = msg.settings)
+                    is GameStore.Msg.ComboStreakUpdated -> copy(comboStreak = msg.comboStreak)
+                    is GameStore.Msg.VisualEffectFeedUpdated ->
+                        copy(
+                            comboStreak = msg.comboStreak,
+                            visualEffectFeed = msg.visualEffectFeed,
+                        )
+
+                    is GameStore.Msg.VisualEffectConsumed ->
+                        if (visualEffectFeed.sequence == msg.sequence) {
+                            copy(visualEffectFeed = visualEffectFeed.copy(latest = null))
+                        } else {
+                            this
+                        }
+                }
+        }
+
+        private inner class ExecutorImpl :
+            CoroutineExecutor<GameStore.Intent, GameStore.Action, GameStore.State, GameStore.Msg, GameStore.Label>() {
+            private val gameLoopUseCase = GameLoopUseCase(scope = this.scope)
+            private var boardHeightPx: Float = 0f
+
+            init {
+                scope.launch {
+                    gameLoopUseCase.events.collect { event ->
+                        when (event) {
+                            is GameLoopEvent.GameTick -> {
+                                // When the game loop ticks, we trigger the move down logic
+                                autoMoveDown(state())
+                            }
+
+                            is GameLoopEvent.TimerUpdated -> {
+                                // When the timer updates, we dispatch a message to update the state
+                                dispatch(GameStore.Msg.ElapsedTimeUpdated(event.elapsedTime))
+                            }
+                        }
+                    }
+                }
+
+                scope.launch {
+                    gameSettingsRepository
+                        .observeSettings()
+                        .drop(1)
+                        .collect { newSettings ->
+                            dispatch(GameStore.Msg.SettingsUpdated(newSettings))
+                            persistGameAudioUseCase.applyAudioSettings(newSettings)
+                        }
+                }
+            }
+
+            override fun executeAction(action: GameStore.Action) {
+                when (action) {
+                    is GameStore.Action.GameLoadStarted -> initializeGame(action.forceNewGame)
+                }
+            }
+
+            override fun executeIntent(intent: GameStore.Intent) {
+                val getState = state()
+                when (intent) {
+                    is GameStore.Intent.PauseGame -> pauseGame(getState)
+                    is GameStore.Intent.ResumeGame -> resumeGame(getState)
+                    is GameStore.Intent.QuitGame -> quitGame(getState)
+                    is GameStore.Intent.RetryGame -> {
+                        gameLoopUseCase.stop()
+                        initializeGame(forceNewGame = true)
+                    }
+
+                    is GameStore.Intent.MoveLeft -> moveLeft(getState)
+                    is GameStore.Intent.MoveRight -> moveRight(getState)
+                    is GameStore.Intent.MoveDown -> moveDown(getState)
+                    is GameStore.Intent.Rotate -> rotate(getState)
+                    is GameStore.Intent.HardDrop -> hardDrop(getState)
+                    is GameStore.Intent.HandleSwipe -> handleSwipe(intent, getState)
+
+                    is GameStore.Intent.OnBoardSizeChanged -> {
+                        boardHeightPx = intent.height
+                    }
+
+                    is GameStore.Intent.DragStarted -> {
+                        if (boardHeightPx > 0f) {
+                            handleGestureEvent(GestureEvent.DragStarted(boardHeightPx), getState)
+                        }
+                    }
+
+                    is GameStore.Intent.Dragged -> {
+                        handleGestureEvent(GestureEvent.Dragged(intent.deltaX, intent.deltaY), getState)
+                    }
+
+                    is GameStore.Intent.DragEnded -> {
+                        handleGestureEvent(GestureEvent.DragEnded, getState)
+                    }
+
+                    is GameStore.Intent.VisualEffectConsumed -> {
+                        dispatch(GameStore.Msg.VisualEffectConsumed(intent.sequence))
+                    }
+                }
+            }
+
+            private fun initializeGame(forceNewGame: Boolean) {
+                scope.launch {
+                    try {
+                        dispatch(GameStore.Msg.LoadingChanged(true))
+                        persistGameAudioUseCase.initializeAudio()
+
+                        val gameSession = initializeGameSessionUseCase(forceNewGame)
+                        persistGameAudioUseCase.applyAudioSettings(gameSession.settings)
+                        val gameState =
+                            if (gameSession.gameState.isPaused) {
+                                gameSession.gameState.copy(isPaused = false)
+                            } else {
+                                gameSession.gameState
+                            }
+
+                        dispatch(
+                            GameStore.Msg.GameInitialized(
+                                gameState,
+                                gameSession.settings,
+                            ),
+                        )
+                        dispatch(GameStore.Msg.LoadingChanged(false))
+
+                        gameLoopUseCase.start(
+                            gameSession.settings,
+                            initialLevel = gameState.level,
+                        )
+                        persistGameAudioUseCase.playMusicIfEnabled(gameSession.settings)
+                    } catch (e: Exception) {
+                        dispatch(GameStore.Msg.LoadingChanged(false))
+                        publish(GameStore.Label.ShowError(e.message ?: "Failed to initialize game"))
+                    }
+                }
+            }
+
+            private fun autoMoveDown(state: GameStore.State) {
+                val gameState = state.playableGameState() ?: return
+                when (val result = advanceGameTickUseCase(gameState)) {
+                    is AdvanceGameTickUseCase.Result.Moved -> {
+                        dispatch(GameStore.Msg.GameStateUpdated(result.gameState, result.ghostPieceY))
+                    }
+
+                    is AdvanceGameTickUseCase.Result.RequiresLock -> {
+                        lockPiece(state.copy(gameState = result.gameState))
+                    }
+                }
+            }
+
+            private fun pauseGame(state: GameStore.State) {
+                gameLoopUseCase.pause()
+                dispatch(GameStore.Msg.PausedChanged(true))
+
+                scope.launch {
+                    persistGameAudioUseCase.saveCurrentState(state.gameState?.copy(isPaused = true))
+                }
+                publish(GameStore.Label.GamePaused)
+                persistGameAudioUseCase.stopMusic()
+            }
+
+            private fun resumeGame(state: GameStore.State) {
+                gameLoopUseCase.resume()
+                dispatch(GameStore.Msg.PausedChanged(false))
+                scope.launch {
+                    persistGameAudioUseCase.playMusicIfEnabled(state.settings)
+                }
+                publish(GameStore.Label.ResumeGame)
+            }
+
+            private fun quitGame(state: GameStore.State) {
+                gameLoopUseCase.stop()
+                persistGameAudioUseCase.stopMusic()
+                scope.launch {
+                    persistGameAudioUseCase.saveCurrentState(state.gameState)
+                }
+
+                publish(GameStore.Label.NavigateBack)
+            }
+
+            private fun moveLeft(state: GameStore.State) {
+                val gameState = state.playableGameState() ?: return
+                movePieceUseCase.moveLeft(gameState)?.let { newState ->
+                    persistGameAudioUseCase.playMoveSound()
                     dispatch(
-                        GameStore.Msg.VisualEffectFeedUpdated(
-                            comboStreak = visualFeedbackResult.nextComboStreak,
-                            visualEffectFeed =
-                                VisualEffectFeed(
-                                    sequence = nextSequence,
-                                    latest = mappedBurst,
-                                ),
+                        GameStore.Msg.GameStateUpdated(
+                            newState,
+                            advanceGameTickUseCase.calculateGhostY(newState),
                         ),
                     )
-                } ?: dispatch(
-                    GameStore.Msg.ComboStreakUpdated(visualFeedbackResult.nextComboStreak),
+                }
+            }
+
+            private fun moveRight(state: GameStore.State) {
+                val gameState = state.playableGameState() ?: return
+                movePieceUseCase.moveRight(gameState)?.let { newState ->
+                    dispatch(
+                        GameStore.Msg.GameStateUpdated(
+                            newState,
+                            advanceGameTickUseCase.calculateGhostY(newState),
+                        ),
+                    )
+                }
+            }
+
+            private fun moveDown(state: GameStore.State) {
+                val gameState = state.playableGameState() ?: return
+                when (val result = advanceGameTickUseCase(gameState)) {
+                    is AdvanceGameTickUseCase.Result.Moved -> {
+                        dispatch(GameStore.Msg.GameStateUpdated(result.gameState, result.ghostPieceY))
+                    }
+
+                    is AdvanceGameTickUseCase.Result.RequiresLock -> {
+                        lockPiece(state.copy(gameState = result.gameState))
+                    }
+                }
+            }
+
+            private fun rotate(state: GameStore.State) {
+                val gameState = state.playableGameState() ?: return
+                rotatePieceUseCase(gameState)?.let { newState ->
+                    dispatch(
+                        GameStore.Msg.GameStateUpdated(
+                            newState,
+                            advanceGameTickUseCase.calculateGhostY(newState),
+                        ),
+                    )
+                }
+            }
+
+            private fun hardDrop(state: GameStore.State) {
+                val gameState = state.playableGameState() ?: return
+                hardDropUseCase(gameState)?.let { droppedState ->
+                    dispatch(
+                        GameStore.Msg.GameStateUpdated(
+                            droppedState,
+                            advanceGameTickUseCase.calculateGhostY(droppedState),
+                        ),
+                    )
+                    lockPiece(state.copy(gameState = droppedState))
+                }
+            }
+
+            private fun handleSwipe(
+                intent: GameStore.Intent.HandleSwipe,
+                state: GameStore.State,
+            ) {
+                val gameState = state.playableGameState() ?: return
+                handleSwipeInputUseCase(
+                    gameState,
+                    intent.deltaX,
+                    intent.deltaY,
+                    intent.velocityX,
+                    intent.velocityY,
+                )?.let { result ->
+                    dispatch(
+                        GameStore.Msg.GameStateUpdated(
+                            result.state,
+                            advanceGameTickUseCase.calculateGhostY(result.state),
+                        ),
+                    )
+
+                    if (result.action == HandleSwipeInputUseCase.SwipeAction.HardDrop) {
+                        lockPiece(state.copy(gameState = result.state))
+                    }
+                }
+            }
+
+            private fun lockPiece(state: GameStore.State) {
+                val gameState = state.gameState ?: return
+                val lockResult =
+                    processLockedPieceUseCase(
+                        gameState = gameState,
+                        currentComboStreak = state.comboStreak,
+                        currentVisualSequence = state.visualEffectFeed.sequence,
+                    )
+
+                lockResult.visualEffectFeed?.let { feed ->
+                    dispatch(
+                        GameStore.Msg.VisualEffectFeedUpdated(
+                            comboStreak = lockResult.nextComboStreak,
+                            visualEffectFeed = feed,
+                        ),
+                    )
+                } ?: dispatch(GameStore.Msg.ComboStreakUpdated(lockResult.nextComboStreak))
+
+                persistGameAudioUseCase.playLockSounds(
+                    linesCleared = lockResult.linesCleared,
+                    levelIncreased = lockResult.levelIncreased,
+                )
+                gameLoopUseCase.updateLevel(lockResult.gameState.level)
+
+                dispatch(
+                    GameStore.Msg.GameStateUpdated(
+                        lockResult.gameState,
+                        lockResult.ghostPieceY,
+                    ),
                 )
 
-                when (linesCleared) {
-                    0 -> audioRepository.playSoundEffect(SoundEffect.PIECE_DROP)
-                    4 -> audioRepository.playSoundEffect(SoundEffect.TETRIS)
-                    else -> audioRepository.playSoundEffect(SoundEffect.LINE_CLEAR)
-                }
-
-                if (newState.level > gameState.level) {
-                    audioRepository.playSoundEffect(SoundEffect.LEVEL_UP)
-                }
-
-                gameLoopUseCase.updateLevel(newState.level)
-
-                val ghostY = calculateGhostY(newState)
-                dispatch(GameStore.Msg.GameStateUpdated(newState, ghostY))
-
-                if (newState.isGameOver) {
-                    handleGameOver(newState, state.settings)
+                if (lockResult.gameState.isGameOver) {
+                    handleGameOver(
+                        gameState = lockResult.gameState,
+                        settings = state.settings,
+                    )
                 }
             }
-        }
 
-        private fun calculateGhostY(gameState: GameState): Int? =
-            gameState.currentPiece?.let { piece ->
-                calculateGhostPositionUseCase(
-                    gameState = gameState,
-                    piece = piece,
-                    currentPosition = gameState.currentPosition,
-                )
-            }
+            private fun handleGameOver(
+                gameState: GameState,
+                settings: GameSettings,
+            ) {
+                gameLoopUseCase.stop()
+                dispatch(GameStore.Msg.ComboStreakUpdated(0))
+                persistGameAudioUseCase.playGameOverSound()
 
-        private fun mapToVisualEffectBurst(
-            id: Long,
-            burstSpec: PlanVisualFeedbackUseCase.BurstSpec,
-        ): VisualEffectBurst =
-            VisualEffectBurst(
-                id = id,
-                linesCleared = burstSpec.linesCleared,
-                comboStreak = burstSpec.comboStreak,
-                intensity = burstSpec.intensity,
-                power = burstSpec.power,
-                events =
-                    burstSpec.events.map { event ->
-                        when (event) {
-                            is VisualEffectEvent.ScreenShake ->
-                                VisualEffectEvent.ScreenShake(
-                                    intensity = event.intensity,
-                                    power = event.power,
-                                )
-
-                            is VisualEffectEvent.FloatingText ->
-                                VisualEffectEvent.FloatingText(
-                                    intensity = event.intensity,
-                                    power = event.power,
-                                    textKey = event.textKey,
-                                )
-
-                            is VisualEffectEvent.ScreenFlash ->
-                                VisualEffectEvent.ScreenFlash(
-                                    intensity = event.intensity,
-                                    power = event.power,
-                                )
-
-                            is VisualEffectEvent.Explosion ->
-                                VisualEffectEvent.Explosion(
-                                    intensity = event.intensity,
-                                    power = event.power,
-                                    particleCount = event.particleCount,
-                                )
-                        }
-                    },
-            )
-
-        private fun handleGameOver(
-            gameState: GameState,
-            settings: GameSettings,
-        ) {
-            gameLoopUseCase.stop()
-            dispatch(GameStore.Msg.ComboStreakUpdated(0))
-
-            audioRepository.stopMusic()
-            audioRepository.playSoundEffect(SoundEffect.GAME_OVER)
-            scope.launch {
-                try {
-                    // Save game record
-                    val record =
-                        GameRecord(
-                            id = Uuid.random().toString(),
-                            score = gameState.score,
-                            linesCleared = gameState.linesCleared,
-                            difficulty = settings.difficulty,
-                            timestamp = Clock.System.now().toEpochMilliseconds(),
-                        )
-                    gameHistoryRepository.saveGame(record)
-
-                    // Clear saved game state
-                    gameStateRepository.clearGameState()
-
-                    publish(GameStore.Label.GameOver)
-                } catch (e: Exception) {
-                    publish(GameStore.Label.ShowError(e.message ?: "Failed to save game"))
+                scope.launch {
+                    try {
+                        persistGameAudioUseCase.saveCompletedGame(gameState, settings)
+                        publish(GameStore.Label.GameOver)
+                    } catch (e: Exception) {
+                        publish(GameStore.Label.ShowError(e.message ?: "Failed to save game"))
+                    }
                 }
             }
-        }
 
-        /**
-         * A helper function to process a gesture event and execute the resulting action.
-         */
-        private fun handleGestureEvent(
-            event: GestureEvent,
-            state: GameStore.State,
-        ) {
-            val result = gestureHandlingUseCase(event)
-            when (result) {
-                is GestureResult.MoveLeft -> moveLeft(state)
-                is GestureResult.MoveRight -> moveRight(state)
-                is GestureResult.MoveDown -> moveDown(state)
-                is GestureResult.HardDrop -> hardDrop(state)
-                null -> { /* No action triggered, do nothing */ }
+            private fun handleGestureEvent(
+                event: GestureEvent,
+                state: GameStore.State,
+            ) {
+                when (gestureHandlingUseCase(event)) {
+                    is GestureResult.MoveLeft -> moveLeft(state)
+                    is GestureResult.MoveRight -> moveRight(state)
+                    is GestureResult.MoveDown -> moveDown(state)
+                    is GestureResult.HardDrop -> hardDrop(state)
+                    null -> Unit
+                }
+            }
+
+            private fun GameStore.State.playableGameState(): GameState? {
+                val gameState = gameState ?: return null
+                if (isPaused || gameState.isGameOver) {
+                    return null
+                }
+                return gameState
             }
         }
     }
-}

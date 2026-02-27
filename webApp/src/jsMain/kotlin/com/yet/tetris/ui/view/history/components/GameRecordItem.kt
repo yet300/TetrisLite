@@ -80,7 +80,7 @@ val GameRecordItem =
                     // Touch event handlers
                     this@CardContent.onTouchStart = { event ->
                         if (event.touches.length > 0) {
-                            setStartX(event.touches[0]!!.clientX)
+                            setStartX(event.touches[0].clientX)
                             setIsSwiping(true)
                         }
                     }
@@ -88,7 +88,7 @@ val GameRecordItem =
                     this@CardContent.onTouchMove = { event ->
                         startX?.let { start ->
                             if (event.touches.length > 0) {
-                                val currentX = event.touches[0]!!.clientX
+                                val currentX = event.touches[0].clientX
                                 val diff = currentX - start
                                 if (diff < 0) {
                                     setOffsetX(diff.coerceAtLeast(-100.0))
@@ -203,7 +203,7 @@ val GameRecordItem =
                             sx {
                                 color = Color("rgba(0, 0, 0, 0.7)")
                             }
-                            +Strings.linesLabel(props.game.linesCleared.toLong())
+                            +Strings.linesLabel(props.game.linesCleared)
                         }
                     }
                 }

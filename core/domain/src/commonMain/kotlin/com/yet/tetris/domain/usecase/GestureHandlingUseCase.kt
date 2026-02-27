@@ -1,6 +1,5 @@
 package com.yet.tetris.domain.usecase
 
-import jakarta.inject.Singleton
 import kotlin.math.abs
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
@@ -35,7 +34,6 @@ sealed interface GestureResult {
  * This UseCase is stateful and maintains the context of an ongoing drag gesture.
  */
 @OptIn(ExperimentalTime::class)
-@Singleton
 class GestureHandlingUseCase {
     // Internal state of the current gesture
     private data class State(

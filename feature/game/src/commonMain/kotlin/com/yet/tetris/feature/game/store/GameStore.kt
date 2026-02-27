@@ -9,13 +9,15 @@ internal interface GameStore : Store<GameStore.Intent, GameStore.State, GameStor
     data class State(
         val gameState: GameState? = null,
         val settings: GameSettings = GameSettings(),
-        val isPaused: Boolean = false,
         val elapsedTime: Long = 0, // milliseconds
         val isLoading: Boolean = false,
         val ghostPieceY: Int? = null,
         val comboStreak: Int = 0,
         val visualEffectFeed: VisualEffectFeed = VisualEffectFeed(),
-    )
+    ) {
+        val isPaused: Boolean
+            get() = gameState?.isPaused == true
+    }
 
     sealed class Intent {
         data object PauseGame : Intent()

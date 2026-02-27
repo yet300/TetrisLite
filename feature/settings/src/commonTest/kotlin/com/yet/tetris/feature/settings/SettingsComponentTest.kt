@@ -8,15 +8,13 @@ import com.yet.tetris.domain.model.game.Difficulty
 import com.yet.tetris.domain.model.settings.GameSettings
 import com.yet.tetris.domain.model.theme.VisualTheme
 import com.yet.tetris.feature.settings.store.FakeGameSettingsRepository
+import com.yet.tetris.feature.settings.store.SettingsStoreFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import org.koin.core.context.startKoin
-import org.koin.core.context.stopKoin
-import org.koin.dsl.module
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -34,20 +32,10 @@ class SettingsComponentTest {
     fun before() {
         Dispatchers.setMain(testDispatcher)
         repository = FakeGameSettingsRepository()
-
-        startKoin {
-            modules(
-                module {
-                    single<com.arkivanov.mvikotlin.core.store.StoreFactory> { DefaultStoreFactory() }
-                    single<com.yet.tetris.domain.repository.GameSettingsRepository> { repository }
-                },
-            )
-        }
     }
 
     @AfterTest
     fun after() {
-        stopKoin()
         Dispatchers.resetMain()
     }
 
@@ -130,6 +118,13 @@ class SettingsComponentTest {
         return DefaultSettingsComponent(
             componentContext = componentContext,
             onCloseRequest = onClose,
+            settingsStoreFactory = createStoreFactory(),
         )
     }
+
+    private fun createStoreFactory(): SettingsStoreFactory =
+        SettingsStoreFactory(
+            storeFactory = DefaultStoreFactory(),
+            gameSettingsRepository = repository,
+        )
 }

@@ -3,14 +3,12 @@ package com.yet.tetris.domain.usecase
 import com.yet.tetris.domain.model.game.GameState
 import com.yet.tetris.domain.model.game.LevelProgression
 import com.yet.tetris.domain.model.game.Position
-import jakarta.inject.Singleton
 
 /**
  * Use case for locking the current piece to the board.
  * This triggers line clearing, score calculation, and spawning the next piece.
  * This is a critical use case that orchestrates multiple game mechanics.
  */
-@Singleton
 class LockPieceUseCase(
     private val calculateScore: CalculateScoreUseCase,
     private val generateTetromino: GenerateTetrominoUseCase,

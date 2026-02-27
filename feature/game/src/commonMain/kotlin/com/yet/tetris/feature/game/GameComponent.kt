@@ -1,5 +1,6 @@
 package com.yet.tetris.feature.game
 
+import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.ExperimentalDecomposeApi
 import com.arkivanov.decompose.router.slot.ChildSlot
 import com.arkivanov.decompose.value.Value
@@ -90,5 +91,12 @@ interface GameComponent : BackHandlerOwner {
         class Settings(
             val component: SettingsComponent,
         ) : SheetChild
+    }
+
+    fun interface Factory {
+        operator fun invoke(
+            componentContext: ComponentContext,
+            navigateBack: () -> Unit,
+        ): GameComponent
     }
 }

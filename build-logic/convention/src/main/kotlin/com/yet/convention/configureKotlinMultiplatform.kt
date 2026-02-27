@@ -27,7 +27,6 @@ internal fun Project.configureKotlinMultiplatform(
 
     js(IR) {
         browser()
-        binaries.executable()
     }
 
     if (targetsConfig.iosEnabled) {

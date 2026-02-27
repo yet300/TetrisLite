@@ -11,16 +11,26 @@ import com.arkivanov.decompose.router.stack.pop
 import com.arkivanov.decompose.router.stack.push
 import com.arkivanov.decompose.router.webhistory.WebNavigation
 import com.arkivanov.decompose.value.Value
-import com.yet.tetris.feature.game.DefaultGameComponent
-import com.yet.tetris.feature.home.DefaultHomeComponent
+import com.yet.tetris.feature.game.GameComponent
+import com.yet.tetris.feature.game.di.GAME_COMPONENT_FACTORY_QUALIFIER
+import com.yet.tetris.feature.home.HomeComponent
+import com.yet.tetris.feature.home.di.HOME_COMPONENT_FACTORY_QUALIFIER
 import kotlinx.serialization.Serializable
 import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
+import org.koin.core.qualifier.named
 
 class DefaultRootComponent(
     componentContext: ComponentContext,
 ) : ComponentContext by componentContext,
     RootComponent,
     KoinComponent {
+    private val homeComponentFactory: HomeComponent.Factory by inject(
+        qualifier = named(HOME_COMPONENT_FACTORY_QUALIFIER),
+    )
+    private val gameComponentFactory: GameComponent.Factory by inject(
+        qualifier = named(GAME_COMPONENT_FACTORY_QUALIFIER),
+    )
     private val navigation = StackNavigation<Configuration>()
 
     private val stack =
@@ -61,7 +71,7 @@ class DefaultRootComponent(
             Configuration.HomeScreen ->
                 RootComponent.Child.Home(
                     component =
-                        DefaultHomeComponent(
+                        homeComponentFactory(
                             componentContext = componentContext,
                             navigateToGame = { navigation.push(Configuration.GameScreen) },
                         ),
@@ -70,7 +80,7 @@ class DefaultRootComponent(
             Configuration.GameScreen ->
                 RootComponent.Child.Game(
                     component =
-                        DefaultGameComponent(
+                        gameComponentFactory(
                             componentContext = componentContext,
                             navigateBack = { navigation.pop() },
                         ),

@@ -3,13 +3,11 @@ package com.yet.tetris.domain.usecase
 import com.yet.tetris.domain.model.game.GameBoard
 import com.yet.tetris.domain.model.game.Position
 import com.yet.tetris.domain.model.game.Tetromino
-import jakarta.inject.Singleton
 
 /**
  * Use case for checking if a tetromino collides with the board boundaries or locked blocks.
  * This is a core piece of game logic used by movement, rotation, and spawning operations.
  */
-@Singleton
 class CheckCollisionUseCase {
     /**
      * Checks if placing a tetromino at the given position would result in a collision.

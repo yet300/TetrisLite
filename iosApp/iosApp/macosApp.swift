@@ -9,7 +9,7 @@ struct macosApp: App {
 
     init() {
         InitKoinKt.InitKoin()
-        
+
 
         self.root = DefaultRootComponent(
             componentContext: DefaultComponentContext(

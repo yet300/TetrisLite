@@ -16,9 +16,6 @@ import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import org.koin.core.context.startKoin
-import org.koin.core.context.stopKoin
-import org.koin.dsl.module
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -37,20 +34,10 @@ class SettingsStoreTest {
         isAssertOnMainThreadEnabled = false
         Dispatchers.setMain(testDispatcher)
         repository = FakeGameSettingsRepository()
-
-        startKoin {
-            modules(
-                module {
-                    single<com.arkivanov.mvikotlin.core.store.StoreFactory> { DefaultStoreFactory() }
-                    single<com.yet.tetris.domain.repository.GameSettingsRepository> { repository }
-                },
-            )
-        }
     }
 
     @AfterTest
     fun after() {
-        stopKoin()
         Dispatchers.resetMain()
         isAssertOnMainThreadEnabled = true
     }
@@ -183,7 +170,7 @@ class SettingsStoreTest {
         runTest {
             repository.shouldThrowOnGet = true
 
-            store = SettingsStoreFactory().create()
+            store = createStoreFactory().create()
             val labels = store.labels.test()
             testDispatcher.scheduler.advanceUntilIdle()
 
@@ -191,7 +178,13 @@ class SettingsStoreTest {
         }
 
     private fun createStore() {
-        store = SettingsStoreFactory().create()
+        store = createStoreFactory().create()
         testDispatcher.scheduler.advanceUntilIdle()
     }
+
+    private fun createStoreFactory(): SettingsStoreFactory =
+        SettingsStoreFactory(
+            storeFactory = DefaultStoreFactory(),
+            gameSettingsRepository = repository,
+        )
 }

@@ -21,7 +21,7 @@ struct iOSApp: App {
 
 class AppDelegate: NSObject, UIApplicationDelegate {
     private var stateKeeper = StateKeeperDispatcherKt.StateKeeperDispatcher(savedState: nil)
-    
+
     lazy var root: RootComponent = DefaultRootComponent(
         componentContext: DefaultComponentContext(
             lifecycle: ApplicationLifecycle(),

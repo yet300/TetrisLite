@@ -1,5 +1,6 @@
 package com.yet.tetris.feature.history
 
+import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.value.Value
 import com.yet.tetris.domain.model.history.GameRecord
 
@@ -21,5 +22,12 @@ interface HistoryComponent {
             val games: List<GameRecord>,
             val currentFilter: DateFilter,
         ) : Model
+    }
+
+    fun interface Factory {
+        operator fun invoke(
+            componentContext: ComponentContext,
+            dismiss: () -> Unit,
+        ): HistoryComponent
     }
 }

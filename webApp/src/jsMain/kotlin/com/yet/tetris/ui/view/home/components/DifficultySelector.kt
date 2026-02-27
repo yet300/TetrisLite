@@ -40,9 +40,7 @@ val DifficultySelector =
                 exclusive = true
                 fullWidth = true
                 onChange = { _, newValue ->
-                    if (newValue != null) {
-                        props.onDifficultyChanged(newValue.unsafeCast<Difficulty>())
-                    }
+                    props.onDifficultyChanged(newValue.unsafeCast<Difficulty>())
                 }
                 sx {
                     backgroundColor = Color("rgba(255, 255, 255, 0.1)")

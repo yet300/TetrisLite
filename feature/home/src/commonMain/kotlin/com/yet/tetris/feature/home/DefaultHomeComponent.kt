@@ -13,22 +13,30 @@ import com.arkivanov.decompose.value.operator.map
 import com.arkivanov.mvikotlin.core.instancekeeper.getStore
 import com.arkivanov.mvikotlin.extensions.coroutines.labels
 import com.yet.tetris.domain.model.game.Difficulty
-import com.yet.tetris.feature.history.DefaultHistoryComponent
+import com.yet.tetris.feature.history.HistoryComponent
+import com.yet.tetris.feature.history.di.HISTORY_COMPONENT_FACTORY_QUALIFIER
+import com.yet.tetris.feature.home.di.HOME_COMPONENT_FACTORY_QUALIFIER
 import com.yet.tetris.feature.home.integration.stateToModel
 import com.yet.tetris.feature.home.store.HomeStore
 import com.yet.tetris.feature.home.store.HomeStoreFactory
-import com.yet.tetris.feature.settings.DefaultSettingsComponent
+import com.yet.tetris.feature.settings.SettingsComponent
+import com.yet.tetris.feature.settings.di.SETTINGS_COMPONENT_FACTORY_QUALIFIER
+import jakarta.inject.Inject
+import jakarta.inject.Named
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
-import org.koin.core.component.KoinComponent
+import org.koin.core.annotation.Factory
+import org.koin.core.annotation.Provided
 
-class DefaultHomeComponent(
+internal class DefaultHomeComponent(
     componentContext: ComponentContext,
     private val navigateToGame: () -> Unit,
+    private val homeStoreFactory: HomeStoreFactory,
+    private val settingsComponentFactory: SettingsComponent.Factory,
+    private val historyComponentFactory: HistoryComponent.Factory,
 ) : ComponentContext by componentContext,
-    HomeComponent,
-    KoinComponent {
-    private val store = instanceKeeper.getStore { HomeStoreFactory().create() }
+    HomeComponent {
+    private val store = instanceKeeper.getStore { homeStoreFactory.create() }
 
     private val bottomSheetSlot = SlotNavigation<BottomSheetConfiguration>()
 
@@ -65,7 +73,7 @@ class DefaultHomeComponent(
             BottomSheetConfiguration.Settings ->
                 HomeComponent.BottomSheetChild.SettingsChild(
                     component =
-                        DefaultSettingsComponent(
+                        settingsComponentFactory(
                             componentContext = componentContext,
                             onCloseRequest = ::onDismissBottomSheet,
                         ),
@@ -74,7 +82,7 @@ class DefaultHomeComponent(
             BottomSheetConfiguration.History ->
                 HomeComponent.BottomSheetChild.HistoryChild(
                     component =
-                        DefaultHistoryComponent(
+                        historyComponentFactory(
                             componentContext = componentContext,
                             dismiss = ::onDismissBottomSheet,
                         ),
@@ -114,3 +122,29 @@ class DefaultHomeComponent(
         data object History : BottomSheetConfiguration
     }
 }
+
+@Factory
+@Named(HOME_COMPONENT_FACTORY_QUALIFIER)
+internal class DefaultHomeComponentFactory
+    @Inject
+    constructor(
+        private val homeStoreFactory: HomeStoreFactory,
+        @Named(SETTINGS_COMPONENT_FACTORY_QUALIFIER)
+        @Provided
+        private val settingsComponentFactory: SettingsComponent.Factory,
+        @Named(HISTORY_COMPONENT_FACTORY_QUALIFIER)
+        @Provided
+        private val historyComponentFactory: HistoryComponent.Factory,
+    ) : HomeComponent.Factory {
+        override fun invoke(
+            componentContext: ComponentContext,
+            navigateToGame: () -> Unit,
+        ): HomeComponent =
+            DefaultHomeComponent(
+                componentContext = componentContext,
+                navigateToGame = navigateToGame,
+                homeStoreFactory = homeStoreFactory,
+                settingsComponentFactory = settingsComponentFactory,
+                historyComponentFactory = historyComponentFactory,
+            )
+    }
