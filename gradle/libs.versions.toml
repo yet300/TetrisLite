@@ -36,14 +36,12 @@ androidx-compose-bom = "2026.02.00"
 
 kotlin = "2.3.0"
 ksp = "2.3.4"
+metro = "0.11.1"
 
 kotlinx-coroutines = "1.10.2"
 kotlinxDatetime = "0.7.1-0.6.x-compat"
 kotlinxSerializationJson = "1.9.0"
 jetbrainsKotlinWrappers = "2025.12.7"
-
-koin = "4.1.1"
-koin-annotation = "2.3.1"
 
 decompose = "3.4.0"
 essenty = "2.5.0"
@@ -89,15 +87,6 @@ kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 kotlin-browser = { module = "org.jetbrains.kotlin-wrappers:kotlin-browser" }
 jetbrains-kotlinWrappers-kotlinWrappersBom = { group = "org.jetbrains.kotlin-wrappers", name = "kotlin-wrappers-bom", version.ref = "jetbrainsKotlinWrappers" }
-
-#koin
-koin-core = { group = "io.insert-koin", name = "koin-core", version.ref = "koin" }
-koin-android = { group = "io.insert-koin", name = "koin-android", version.ref = "koin" }
-koin-test = { group = "io.insert-koin", name = "koin-test", version.ref = "koin" }
-
-koin-annotation = { group = "io.insert-koin", name = "koin-annotations", version.ref = "koin-annotation" }
-koin-annotation-compiler = { group = "io.insert-koin", name = "koin-ksp-compiler", version.ref = "koin-annotation" }
-koin-jsr330 = { group = "io.insert-koin", name = "koin-jsr330", version.ref = "koin-annotation" }
 
 #decompose
 decompose = { module = "com.arkivanov.decompose:decompose", version.ref = "decompose" }
@@ -183,7 +172,6 @@ testing = [
     "kotlin-test-annotations",
     "kotlinx-coroutines-test",
     "turbine",
-    "koin-test"
 ]
 
 android-test = [
@@ -202,6 +190,7 @@ composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "k
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 android-kotlin-multiplatform-library = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+metro = { id = "dev.zacsweers.metro", version.ref = "metro" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 sqlDelight = { id = "app.cash.sqldelight", version.ref = "sqldelight" }
 ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint" }
@@ -213,5 +202,4 @@ detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
 
 local-kotlin-multiplatform = { id = "com.plugins.kotlinMultiplatformPlugin", version = "unspecified" }
 local-compose-multiplatform = { id = "com.plugins.composeMultiplatform", version = "unspecified" }
-local-koin = { id = "com.plugins.koin-annotation", version = "unspecified" }
 local-sqlDelight = { id = "com.plugins.sqldelight", version = "unspecified" }
