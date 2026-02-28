@@ -6,8 +6,8 @@ import com.arkivanov.decompose.router.webhistory.withWebHistory
 import com.arkivanov.essenty.lifecycle.LifecycleRegistry
 import com.arkivanov.essenty.lifecycle.resume
 import com.arkivanov.essenty.lifecycle.stop
-import com.yet.tetris.di.InitKoin
-import com.yet.tetris.feature.root.DefaultRootComponent
+import com.yet.tetris.di.createJsAppGraph
+import com.yet.tetris.di.createRootComponent
 import com.yet.tetris.feature.root.RootComponent
 import com.yet.tetris.ui.theme.ThemeModule
 import com.yet.tetris.ui.view.root.RootContent
@@ -22,18 +22,19 @@ import web.dom.visible
 
 @OptIn(ExperimentalDecomposeApi::class)
 fun main() {
-    InitKoin()
+    val appGraph = createJsAppGraph()
 
     val lifecycle = LifecycleRegistry()
 
     val root =
         withWebHistory { stateKeeper, _ ->
-            DefaultRootComponent(
+            createRootComponent(
                 componentContext =
                     DefaultComponentContext(
                         lifecycle = lifecycle,
                         stateKeeper = stateKeeper,
                     ),
+                graph = appGraph,
             )
         }
 
