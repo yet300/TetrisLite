@@ -1,6 +1,6 @@
 plugins {
     alias(libs.plugins.local.kotlin.multiplatform)
-    alias(libs.plugins.local.koin)
+    alias(libs.plugins.metro)
 }
 
 kotlin {
@@ -44,6 +44,7 @@ kotlin {
         commonMain.dependencies {
             implementation(projects.core.data)
             implementation(projects.core.common)
+            implementation(projects.core.database)
             api(projects.core.domain)
 
             api(projects.feature.root)

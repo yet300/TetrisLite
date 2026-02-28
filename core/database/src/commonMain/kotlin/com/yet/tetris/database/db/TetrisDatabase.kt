@@ -3,7 +3,6 @@ package com.yet.tetris.database.db
 import app.cash.sqldelight.db.SqlDriver
 import com.yet.tetris.database.TetrisLiteDatabase
 import com.yet.tetris.database.utils.enumAdapter
-import jakarta.inject.Singleton
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -12,7 +11,6 @@ import kotlinx.coroutines.sync.withLock
  * Manages the singleton instance of the database, handling its asynchronous initialization.
  * This class ensures that the database driver is created only once in a thread-safe manner.
  */
-@Singleton
 class DatabaseManager(
     private val driverFactory: DatabaseDriverFactory,
 ) {

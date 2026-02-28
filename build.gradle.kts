@@ -11,6 +11,7 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform) apply false
     alias(libs.plugins.android.kotlin.multiplatform.library) apply false
     alias(libs.plugins.ksp) apply false
+    alias(libs.plugins.metro) apply false
     alias(libs.plugins.kotlin.serialization) apply false
     alias(libs.plugins.sqlDelight) apply false
     alias(libs.plugins.android.test) apply false

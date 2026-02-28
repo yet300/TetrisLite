@@ -22,27 +22,22 @@ import com.yet.tetris.domain.usecase.MovePieceUseCase
 import com.yet.tetris.domain.usecase.PersistGameAudioUseCase
 import com.yet.tetris.domain.usecase.ProcessLockedPieceUseCase
 import com.yet.tetris.domain.usecase.RotatePieceUseCase
-import jakarta.inject.Inject
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
-import org.koin.core.annotation.Factory
-import org.koin.core.annotation.Provided
 
-@Factory
 internal class GameStoreFactory
-    @Inject
     constructor(
-        @Provided private val storeFactory: StoreFactory,
-        @Provided private val gameSettingsRepository: GameSettingsRepository,
-        @Provided private val movePieceUseCase: MovePieceUseCase,
-        @Provided private val rotatePieceUseCase: RotatePieceUseCase,
-        @Provided private val hardDropUseCase: HardDropUseCase,
-        @Provided private val handleSwipeInputUseCase: HandleSwipeInputUseCase,
-        @Provided private val gestureHandlingUseCase: GestureHandlingUseCase,
-        @Provided private val initializeGameSessionUseCase: InitializeGameSessionUseCase,
-        @Provided private val advanceGameTickUseCase: AdvanceGameTickUseCase,
-        @Provided private val processLockedPieceUseCase: ProcessLockedPieceUseCase,
-        @Provided private val persistGameAudioUseCase: PersistGameAudioUseCase,
+        private val storeFactory: StoreFactory,
+        private val gameSettingsRepository: GameSettingsRepository,
+        private val movePieceUseCase: MovePieceUseCase,
+        private val rotatePieceUseCase: RotatePieceUseCase,
+        private val hardDropUseCase: HardDropUseCase,
+        private val handleSwipeInputUseCase: HandleSwipeInputUseCase,
+        private val gestureHandlingUseCase: GestureHandlingUseCase,
+        private val initializeGameSessionUseCase: InitializeGameSessionUseCase,
+        private val advanceGameTickUseCase: AdvanceGameTickUseCase,
+        private val processLockedPieceUseCase: ProcessLockedPieceUseCase,
+        private val persistGameAudioUseCase: PersistGameAudioUseCase,
     ) {
         fun create(): GameStore =
             object :
@@ -371,7 +366,6 @@ internal class GameStoreFactory
                         lockResult.ghostPieceY,
                     ),
                 )
-
                 if (lockResult.gameState.isGameOver) {
                     handleGameOver(
                         gameState = lockResult.gameState,

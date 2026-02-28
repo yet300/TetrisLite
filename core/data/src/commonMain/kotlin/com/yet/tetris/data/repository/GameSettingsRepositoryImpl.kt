@@ -7,7 +7,6 @@ import com.yet.tetris.data.mapper.toDto
 import com.yet.tetris.data.model.GameSettingsDto
 import com.yet.tetris.domain.model.settings.GameSettings
 import com.yet.tetris.domain.repository.GameSettingsRepository
-import jakarta.inject.Singleton
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
@@ -17,7 +16,6 @@ import kotlinx.serialization.serializer
  * Implementation of GameSettingsRepository using multiplatform-settings.
  */
 @OptIn(ExperimentalSettingsApi::class)
-@Singleton
 class GameSettingsRepositoryImpl(
     private val flowSettings: FlowSettings,
     private val json: Json,

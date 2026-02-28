@@ -13,13 +13,6 @@ gradlePlugin {
             implementationClass = "com.yet.plugins.ComposeMultiplatformPlugin"
         }
 
-        register("koinAnnotation") {
-            id = "com.plugins.koin-annotation"
-            displayName = "KMP Koin Annotation"
-            tags = listOf("kmp", "koin-core", "koin-annotation")
-            implementationClass = "com.yet.plugins.KoinAnnotationPlugin"
-        }
-
         register("sqlDelight") {
             id = "com.plugins.sqldelight"
             displayName = "SqlDelight"
@@ -37,4 +30,3 @@ dependencies {
     compileOnly(libs.compose.gradlePlugin)
     compileOnly(libs.ksp.gradlePlugin)
 }
-

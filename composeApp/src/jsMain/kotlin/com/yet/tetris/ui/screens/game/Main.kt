@@ -9,8 +9,8 @@ import com.arkivanov.essenty.lifecycle.LifecycleRegistry
 import com.arkivanov.essenty.lifecycle.resume
 import com.arkivanov.essenty.lifecycle.stop
 import com.yet.tetris.App
-import com.yet.tetris.di.InitKoin
-import com.yet.tetris.feature.root.DefaultRootComponent
+import com.yet.tetris.di.createJsAppGraph
+import com.yet.tetris.di.createRootComponent
 import org.jetbrains.skiko.wasm.onWasmReady
 import web.dom.DocumentVisibilityState
 import web.dom.visible
@@ -20,16 +20,17 @@ import web.events.EventHandler
 @OptIn(ExperimentalDecomposeApi::class, ExperimentalComposeUiApi::class)
 fun main() {
     val lifecycle = LifecycleRegistry()
-    InitKoin()
+    val appGraph = createJsAppGraph()
 
     val root =
         withWebHistory { stateKeeper, deepLink ->
-            DefaultRootComponent(
+            createRootComponent(
                 componentContext =
                     DefaultComponentContext(
                         lifecycle = lifecycle,
                         stateKeeper = stateKeeper,
                     ),
+                graph = appGraph,
             )
         }
 
