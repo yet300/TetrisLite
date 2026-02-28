@@ -33,7 +33,9 @@ import dev.zacsweers.metro.createGraphFactory
 internal interface AndroidAppGraph : AppGraph {
     @DependencyGraph.Factory
     fun interface Factory {
-        fun create(@Provides appContext: Context): AndroidAppGraph
+        fun create(
+            @Provides appContext: Context,
+        ): AndroidAppGraph
     }
 }
 

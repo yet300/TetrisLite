@@ -29,8 +29,7 @@ abstract class SettingsBindings {
             )
 
         @Provides
-        internal fun provideDefaultSettingsComponentFactory(
-            settingsStoreFactory: SettingsStoreFactory,
-        ): DefaultSettingsComponentFactory = DefaultSettingsComponentFactory(settingsStoreFactory)
+        internal fun provideDefaultSettingsComponentFactory(settingsStoreFactory: SettingsStoreFactory): DefaultSettingsComponentFactory =
+            DefaultSettingsComponentFactory(settingsStoreFactory)
     }
 }

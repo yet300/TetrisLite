@@ -75,6 +75,7 @@ internal class DefaultSettingsComponent(
         onCloseRequest()
     }
 }
+
 internal class DefaultSettingsComponentFactory
     constructor(
         private val settingsStoreFactory: SettingsStoreFactory,

@@ -115,6 +115,7 @@ internal class DefaultHomeComponent(
         data object History : BottomSheetConfiguration
     }
 }
+
 internal class DefaultHomeComponentFactory
     constructor(
         private val homeStoreFactory: HomeStoreFactory,

@@ -29,8 +29,7 @@ abstract class HistoryBindings {
             )
 
         @Provides
-        internal fun provideDefaultHistoryComponentFactory(
-            historyStoreFactory: HistoryStoreFactory,
-        ): DefaultHistoryComponentFactory = DefaultHistoryComponentFactory(historyStoreFactory)
+        internal fun provideDefaultHistoryComponentFactory(historyStoreFactory: HistoryStoreFactory): DefaultHistoryComponentFactory =
+            DefaultHistoryComponentFactory(historyStoreFactory)
     }
 }
