@@ -29,14 +29,14 @@ A modern, cross-platform Tetris game built with Kotlin Multiplatform and Compose
 - **SQLite Database** - Local storage for game records and settings
 - **Procedural Audio** - Dynamically generated music and SFX (no audio files needed!)
 - **MVI Architecture** - Predictable state management with MVIKotlin
-- **Dependency Injection** - Koin for clean architecture
+- **Dependency Injection** - Metro DI
 
 ### Tech Stack
 - **Kotlin Multiplatform** 2.2.20 - Share code across all platforms
 - **Compose Multiplatform** 1.9.0 - Modern declarative UI
 - **MVIKotlin** - MVI architecture for predictable state management
 - **Decompose** - Navigation and lifecycle management
-- **Koin** - Dependency injection
+- **Metro DI** - Compile-time dependency injection
 - **SQLDelight** - Type-safe SQL database
 - **Kotlinx Coroutines** - Asynchronous programming
 - **Kotlinx Serialization** - JSON serialization
