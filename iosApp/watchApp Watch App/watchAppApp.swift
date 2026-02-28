@@ -13,14 +13,15 @@ struct watchApp_Watch_AppApp: App {
     private let root: RootComponent
 
     init() {
-        InitKoinKt.InitKoin()
-        self.root = DefaultRootComponent(
+        let appGraph = NativeAppGraphKt.createNativeAppGraph()
+        self.root = RootComponentFactoryKt.createRootComponent(
             componentContext: DefaultComponentContext(
                 lifecycle: LifecycleRegistryKt.LifecycleRegistry(),
                 stateKeeper: nil,
                 instanceKeeper: nil,
                 backHandler: nil
-            )
+            ),
+            graph: appGraph
         )
     }
 
