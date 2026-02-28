@@ -12,25 +12,15 @@ import com.arkivanov.decompose.router.stack.push
 import com.arkivanov.decompose.router.webhistory.WebNavigation
 import com.arkivanov.decompose.value.Value
 import com.yet.tetris.feature.game.GameComponent
-import com.yet.tetris.feature.game.di.GAME_COMPONENT_FACTORY_QUALIFIER
 import com.yet.tetris.feature.home.HomeComponent
-import com.yet.tetris.feature.home.di.HOME_COMPONENT_FACTORY_QUALIFIER
 import kotlinx.serialization.Serializable
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
-import org.koin.core.qualifier.named
 
-class DefaultRootComponent(
+internal class DefaultRootComponent(
     componentContext: ComponentContext,
+    private val homeComponentFactory: HomeComponent.Factory,
+    private val gameComponentFactory: GameComponent.Factory,
 ) : ComponentContext by componentContext,
-    RootComponent,
-    KoinComponent {
-    private val homeComponentFactory: HomeComponent.Factory by inject(
-        qualifier = named(HOME_COMPONENT_FACTORY_QUALIFIER),
-    )
-    private val gameComponentFactory: GameComponent.Factory by inject(
-        qualifier = named(GAME_COMPONENT_FACTORY_QUALIFIER),
-    )
+    RootComponent {
     private val navigation = StackNavigation<Configuration>()
 
     private val stack =
@@ -95,4 +85,17 @@ class DefaultRootComponent(
         @Serializable
         data object GameScreen : Configuration()
     }
+}
+
+internal class DefaultRootComponentFactory
+constructor(
+    private val homeComponentFactory: HomeComponent.Factory,
+    private val gameComponentFactory: GameComponent.Factory,
+) : RootComponent.Factory {
+    override fun invoke(componentContext: ComponentContext): RootComponent =
+        DefaultRootComponent(
+            componentContext = componentContext,
+            homeComponentFactory = homeComponentFactory,
+            gameComponentFactory = gameComponentFactory,
+        )
 }
