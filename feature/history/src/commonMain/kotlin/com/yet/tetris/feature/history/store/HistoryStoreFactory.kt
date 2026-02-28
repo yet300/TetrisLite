@@ -7,17 +7,12 @@ import com.arkivanov.mvikotlin.core.store.StoreFactory
 import com.arkivanov.mvikotlin.extensions.coroutines.CoroutineExecutor
 import com.yet.tetris.domain.repository.GameHistoryRepository
 import com.yet.tetris.feature.history.DateFilter
-import jakarta.inject.Inject
 import kotlinx.coroutines.launch
-import org.koin.core.annotation.Factory
-import org.koin.core.annotation.Provided
 
-@Factory
 internal class HistoryStoreFactory
-    @Inject
     constructor(
-        @Provided private val storeFactory: StoreFactory,
-        @Provided private val gameHistoryRepository: GameHistoryRepository,
+        private val storeFactory: StoreFactory,
+        private val gameHistoryRepository: GameHistoryRepository,
     ) {
         fun create(): HistoryStore =
             object :
