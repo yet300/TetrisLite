@@ -5,7 +5,6 @@ import com.yet.tetris.database.mapper.toDomain
 import com.yet.tetris.database.mapper.toEntity
 import com.yet.tetris.domain.model.history.GameRecord
 import com.yet.tetris.domain.repository.GameHistoryRepository
-import jakarta.inject.Singleton
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -13,7 +12,6 @@ import kotlinx.coroutines.flow.map
  * Implementation of GameHistoryRepository using SQLDelight.
  * Limits history to 100 games to prevent unbounded growth.
  */
-@Singleton
 class GameHistoryRepositoryImpl(
     private val gameHistoryDao: GameHistoryDao,
 ) : GameHistoryRepository {

@@ -1,6 +1,6 @@
 plugins {
     alias(libs.plugins.local.kotlin.multiplatform)
-    alias(libs.plugins.local.koin)
+    alias(libs.plugins.metro)
     alias(libs.plugins.local.sqlDelight)
 }
 

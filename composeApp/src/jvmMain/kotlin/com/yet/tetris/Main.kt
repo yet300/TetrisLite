@@ -5,21 +5,21 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import com.arkivanov.decompose.DefaultComponentContext
 import com.arkivanov.essenty.lifecycle.LifecycleRegistry
-import com.yet.tetris.di.InitKoin
-import com.yet.tetris.feature.root.DefaultRootComponent
+import com.yet.tetris.di.createDesktopAppGraph
+import com.yet.tetris.di.createRootComponent
 import java.awt.Dimension
 import javax.swing.SwingUtilities
 
 fun main() =
     application {
         val lifecycle = LifecycleRegistry()
-
-        InitKoin()
+        val appGraph = createDesktopAppGraph()
 
         val root =
             runOnUiThread {
-                DefaultRootComponent(
+                createRootComponent(
                     componentContext = DefaultComponentContext(lifecycle = lifecycle),
+                    graph = appGraph,
                 )
             }
 

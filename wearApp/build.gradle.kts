@@ -54,7 +54,6 @@ dependencies {
     implementation(libs.androidx.compose.ui.toolingPreview)
     debugImplementation(libs.androidx.compose.ui.tooling)
 
-    implementation(libs.koin.android)
 
     implementation(libs.androidx.wear.compose.foundation)
     implementation(libs.androidx.wear.compose.navigation)

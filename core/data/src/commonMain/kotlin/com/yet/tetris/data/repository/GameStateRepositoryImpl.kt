@@ -5,13 +5,11 @@ import com.yet.tetris.database.mapper.toDomain
 import com.yet.tetris.database.mapper.toEntities
 import com.yet.tetris.domain.model.game.GameState
 import com.yet.tetris.domain.repository.GameStateRepository
-import jakarta.inject.Singleton
 
 /**
  * Implementation of GameStateRepository using SQLDelight.
  * Used for pause/resume functionality.
  */
-@Singleton
 class GameStateRepositoryImpl(
     private val gameStateDao: GameStateDao,
 ) : GameStateRepository {

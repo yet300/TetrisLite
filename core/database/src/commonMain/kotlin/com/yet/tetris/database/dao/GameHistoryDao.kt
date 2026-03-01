@@ -7,14 +7,12 @@ import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToList
 import com.yet.tetris.database.GameHistory
 import com.yet.tetris.database.db.DatabaseManager
-import jakarta.inject.Singleton
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
 
-@Singleton
 class GameHistoryDao(
     private val databaseManager: DatabaseManager,
 ) {

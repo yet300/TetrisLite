@@ -9,14 +9,12 @@ import com.yet.tetris.database.BoardCells
 import com.yet.tetris.database.CurrentGameState
 import com.yet.tetris.database.db.DatabaseManager
 import com.yet.tetris.domain.model.game.TetrominoType
-import jakarta.inject.Singleton
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
 
-@Singleton
 class GameStateDao(
     private val databaseManager: DatabaseManager,
 ) {

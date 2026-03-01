@@ -8,16 +8,16 @@ struct macosApp: App {
     private let root: RootComponent
 
     init() {
-        InitKoinKt.InitKoin()
+        let appGraph = NativeAppGraphKt.createNativeAppGraph()
 
-
-        self.root = DefaultRootComponent(
+        self.root = RootComponentFactoryKt.createRootComponent(
             componentContext: DefaultComponentContext(
                 lifecycle: LifecycleRegistryKt.LifecycleRegistry(),
                 stateKeeper: nil,
                 instanceKeeper: nil,
                 backHandler: nil
-            )
+            ),
+            graph: appGraph
         )
     }
 

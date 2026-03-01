@@ -20,35 +20,44 @@ import com.yet.tetris.domain.usecase.PlanVisualFeedbackUseCase
 import com.yet.tetris.domain.usecase.ProcessLockedPieceUseCase
 import com.yet.tetris.domain.usecase.RotatePieceUseCase
 import com.yet.tetris.domain.usecase.StartGameUseCase
-import jakarta.inject.Singleton
-import org.koin.core.annotation.Factory
-import org.koin.core.annotation.Module
-import org.koin.core.annotation.Provided
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.BindingContainer
+import dev.zacsweers.metro.ContributesTo
+import dev.zacsweers.metro.Provides
+import dev.zacsweers.metro.SingleIn
 
-@Module
-class DomainModule {
-    @Singleton
+@ContributesTo(AppScope::class)
+@BindingContainer
+object DomainBindings {
+    @SingleIn(AppScope::class)
+    @Provides
     fun provideCheckCollisionUseCase(): CheckCollisionUseCase = CheckCollisionUseCase()
 
-    @Singleton
+    @SingleIn(AppScope::class)
+    @Provides
     fun provideCalculateScoreUseCase(): CalculateScoreUseCase = CalculateScoreUseCase()
 
-    @Singleton
+    @SingleIn(AppScope::class)
+    @Provides
     fun provideGenerateTetrominoUseCase(): GenerateTetrominoUseCase = GenerateTetrominoUseCase()
 
-    @Singleton
+    @SingleIn(AppScope::class)
+    @Provides
     fun provideMovePieceUseCase(checkCollisionUseCase: CheckCollisionUseCase): MovePieceUseCase =
         MovePieceUseCase(checkCollision = checkCollisionUseCase)
 
-    @Singleton
+    @SingleIn(AppScope::class)
+    @Provides
     fun provideRotatePieceUseCase(checkCollisionUseCase: CheckCollisionUseCase): RotatePieceUseCase =
         RotatePieceUseCase(checkCollision = checkCollisionUseCase)
 
-    @Singleton
+    @SingleIn(AppScope::class)
+    @Provides
     fun provideHardDropUseCase(checkCollisionUseCase: CheckCollisionUseCase): HardDropUseCase =
         HardDropUseCase(checkCollision = checkCollisionUseCase)
 
-    @Singleton
+    @SingleIn(AppScope::class)
+    @Provides
     fun provideLockPieceUseCase(
         calculateScoreUseCase: CalculateScoreUseCase,
         generateTetrominoUseCase: GenerateTetrominoUseCase,
@@ -60,11 +69,13 @@ class DomainModule {
             checkCollision = checkCollisionUseCase,
         )
 
-    @Singleton
+    @SingleIn(AppScope::class)
+    @Provides
     fun provideStartGameUseCase(generateTetrominoUseCase: GenerateTetrominoUseCase): StartGameUseCase =
         StartGameUseCase(generateTetromino = generateTetrominoUseCase)
 
-    @Singleton
+    @SingleIn(AppScope::class)
+    @Provides
     fun provideHandleSwipeInputUseCase(
         movePieceUseCase: MovePieceUseCase,
         hardDropUseCase: HardDropUseCase,
@@ -74,30 +85,32 @@ class DomainModule {
             hardDrop = hardDropUseCase,
         )
 
-    @Singleton
+    @SingleIn(AppScope::class)
+    @Provides
     fun provideCalculateGhostPositionUseCase(): CalculateGhostPositionUseCase = CalculateGhostPositionUseCase()
 
-    @Singleton
+    @SingleIn(AppScope::class)
+    @Provides
     fun providePlanVisualFeedbackUseCase(): PlanVisualFeedbackUseCase = PlanVisualFeedbackUseCase()
 
-    @Factory
+    @Provides
     fun provideGestureHandlingUseCase(): GestureHandlingUseCase = GestureHandlingUseCase()
 
-    @Factory
+    @Provides
     fun provideAdvanceGameTickUseCase(
-        @Provided movePieceUseCase: MovePieceUseCase,
-        @Provided calculateGhostPositionUseCase: CalculateGhostPositionUseCase,
+        movePieceUseCase: MovePieceUseCase,
+        calculateGhostPositionUseCase: CalculateGhostPositionUseCase,
     ): AdvanceGameTickUseCase =
         AdvanceGameTickUseCase(
             movePieceUseCase = movePieceUseCase,
             calculateGhostPositionUseCase = calculateGhostPositionUseCase,
         )
 
-    @Factory
+    @Provides
     fun providePersistGameAudioUseCase(
-        @Provided gameStateRepository: GameStateRepository,
-        @Provided gameHistoryRepository: GameHistoryRepository,
-        @Provided audioRepository: AudioRepository,
+        gameStateRepository: GameStateRepository,
+        gameHistoryRepository: GameHistoryRepository,
+        audioRepository: AudioRepository,
     ): PersistGameAudioUseCase =
         PersistGameAudioUseCase(
             gameStateRepository = gameStateRepository,
@@ -105,11 +118,11 @@ class DomainModule {
             audioRepository = audioRepository,
         )
 
-    @Factory
+    @Provides
     fun provideInitializeGameSessionUseCase(
-        @Provided gameSettingsRepository: GameSettingsRepository,
-        @Provided gameStateRepository: GameStateRepository,
-        @Provided startGameUseCase: StartGameUseCase,
+        gameSettingsRepository: GameSettingsRepository,
+        gameStateRepository: GameStateRepository,
+        startGameUseCase: StartGameUseCase,
     ): InitializeGameSessionUseCase =
         InitializeGameSessionUseCase(
             gameSettingsRepository = gameSettingsRepository,
@@ -117,11 +130,11 @@ class DomainModule {
             startGameUseCase = startGameUseCase,
         )
 
-    @Factory
+    @Provides
     fun provideProcessLockedPieceUseCase(
-        @Provided lockPieceUseCase: LockPieceUseCase,
-        @Provided planVisualFeedbackUseCase: PlanVisualFeedbackUseCase,
-        @Provided advanceGameTickUseCase: AdvanceGameTickUseCase,
+        lockPieceUseCase: LockPieceUseCase,
+        planVisualFeedbackUseCase: PlanVisualFeedbackUseCase,
+        advanceGameTickUseCase: AdvanceGameTickUseCase,
     ): ProcessLockedPieceUseCase =
         ProcessLockedPieceUseCase(
             lockPieceUseCase = lockPieceUseCase,

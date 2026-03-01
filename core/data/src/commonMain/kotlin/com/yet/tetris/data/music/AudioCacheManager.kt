@@ -5,11 +5,9 @@ import com.yet.tetris.data.mapper.getSequenceForTheme
 import com.yet.tetris.domain.model.audio.MusicTheme
 import com.yet.tetris.domain.model.audio.SoundEffect
 import com.yet.tetris.domain.model.audio.WaveformType
-import jakarta.inject.Singleton
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
-@Singleton
 class AudioCacheManager {
     private val sfxPcmCache = mutableMapOf<SoundEffect, FloatArray>()
     private val musicPcmCache = mutableMapOf<MusicTheme, FloatArray>()

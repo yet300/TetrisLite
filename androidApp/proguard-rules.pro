@@ -36,7 +36,6 @@
     @androidx.compose.runtime.Composable *;
 }
 
--keep class org.koin.** { *; }
 
 -keep class com.arkivanov.decompose.** { *; }
 -keep class com.arkivanov.essenty.** { *; }

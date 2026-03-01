@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.composeCompiler)
+    alias(libs.plugins.metro)
 }
 
 android {
@@ -69,6 +70,5 @@ dependencies {
     implementation(projects.feature.root)
 
     implementation(libs.androidx.activity.compose)
-    implementation(libs.koin.android)
     implementation(libs.androidx.profileinstaller)
 }

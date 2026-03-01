@@ -8,18 +8,13 @@ import com.arkivanov.mvikotlin.extensions.coroutines.CoroutineExecutor
 import com.yet.tetris.domain.model.game.Difficulty
 import com.yet.tetris.domain.repository.GameSettingsRepository
 import com.yet.tetris.domain.repository.GameStateRepository
-import jakarta.inject.Inject
 import kotlinx.coroutines.launch
-import org.koin.core.annotation.Factory
-import org.koin.core.annotation.Provided
 
-@Factory
 internal class HomeStoreFactory
-    @Inject
     constructor(
-        @Provided private val storeFactory: StoreFactory,
-        @Provided private val gameSettingsRepository: GameSettingsRepository,
-        @Provided private val gameStateRepository: GameStateRepository,
+        private val storeFactory: StoreFactory,
+        private val gameSettingsRepository: GameSettingsRepository,
+        private val gameStateRepository: GameStateRepository,
     ) {
         fun create(): HomeStore =
             object :

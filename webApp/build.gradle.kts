@@ -35,8 +35,6 @@ kotlin {
             implementation(libs.essenty.lifecycle)
             implementation(libs.essenty.stateKeeper)
 
-            // Koin
-            implementation(libs.koin.core)
 
             //sql
             implementation(devNpm("copy-webpack-plugin", "9.1.0"))
