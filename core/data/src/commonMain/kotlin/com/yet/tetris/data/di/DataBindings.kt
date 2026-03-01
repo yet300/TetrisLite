@@ -52,8 +52,7 @@ object DataBindings {
 
     @SingleIn(AppScope::class)
     @Provides
-    fun provideAudioRepository(cacheManager: AudioCacheManager): AudioRepository =
-        DataPlatformModule().provideAudioRepository(cacheManager)
+    fun provideAudioRepository(cacheManager: AudioCacheManager): AudioRepository = DataPlatformModule().provideAudioRepository(cacheManager)
 
     @OptIn(ExperimentalSettingsApi::class)
     @SingleIn(AppScope::class)
@@ -65,11 +64,9 @@ object DataBindings {
 
     @SingleIn(AppScope::class)
     @Provides
-    fun provideGameStateRepository(gameStateDao: GameStateDao): GameStateRepository =
-        GameStateRepositoryImpl(gameStateDao)
+    fun provideGameStateRepository(gameStateDao: GameStateDao): GameStateRepository = GameStateRepositoryImpl(gameStateDao)
 
     @SingleIn(AppScope::class)
     @Provides
-    fun provideGameHistoryRepository(gameHistoryDao: GameHistoryDao): GameHistoryRepository =
-        GameHistoryRepositoryImpl(gameHistoryDao)
+    fun provideGameHistoryRepository(gameHistoryDao: GameHistoryDao): GameHistoryRepository = GameHistoryRepositoryImpl(gameHistoryDao)
 }

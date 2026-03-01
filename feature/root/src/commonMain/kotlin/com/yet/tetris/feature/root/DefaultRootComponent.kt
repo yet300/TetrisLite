@@ -88,14 +88,14 @@ internal class DefaultRootComponent(
 }
 
 internal class DefaultRootComponentFactory
-constructor(
-    private val homeComponentFactory: HomeComponent.Factory,
-    private val gameComponentFactory: GameComponent.Factory,
-) : RootComponent.Factory {
-    override fun invoke(componentContext: ComponentContext): RootComponent =
-        DefaultRootComponent(
-            componentContext = componentContext,
-            homeComponentFactory = homeComponentFactory,
-            gameComponentFactory = gameComponentFactory,
-        )
-}
+    constructor(
+        private val homeComponentFactory: HomeComponent.Factory,
+        private val gameComponentFactory: GameComponent.Factory,
+    ) : RootComponent.Factory {
+        override fun invoke(componentContext: ComponentContext): RootComponent =
+            DefaultRootComponent(
+                componentContext = componentContext,
+                homeComponentFactory = homeComponentFactory,
+                gameComponentFactory = gameComponentFactory,
+            )
+    }

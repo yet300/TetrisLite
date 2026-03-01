@@ -13,6 +13,5 @@ import dev.zacsweers.metro.SingleIn
 object AndroidDatabaseBindings {
     @SingleIn(AppScope::class)
     @Provides
-    fun provideDatabaseDriverFactory(appContext: Context): DatabaseDriverFactory =
-        DatabaseDriverFactory(appContext)
+    fun provideDatabaseDriverFactory(appContext: Context): DatabaseDriverFactory = DatabaseDriverFactory(appContext)
 }

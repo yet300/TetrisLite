@@ -39,5 +39,4 @@ internal interface AndroidAppGraph : AppGraph {
     }
 }
 
-fun createAndroidAppGraph(context: Context): AppGraph =
-    createGraphFactory<AndroidAppGraph.Factory>().create(context.applicationContext)
+fun createAndroidAppGraph(context: Context): AppGraph = createGraphFactory<AndroidAppGraph.Factory>().create(context.applicationContext)

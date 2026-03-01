@@ -15,16 +15,13 @@ import dev.zacsweers.metro.SingleIn
 object DatabaseBindings {
     @SingleIn(AppScope::class)
     @Provides
-    fun provideDatabaseManager(driverFactory: DatabaseDriverFactory): DatabaseManager =
-        DatabaseManager(driverFactory)
+    fun provideDatabaseManager(driverFactory: DatabaseDriverFactory): DatabaseManager = DatabaseManager(driverFactory)
 
     @SingleIn(AppScope::class)
     @Provides
-    fun provideGameStateDao(databaseManager: DatabaseManager): GameStateDao =
-        GameStateDao(databaseManager)
+    fun provideGameStateDao(databaseManager: DatabaseManager): GameStateDao = GameStateDao(databaseManager)
 
     @SingleIn(AppScope::class)
     @Provides
-    fun provideGameHistoryDao(databaseManager: DatabaseManager): GameHistoryDao =
-        GameHistoryDao(databaseManager)
+    fun provideGameHistoryDao(databaseManager: DatabaseManager): GameHistoryDao = GameHistoryDao(databaseManager)
 }
