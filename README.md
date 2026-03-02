@@ -130,12 +130,12 @@ Key areas for enhancement:
 1. **UI/UX**: Improve the iOS part
 
 ## Support Me
-ton: UQCi1XMdZP2fBfTK-O6rsAX3fXEm5iBpjO1D6FDekdUDQnaw
-btc: bc1qv2m03vg23227yfnlu0c0jx2ps5yg8v8kvy748s
-eth: 0xdF196759E996Fe684c33416282F30d6B9A0b325e
-usdt(erc20): 0xdF196759E996Fe684c33416282F30d6B9A0b325e
-bnb: 0xdF196759E996Fe684c33416282F30d6B9A0b325e
-usdt(trc20): TYrBMc4yN4k8im2Qq2G17hv9VdmcYFngpT
+- **ton**: UQCi1XMdZP2fBfTK-O6rsAX3fXEm5iBpjO1D6FDekdUDQnaw
+- **btc**: bc1qv2m03vg23227yfnlu0c0jx2ps5yg8v8kvy748s
+- **eth**: 0xdF196759E996Fe684c33416282F30d6B9A0b325e
+- **usdt(erc20)**: 0xdF196759E996Fe684c33416282F30d6B9A0b325e
+- **bnb**: 0xdF196759E996Fe684c33416282F30d6B9A0b325e
+- **usdt(trc20)**: TYrBMc4yN4k8im2Qq2G17hv9VdmcYFngpT
 
 ## License
 
