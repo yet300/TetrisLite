@@ -529,7 +529,7 @@
 				"ARCHS[sdk=watchos*]" = arm64_32;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = 3KKQ642Q9H;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
@@ -546,7 +546,7 @@
 						"-framework",
 						Shared,
 					);
-					MARKETING_VERSION = 1.0;
+					MARKETING_VERSION = 1.2.0;
 					PRODUCT_BUNDLE_IDENTIFIER = com.yet.tetris.TetrisLite.watchkitapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
@@ -570,7 +570,7 @@
 				"ARCHS[sdk=watchos*]" = arm64_32;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = 3KKQ642Q9H;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
@@ -587,7 +587,7 @@
 						"-framework",
 						Shared,
 					);
-					MARKETING_VERSION = 1.0;
+					MARKETING_VERSION = 1.2.0;
 					PRODUCT_BUNDLE_IDENTIFIER = com.yet.tetris.TetrisLite.watchkitapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
