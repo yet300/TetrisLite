@@ -33,13 +33,17 @@ This directory contains GitHub Actions workflows for continuous integration and 
 
 - **Create Release**: Creates a GitHub release (tags only)
 - **Build Android Release**: Builds signed APK and AAB (tags only)
+- **Build Wear Release**: Builds signed Wear APK and AAB (tags only)
 - **Build Desktop Release**: Builds platform-specific installers (tags only)
+- **Build macOS Native Release**: Builds a native macOS `.app` archive from Xcode (tags only)
 - **Build Web and Deploy to Pages**: Builds JS app and deploys to GitHub Pages (always)
 - **Upload Source Code**: Packages and uploads source code archives (tags only)
 
 **Artifacts (on release tags):**
 - Signed Android APK and AAB
+- Signed Wear APK and AAB
 - Desktop installers for all platforms (DEB, DMG, MSI)
+- Native macOS app archive (zip)
 - Web application archive (tar.gz)
 - Source code (tar.gz and zip)
 
