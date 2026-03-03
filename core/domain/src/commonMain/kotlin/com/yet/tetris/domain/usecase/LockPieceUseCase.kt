@@ -3,6 +3,7 @@ package com.yet.tetris.domain.usecase
 import com.yet.tetris.domain.model.game.GameState
 import com.yet.tetris.domain.model.game.LevelProgression
 import com.yet.tetris.domain.model.game.Position
+import com.yet.tetris.domain.model.game.Tetromino
 
 /**
  * Use case for locking the current piece to the board.
@@ -11,8 +12,8 @@ import com.yet.tetris.domain.model.game.Position
  */
 class LockPieceUseCase(
     private val calculateScore: CalculateScoreUseCase,
-    private val generateTetromino: GenerateTetrominoUseCase,
     private val checkCollision: CheckCollisionUseCase,
+    private val previewQueueEngine: PreviewQueueEngine,
 ) {
     companion object {
         // Standard spawn position for new pieces (top-center of board)
@@ -46,9 +47,9 @@ class LockPieceUseCase(
         val newLinesCleared = state.linesCleared + linesCleared
         val newLevel = LevelProgression.levelForLines(newLinesCleared)
 
-        // 4. Spawn next piece
-        val newCurrentPiece = state.nextPiece
-        val newNextPiece = generateTetromino()
+        // 4. Spawn next piece and advance queue
+        val newCurrentPiece = state.nextPiece.resetRotation()
+        val preview = previewQueueEngine.advance(state.nextQueue)
         val spawnPosition = Position(SPAWN_X, SPAWN_Y)
 
         // 5. Check for game over (new piece collides immediately)
@@ -58,7 +59,9 @@ class LockPieceUseCase(
             board = clearedBoard,
             currentPiece = if (isGameOver) null else newCurrentPiece,
             currentPosition = spawnPosition,
-            nextPiece = newNextPiece,
+            nextPiece = preview.nextPiece,
+            nextQueue = preview.nextQueue,
+            canHold = true,
             score = newScore,
             linesCleared = newLinesCleared,
             level = newLevel,
@@ -74,4 +77,6 @@ class LockPieceUseCase(
         val downPosition = state.currentPosition + Position(0, 1)
         return checkCollision(state.board, piece, downPosition)
     }
+
+    private fun Tetromino.resetRotation(): Tetromino = Tetromino.create(type = type, rotation = 0)
 }

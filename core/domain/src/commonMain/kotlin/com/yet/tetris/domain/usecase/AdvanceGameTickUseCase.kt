@@ -18,14 +18,17 @@ class AdvanceGameTickUseCase(
     }
 
     operator fun invoke(gameState: GameState): Result {
-        val movedState = movePieceUseCase.moveDown(gameState)
-        return if (movedState != null) {
-            Result.Moved(
-                gameState = movedState,
-                ghostPieceY = calculateGhostY(movedState),
-            )
-        } else {
-            Result.RequiresLock(gameState)
+        return when (val moveResult = movePieceUseCase.moveDown(gameState)) {
+            is MovePieceUseCase.Result.Applied -> {
+                Result.Moved(
+                    gameState = moveResult.gameState,
+                    ghostPieceY = calculateGhostY(moveResult.gameState),
+                )
+            }
+
+            is MovePieceUseCase.Result.Blocked -> {
+                Result.RequiresLock(gameState)
+            }
         }
     }
 

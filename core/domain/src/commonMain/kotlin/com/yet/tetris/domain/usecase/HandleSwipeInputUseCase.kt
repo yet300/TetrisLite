@@ -56,9 +56,9 @@ class HandleSwipeInputUseCase(
 
         val newState =
             when (action) {
-                SwipeAction.MoveLeft -> movePiece.moveLeft(state)
-                SwipeAction.MoveRight -> movePiece.moveRight(state)
-                SwipeAction.SoftDrop -> movePiece.moveDown(state)
+                SwipeAction.MoveLeft -> movePiece.moveLeft(state).appliedStateOrNull()
+                SwipeAction.MoveRight -> movePiece.moveRight(state).appliedStateOrNull()
+                SwipeAction.SoftDrop -> movePiece.moveDown(state).appliedStateOrNull()
                 SwipeAction.HardDrop -> hardDrop(state)
                 SwipeAction.None -> null
             }
@@ -105,4 +105,10 @@ class HandleSwipeInputUseCase(
         // This is just a marker - actual rotation is handled by RotatePieceUseCase
         return SwipeAction.None
     }
+
+    private fun MovePieceUseCase.Result.appliedStateOrNull(): GameState? =
+        when (this) {
+            is MovePieceUseCase.Result.Applied -> gameState
+            is MovePieceUseCase.Result.Blocked -> null
+        }
 }

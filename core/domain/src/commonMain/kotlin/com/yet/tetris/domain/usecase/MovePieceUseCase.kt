@@ -10,6 +10,23 @@ import com.yet.tetris.domain.model.game.Position
 class MovePieceUseCase(
     private val checkCollision: CheckCollisionUseCase,
 ) {
+    sealed interface Result {
+        data class Applied(
+            val gameState: GameState,
+        ) : Result
+
+        data class Blocked(
+            val reason: BlockedReason,
+        ) : Result
+    }
+
+    enum class BlockedReason {
+        NO_CURRENT_PIECE,
+        GAME_OVER,
+        PAUSED,
+        COLLISION,
+    }
+
     enum class Direction {
         LEFT,
         RIGHT,
@@ -21,14 +38,17 @@ class MovePieceUseCase(
      *
      * @param state Current game state
      * @param direction Direction to move (LEFT, RIGHT, or DOWN)
-     * @return Updated GameState if move is valid, null if move is blocked
+     * @return Explicit move result with updated state or blocking reason
      */
     operator fun invoke(
         state: GameState,
         direction: Direction,
-    ): GameState? {
-        val piece = state.currentPiece ?: return null
-        if (state.isGameOver || state.isPaused) return null
+    ): Result {
+        val piece =
+            state.currentPiece
+                ?: return Result.Blocked(BlockedReason.NO_CURRENT_PIECE)
+        if (state.isGameOver) return Result.Blocked(BlockedReason.GAME_OVER)
+        if (state.isPaused) return Result.Blocked(BlockedReason.PAUSED)
 
         val offset =
             when (direction) {
@@ -40,24 +60,26 @@ class MovePieceUseCase(
         val newPosition = state.currentPosition + offset
 
         return if (!checkCollision(state.board, piece, newPosition)) {
-            state.copy(currentPosition = newPosition)
+            Result.Applied(
+                state.copy(currentPosition = newPosition),
+            )
         } else {
-            null
+            Result.Blocked(BlockedReason.COLLISION)
         }
     }
 
     /**
      * Moves the piece left if possible.
      */
-    fun moveLeft(state: GameState): GameState? = invoke(state, Direction.LEFT)
+    fun moveLeft(state: GameState): Result = invoke(state, Direction.LEFT)
 
     /**
      * Moves the piece right if possible.
      */
-    fun moveRight(state: GameState): GameState? = invoke(state, Direction.RIGHT)
+    fun moveRight(state: GameState): Result = invoke(state, Direction.RIGHT)
 
     /**
      * Moves the piece down if possible (soft drop).
      */
-    fun moveDown(state: GameState): GameState? = invoke(state, Direction.DOWN)
+    fun moveDown(state: GameState): Result = invoke(state, Direction.DOWN)
 }

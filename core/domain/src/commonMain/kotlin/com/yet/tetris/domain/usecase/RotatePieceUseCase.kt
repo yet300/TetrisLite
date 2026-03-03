@@ -11,21 +11,43 @@ import com.yet.tetris.domain.model.game.Tetromino
 class RotatePieceUseCase(
     private val checkCollision: CheckCollisionUseCase,
 ) {
+    sealed interface Result {
+        data class Applied(
+            val gameState: GameState,
+        ) : Result
+
+        data class Blocked(
+            val reason: BlockedReason,
+        ) : Result
+    }
+
+    enum class BlockedReason {
+        NO_CURRENT_PIECE,
+        GAME_OVER,
+        PAUSED,
+        COLLISION,
+    }
+
     /**
      * Attempts to rotate the current piece clockwise.
      * Uses SRS wall kick system to find a valid rotation position.
      *
-     * @return Updated GameState with rotated piece, or null if rotation is not possible
+     * @return Explicit rotation result with updated state or blocking reason
      */
-    operator fun invoke(state: GameState): GameState? {
-        val piece = state.currentPiece ?: return null
-        if (state.isGameOver || state.isPaused) return null
+    operator fun invoke(state: GameState): Result {
+        val piece =
+            state.currentPiece
+                ?: return Result.Blocked(BlockedReason.NO_CURRENT_PIECE)
+        if (state.isGameOver) return Result.Blocked(BlockedReason.GAME_OVER)
+        if (state.isPaused) return Result.Blocked(BlockedReason.PAUSED)
 
         val rotatedPiece = piece.rotate()
 
         // Try rotation at current position first
         if (!checkCollision(state.board, rotatedPiece, state.currentPosition)) {
-            return state.copy(currentPiece = rotatedPiece)
+            return Result.Applied(
+                state.copy(currentPiece = rotatedPiece),
+            )
         }
 
         // Try wall kick offsets
@@ -33,15 +55,17 @@ class RotatePieceUseCase(
         for (offset in kickOffsets) {
             val newPosition = state.currentPosition + offset
             if (!checkCollision(state.board, rotatedPiece, newPosition)) {
-                return state.copy(
-                    currentPiece = rotatedPiece,
-                    currentPosition = newPosition,
+                return Result.Applied(
+                    state.copy(
+                        currentPiece = rotatedPiece,
+                        currentPosition = newPosition,
+                    ),
                 )
             }
         }
 
         // Rotation not possible
-        return null
+        return Result.Blocked(BlockedReason.COLLISION)
     }
 
     /**

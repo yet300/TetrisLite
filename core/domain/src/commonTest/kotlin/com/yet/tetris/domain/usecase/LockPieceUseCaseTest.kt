@@ -16,7 +16,8 @@ class LockPieceUseCaseTest {
     private val checkCollision = CheckCollisionUseCase()
     private val calculateScore = CalculateScoreUseCase()
     private val generateTetromino = GenerateTetrominoUseCase()
-    private val useCase = LockPieceUseCase(calculateScore, generateTetromino, checkCollision)
+    private val previewQueueEngine = PreviewQueueEngine(generateTetromino)
+    private val useCase = LockPieceUseCase(calculateScore, checkCollision, previewQueueEngine)
 
     private fun createTestState(
         position: Position = Position(3, 17),

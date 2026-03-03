@@ -12,6 +12,7 @@ import com.yet.tetris.domain.model.settings.GameSettings
  */
 class StartGameUseCase(
     private val generateTetromino: GenerateTetrominoUseCase,
+    private val previewQueueEngine: PreviewQueueEngine,
 ) {
     companion object {
         // Standard spawn position for new pieces (top-center of board)
@@ -29,15 +30,18 @@ class StartGameUseCase(
         // Reset the tetromino generator for a new game
         generateTetromino.reset()
 
-        // Generate first two pieces
+        // Generate the current piece plus a fixed-size preview queue.
         val currentPiece = generateTetromino()
-        val nextPiece = generateTetromino()
+        val preview = previewQueueEngine.createInitialPreview()
 
         return GameState(
             board = GameBoard(),
             currentPiece = currentPiece,
             currentPosition = Position(SPAWN_X, SPAWN_Y),
-            nextPiece = nextPiece,
+            nextPiece = preview.nextPiece,
+            nextQueue = preview.nextQueue,
+            holdPiece = null,
+            canHold = true,
             score = 0,
             linesCleared = 0,
             level = LevelProgression.START_LEVEL,

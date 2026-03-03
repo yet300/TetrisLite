@@ -10,7 +10,8 @@ import kotlin.test.assertTrue
 
 class StartGameUseCaseTest {
     private val generateTetromino = GenerateTetrominoUseCase()
-    private val useCase = StartGameUseCase(generateTetromino)
+    private val previewQueueEngine = PreviewQueueEngine(generateTetromino)
+    private val useCase = StartGameUseCase(generateTetromino, previewQueueEngine)
 
     @Test
     fun invoke_shouldCreateInitialState() {
@@ -24,6 +25,8 @@ class StartGameUseCaseTest {
         assertNotNull(state)
         assertNotNull(state.currentPiece)
         assertNotNull(state.nextPiece)
+        assertEquals(4, state.nextQueue.size)
+        assertTrue(state.canHold)
         assertEquals(0, state.score)
         assertEquals(0, state.linesCleared)
         assertEquals(1, state.level)

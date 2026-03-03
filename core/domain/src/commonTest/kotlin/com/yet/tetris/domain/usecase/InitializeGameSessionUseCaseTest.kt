@@ -30,7 +30,7 @@ class InitializeGameSessionUseCaseTest {
                 InitializeGameSessionUseCase(
                     gameSettingsRepository = settingsRepository,
                     gameStateRepository = stateRepository,
-                    startGameUseCase = StartGameUseCase(GenerateTetrominoUseCase()),
+                    startGameUseCase = createStartGameUseCase(),
                 )
 
             val result = useCase(forceNewGame = false)
@@ -54,7 +54,7 @@ class InitializeGameSessionUseCaseTest {
                 InitializeGameSessionUseCase(
                     gameSettingsRepository = settingsRepository,
                     gameStateRepository = stateRepository,
-                    startGameUseCase = StartGameUseCase(GenerateTetrominoUseCase()),
+                    startGameUseCase = createStartGameUseCase(),
                 )
 
             val result = useCase(forceNewGame = true)
@@ -77,7 +77,7 @@ class InitializeGameSessionUseCaseTest {
                 InitializeGameSessionUseCase(
                     gameSettingsRepository = settingsRepository,
                     gameStateRepository = stateRepository,
-                    startGameUseCase = StartGameUseCase(GenerateTetrominoUseCase()),
+                    startGameUseCase = createStartGameUseCase(),
                 )
 
             val result = useCase(forceNewGame = false)
@@ -134,4 +134,12 @@ class InitializeGameSessionUseCaseTest {
             isGameOver = false,
             isPaused = false,
         )
+
+    private fun createStartGameUseCase(): StartGameUseCase {
+        val generateTetrominoUseCase = GenerateTetrominoUseCase()
+        return StartGameUseCase(
+            generateTetromino = generateTetrominoUseCase,
+            previewQueueEngine = PreviewQueueEngine(generateTetrominoUseCase),
+        )
+    }
 }

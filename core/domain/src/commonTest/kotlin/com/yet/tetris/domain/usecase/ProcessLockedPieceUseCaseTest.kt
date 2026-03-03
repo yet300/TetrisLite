@@ -18,11 +18,12 @@ class ProcessLockedPieceUseCaseTest {
     private val calculateGhostPositionUseCase = CalculateGhostPositionUseCase()
     private val calculateScoreUseCase = CalculateScoreUseCase()
     private val generateTetrominoUseCase = GenerateTetrominoUseCase()
+    private val previewQueueEngine = PreviewQueueEngine(generateTetrominoUseCase)
     private val lockPieceUseCase =
         LockPieceUseCase(
             calculateScore = calculateScoreUseCase,
-            generateTetromino = generateTetrominoUseCase,
             checkCollision = checkCollisionUseCase,
+            previewQueueEngine = previewQueueEngine,
         )
     private val useCase =
         ProcessLockedPieceUseCase(
