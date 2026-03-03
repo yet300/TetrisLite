@@ -52,6 +52,7 @@ class DatabaseManager(
                                 com.yet.tetris.database.CurrentGameState.Adapter(
                                     currentPieceTypeAdapter = enumAdapter(),
                                     nextPieceTypeAdapter = enumAdapter(),
+                                    holdPieceTypeAdapter = enumAdapter(),
                                 ),
                             BoardCellsAdapter =
                                 com.yet.tetris.database.BoardCells.Adapter(
