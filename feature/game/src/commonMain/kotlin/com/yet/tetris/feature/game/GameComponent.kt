@@ -57,6 +57,8 @@ interface GameComponent : BackHandlerOwner {
 
     fun onHardDrop()
 
+    fun onHold()
+
     fun onSwipe(
         deltaX: Float,
         deltaY: Float,

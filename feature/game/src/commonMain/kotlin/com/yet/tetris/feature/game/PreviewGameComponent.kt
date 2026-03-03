@@ -69,6 +69,10 @@ class PreviewGameComponent :
         TODO("Not yet implemented")
     }
 
+    override fun onHold() {
+        TODO("Not yet implemented")
+    }
+
     override fun onSwipe(
         deltaX: Float,
         deltaY: Float,

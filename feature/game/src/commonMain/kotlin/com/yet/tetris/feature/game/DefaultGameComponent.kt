@@ -155,6 +155,10 @@ internal class DefaultGameComponent(
         store.accept(GameStore.Intent.HardDrop)
     }
 
+    override fun onHold() {
+        store.accept(GameStore.Intent.Hold)
+    }
+
     override fun onSwipe(
         deltaX: Float,
         deltaY: Float,

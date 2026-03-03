@@ -6,6 +6,7 @@ import com.yet.tetris.domain.usecase.AdvanceGameTickUseCase
 import com.yet.tetris.domain.usecase.GestureHandlingUseCase
 import com.yet.tetris.domain.usecase.HandleSwipeInputUseCase
 import com.yet.tetris.domain.usecase.HardDropUseCase
+import com.yet.tetris.domain.usecase.HoldPieceUseCase
 import com.yet.tetris.domain.usecase.InitializeGameSessionUseCase
 import com.yet.tetris.domain.usecase.MovePieceUseCase
 import com.yet.tetris.domain.usecase.PersistGameAudioUseCase
@@ -35,6 +36,7 @@ abstract class GameBindings {
             movePieceUseCase: MovePieceUseCase,
             rotatePieceUseCase: RotatePieceUseCase,
             hardDropUseCase: HardDropUseCase,
+            holdPieceUseCase: HoldPieceUseCase,
             handleSwipeInputUseCase: HandleSwipeInputUseCase,
             gestureHandlingUseCase: GestureHandlingUseCase,
             initializeGameSessionUseCase: InitializeGameSessionUseCase,
@@ -48,6 +50,7 @@ abstract class GameBindings {
                 movePieceUseCase = movePieceUseCase,
                 rotatePieceUseCase = rotatePieceUseCase,
                 hardDropUseCase = hardDropUseCase,
+                holdPieceUseCase = holdPieceUseCase,
                 handleSwipeInputUseCase = handleSwipeInputUseCase,
                 gestureHandlingUseCase = gestureHandlingUseCase,
                 initializeGameSessionUseCase = initializeGameSessionUseCase,

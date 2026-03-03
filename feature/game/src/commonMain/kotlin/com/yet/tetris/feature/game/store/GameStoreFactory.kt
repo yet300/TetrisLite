@@ -17,6 +17,7 @@ import com.yet.tetris.domain.usecase.GestureHandlingUseCase
 import com.yet.tetris.domain.usecase.GestureResult
 import com.yet.tetris.domain.usecase.HandleSwipeInputUseCase
 import com.yet.tetris.domain.usecase.HardDropUseCase
+import com.yet.tetris.domain.usecase.HoldPieceUseCase
 import com.yet.tetris.domain.usecase.InitializeGameSessionUseCase
 import com.yet.tetris.domain.usecase.MovePieceUseCase
 import com.yet.tetris.domain.usecase.PersistGameAudioUseCase
@@ -32,6 +33,7 @@ internal class GameStoreFactory
         private val movePieceUseCase: MovePieceUseCase,
         private val rotatePieceUseCase: RotatePieceUseCase,
         private val hardDropUseCase: HardDropUseCase,
+        private val holdPieceUseCase: HoldPieceUseCase,
         private val handleSwipeInputUseCase: HandleSwipeInputUseCase,
         private val gestureHandlingUseCase: GestureHandlingUseCase,
         private val initializeGameSessionUseCase: InitializeGameSessionUseCase,
@@ -144,6 +146,7 @@ internal class GameStoreFactory
                     is GameStore.Intent.MoveDown -> moveDown(getState)
                     is GameStore.Intent.Rotate -> rotate(getState)
                     is GameStore.Intent.HardDrop -> hardDrop(getState)
+                    is GameStore.Intent.Hold -> hold(getState)
                     is GameStore.Intent.HandleSwipe -> handleSwipe(intent, getState)
 
                     is GameStore.Intent.OnBoardSizeChanged -> {
@@ -250,26 +253,36 @@ internal class GameStoreFactory
 
             private fun moveLeft(state: GameStore.State) {
                 val gameState = state.playableGameState() ?: return
-                movePieceUseCase.moveLeft(gameState)?.let { newState ->
-                    persistGameAudioUseCase.playMoveSound()
-                    dispatch(
-                        GameStore.Msg.GameStateUpdated(
-                            newState,
-                            advanceGameTickUseCase.calculateGhostY(newState),
-                        ),
-                    )
+                when (val result = movePieceUseCase.moveLeft(gameState)) {
+                    is MovePieceUseCase.Result.Applied -> {
+                        val newState = result.gameState
+                        persistGameAudioUseCase.playMoveSound()
+                        dispatch(
+                            GameStore.Msg.GameStateUpdated(
+                                newState,
+                                advanceGameTickUseCase.calculateGhostY(newState),
+                            ),
+                        )
+                    }
+
+                    is MovePieceUseCase.Result.Blocked -> Unit
                 }
             }
 
             private fun moveRight(state: GameStore.State) {
                 val gameState = state.playableGameState() ?: return
-                movePieceUseCase.moveRight(gameState)?.let { newState ->
-                    dispatch(
-                        GameStore.Msg.GameStateUpdated(
-                            newState,
-                            advanceGameTickUseCase.calculateGhostY(newState),
-                        ),
-                    )
+                when (val result = movePieceUseCase.moveRight(gameState)) {
+                    is MovePieceUseCase.Result.Applied -> {
+                        val newState = result.gameState
+                        dispatch(
+                            GameStore.Msg.GameStateUpdated(
+                                newState,
+                                advanceGameTickUseCase.calculateGhostY(newState),
+                            ),
+                        )
+                    }
+
+                    is MovePieceUseCase.Result.Blocked -> Unit
                 }
             }
 
@@ -288,13 +301,18 @@ internal class GameStoreFactory
 
             private fun rotate(state: GameStore.State) {
                 val gameState = state.playableGameState() ?: return
-                rotatePieceUseCase(gameState)?.let { newState ->
-                    dispatch(
-                        GameStore.Msg.GameStateUpdated(
-                            newState,
-                            advanceGameTickUseCase.calculateGhostY(newState),
-                        ),
-                    )
+                when (val result = rotatePieceUseCase(gameState)) {
+                    is RotatePieceUseCase.Result.Applied -> {
+                        val newState = result.gameState
+                        dispatch(
+                            GameStore.Msg.GameStateUpdated(
+                                newState,
+                                advanceGameTickUseCase.calculateGhostY(newState),
+                            ),
+                        )
+                    }
+
+                    is RotatePieceUseCase.Result.Blocked -> Unit
                 }
             }
 
@@ -311,6 +329,29 @@ internal class GameStoreFactory
                 }
             }
 
+            private fun hold(state: GameStore.State) {
+                val gameState = state.playableGameState() ?: return
+                when (val result = holdPieceUseCase(gameState)) {
+                    is HoldPieceUseCase.Result.Applied -> {
+                        val heldState = result.gameState
+                        dispatch(
+                            GameStore.Msg.GameStateUpdated(
+                                heldState,
+                                advanceGameTickUseCase.calculateGhostY(heldState),
+                            ),
+                        )
+
+                        if (heldState.isGameOver) {
+                            handleGameOver(
+                                gameState = heldState,
+                                settings = state.settings,
+                            )
+                        }
+                    }
+
+                    is HoldPieceUseCase.Result.Blocked -> Unit
+                }
+            }
             private fun handleSwipe(
                 intent: GameStore.Intent.HandleSwipe,
                 state: GameStore.State,
