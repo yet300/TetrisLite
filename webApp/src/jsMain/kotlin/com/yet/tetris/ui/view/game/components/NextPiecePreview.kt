@@ -28,29 +28,39 @@ import web.cssom.rem
 import web.html.HTMLCanvasElement
 
 external interface NextPiecePreviewProps : Props {
-    var piece: Tetromino
+    var piece: Tetromino?
     var settings: GameSettings
+    var title: String?
+    var canvasSize: Double?
+    var showTitle: Boolean?
+    var compact: Boolean?
+    var chrome: Boolean?
 }
 
 @OptIn(ExperimentalWasmJsInterop::class)
 val NextPiecePreview =
     FC<NextPiecePreviewProps> { props ->
         val canvasRef = useRef<HTMLCanvasElement>()
+        val canvasSize = props.canvasSize ?: 70.0
+        val title = props.title ?: Strings.NEXT
+        val showTitle = props.showTitle ?: true
+        val compact = props.compact ?: false
+        val chrome = props.chrome ?: true
 
-        useEffect(props.piece) {
+        useEffect(props.piece, props.canvasSize, props.settings) {
             val canvas = canvasRef.current ?: return@useEffect
             val ctx = canvas.getContext(CanvasRenderingContext2D.ID) ?: return@useEffect
 
-            val cellSize = 15.0
-
             // Clear canvas
             ctx.clearRect(0.0, 0.0, canvas.width.toDouble(), canvas.height.toDouble())
+            val piece = props.piece ?: return@useEffect
+            val cellSize = canvasSize / 4.0
 
             // Calculate piece bounds
-            val minX = props.piece.blocks.minOfOrNull { it.x } ?: 0
-            val maxX = props.piece.blocks.maxOfOrNull { it.x } ?: 0
-            val minY = props.piece.blocks.minOfOrNull { it.y } ?: 0
-            val maxY = props.piece.blocks.maxOfOrNull { it.y } ?: 0
+            val minX = piece.blocks.minOfOrNull { it.x } ?: 0
+            val maxX = piece.blocks.maxOfOrNull { it.x } ?: 0
+            val minY = piece.blocks.minOfOrNull { it.y } ?: 0
+            val maxY = piece.blocks.maxOfOrNull { it.y } ?: 0
 
             val pieceWidth = (maxX - minX + 1) * cellSize
             val pieceHeight = (maxY - minY + 1) * cellSize
@@ -59,10 +69,10 @@ val NextPiecePreview =
             val offsetY = (canvas.height - pieceHeight) / 2 - (minY * cellSize)
 
             // Draw piece with theme color
-            val color = getTetrominoColorForPreview(props.piece.type, props.settings)
+            val color = getTetrominoColorForPreview(piece.type, props.settings)
             ctx.fillStyle = color.toJsString()
 
-            props.piece.blocks.forEach { block ->
+            piece.blocks.forEach { block ->
                 val x = block.x * cellSize + offsetX
                 val y = block.y * cellSize + offsetY
                 ctx.fillRect(x, y, cellSize - 1, cellSize - 1)
@@ -74,33 +84,48 @@ val NextPiecePreview =
                 display = Display.flex
                 flexDirection = FlexDirection.column
                 alignItems = AlignItems.center
-                gap = 0.4.rem
-                padding = 0.75.rem
-                backgroundColor = Color("rgba(255, 255, 255, 0.1)")
-                backdropFilter = "blur(10px)".unsafeCast<BackdropFilter>()
-                border = "1px solid rgba(255, 255, 255, 0.2)".unsafeCast<Border>()
-                borderRadius = 0.75.rem
-            }
-
-            Typography {
-                variant = TypographyVariant.caption
-                sx {
-                    color = Color("rgba(255, 255, 255, 0.7)")
-                    textTransform = TextTransform.uppercase
-                    fontSize = 0.7.rem
-                    whiteSpace = WhiteSpace.nowrap
+                gap = (if (compact) 0.2 else 0.4).rem
+                padding = (if (compact) 0.45 else 0.75).rem
+                if (chrome) {
+                    backgroundColor = Color("rgba(255, 255, 255, 0.1)")
+                    backdropFilter = "blur(10px)".unsafeCast<BackdropFilter>()
+                    border = "1px solid rgba(255, 255, 255, 0.2)".unsafeCast<Border>()
+                    borderRadius = 0.75.rem
                 }
-                +Strings.NEXT
             }
 
-            canvas {
-                ref = canvasRef
-                width = 70.toDouble()
-                height = 70.toDouble()
-                style =
-                    unsafeJso {
-                        display = "block".unsafeCast<Display>()
+            if (showTitle) {
+                Typography {
+                    variant = TypographyVariant.caption
+                    sx {
+                        color = Color("rgba(255, 255, 255, 0.7)")
+                        textTransform = TextTransform.uppercase
+                        fontSize = (if (compact) 0.62 else 0.7).rem
+                        whiteSpace = WhiteSpace.nowrap
                     }
+                    +title
+                }
+            }
+
+            if (props.piece != null) {
+                canvas {
+                    ref = canvasRef
+                    width = canvasSize
+                    height = canvasSize
+                    style =
+                        unsafeJso {
+                            display = "block".unsafeCast<Display>()
+                        }
+                }
+            } else {
+                Typography {
+                    variant = TypographyVariant.body2
+                    sx {
+                        color = Color("rgba(255, 255, 255, 0.7)")
+                        fontSize = (if (compact) 0.95 else 1.0).rem
+                    }
+                    +"—"
+                }
             }
         }
     }

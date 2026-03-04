@@ -20,7 +20,6 @@ import js.objects.unsafeJso
 import kotlinx.browser.window
 import mui.icons.material.Pause
 import mui.material.Box
-import mui.material.Container
 import mui.material.Drawer
 import mui.material.DrawerAnchor
 import mui.material.IconButton
@@ -52,6 +51,8 @@ import web.cssom.rem
 import web.cssom.vh
 import kotlin.math.PI
 import kotlin.math.cos
+import kotlin.math.max
+import kotlin.math.min
 import kotlin.math.sin
 
 private data class WebFloatingText(
@@ -70,6 +71,29 @@ private data class WebParticleBurst(
     val seed: Int,
 )
 
+private data class WebViewport(
+    val width: Int,
+    val height: Int,
+)
+
+private enum class WebLayoutClass {
+    Compact,
+    Medium,
+    Expanded,
+}
+
+private data class WebLayoutMetrics(
+    val rootPaddingRem: Double,
+    val gapRem: Double,
+    val boardCanvasPx: Double,
+    val boardMaxWidthPx: Double,
+    val boardMaxHeightPx: Double,
+    val rightPaneWidthPx: Double,
+    val leftPaneWidthPx: Double,
+    val previewMainPx: Double,
+    val previewSmallPx: Double,
+)
+
 @OptIn(ExperimentalWasmJsInterop::class)
 val GameContent =
     FC<RProps<GameComponent>> { props ->
@@ -83,6 +107,17 @@ val GameContent =
         val (flashAlpha, setFlashAlpha) = useState(0.0)
         val (floatingTexts, setFloatingTexts) = useState<List<WebFloatingText>>(emptyList())
         val (particleBursts, setParticleBursts) = useState<List<WebParticleBurst>>(emptyList())
+        val (viewport, setViewport) =
+            useState(
+                WebViewport(
+                    width = window.innerWidth,
+                    height = window.innerHeight,
+                ),
+            )
+        val (layoutClass, layoutMetrics) = resolveWebLayoutMetrics(viewport)
+        val gameState = model.gameState
+        val formattedTime = formatTime(model.elapsedTime)
+        val nextPieces = gameState?.previewPieces.orEmpty()
 
         fun triggerScreenShake(
             intensity: IntensityLevel,
@@ -223,35 +258,60 @@ val GameContent =
         // Keyboard controls
         useEffectOnce {
             val handleKeyDown = { event: dynamic ->
-                when (event.key.toString().lowercase()) {
-                    "arrowleft", "a" -> {
-                        event.preventDefault()
-                        props.component.onMoveLeft()
-                    }
+                val target = event.target
+                val tagName = target?.tagName?.toString()?.lowercase()
+                val isEditableTarget =
+                    target?.isContentEditable == true ||
+                        tagName == "input" ||
+                        tagName == "textarea" ||
+                        tagName == "select"
 
-                    "arrowright", "d" -> {
-                        event.preventDefault()
-                        props.component.onMoveRight()
-                    }
+                if (!isEditableTarget) {
+                    val key = event.key?.toString()?.lowercase() ?: ""
+                    val code = event.code?.toString() ?: ""
 
-                    "arrowdown", "s" -> {
-                        event.preventDefault()
-                        props.component.onMoveDown()
-                    }
+                    val handled =
+                        when {
+                            code == "ArrowLeft" || code == "KeyA" || key == "arrowleft" || key == "a" -> {
+                                props.component.onMoveLeft()
+                                true
+                            }
 
-                    "arrowup", "w", " " -> {
-                        event.preventDefault()
-                        props.component.onRotate()
-                    }
+                            code == "ArrowRight" || code == "KeyD" || key == "arrowright" || key == "d" -> {
+                                props.component.onMoveRight()
+                                true
+                            }
 
-                    "enter" -> {
-                        event.preventDefault()
-                        props.component.onHardDrop()
-                    }
+                            code == "ArrowDown" || code == "KeyS" || key == "arrowdown" || key == "s" -> {
+                                props.component.onMoveDown()
+                                true
+                            }
 
-                    "escape", "p" -> {
+                            code == "ArrowUp" || code == "KeyW" || code == "Space" || key == "arrowup" || key == "w" || key == " " -> {
+                                props.component.onRotate()
+                                true
+                            }
+
+                            code == "Enter" || code == "NumpadEnter" || code == "KeyV" || key == "enter" || key == "v" -> {
+                                props.component.onHardDrop()
+                                true
+                            }
+
+                            code == "KeyC" || code == "KeyH" || key == "c" || key == "h" -> {
+                                props.component.onHold()
+                                true
+                            }
+
+                            code == "Escape" || code == "KeyP" || key == "escape" || key == "p" -> {
+                                props.component.onPause()
+                                true
+                            }
+
+                            else -> false
+                        }
+
+                    if (handled) {
                         event.preventDefault()
-                        props.component.onPause()
                     }
                 }
             }
@@ -265,141 +325,534 @@ val GameContent =
             cleanup
         }
 
+        useEffectOnce {
+            val handleResize: (dynamic) -> Unit = {
+                setViewport(
+                    WebViewport(
+                        width = window.innerWidth,
+                        height = window.innerHeight,
+                    ),
+                )
+            }
+
+            window.addEventListener("resize", handleResize)
+
+            val cleanup: () -> Unit = {
+                window.removeEventListener("resize", handleResize)
+            }
+
+            cleanup
+        }
+
         Scaffold {
             sx {
                 backgroundColor = Color("#000000")
                 overflow = Overflow.hidden
             }
 
-            Container {
-                maxWidth = "lg"
+            Box {
                 sx {
+                    position = Position.relative
                     display = Display.flex
                     flexDirection = FlexDirection.column
                     height = 100.vh
-                    padding = 0.5.rem
+                    width = 100.pct
+                    padding = layoutMetrics.rootPaddingRem.rem
                     boxSizing = BoxSizing.borderBox
                     overflow = Overflow.hidden
                 }
 
                 Box {
+                    className = shakeClass.toClassName()
                     sx {
                         position = Position.relative
                         display = Display.flex
-                        flexDirection = FlexDirection.column
+                        flexDirection =
+                            if (layoutClass == WebLayoutClass.Compact) {
+                                FlexDirection.column
+                            } else {
+                                FlexDirection.row
+                            }
                         flexGrow = number(1.0)
                         minHeight = 0.px
-                        overflow = Overflow.hidden
+                        minWidth = 0.px
+                        gap = layoutMetrics.gapRem.rem
+                        transform = "scale($contentScale)".unsafeCast<Transform>()
+                        asDynamic().transition = "transform 180ms ease-out"
                     }
 
-                    Box {
-                        className = shakeClass.toClassName()
-                        sx {
-                            display = Display.flex
-                            flexDirection = FlexDirection.column
-                            flexGrow = number(1.0)
-                            minHeight = 0.px
-                            transform = "scale($contentScale)".unsafeCast<Transform>()
-                            asDynamic().transition = "transform 180ms ease-out"
-                        }
-
-                        // Top row: Pause button, Stats, Next piece
-                        Box {
-                            sx {
-                                display = Display.flex
-                                justifyContent = JustifyContent.spaceBetween
-                                alignItems = AlignItems.center
-                                marginBottom = 0.5.rem
-                                gap = 0.5.rem
-                                flexWrap = FlexWrap.wrap
-                            }
-
-                            IconButton {
+                    when (layoutClass) {
+                        WebLayoutClass.Compact -> {
+                            Box {
                                 sx {
-                                    backgroundColor = Color("rgba(255, 255, 255, 0.1)")
-                                    backdropFilter = "blur(10px)".unsafeCast<BackdropFilter>()
-                                    border =
-                                        "1px solid rgba(255, 255, 255, 0.2)".unsafeCast<Border>()
-                                    padding = 0.5.rem
-                                    minWidth = "auto".unsafeCast<web.cssom.MinWidth>()
-                                    hover {
-                                        backgroundColor = Color("rgba(255, 255, 255, 0.2)")
+                                    display = Display.flex
+                                    flexDirection = FlexDirection.column
+                                    gap = layoutMetrics.gapRem.rem
+                                }
+
+                                Box {
+                                    sx {
+                                        display = Display.flex
+                                        alignItems = AlignItems.center
+                                        gap = 0.45.rem
+                                        flexWrap = FlexWrap.wrap
+                                    }
+
+                                    IconButton {
+                                        sx {
+                                            backgroundColor = Color("rgba(255, 255, 255, 0.1)")
+                                            backdropFilter = "blur(10px)".unsafeCast<BackdropFilter>()
+                                            border =
+                                                "1px solid rgba(255, 255, 255, 0.2)".unsafeCast<Border>()
+                                            padding = 0.42.rem
+                                            minWidth = "auto".unsafeCast<web.cssom.MinWidth>()
+                                            hover {
+                                                backgroundColor = Color("rgba(255, 255, 255, 0.2)")
+                                            }
+                                        }
+                                        onClick = { props.component.onPause() }
+                                        Pause()
+                                    }
+
+                                    IconButton {
+                                        sx {
+                                            backgroundColor = Color("rgba(255, 255, 255, 0.1)")
+                                            backdropFilter = "blur(10px)".unsafeCast<BackdropFilter>()
+                                            border =
+                                                "1px solid rgba(255, 255, 255, 0.2)".unsafeCast<Border>()
+                                            padding = 0.42.rem
+                                            minWidth = "auto".unsafeCast<web.cssom.MinWidth>()
+                                            hover {
+                                                backgroundColor = Color("rgba(255, 255, 255, 0.2)")
+                                            }
+                                        }
+                                        onClick = { props.component.onHold() }
+                                        +"H"
+                                    }
+
+                                    Box {
+                                        sx {
+                                            display = Display.flex
+                                            gap = 0.7.rem
+                                            padding = Padding(0.45.rem, 0.75.rem)
+                                            backgroundColor = Color("rgba(255, 255, 255, 0.1)")
+                                            backdropFilter = "blur(10px)".unsafeCast<BackdropFilter>()
+                                            border =
+                                                "1px solid rgba(255, 255, 255, 0.2)".unsafeCast<Border>()
+                                            borderRadius = 0.75.rem
+                                            flexGrow = number(1.0)
+                                            justifyContent = JustifyContent.spaceAround
+                                            minWidth = 0.px
+                                            flexWrap = FlexWrap.wrap
+                                        }
+
+                                        StatItem {
+                                            label = Strings.SCORE
+                                            value = gameState?.score?.toString() ?: "0"
+                                        }
+
+                                        StatItem {
+                                            label = Strings.LINES
+                                            value = gameState?.linesCleared?.toString() ?: "0"
+                                        }
+
+                                        StatItem {
+                                            label = Strings.LEVEL
+                                            value = gameState?.level?.toString() ?: "1"
+                                        }
+
+                                        StatItem {
+                                            label = Strings.TIME
+                                            value = formattedTime
+                                        }
                                     }
                                 }
-                                onClick = { props.component.onPause() }
-                                Pause()
+
+                                gameState?.let { currentGameState ->
+                                    Box {
+                                        sx {
+                                            display = Display.flex
+                                            alignItems = AlignItems.center
+                                            gap = 0.45.rem
+                                            flexWrap = FlexWrap.wrap
+                                        }
+
+                                        NextPiecePreview {
+                                            piece = currentGameState.holdPiece
+                                            settings = model.settings
+                                            title = Strings.HOLD
+                                            canvasSize = layoutMetrics.previewSmallPx
+                                            compact = true
+                                        }
+
+                                        val compactQueueCount = min(nextPieces.size, 3)
+                                        for (index in 0 until compactQueueCount) {
+                                            NextPiecePreview {
+                                                piece = nextPieces[index]
+                                                settings = model.settings
+                                                title = Strings.NEXT
+                                                showTitle = index == 0
+                                                canvasSize = layoutMetrics.previewSmallPx
+                                                compact = true
+                                            }
+                                        }
+                                    }
+                                }
                             }
 
                             Box {
                                 sx {
-                                    display = Display.flex
-                                    gap = 1.rem
-                                    padding = Padding(0.5.rem, 1.rem)
-                                    backgroundColor = Color("rgba(255, 255, 255, 0.1)")
-                                    backdropFilter = "blur(10px)".unsafeCast<BackdropFilter>()
-                                    border =
-                                        "1px solid rgba(255, 255, 255, 0.2)".unsafeCast<Border>()
-                                    borderRadius = 0.75.rem
                                     flexGrow = number(1.0)
-                                    maxWidth = 400.px
-                                    justifyContent = JustifyContent.spaceAround
+                                    minHeight = 0.px
                                     minWidth = 0.px
+                                    display = Display.flex
+                                    alignItems = AlignItems.center
+                                    justifyContent = JustifyContent.center
+                                    overflow = Overflow.hidden
                                 }
 
-                                StatItem {
-                                    label = Strings.SCORE
-                                    value = model.gameState?.score?.toString() ?: "0"
-                                }
-
-                                StatItem {
-                                    label = Strings.LINES
-                                    value = model.gameState?.linesCleared?.toString() ?: "0"
-                                }
-
-                                StatItem {
-                                    label = Strings.LEVEL
-                                    value = model.gameState?.level?.toString() ?: "1"
-                                }
-
-                                StatItem {
-                                    label = Strings.TIME
-                                    value = formatTime(model.elapsedTime)
-                                }
-                            }
-
-                            model.gameState?.nextPiece?.let { nextPiece ->
-                                NextPiecePreview {
-                                    piece = nextPiece
-                                    settings = model.settings
-                                }
-                            }
-                        }
-
-                        // Game board - centered and responsive
-                        Box {
-                            sx {
-                                flexGrow = number(1.0)
-                                display = Display.flex
-                                alignItems = AlignItems.center
-                                justifyContent = JustifyContent.center
-                                minHeight = 0.px
-                                overflow = Overflow.hidden
-                            }
-
-                            model.gameState?.let { gameState ->
-                                GameBoard {
-                                    this.gameState = gameState
-                                    this.settings = model.settings
-                                    this.ghostY = model.ghostPieceY
-                                    this.onDragStarted = { props.component.onDragStarted() }
-                                    this.onDragged = { deltaX, deltaY ->
-                                        props.component.onDragged(deltaX, deltaY)
+                                gameState?.let { currentGameState ->
+                                    GameBoard {
+                                        this.gameState = currentGameState
+                                        this.settings = model.settings
+                                        this.ghostY = model.ghostPieceY
+                                        this.onDragStarted = { props.component.onDragStarted() }
+                                        this.onDragged = { deltaX, deltaY ->
+                                            props.component.onDragged(deltaX, deltaY)
+                                        }
+                                        this.onDragEnded = { props.component.onDragEnded() }
+                                        this.onTap = { props.component.onRotate() }
+                                        this.onBoardSizeChanged = { height ->
+                                            props.component.onBoardSizeChanged(height)
+                                        }
+                                        this.canvasWidthPx = layoutMetrics.boardCanvasPx
+                                        this.maxBoardWidthPx = layoutMetrics.boardMaxWidthPx
+                                        this.maxBoardHeightPx = layoutMetrics.boardMaxHeightPx
                                     }
-                                    this.onDragEnded = { props.component.onDragEnded() }
-                                    this.onTap = { props.component.onRotate() }
                                 }
                             }
                         }
+
+                        WebLayoutClass.Medium -> {
+                            Box {
+                                sx {
+                                    flexGrow = number(1.0)
+                                    minHeight = 0.px
+                                    minWidth = 0.px
+                                    display = Display.flex
+                                    alignItems = AlignItems.center
+                                    justifyContent = JustifyContent.center
+                                    overflow = Overflow.hidden
+                                }
+
+                                gameState?.let { currentGameState ->
+                                    GameBoard {
+                                        this.gameState = currentGameState
+                                        this.settings = model.settings
+                                        this.ghostY = model.ghostPieceY
+                                        this.onDragStarted = { props.component.onDragStarted() }
+                                        this.onDragged = { deltaX, deltaY ->
+                                            props.component.onDragged(deltaX, deltaY)
+                                        }
+                                        this.onDragEnded = { props.component.onDragEnded() }
+                                        this.onTap = { props.component.onRotate() }
+                                        this.onBoardSizeChanged = { height ->
+                                            props.component.onBoardSizeChanged(height)
+                                        }
+                                        this.canvasWidthPx = layoutMetrics.boardCanvasPx
+                                        this.maxBoardWidthPx = layoutMetrics.boardMaxWidthPx
+                                        this.maxBoardHeightPx = layoutMetrics.boardMaxHeightPx
+                                    }
+                                }
+                            }
+
+                            Box {
+                                sx {
+                                    width = layoutMetrics.rightPaneWidthPx.px
+                                    display = Display.flex
+                                    flexDirection = FlexDirection.column
+                                    gap = layoutMetrics.gapRem.rem
+                                    minHeight = 0.px
+                                }
+
+                                Box {
+                                    sx {
+                                        display = Display.flex
+                                        alignItems = AlignItems.center
+                                        gap = 0.45.rem
+                                    }
+
+                                    IconButton {
+                                        sx {
+                                            backgroundColor = Color("rgba(255, 255, 255, 0.1)")
+                                            backdropFilter = "blur(10px)".unsafeCast<BackdropFilter>()
+                                            border =
+                                                "1px solid rgba(255, 255, 255, 0.2)".unsafeCast<Border>()
+                                            padding = 0.45.rem
+                                            minWidth = "auto".unsafeCast<web.cssom.MinWidth>()
+                                            hover {
+                                                backgroundColor = Color("rgba(255, 255, 255, 0.2)")
+                                            }
+                                        }
+                                        onClick = { props.component.onPause() }
+                                        Pause()
+                                    }
+
+                                    IconButton {
+                                        sx {
+                                            backgroundColor = Color("rgba(255, 255, 255, 0.1)")
+                                            backdropFilter = "blur(10px)".unsafeCast<BackdropFilter>()
+                                            border =
+                                                "1px solid rgba(255, 255, 255, 0.2)".unsafeCast<Border>()
+                                            padding = 0.45.rem
+                                            minWidth = "auto".unsafeCast<web.cssom.MinWidth>()
+                                            hover {
+                                                backgroundColor = Color("rgba(255, 255, 255, 0.2)")
+                                            }
+                                        }
+                                        onClick = { props.component.onHold() }
+                                        +"H"
+                                    }
+                                }
+
+                                Box {
+                                    sx {
+                                        display = Display.flex
+                                        gap = 0.8.rem
+                                        padding = Padding(0.55.rem, 0.85.rem)
+                                        backgroundColor = Color("rgba(255, 255, 255, 0.1)")
+                                        backdropFilter = "blur(10px)".unsafeCast<BackdropFilter>()
+                                        border =
+                                            "1px solid rgba(255, 255, 255, 0.2)".unsafeCast<Border>()
+                                        borderRadius = 0.75.rem
+                                        justifyContent = JustifyContent.spaceAround
+                                        flexWrap = FlexWrap.wrap
+                                    }
+
+                                    StatItem {
+                                        label = Strings.SCORE
+                                        value = gameState?.score?.toString() ?: "0"
+                                    }
+                                    StatItem {
+                                        label = Strings.LINES
+                                        value = gameState?.linesCleared?.toString() ?: "0"
+                                    }
+                                    StatItem {
+                                        label = Strings.LEVEL
+                                        value = gameState?.level?.toString() ?: "1"
+                                    }
+                                    StatItem {
+                                        label = Strings.TIME
+                                        value = formattedTime
+                                    }
+                                }
+
+                                gameState?.let { currentGameState ->
+                                    Box {
+                                        sx {
+                                            display = Display.flex
+                                            flexDirection = FlexDirection.column
+                                            gap = 0.5.rem
+                                            padding = 0.55.rem
+                                            backgroundColor = Color("rgba(255, 255, 255, 0.1)")
+                                            backdropFilter = "blur(10px)".unsafeCast<BackdropFilter>()
+                                            border =
+                                                "1px solid rgba(255, 255, 255, 0.2)".unsafeCast<Border>()
+                                            borderRadius = 0.75.rem
+                                            minHeight = 0.px
+                                        }
+
+                                        NextPiecePreview {
+                                            piece = currentGameState.holdPiece
+                                            settings = model.settings
+                                            title = Strings.HOLD
+                                            canvasSize = layoutMetrics.previewMainPx
+                                            chrome = false
+                                        }
+
+                                        val mediumQueueCount = min(nextPieces.size, 3)
+                                        for (index in 0 until mediumQueueCount) {
+                                            NextPiecePreview {
+                                                piece = nextPieces[index]
+                                                settings = model.settings
+                                                title = Strings.NEXT
+                                                showTitle = index == 0
+                                                canvasSize = layoutMetrics.previewSmallPx
+                                                compact = true
+                                                chrome = false
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        WebLayoutClass.Expanded -> {
+                            Box {
+                                sx {
+                                    width = layoutMetrics.leftPaneWidthPx.px
+                                    display = Display.flex
+                                    flexDirection = FlexDirection.column
+                                    gap = layoutMetrics.gapRem.rem
+                                    minHeight = 0.px
+                                }
+
+                                Box {
+                                    sx {
+                                        display = Display.flex
+                                        alignItems = AlignItems.center
+                                        gap = 0.5.rem
+                                    }
+
+                                    IconButton {
+                                        sx {
+                                            backgroundColor = Color("rgba(255, 255, 255, 0.1)")
+                                            backdropFilter = "blur(10px)".unsafeCast<BackdropFilter>()
+                                            border =
+                                                "1px solid rgba(255, 255, 255, 0.2)".unsafeCast<Border>()
+                                            padding = 0.5.rem
+                                            minWidth = "auto".unsafeCast<web.cssom.MinWidth>()
+                                            hover {
+                                                backgroundColor = Color("rgba(255, 255, 255, 0.2)")
+                                            }
+                                        }
+                                        onClick = { props.component.onPause() }
+                                        Pause()
+                                    }
+
+                                    IconButton {
+                                        sx {
+                                            backgroundColor = Color("rgba(255, 255, 255, 0.1)")
+                                            backdropFilter = "blur(10px)".unsafeCast<BackdropFilter>()
+                                            border =
+                                                "1px solid rgba(255, 255, 255, 0.2)".unsafeCast<Border>()
+                                            padding = 0.5.rem
+                                            minWidth = "auto".unsafeCast<web.cssom.MinWidth>()
+                                            hover {
+                                                backgroundColor = Color("rgba(255, 255, 255, 0.2)")
+                                            }
+                                        }
+                                        onClick = { props.component.onHold() }
+                                        +"H"
+                                    }
+                                }
+
+                                Box {
+                                    sx {
+                                        display = Display.flex
+                                        gap = 0.8.rem
+                                        padding = Padding(0.65.rem, 0.95.rem)
+                                        backgroundColor = Color("rgba(255, 255, 255, 0.1)")
+                                        backdropFilter = "blur(10px)".unsafeCast<BackdropFilter>()
+                                        border =
+                                            "1px solid rgba(255, 255, 255, 0.2)".unsafeCast<Border>()
+                                        borderRadius = 0.75.rem
+                                        justifyContent = JustifyContent.spaceAround
+                                        flexWrap = FlexWrap.wrap
+                                    }
+
+                                    StatItem {
+                                        label = Strings.SCORE
+                                        value = gameState?.score?.toString() ?: "0"
+                                    }
+                                    StatItem {
+                                        label = Strings.LINES
+                                        value = gameState?.linesCleared?.toString() ?: "0"
+                                    }
+                                    StatItem {
+                                        label = Strings.LEVEL
+                                        value = gameState?.level?.toString() ?: "1"
+                                    }
+                                    StatItem {
+                                        label = Strings.TIME
+                                        value = formattedTime
+                                    }
+                                }
+                            }
+
+                            Box {
+                                sx {
+                                    flexGrow = number(1.0)
+                                    minHeight = 0.px
+                                    minWidth = 0.px
+                                    display = Display.flex
+                                    alignItems = AlignItems.center
+                                    justifyContent = JustifyContent.center
+                                    overflow = Overflow.hidden
+                                }
+
+                                gameState?.let { currentGameState ->
+                                    GameBoard {
+                                        this.gameState = currentGameState
+                                        this.settings = model.settings
+                                        this.ghostY = model.ghostPieceY
+                                        this.onDragStarted = { props.component.onDragStarted() }
+                                        this.onDragged = { deltaX, deltaY ->
+                                            props.component.onDragged(deltaX, deltaY)
+                                        }
+                                        this.onDragEnded = { props.component.onDragEnded() }
+                                        this.onTap = { props.component.onRotate() }
+                                        this.onBoardSizeChanged = { height ->
+                                            props.component.onBoardSizeChanged(height)
+                                        }
+                                        this.canvasWidthPx = layoutMetrics.boardCanvasPx
+                                        this.maxBoardWidthPx = layoutMetrics.boardMaxWidthPx
+                                        this.maxBoardHeightPx = layoutMetrics.boardMaxHeightPx
+                                    }
+                                }
+                            }
+
+                            gameState?.let { currentGameState ->
+                                Box {
+                                    sx {
+                                        width = layoutMetrics.rightPaneWidthPx.px
+                                        display = Display.flex
+                                        flexDirection = FlexDirection.column
+                                        gap = 0.55.rem
+                                        padding = 0.65.rem
+                                        backgroundColor = Color("rgba(255, 255, 255, 0.1)")
+                                        backdropFilter = "blur(10px)".unsafeCast<BackdropFilter>()
+                                        border =
+                                            "1px solid rgba(255, 255, 255, 0.2)".unsafeCast<Border>()
+                                        borderRadius = 0.75.rem
+                                        minHeight = 0.px
+                                        overflow = "auto".unsafeCast<Overflow>()
+                                    }
+
+                                    NextPiecePreview {
+                                        piece = currentGameState.holdPiece
+                                        settings = model.settings
+                                        title = Strings.HOLD
+                                        canvasSize = layoutMetrics.previewMainPx
+                                        chrome = false
+                                    }
+
+                                    val expandedQueueCount = min(nextPieces.size, 3)
+                                    for (index in 0 until expandedQueueCount) {
+                                        NextPiecePreview {
+                                            piece = nextPieces[index]
+                                            settings = model.settings
+                                            title = Strings.NEXT
+                                            showTitle = index == 0
+                                            canvasSize = layoutMetrics.previewMainPx
+                                            chrome = false
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Box {
+                    sx {
+                        position = Position.absolute
+                        top = 0.px
+                        left = 0.px
+                        right = 0.px
+                        bottom = 0.px
+                        asDynamic().pointerEvents = "none"
+                        asDynamic().zIndex = 10
                     }
 
                     Box {
@@ -409,112 +862,100 @@ val GameContent =
                             left = 0.px
                             right = 0.px
                             bottom = 0.px
-                            asDynamic().pointerEvents = "none"
-                            asDynamic().zIndex = 10
+                            backgroundColor = Color("rgba(255, 255, 255, $flashAlpha)")
+                            asDynamic().transition = "background-color 180ms ease-out"
                         }
+                    }
 
+                    floatingTexts.forEach { textEntry ->
                         Box {
+                            key = textEntry.id
+                            className =
+                                if (textEntry.isHigh) {
+                                    "juice-floating-text juice-text-rise juice-text-pulse-high"
+                                } else {
+                                    "juice-floating-text juice-text-rise"
+                                }.toClassName()
                             sx {
                                 position = Position.absolute
-                                top = 0.px
-                                left = 0.px
-                                right = 0.px
-                                bottom = 0.px
-                                backgroundColor = Color("rgba(255, 255, 255, $flashAlpha)")
-                                asDynamic().transition = "background-color 180ms ease-out"
-                            }
-                        }
-
-                        floatingTexts.forEach { textEntry ->
-                            Box {
-                                key = textEntry.id
-                                className =
+                                top = 50.pct
+                                left = 50.pct
+                                transform = "translate(-50%, -50%)".unsafeCast<Transform>()
+                                fontSize =
                                     if (textEntry.isHigh) {
-                                        "juice-floating-text juice-text-rise juice-text-pulse-high"
+                                        (44 + (12 * textEntry.power)).px
                                     } else {
-                                        "juice-floating-text juice-text-rise"
-                                    }.toClassName()
+                                        (24 + (6 * textEntry.power)).px
+                                    }
+                                fontWeight = integer(900)
+                                color =
+                                    if (textEntry.isHigh) Color("#ffd54f") else Color("#ffffff")
+                                asDynamic()["WebkitTextStrokeWidth"] =
+                                    if (textEntry.isHigh) "2.6px" else "1.6px"
+                                asDynamic()["WebkitTextStrokeColor"] =
+                                    if (textEntry.isHigh) "rgba(58, 24, 0, 0.95)" else "rgba(11, 18, 32, 0.95)"
+                                asDynamic()["textShadow"] =
+                                    "0 3px 0 rgba(0,0,0,0.48), 0 6px 12px rgba(0,0,0,0.35)"
+                                asDynamic()["fontFamily"] =
+                                    "'Impact','Arial Black','Segoe UI',sans-serif"
+                                asDynamic()["letterSpacing"] =
+                                    if (textEntry.isHigh) "0.10em" else "0.08em"
+                                asDynamic()["--juice-duration"] = "${textEntry.durationMs}ms"
+                            }
+                            +textEntry.text
+                        }
+                    }
+
+                    particleBursts.forEach { burst ->
+                        for (index in 0 until burst.particleCount) {
+                            val angle =
+                                seededFloat(
+                                    seed = burst.seed,
+                                    index = index,
+                                    salt = 11,
+                                ) * (PI * 2)
+                            val distanceScale =
+                                0.45 + seededFloat(
+                                    seed = burst.seed,
+                                    index = index,
+                                    salt = 23,
+                                ) * 0.75
+                            val distance =
+                                (80 + ((210 - 80) * burst.power)) * distanceScale
+                            val sizeScale =
+                                if (burst.isHigh) {
+                                    6
+                                } else {
+                                    3
+                                }
+                            val dx = cos(angle) * distance
+                            val dy = sin(angle) * distance - 36
+                            val size =
+                                2 + seededFloat(
+                                    seed = burst.seed,
+                                    index = index,
+                                    salt = 37,
+                                ) * sizeScale
+                            Box {
+                                key = "${burst.id}-$index"
+                                className = "juice-particle-burst".toClassName()
                                 sx {
                                     position = Position.absolute
                                     top = 50.pct
                                     left = 50.pct
-                                    transform = "translate(-50%, -50%)".unsafeCast<Transform>()
-                                    fontSize =
-                                        if (textEntry.isHigh) {
-                                            (44 + (12 * textEntry.power)).px
+                                    width = size.px
+                                    height = size.px
+                                    borderRadius = 999.px
+                                    backgroundColor =
+                                        if (burst.isHigh) {
+                                            Color("rgba(255, 237, 153, 0.95)")
                                         } else {
-                                            (24 + (6 * textEntry.power)).px
+                                            Color("rgba(255, 255, 255, 0.9)")
                                         }
-                                    fontWeight = integer(900)
-                                    color =
-                                        if (textEntry.isHigh) Color("#ffd54f") else Color("#ffffff")
-                                    asDynamic()["WebkitTextStrokeWidth"] =
-                                        if (textEntry.isHigh) "2.6px" else "1.6px"
-                                    asDynamic()["WebkitTextStrokeColor"] =
-                                        if (textEntry.isHigh) "rgba(58, 24, 0, 0.95)" else "rgba(11, 18, 32, 0.95)"
-                                    asDynamic()["textShadow"] =
-                                        "0 3px 0 rgba(0,0,0,0.48), 0 6px 12px rgba(0,0,0,0.35)"
-                                    asDynamic()["fontFamily"] =
-                                        "'Impact','Arial Black','Segoe UI',sans-serif"
-                                    asDynamic()["letterSpacing"] =
-                                        if (textEntry.isHigh) "0.10em" else "0.08em"
-                                    asDynamic()["--juice-duration"] = "${textEntry.durationMs}ms"
-                                }
-                                +textEntry.text
-                            }
-                        }
-
-                        particleBursts.forEach { burst ->
-                            for (index in 0 until burst.particleCount) {
-                                val angle =
-                                    seededFloat(
-                                        seed = burst.seed,
-                                        index = index,
-                                        salt = 11,
-                                    ) * (PI * 2)
-                                val distanceScale =
-                                    0.45 + seededFloat(
-                                        seed = burst.seed,
-                                        index = index,
-                                        salt = 23,
-                                    ) * 0.75
-                                val distance =
-                                    (80 + ((210 - 80) * burst.power)) * distanceScale
-                                val sizeScale =
-                                    if (burst.isHigh) {
-                                        6
-                                    } else {
-                                        3
-                                    }
-                                val dx = cos(angle) * distance
-                                val dy = sin(angle) * distance - 36
-                                val size =
-                                    2 + seededFloat(
-                                        seed = burst.seed,
-                                        index = index,
-                                        salt = 37,
-                                    ) * sizeScale
-                                Box {
-                                    key = "${burst.id}-$index"
-                                    className = "juice-particle-burst".toClassName()
-                                    sx {
-                                        position = Position.absolute
-                                        top = 50.pct
-                                        left = 50.pct
-                                        width = size.px
-                                        height = size.px
-                                        borderRadius = 999.px
-                                        backgroundColor =
-                                            if (burst.isHigh) {
-                                                Color("rgba(255, 237, 153, 0.95)")
-                                            } else {
-                                                Color("rgba(255, 255, 255, 0.9)")
-                                            }
-                                        transform = "translate(-50%, -50%)".unsafeCast<Transform>()
-                                        asDynamic()["--juice-dx"] = "${dx}px"
-                                        asDynamic()["--juice-dy"] = "${dy}px"
-                                        asDynamic()["--juice-duration"] = "550ms"
-                                    }
+                                    transform = "translate(-50%, -50%)".unsafeCast<Transform>()
+                                    asDynamic()["--juice-dx"] = "${dx}px"
+                                    asDynamic()["--juice-dy"] = "${dy}px"
+                                    asDynamic()["--juice-duration"] = "550ms"
                                 }
                             }
                         }
@@ -587,6 +1028,92 @@ val GameContent =
             }
         }
     }
+
+private fun resolveWebLayoutMetrics(viewport: WebViewport): Pair<WebLayoutClass, WebLayoutMetrics> {
+    val width = viewport.width.toDouble()
+    val height = viewport.height.toDouble()
+    val isShortHeight = height < 560.0
+    val boardAspect = 0.5 // 10 cols / 20 rows
+
+    val layoutClass =
+        when {
+            width < 760.0 || (width < 900.0 && !isShortHeight) -> WebLayoutClass.Compact
+            width < 1240.0 || isShortHeight -> WebLayoutClass.Medium
+            else -> WebLayoutClass.Expanded
+        }
+
+    val metrics =
+        when (layoutClass) {
+            WebLayoutClass.Compact -> {
+                val rootPaddingRem = if (width < 430.0) 0.35 else 0.55
+                val gapRem = if (isShortHeight) 0.35 else 0.55
+                val reservedTopPx = if (width < 430.0) 238.0 else 210.0
+                val widthBased = clamp(width * 0.86, 260.0, 440.0)
+                val heightBased = clamp((height - reservedTopPx) * boardAspect, 230.0, 460.0)
+                val boardWidth = min(widthBased, heightBased)
+
+                WebLayoutMetrics(
+                    rootPaddingRem = rootPaddingRem,
+                    gapRem = gapRem,
+                    boardCanvasPx = boardWidth,
+                    boardMaxWidthPx = boardWidth,
+                    boardMaxHeightPx = boardWidth / boardAspect,
+                    rightPaneWidthPx = 0.0,
+                    leftPaneWidthPx = 0.0,
+                    previewMainPx = if (width < 430.0) 40.0 else 46.0,
+                    previewSmallPx = if (width < 430.0) 34.0 else 38.0,
+                )
+            }
+
+            WebLayoutClass.Medium -> {
+                val rootPaddingRem = 0.6
+                val gapRem = 0.65
+                val widthBased = clamp(width * 0.54, 330.0, 520.0)
+                val heightBased = clamp((height - 52.0) * boardAspect, 280.0, 560.0)
+                val boardWidth = min(widthBased, heightBased)
+
+                WebLayoutMetrics(
+                    rootPaddingRem = rootPaddingRem,
+                    gapRem = gapRem,
+                    boardCanvasPx = boardWidth,
+                    boardMaxWidthPx = boardWidth,
+                    boardMaxHeightPx = boardWidth / boardAspect,
+                    rightPaneWidthPx = clamp(width * 0.34, 250.0, 360.0),
+                    leftPaneWidthPx = 0.0,
+                    previewMainPx = 58.0,
+                    previewSmallPx = 46.0,
+                )
+            }
+
+            WebLayoutClass.Expanded -> {
+                val rootPaddingRem = 0.7
+                val gapRem = 0.75
+                val widthBased = clamp(width * 0.43, 400.0, 620.0)
+                val heightBased = clamp((height - 48.0) * boardAspect, 320.0, 640.0)
+                val boardWidth = min(widthBased, heightBased)
+
+                WebLayoutMetrics(
+                    rootPaddingRem = rootPaddingRem,
+                    gapRem = gapRem,
+                    boardCanvasPx = boardWidth,
+                    boardMaxWidthPx = boardWidth,
+                    boardMaxHeightPx = boardWidth / boardAspect,
+                    rightPaneWidthPx = clamp(width * 0.22, 260.0, 360.0),
+                    leftPaneWidthPx = clamp(width * 0.20, 220.0, 320.0),
+                    previewMainPx = 64.0,
+                    previewSmallPx = 52.0,
+                )
+            }
+        }
+
+    return layoutClass to metrics
+}
+
+private fun clamp(
+    value: Double,
+    minValue: Double,
+    maxValue: Double,
+): Double = max(minValue, min(maxValue, value))
 
 private fun seededFloat(
     seed: Int,
