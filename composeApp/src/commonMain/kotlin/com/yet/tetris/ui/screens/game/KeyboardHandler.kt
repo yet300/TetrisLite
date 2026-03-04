@@ -10,5 +10,6 @@ expect fun Modifier.keyboardHandler(
     onMoveDown: () -> Unit,
     onRotate: () -> Unit,
     onHardDrop: () -> Unit,
+    onHold: () -> Unit,
     onPause: () -> Unit,
 ): Modifier

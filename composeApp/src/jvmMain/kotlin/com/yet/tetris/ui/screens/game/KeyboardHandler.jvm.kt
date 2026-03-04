@@ -22,6 +22,7 @@ actual fun Modifier.keyboardHandler(
     onMoveDown: () -> Unit,
     onRotate: () -> Unit,
     onHardDrop: () -> Unit,
+    onHold: () -> Unit,
     onPause: () -> Unit,
 ): Modifier {
     val focusRequester = remember { FocusRequester() }
@@ -54,6 +55,10 @@ actual fun Modifier.keyboardHandler(
                     }
                     Key.Enter -> {
                         onHardDrop()
+                        true
+                    }
+                    Key.C, Key.H -> {
+                        onHold()
                         true
                     }
 

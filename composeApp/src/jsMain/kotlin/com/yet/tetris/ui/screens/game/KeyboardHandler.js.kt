@@ -24,6 +24,7 @@ actual fun Modifier.keyboardHandler(
     onMoveDown: () -> Unit,
     onRotate: () -> Unit,
     onHardDrop: () -> Unit,
+    onHold: () -> Unit,
     onPause: () -> Unit,
 ): Modifier {
     DisposableEffect(Unit) {
@@ -50,6 +51,10 @@ actual fun Modifier.keyboardHandler(
                 }
                 "enter" -> {
                     onHardDrop()
+                    keyboardEvent.preventDefault()
+                }
+                "c", "h" -> {
+                    onHold()
                     keyboardEvent.preventDefault()
                 }
                 "escape" -> {
