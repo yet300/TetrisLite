@@ -21,6 +21,7 @@ object Strings {
     const val DIFFICULTY = "Difficulty"
 
     // Game Screen
+    const val HOLD = "Hold"
     const val NEXT = "Next"
     const val SCORE = "Score"
     const val LINES = "Lines"

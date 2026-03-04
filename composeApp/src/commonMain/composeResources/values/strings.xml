@@ -16,6 +16,7 @@
     <string name="difficulty">Difficulty</string>
     
     <!-- Game Screen -->
+    <string name="hold">Hold</string>
     <string name="next">Next</string>
     <string name="score">Score</string>
     <string name="lines">Lines</string>

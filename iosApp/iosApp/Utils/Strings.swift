@@ -30,6 +30,7 @@ enum Strings {
     static let newGame = NSLocalizedString("new_game", comment: "")
 
     // Game Screen
+    static let hold = NSLocalizedString("hold", comment: "")
     static let next = NSLocalizedString("next", comment: "")
     static let score = NSLocalizedString("score", comment: "")
     static let lines = NSLocalizedString("lines", comment: "")

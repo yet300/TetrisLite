@@ -26,6 +26,7 @@
 "new_game" = "New Game";
 
 /* Game Screen */
+"hold" = "Hold";
 "next" = "Next";
 "score" = "Score";
 "lines" = "Lines";
