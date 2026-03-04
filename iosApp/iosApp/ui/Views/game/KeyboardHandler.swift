@@ -27,6 +27,7 @@ private struct KeyboardHandler: NSViewRepresentable {
     private class KeyCatcherView: NSView {
         var onKey: ((String) -> Void)?
         private var localMonitor: Any?
+        private let handledCharacterKeys: Set<String> = ["a", "d", "s", "w", " ", "c", "h", "p", "\r", "\n"]
 
         override var acceptsFirstResponder: Bool { true }
 
@@ -58,6 +59,11 @@ private struct KeyboardHandler: NSViewRepresentable {
         }
 
         private func handleKeyEvent(_ event: NSEvent) -> Bool {
+            let blockedModifiers: NSEvent.ModifierFlags = [.command, .control, .option]
+            if !event.modifierFlags.intersection(blockedModifiers).isEmpty {
+                return false
+            }
+
             switch event.keyCode {
             case 123:
                 onKey?("directionleft")
@@ -81,11 +87,12 @@ private struct KeyboardHandler: NSViewRepresentable {
                 break
             }
 
-            if let chars = event.charactersIgnoringModifiers, !chars.isEmpty {
-                onKey?(chars)
-                return true
+            guard let chars = event.charactersIgnoringModifiers?.lowercased(), !chars.isEmpty else {
+                return false
             }
-            return false
+            guard handledCharacterKeys.contains(chars) else { return false }
+            onKey?(chars)
+            return true
         }
 
         private func installLocalMonitorIfNeeded() {
@@ -128,7 +135,6 @@ private struct KeyboardHandler: UIViewRepresentable {
     func updateUIView(_ uiView: UIView, context: Context) {
         guard let catcherView = uiView as? KeyCatcherView else { return }
         catcherView.onKey = onKey
-        catcherView.requestFocus()
     }
 
     private class KeyCatcherView: UIView {

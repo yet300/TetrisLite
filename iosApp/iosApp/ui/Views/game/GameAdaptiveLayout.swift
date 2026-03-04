@@ -320,7 +320,7 @@ private struct GameControlButtonsRow: View {
             .buttonStyle(.plain)
             .keyboardShortcut("p", modifiers: [])
             .gameHoverEffect()
-            .accessibilityLabel("Pause")
+            .accessibilityLabel(Strings.paused)
 
             Button(action: actions.onHold) {
                 Image(systemName: "arrow.left.arrow.right")
