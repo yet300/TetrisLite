@@ -24,10 +24,11 @@ struct macosApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView(rootComponent: root)
-                .frame(minWidth: 800, minHeight: 600)
+                .frame(minWidth: 900, minHeight: 620)
         }
+        .defaultSize(width: 1240, height: 820)
         .windowStyle(.hiddenTitleBar)
-        .windowResizability(.contentSize)
+        .windowResizability(.automatic)
     }
 }
 
