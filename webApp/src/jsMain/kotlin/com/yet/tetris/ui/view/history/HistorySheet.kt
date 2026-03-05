@@ -7,6 +7,7 @@ import com.yet.tetris.ui.strings.Strings
 import com.yet.tetris.ui.view.history.components.EmptyHistoryState
 import com.yet.tetris.ui.view.history.components.GameRecordItem
 import com.yet.tetris.utils.RProps
+import com.yet.tetris.utils.reactKey
 import com.yet.tetris.utils.useAsState
 import mui.icons.material.Close
 import mui.icons.material.FilterList
@@ -91,7 +92,7 @@ val HistorySheet =
 
                     DateFilter.entries.forEach { filter ->
                         MenuItem {
-                            key = filter.name
+                            key = filter.name.reactKey()
                             onClick = {
                                 props.component.onFilterChanged(filter)
                                 setFilterMenuAnchor(null)
@@ -155,7 +156,7 @@ val GamesList =
             List {
                 props.games.forEach { game ->
                     GameRecordItem {
-                        key = game.id
+                        key = game.id.reactKey()
                         this.game = game
                         this.onDelete = { props.onDeleteGame(game.id) }
                     }

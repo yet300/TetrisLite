@@ -3,6 +3,7 @@ package com.yet.tetris.ui.view.settings.components
 import com.yet.tetris.domain.model.theme.PieceStyle
 import com.yet.tetris.domain.model.theme.VisualTheme
 import com.yet.tetris.ui.strings.Strings
+import com.yet.tetris.utils.reactKey
 import mui.material.Box
 import mui.material.Chip
 import mui.material.ChipColor
@@ -43,7 +44,7 @@ val ThemeSelector =
 
                     VisualTheme.entries.forEach { theme ->
                         Chip {
-                            key = theme.name
+                            key = theme.name.reactKey()
                             label =
                                 div.create {
                                     +theme.name.lowercase().replaceFirstChar { it.uppercase() }
@@ -79,7 +80,7 @@ val ThemeSelector =
 
                     PieceStyle.entries.forEach { style ->
                         Chip {
-                            key = style.name
+                            key = style.name.reactKey()
                             label =
                                 div.create {
                                     +style.name.lowercase().replaceFirstChar { it.uppercase() }

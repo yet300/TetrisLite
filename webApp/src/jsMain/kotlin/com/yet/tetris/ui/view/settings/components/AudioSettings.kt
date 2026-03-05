@@ -3,6 +3,7 @@ package com.yet.tetris.ui.view.settings.components
 import com.yet.tetris.domain.model.audio.AudioSettings
 import com.yet.tetris.domain.model.audio.MusicTheme
 import com.yet.tetris.ui.strings.Strings
+import com.yet.tetris.utils.reactKey
 import mui.material.Box
 import mui.material.Button
 import mui.material.ButtonGroup
@@ -105,7 +106,7 @@ val AudioSettingsSection =
 
                             MusicTheme.entries.forEach { theme ->
                                 Button {
-                                    key = theme.name
+                                    key = theme.name.reactKey()
                                     variant =
                                         if (props.audioSettings.selectedMusicTheme == theme) {
                                             ButtonVariant.contained

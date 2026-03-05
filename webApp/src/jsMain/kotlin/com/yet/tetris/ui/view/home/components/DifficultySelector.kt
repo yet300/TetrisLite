@@ -1,6 +1,7 @@
 package com.yet.tetris.ui.view.home.components
 
 import com.yet.tetris.domain.model.game.Difficulty
+import com.yet.tetris.utils.reactKey
 import mui.material.Box
 import mui.material.ToggleButton
 import mui.material.ToggleButtonGroup
@@ -52,7 +53,7 @@ val DifficultySelector =
 
                 Difficulty.entries.forEach { diff ->
                     ToggleButton {
-                        key = diff.name
+                        key = diff.name.reactKey()
                         value = diff
                         sx {
                             color = Color("rgba(255, 255, 255, 0.9)")

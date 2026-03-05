@@ -15,6 +15,7 @@ import com.yet.tetris.ui.view.game.dialog.PauseDialog
 import com.yet.tetris.ui.view.settings.SettingsSheet
 import com.yet.tetris.utils.RProps
 import com.yet.tetris.utils.formatTime
+import com.yet.tetris.utils.reactKey
 import com.yet.tetris.utils.useAsState
 import js.objects.unsafeJso
 import kotlinx.browser.window
@@ -869,7 +870,7 @@ val GameContent =
 
                     floatingTexts.forEach { textEntry ->
                         Box {
-                            key = textEntry.id
+                            key = textEntry.id.reactKey()
                             className =
                                 if (textEntry.isHigh) {
                                     "juice-floating-text juice-text-rise juice-text-pulse-high"
@@ -937,7 +938,7 @@ val GameContent =
                                     salt = 37,
                                 ) * sizeScale
                             Box {
-                                key = "${burst.id}-$index"
+                                key = "${burst.id}-$index".reactKey()
                                 className = "juice-particle-burst".toClassName()
                                 sx {
                                     position = Position.absolute
