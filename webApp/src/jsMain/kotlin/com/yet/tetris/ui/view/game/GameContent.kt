@@ -17,6 +17,12 @@ import com.yet.tetris.utils.RProps
 import com.yet.tetris.utils.formatTime
 import com.yet.tetris.utils.reactKey
 import com.yet.tetris.utils.useAsState
+import com.yet.tetris.ui.view.game.rendering.WebLineSweepEffect
+import com.yet.tetris.ui.view.game.rendering.WebLockGlowEffect
+import com.yet.tetris.ui.view.game.rendering.WebBoardCell
+import com.yet.tetris.ui.view.game.rendering.colorWithAlpha
+import com.yet.tetris.ui.view.game.rendering.webThemeEffectStyle
+import com.yet.tetris.ui.view.game.rendering.webThemeMotionStyle
 import js.objects.unsafeJso
 import kotlinx.browser.window
 import mui.icons.material.Pause
@@ -62,6 +68,10 @@ private data class WebFloatingText(
     val isHigh: Boolean,
     val power: Double,
     val durationMs: Int,
+    val textColor: String,
+    val strokeColor: String,
+    val pulseDurationMs: Int,
+    val pulseCount: Int,
 )
 
 private data class WebParticleBurst(
@@ -70,6 +80,11 @@ private data class WebParticleBurst(
     val power: Double,
     val particleCount: Int,
     val seed: Int,
+    val durationMs: Int,
+    val primaryColor: String,
+    val secondaryColor: String,
+    val opacityBoost: Double,
+    val usesSquares: Boolean,
 )
 
 private data class WebViewport(
@@ -104,10 +119,17 @@ val GameContent =
         val activeSheet = sheetSlot.child?.instance
 
         val (shakeClass, setShakeClass) = useState("")
+        val (shakeDurationMs, setShakeDurationMs) = useState(220)
         val (contentScale, setContentScale) = useState(1.0)
+        val (scaleTransitionMs, setScaleTransitionMs) = useState(180)
         val (flashAlpha, setFlashAlpha) = useState(0.0)
+        val (flashColor, setFlashColor) = useState("#ffffff")
+        val (flashFadeDurationMs, setFlashFadeDurationMs) = useState(180)
         val (floatingTexts, setFloatingTexts) = useState<List<WebFloatingText>>(emptyList())
         val (particleBursts, setParticleBursts) = useState<List<WebParticleBurst>>(emptyList())
+        val (lineSweeps, setLineSweeps) = useState<List<WebLineSweepEffect>>(emptyList())
+        val (lockGlows, setLockGlows) = useState<List<WebLockGlowEffect>>(emptyList())
+        val (boardEffectTimeMs, setBoardEffectTimeMs) = useState(window.performance.now())
         val (viewport, setViewport) =
             useState(
                 WebViewport(
@@ -119,13 +141,18 @@ val GameContent =
         val gameState = model.gameState
         val formattedTime = formatTime(model.elapsedTime)
         val nextPieces = gameState?.previewPieces.orEmpty()
+        val effectStyle = webThemeEffectStyle(model.settings)
+        val motionStyle = webThemeMotionStyle(model.settings.themeConfig.visualTheme)
 
         fun triggerScreenShake(
             intensity: IntensityLevel,
             power: Float,
         ) {
             val isHigh = intensity == IntensityLevel.HIGH
+            val durationMs = if (isHigh) motionStyle.shakeDurationHighMs else motionStyle.shakeDurationLowMs
             setShakeClass("")
+            setShakeDurationMs(durationMs)
+            setScaleTransitionMs(durationMs)
             window.setTimeout(
                 handler = {
                     setShakeClass(if (isHigh) "juice-shake-high" else "juice-shake-low")
@@ -138,18 +165,20 @@ val GameContent =
                 handler = {
                     setContentScale(1.0)
                 },
-                timeout = 220,
+                timeout = motionStyle.scaleResetDelayMs,
             )
             window.setTimeout(
                 handler = {
                     setShakeClass("")
                 },
-                timeout = if (isHigh) 320 else 240,
+                timeout = durationMs,
             )
         }
 
         fun triggerScreenFlash(power: Float) {
-            setFlashAlpha(0.45 + (0.4 * power))
+            setFlashColor(effectStyle.flashColor)
+            setFlashFadeDurationMs(motionStyle.flashFadeDurationMs)
+            setFlashAlpha(0.45 + ((effectStyle.flashBoost - 0.45) * power))
             window.setTimeout(
                 handler = {
                     setFlashAlpha(0.0)
@@ -166,7 +195,14 @@ val GameContent =
             sequence: Long,
         ) {
             val isHigh = intensity == IntensityLevel.HIGH
-            val durationMs = if (isHigh) 1100 else 780
+            val baseDurationMs = if (isHigh) 1100.0 else 780.0
+            val durationMs =
+                (baseDurationMs *
+                    if (isHigh) {
+                        motionStyle.floatingDurationHighMultiplier
+                    } else {
+                        motionStyle.floatingDurationLowMultiplier
+                    }).toInt()
             val id = "$sequence-${window.performance.now()}"
             val entry =
                 WebFloatingText(
@@ -175,6 +211,10 @@ val GameContent =
                     isHigh = isHigh,
                     power = power.toDouble(),
                     durationMs = durationMs,
+                    textColor = if (isHigh) effectStyle.textHigh else effectStyle.textLow,
+                    strokeColor = if (isHigh) effectStyle.textStrokeHigh else effectStyle.textStrokeLow,
+                    pulseDurationMs = motionStyle.pulseDurationMs,
+                    pulseCount = if (isHigh) max(3, durationMs / motionStyle.pulseDurationMs) else 1,
                 )
 
             setFloatingTexts { previous -> previous + entry }
@@ -202,6 +242,11 @@ val GameContent =
                     power = power.toDouble(),
                     particleCount = particleCount,
                     seed = burst.id.toInt(),
+                    durationMs = (550.0 * motionStyle.particleDurationMultiplier).toInt(),
+                    primaryColor = effectStyle.particlePrimary,
+                    secondaryColor = effectStyle.particleSecondary,
+                    opacityBoost = effectStyle.particleOpacityBoost,
+                    usesSquares = effectStyle.particleUsesSquares,
                 )
 
             setParticleBursts { previous -> previous + entry }
@@ -210,7 +255,61 @@ val GameContent =
                 handler = {
                     setParticleBursts { previous -> previous.filterNot { it.id == id } }
                 },
-                timeout = 650,
+                timeout = entry.durationMs + 100,
+            )
+        }
+
+        fun addLineSweep(
+            burst: VisualEffectBurst,
+            sequence: Long,
+        ) {
+            if (burst.clearedRows.isEmpty()) return
+            val durationMs = 520.0 * motionStyle.sweepDurationMultiplier
+            val id = "$sequence-sweep-${burst.id}"
+            val entry =
+                WebLineSweepEffect(
+                    id = id,
+                    clearedRows = burst.clearedRows,
+                    createdAtMs = window.performance.now(),
+                    durationMs = durationMs,
+                    primaryColor = effectStyle.sweepPrimary,
+                    secondaryColor = effectStyle.sweepSecondary,
+                    fillColor = effectStyle.sweepFill,
+                    opacityBoost = effectStyle.sweepOpacityBoost,
+                )
+            setLineSweeps { previous -> previous + entry }
+            window.setTimeout(
+                handler = {
+                    setLineSweeps { previous -> previous.filterNot { it.id == id } }
+                },
+                timeout = durationMs.toInt() + 100,
+            )
+        }
+
+        fun addLockGlow(
+            burst: VisualEffectBurst,
+            sequence: Long,
+        ) {
+            if (burst.lockCells.isEmpty()) return
+            val durationMs = 460.0 * motionStyle.lockGlowDurationMultiplier
+            val id = "$sequence-lock-${burst.id}"
+            val entry =
+                WebLockGlowEffect(
+                    id = id,
+                    cells = burst.lockCells.map { WebBoardCell(x = it.x, y = it.y) },
+                    createdAtMs = window.performance.now(),
+                    durationMs = durationMs,
+                    primaryColor = effectStyle.lockGlowPrimary,
+                    secondaryColor = effectStyle.lockGlowSecondary,
+                    opacityBoost = effectStyle.lockGlowOpacityBoost,
+                    cornerRadiusFactor = effectStyle.lockGlowCornerRadiusFactor,
+                )
+            setLockGlows { previous -> previous + entry }
+            window.setTimeout(
+                handler = {
+                    setLockGlows { previous -> previous.filterNot { it.id == id } }
+                },
+                timeout = durationMs.toInt() + 100,
             )
         }
 
@@ -246,6 +345,8 @@ val GameContent =
                         )
                 }
             }
+            addLineSweep(burst = burst, sequence = sequence)
+            addLockGlow(burst = burst, sequence = sequence)
         }
 
         useEffect(model.visualEffectFeed.sequence) {
@@ -254,6 +355,27 @@ val GameContent =
                 processVisualEffectBurst(sequence = sequence, burst = burst)
                 props.component.onVisualEffectConsumed(sequence)
             }
+        }
+
+        useEffect(lineSweeps.size, lockGlows.size) {
+            if (lineSweeps.isEmpty() && lockGlows.isEmpty()) {
+                return@useEffect
+            }
+
+            var frameHandle = 0
+            lateinit var tick: (Double) -> Unit
+            tick = { time ->
+                setBoardEffectTimeMs(time)
+                frameHandle = window.requestAnimationFrame(tick)
+            }
+
+            frameHandle = window.requestAnimationFrame(tick)
+
+            val cleanup: () -> Unit = {
+                window.cancelAnimationFrame(frameHandle)
+            }
+
+            cleanup
         }
 
         // Keyboard controls
@@ -379,7 +501,8 @@ val GameContent =
                         minWidth = 0.px
                         gap = layoutMetrics.gapRem.rem
                         transform = "scale($contentScale)".unsafeCast<Transform>()
-                        asDynamic().transition = "transform 180ms ease-out"
+                        asDynamic().transition = "transform ${scaleTransitionMs}ms ease-out"
+                        asDynamic().animationDuration = "${shakeDurationMs}ms"
                     }
 
                     when (layoutClass) {
@@ -493,6 +616,9 @@ val GameContent =
                                         this.canvasWidthPx = layoutMetrics.boardCanvasPx
                                         this.maxBoardWidthPx = layoutMetrics.boardMaxWidthPx
                                         this.maxBoardHeightPx = layoutMetrics.boardMaxHeightPx
+                                        this.lineSweeps = lineSweeps
+                                        this.lockGlows = lockGlows
+                                        this.effectTimeMs = boardEffectTimeMs
                                     }
                                 }
                             }
@@ -578,6 +704,9 @@ val GameContent =
                                         this.canvasWidthPx = layoutMetrics.boardCanvasPx
                                         this.maxBoardWidthPx = layoutMetrics.boardMaxWidthPx
                                         this.maxBoardHeightPx = layoutMetrics.boardMaxHeightPx
+                                        this.lineSweeps = lineSweeps
+                                        this.lockGlows = lockGlows
+                                        this.effectTimeMs = boardEffectTimeMs
                                     }
                                 }
                             }
@@ -846,6 +975,9 @@ val GameContent =
                                         this.canvasWidthPx = layoutMetrics.boardCanvasPx
                                         this.maxBoardWidthPx = layoutMetrics.boardMaxWidthPx
                                         this.maxBoardHeightPx = layoutMetrics.boardMaxHeightPx
+                                        this.lineSweeps = lineSweeps
+                                        this.lockGlows = lockGlows
+                                        this.effectTimeMs = boardEffectTimeMs
                                     }
                                 }
                             }
@@ -927,8 +1059,8 @@ val GameContent =
                             left = 0.px
                             right = 0.px
                             bottom = 0.px
-                            backgroundColor = Color("rgba(255, 255, 255, $flashAlpha)")
-                            asDynamic().transition = "background-color 180ms ease-out"
+                            backgroundColor = Color(colorWithAlpha(flashColor, flashAlpha))
+                            asDynamic().transition = "background-color ${flashFadeDurationMs}ms ease-out"
                         }
                     }
 
@@ -953,12 +1085,10 @@ val GameContent =
                                         (24 + (6 * textEntry.power)).px
                                     }
                                 fontWeight = integer(900)
-                                color =
-                                    if (textEntry.isHigh) Color("#ffd54f") else Color("#ffffff")
+                                color = Color(textEntry.textColor)
                                 asDynamic()["WebkitTextStrokeWidth"] =
                                     if (textEntry.isHigh) "2.6px" else "1.6px"
-                                asDynamic()["WebkitTextStrokeColor"] =
-                                    if (textEntry.isHigh) "rgba(58, 24, 0, 0.95)" else "rgba(11, 18, 32, 0.95)"
+                                asDynamic()["WebkitTextStrokeColor"] = textEntry.strokeColor
                                 asDynamic()["textShadow"] =
                                     "0 3px 0 rgba(0,0,0,0.48), 0 6px 12px rgba(0,0,0,0.35)"
                                 asDynamic()["fontFamily"] =
@@ -966,6 +1096,8 @@ val GameContent =
                                 asDynamic()["letterSpacing"] =
                                     if (textEntry.isHigh) "0.10em" else "0.08em"
                                 asDynamic()["--juice-duration"] = "${textEntry.durationMs}ms"
+                                asDynamic()["--juice-pulse-duration"] = "${textEntry.pulseDurationMs}ms"
+                                asDynamic()["--juice-pulse-count"] = textEntry.pulseCount.toString()
                             }
                             +textEntry.text
                         }
@@ -1010,17 +1142,28 @@ val GameContent =
                                     left = 50.pct
                                     width = size.px
                                     height = size.px
-                                    borderRadius = 999.px
+                                    borderRadius = if (burst.usesSquares) 2.px else 999.px
                                     backgroundColor =
-                                        if (burst.isHigh) {
-                                            Color("rgba(255, 237, 153, 0.95)")
-                                        } else {
-                                            Color("rgba(255, 255, 255, 0.9)")
-                                        }
+                                        Color(
+                                            colorWithAlpha(
+                                                hex =
+                                                    if (seededFloat(burst.seed, index, 41) > 0.48) {
+                                                        burst.primaryColor
+                                                    } else {
+                                                        burst.secondaryColor
+                                                    },
+                                                alpha =
+                                                    (if (burst.isHigh) {
+                                                        0.95
+                                                    } else {
+                                                        0.9
+                                                    }) * burst.opacityBoost,
+                                            ),
+                                        )
                                     transform = "translate(-50%, -50%)".unsafeCast<Transform>()
                                     asDynamic()["--juice-dx"] = "${dx}px"
                                     asDynamic()["--juice-dy"] = "${dy}px"
-                                    asDynamic()["--juice-duration"] = "550ms"
+                                    asDynamic()["--juice-duration"] = "${burst.durationMs}ms"
                                 }
                             }
                         }

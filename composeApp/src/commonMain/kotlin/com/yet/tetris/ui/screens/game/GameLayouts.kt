@@ -46,6 +46,7 @@ internal fun CompactGameLayout(
     model: GameComponent.Model,
     actions: GameInputActions,
     metrics: GameLayoutMetrics,
+    juiceOverlayState: JuiceOverlayState,
 ) {
     Column(
         modifier = modifier.fillMaxSize(),
@@ -69,6 +70,7 @@ internal fun CompactGameLayout(
             ghostPieceY = model.ghostPieceY,
             boardMaxWidth = metrics.boardMaxWidth,
             actions = actions,
+            juiceOverlayState = juiceOverlayState,
         )
 
         CompactBottomPane(
@@ -90,6 +92,7 @@ internal fun CanonicalSupportingPaneGameLayout(
     actions: GameInputActions,
     metrics: GameLayoutMetrics,
     paneDirective: PaneScaffoldDirective,
+    juiceOverlayState: JuiceOverlayState,
 ) {
     val paneValue =
         remember(paneDirective.maxHorizontalPartitions, paneDirective.maxVerticalPartitions) {
@@ -113,6 +116,7 @@ internal fun CanonicalSupportingPaneGameLayout(
                 ghostPieceY = model.ghostPieceY,
                 boardMaxWidth = metrics.boardMaxWidth,
                 actions = actions,
+                juiceOverlayState = juiceOverlayState,
                 fitHeightFirst = true,
                 paneAlignment = Alignment.Center,
             )
@@ -140,6 +144,7 @@ internal fun ExpandedGameLayout(
     model: GameComponent.Model,
     actions: GameInputActions,
     metrics: GameLayoutMetrics,
+    juiceOverlayState: JuiceOverlayState,
 ) {
     Row(
         modifier = modifier.fillMaxSize(),
@@ -188,6 +193,7 @@ internal fun ExpandedGameLayout(
             ghostPieceY = model.ghostPieceY,
             boardMaxWidth = metrics.boardMaxWidth,
             actions = actions,
+            juiceOverlayState = juiceOverlayState,
             fitHeightFirst = true,
             paneAlignment = Alignment.Center,
         )
@@ -360,6 +366,7 @@ private fun GameBoardPane(
     ghostPieceY: Int?,
     boardMaxWidth: Dp,
     actions: GameInputActions,
+    juiceOverlayState: JuiceOverlayState,
     fitHeightFirst: Boolean = false,
     paneAlignment: Alignment = Alignment.Center,
 ) {
@@ -412,6 +419,9 @@ private fun GameBoardPane(
             gameState = gameState,
             settings = settings,
             ghostPieceY = ghostPieceY,
+            lineSweeps = juiceOverlayState.activeLineSweeps,
+            lockGlows = juiceOverlayState.activeLockGlows,
+            effectTimeMillis = juiceOverlayState.frameTimeMillis,
         )
     }
 }

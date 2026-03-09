@@ -8,6 +8,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -29,6 +30,9 @@ fun TetrisBoard(
     gameState: GameState,
     settings: GameSettings,
     ghostPieceY: Int?,
+    lineSweeps: List<BoardLineSweepEffect> = emptyList(),
+    lockGlows: List<BoardLockGlowEffect> = emptyList(),
+    effectTimeMillis: Long = 0L,
     borderWidth: Dp = 2.dp,
 ) {
     Canvas(
@@ -105,11 +109,122 @@ fun TetrisBoard(
             }
         }
 
+        drawLockGlowEffects(
+            lockGlows = lockGlows,
+            effectTimeMillis = effectTimeMillis,
+            cellSize = cellSize,
+        )
+        drawLineSweepEffects(
+            lineSweeps = lineSweeps,
+            effectTimeMillis = effectTimeMillis,
+            cellSize = cellSize,
+            boardWidth = gameState.board.width,
+        )
+
         drawBoardGrid(
             width = gameState.board.width,
             height = gameState.board.height,
             cellSize = cellSize,
             settings = settings,
+        )
+    }
+}
+
+private fun DrawScope.drawLineSweepEffects(
+    lineSweeps: List<BoardLineSweepEffect>,
+    effectTimeMillis: Long,
+    cellSize: Float,
+    boardWidth: Int,
+) {
+    if (lineSweeps.isEmpty()) return
+
+    val rowHeight = cellSize
+    val sweepWidth = max(size.width * 0.42f, cellSize * 3.2f)
+    val fillAlphaBase = 0.14f
+
+    lineSweeps.forEach { effect ->
+        val progress =
+            ((effectTimeMillis - effect.createdAtMillis).toFloat() / effect.durationMillis)
+                .coerceIn(0f, 1f)
+        if (progress >= 1f) return@forEach
+
+        val fillAlpha = ((1f - progress) * fillAlphaBase * effect.opacityBoost).coerceIn(0f, 0.4f)
+        val sweepAlpha = ((1f - progress) * 0.7f * effect.opacityBoost).coerceIn(0f, 0.95f)
+        val sweepLeft = lerp(-sweepWidth, boardWidth * cellSize, progress)
+        val sweepHeight = max(rowHeight * 0.88f, cellSize * 0.72f)
+
+        effect.clearedRows.forEach { row ->
+            val top = (row * cellSize).coerceAtLeast(0f)
+            drawRect(
+                color = effect.fillColor.copy(alpha = fillAlpha),
+                topLeft = Offset(0f, top),
+                size = Size(size.width, rowHeight),
+            )
+            drawRect(
+                brush =
+                    Brush.horizontalGradient(
+                        colors =
+                            listOf(
+                                Color.Transparent,
+                                effect.primaryColor.copy(alpha = sweepAlpha * 0.55f),
+                                effect.secondaryColor.copy(alpha = sweepAlpha),
+                                Color.Transparent,
+                            ),
+                        startX = sweepLeft,
+                        endX = sweepLeft + sweepWidth,
+                    ),
+                topLeft = Offset(sweepLeft, top + ((rowHeight - sweepHeight) * 0.5f)),
+                size = Size(sweepWidth, sweepHeight),
+            )
+        }
+    }
+}
+
+private fun DrawScope.drawLockGlowEffects(
+    lockGlows: List<BoardLockGlowEffect>,
+    effectTimeMillis: Long,
+    cellSize: Float,
+) {
+    if (lockGlows.isEmpty()) return
+
+    lockGlows.forEach { effect ->
+        val progress =
+            ((effectTimeMillis - effect.createdAtMillis).toFloat() / effect.durationMillis)
+                .coerceIn(0f, 1f)
+        if (progress >= 1f || effect.cells.isEmpty()) return@forEach
+
+        val minX = effect.cells.minOf { it.x }
+        val maxX = effect.cells.maxOf { it.x }
+        val minY = effect.cells.minOf { it.y }
+        val maxY = effect.cells.maxOf { it.y }
+
+        val inset = cellSize * 0.18f
+        val topLeft = Offset((minX * cellSize) - inset, (minY * cellSize) - inset)
+        val glowSize =
+            Size(
+                width = ((maxX - minX + 1) * cellSize) + (inset * 2f),
+                height = ((maxY - minY + 1) * cellSize) + (inset * 2f),
+            )
+        val center = Offset(topLeft.x + (glowSize.width * 0.5f), topLeft.y + (glowSize.height * 0.5f))
+        val radius = max(glowSize.width, glowSize.height) * (0.75f + ((1f - progress) * 0.18f))
+        val alpha = ((1f - progress) * 0.34f * effect.opacityBoost).coerceIn(0f, 0.6f)
+        val cornerRadius = max(0f, cellSize * effect.cornerRadiusFactor)
+
+        drawRoundRect(
+            brush =
+                Brush.radialGradient(
+                    colors =
+                        listOf(
+                            effect.secondaryColor.copy(alpha = alpha),
+                            effect.primaryColor.copy(alpha = alpha * 0.52f),
+                            Color.Transparent,
+                        ),
+                    center = center,
+                    radius = radius,
+                ),
+            topLeft = topLeft,
+            size = glowSize,
+            cornerRadius = CornerRadius(cornerRadius, cornerRadius),
         )
     }
 }
@@ -197,6 +312,12 @@ private fun DrawScope.drawBoardGrid(
         )
     }
 }
+
+private fun lerp(
+    start: Float,
+    end: Float,
+    progress: Float,
+): Float = start + ((end - start) * progress.coerceIn(0f, 1f))
 
 fun DrawScope.drawStyledBlock(
     type: TetrominoType,

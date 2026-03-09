@@ -3,6 +3,8 @@ package com.yet.tetris.ui.view.game
 import com.yet.tetris.domain.model.game.GameState
 import com.yet.tetris.ui.view.game.gestures.GestureHandler
 import com.yet.tetris.ui.view.game.rendering.BoardRenderer
+import com.yet.tetris.ui.view.game.rendering.WebLineSweepEffect
+import com.yet.tetris.ui.view.game.rendering.WebLockGlowEffect
 import kotlinx.browser.window
 import js.objects.unsafeJso
 import mui.material.Box
@@ -36,6 +38,9 @@ external interface GameBoardProps : Props {
     var canvasWidthPx: Double?
     var maxBoardWidthPx: Double?
     var maxBoardHeightPx: Double?
+    var lineSweeps: List<WebLineSweepEffect>
+    var lockGlows: List<WebLockGlowEffect>
+    var effectTimeMs: Double?
 }
 
 @OptIn(ExperimentalWasmJsInterop::class)
@@ -69,7 +74,7 @@ val GameBoard =
             cleanup
         }
 
-        useEffect(props.gameState, props.ghostY, props.canvasWidthPx, props.settings) {
+        useEffect(props.gameState, props.ghostY, props.canvasWidthPx, props.settings, props.lineSweeps, props.lockGlows, props.effectTimeMs) {
             val canvas = canvasRef.current ?: return@useEffect
             val ctx = canvas.getContext(CanvasRenderingContext2D.ID) ?: return@useEffect
 
@@ -77,7 +82,16 @@ val GameBoard =
                 canvas.width = canvasWidth.toInt()
             }
 
-            BoardRenderer.render(canvas, ctx, props.gameState, props.ghostY, props.settings)
+            BoardRenderer.render(
+                canvas = canvas,
+                ctx = ctx,
+                gameState = props.gameState,
+                ghostY = props.ghostY,
+                settings = props.settings,
+                lineSweeps = props.lineSweeps,
+                lockGlows = props.lockGlows,
+                effectTimeMs = props.effectTimeMs ?: window.performance.now(),
+            )
             props.onBoardSizeChanged?.invoke(canvas.getBoundingClientRect().height.toFloat())
         }
 

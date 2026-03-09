@@ -44,7 +44,10 @@ fun GameScreen(component: GameComponent) {
 
     LaunchedEffect(model.visualEffectFeed.sequence) {
         model.visualEffectFeed.latest?.let {
-            juiceOverlayState.dispatchBurst(it)
+            juiceOverlayState.dispatchBurst(
+                burst = it,
+                theme = model.settings.themeConfig.visualTheme,
+            )
             component.onVisualEffectConsumed(model.visualEffectFeed.sequence)
         }
     }
@@ -74,6 +77,7 @@ fun GameScreen(component: GameComponent) {
                     GamePlayingContent(
                         model = model,
                         actions = inputActions,
+                        juiceOverlayState = juiceOverlayState,
                     )
 
                     GameDialog(component, model)

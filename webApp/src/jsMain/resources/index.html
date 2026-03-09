@@ -107,8 +107,8 @@
 
         .juice-text-pulse-high {
             animation-name: juice-text-rise, juice-text-pulse-high;
-            animation-duration: var(--juice-duration, 1100ms), 180ms;
-            animation-iteration-count: 1, 6;
+            animation-duration: var(--juice-duration, 1100ms), var(--juice-pulse-duration, 180ms);
+            animation-iteration-count: 1, var(--juice-pulse-count, 6);
             animation-timing-function: ease-out, ease-in-out;
             animation-fill-mode: forwards, none;
         }

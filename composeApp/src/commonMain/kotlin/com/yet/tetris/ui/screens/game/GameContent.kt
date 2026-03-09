@@ -35,6 +35,7 @@ internal data class GameInputActions(
 internal fun GamePlayingContent(
     model: GameComponent.Model,
     actions: GameInputActions,
+    juiceOverlayState: JuiceOverlayState,
 ) {
     val gameState = model.gameState ?: return
     val adaptiveInfo = currentWindowAdaptiveInfo()
@@ -74,6 +75,7 @@ internal fun GamePlayingContent(
                 model = model,
                 actions = actions,
                 metrics = metrics,
+                juiceOverlayState = juiceOverlayState,
             )
         } else if (expandedWidth) {
             ExpandedGameLayout(
@@ -82,6 +84,7 @@ internal fun GamePlayingContent(
                 model = model,
                 actions = actions,
                 metrics = metrics,
+                juiceOverlayState = juiceOverlayState,
             )
         } else {
             CanonicalSupportingPaneGameLayout(
@@ -91,6 +94,7 @@ internal fun GamePlayingContent(
                 actions = actions,
                 metrics = metrics,
                 paneDirective = paneDirective,
+                juiceOverlayState = juiceOverlayState,
             )
         }
     }
