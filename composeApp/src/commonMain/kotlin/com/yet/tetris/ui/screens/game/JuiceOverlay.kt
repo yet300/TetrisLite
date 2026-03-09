@@ -77,19 +77,20 @@ class JuiceOverlayState internal constructor(
     fun dispatchBurst(
         burst: VisualEffectBurst,
         theme: VisualTheme,
+        reducedMotion: Boolean = false,
     ) {
         val effectStyle = composeThemeEffectStyle(theme)
         val motionStyle = composeThemeMotionStyle(theme)
         burst.events.forEach { event ->
             when (event) {
-                is VisualEffectEvent.ScreenShake -> triggerScreenShake(event, motionStyle)
-                is VisualEffectEvent.ScreenFlash -> triggerScreenFlash(event, effectStyle, motionStyle)
-                is VisualEffectEvent.FloatingText -> addFloatingText(event, burst, effectStyle, motionStyle)
-                is VisualEffectEvent.Explosion -> addParticleBurst(event, burst.id, effectStyle, motionStyle)
+                is VisualEffectEvent.ScreenShake -> triggerScreenShake(event, motionStyle, reducedMotion)
+                is VisualEffectEvent.ScreenFlash -> triggerScreenFlash(event, effectStyle, motionStyle, reducedMotion)
+                is VisualEffectEvent.FloatingText -> addFloatingText(event, burst, effectStyle, motionStyle, reducedMotion)
+                is VisualEffectEvent.Explosion -> addParticleBurst(event, burst.id, effectStyle, motionStyle, reducedMotion)
             }
         }
-        addLineSweep(burst = burst, effectStyle = effectStyle, motionStyle = motionStyle)
-        addLockGlow(burst = burst, effectStyle = effectStyle, motionStyle = motionStyle)
+        addLineSweep(burst = burst, effectStyle = effectStyle, motionStyle = motionStyle, reducedMotion = reducedMotion)
+        addLockGlow(burst = burst, effectStyle = effectStyle, motionStyle = motionStyle, reducedMotion = reducedMotion)
     }
 
     private fun nextLocalId(seed: Long): Long {
@@ -102,6 +103,7 @@ class JuiceOverlayState internal constructor(
         burst: VisualEffectBurst,
         effectStyle: ComposeThemeEffectStyle,
         motionStyle: ComposeThemeMotionStyle,
+        reducedMotion: Boolean,
     ) {
         val baseDurationMillis = if (event.intensity == IntensityLevel.HIGH) 1100f else 780f
         val durationMillis =
@@ -110,7 +112,8 @@ class JuiceOverlayState internal constructor(
                     motionStyle.floatingDurationHighMultiplier
                 } else {
                     motionStyle.floatingDurationLowMultiplier
-                }).toLong()
+                } *
+                if (reducedMotion) 0.72f else 1f).toLong()
         val entry =
             JuiceFloatingText(
                 id = nextLocalId(burst.id),
@@ -139,14 +142,21 @@ class JuiceOverlayState internal constructor(
         burstId: Long,
         effectStyle: ComposeThemeEffectStyle,
         motionStyle: ComposeThemeMotionStyle,
+        reducedMotion: Boolean,
     ) {
-        val durationMillis = (550f * motionStyle.particleDurationMultiplier).toLong()
+        val durationMillis = (550f * motionStyle.particleDurationMultiplier * if (reducedMotion) 0.72f else 1f).toLong()
+        val reducedParticleCount =
+            if (reducedMotion) {
+                maxOf(6, (event.particleCount * 0.55f).toInt())
+            } else {
+                event.particleCount
+            }
         val entry =
             JuiceParticleBurst(
                 id = nextLocalId(burstId),
                 intensity = event.intensity,
                 power = event.power,
-                particleCount = event.particleCount,
+                particleCount = reducedParticleCount,
                 seed = burstId.toInt(),
                 primaryColor = effectStyle.particlePrimary,
                 secondaryColor = effectStyle.particleSecondary,
@@ -165,7 +175,14 @@ class JuiceOverlayState internal constructor(
     private fun triggerScreenShake(
         event: VisualEffectEvent.ScreenShake,
         motionStyle: ComposeThemeMotionStyle,
+        reducedMotion: Boolean,
     ) {
+        if (reducedMotion) {
+            shakeOffsetX = 0f
+            shakeOffsetY = 0f
+            contentScale = 1f
+            return
+        }
         scope.launch {
             val isHigh = event.intensity == IntensityLevel.HIGH
             val amplitude =
@@ -207,10 +224,16 @@ class JuiceOverlayState internal constructor(
         event: VisualEffectEvent.ScreenFlash,
         effectStyle: ComposeThemeEffectStyle,
         motionStyle: ComposeThemeMotionStyle,
+        reducedMotion: Boolean,
     ) {
         scope.launch {
             flashColor = effectStyle.flashColor
-            val targetAlpha = lerp(0.45f, effectStyle.flashBoost, event.power)
+            val targetAlpha =
+                lerp(
+                    start = if (reducedMotion) 0.28f else 0.45f,
+                    end = if (reducedMotion) minOf(effectStyle.flashBoost, 0.58f) else effectStyle.flashBoost,
+                    fraction = event.power,
+                )
             flashAlpha.snapTo(maxOf(flashAlpha.value, targetAlpha))
             flashAlpha.animateTo(
                 targetValue = 0f,
@@ -227,9 +250,10 @@ class JuiceOverlayState internal constructor(
         burst: VisualEffectBurst,
         effectStyle: ComposeThemeEffectStyle,
         motionStyle: ComposeThemeMotionStyle,
+        reducedMotion: Boolean,
     ) {
         if (burst.clearedRows.isEmpty()) return
-        val durationMillis = (520f * motionStyle.sweepDurationMultiplier).toLong()
+        val durationMillis = (520f * motionStyle.sweepDurationMultiplier * if (reducedMotion) 0.8f else 1f).toLong()
         val entry =
             BoardLineSweepEffect(
                 id = nextLocalId(burst.id),
@@ -252,9 +276,10 @@ class JuiceOverlayState internal constructor(
         burst: VisualEffectBurst,
         effectStyle: ComposeThemeEffectStyle,
         motionStyle: ComposeThemeMotionStyle,
+        reducedMotion: Boolean,
     ) {
         if (burst.lockCells.isEmpty()) return
-        val durationMillis = (460f * motionStyle.lockGlowDurationMultiplier).toLong()
+        val durationMillis = (460f * motionStyle.lockGlowDurationMultiplier * if (reducedMotion) 0.78f else 1f).toLong()
         val entry =
             BoardLockGlowEffect(
                 id = nextLocalId(burst.id),
@@ -298,6 +323,7 @@ private fun resolveFloatingTextMessage(
 @Composable
 fun JuiceOverlay(
     state: JuiceOverlayState,
+    reducedMotion: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
     LaunchedEffect(
@@ -340,12 +366,14 @@ fun JuiceOverlay(
                 val isHigh = floatingText.intensity == IntensityLevel.HIGH
                 val riseDistance = if (isHigh) 220f else 130f
                 val pulse =
-                    if (isHigh) {
+                    if (reducedMotion) {
+                        1f
+                    } else if (isHigh) {
                         1f + (sin(progress * PI.toFloat() * 10f) * 0.12f * (1f - progress))
                     } else {
                         1f + ((1f - progress) * 0.04f)
                     }
-                val baseTranslationY = -riseDistance * progress
+                val baseTranslationY = -(if (reducedMotion) riseDistance * 0.55f else riseDistance) * progress
                 val baseAlpha = 1f - progress
                 val outlineThickness = if (isHigh) 3.4f else 2.1f
                 val fontSize =
@@ -418,7 +446,7 @@ fun JuiceOverlay(
                     return@forEach
                 }
 
-                val maxRadius = lerp(80f, 210f, burst.power)
+                val maxRadius = lerp(80f, 210f, burst.power) * if (reducedMotion) 0.72f else 1f
                 val baseAlpha = (1f - progress) * lerp(0.65f, 1f, burst.power)
 
                 for (index in 0 until burst.particleCount) {
@@ -432,7 +460,7 @@ fun JuiceOverlay(
                         0.45f + seededFloat(seed = burst.seed, index = index, salt = 23) * 0.75f
                     val radius = maxRadius * progress * speedScale
                     val x = centerX + cos(angle) * radius
-                    val y = centerY + sin(angle) * radius - progress * 36f
+                    val y = centerY + sin(angle) * radius - progress * if (reducedMotion) 18f else 36f
                     val particleScale =
                         if (burst.intensity == IntensityLevel.HIGH) {
                             6f

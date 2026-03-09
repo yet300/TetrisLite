@@ -4,6 +4,7 @@ import Foundation
 
 struct WatchGameView: View {
     private let component: GameComponent
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     @StateValue
     private var model: GameComponentModel
@@ -48,7 +49,8 @@ struct WatchGameView: View {
                                 settings: model.settings,
                                 ghostY: model.ghostPieceY?.int32Value,
                                 lineSweeps: lineSweeps,
-                                lockGlows: lockGlows
+                                lockGlows: lockGlows,
+                                reducedMotion: reduceMotion
                             )
                             .onAppear {
                                 component.onBoardSizeChanged(height: Float(geometry.size.height))
@@ -196,7 +198,8 @@ struct WatchGameView: View {
                 theme: model.settings.themeConfig.visualTheme,
                 flashOpacity: flashOpacity,
                 floatingTexts: floatingTexts,
-                particleBursts: particleBursts
+                particleBursts: particleBursts,
+                reducedMotion: reduceMotion
             )
 
             if let child = dialog.child?.instance {
@@ -301,7 +304,12 @@ struct WatchGameView: View {
         intensity: IntensityLevel,
         power: CGFloat
     ) {
-        let motion = appleThemeMotionStyle(theme: model.settings.themeConfig.visualTheme)
+        guard !reduceMotion else {
+            shakeAmount = 0
+            contentScale = 1
+            return
+        }
+        let motion = appleThemeMotionStyle(theme: model.settings.themeConfig.visualTheme, reducedMotion: reduceMotion)
         let isHigh = intensity == .high
         let amplitude = isHigh ? 6 + (9 * power) : 1.8 + (3.2 * power)
 
@@ -322,8 +330,8 @@ struct WatchGameView: View {
     }
 
     private func triggerFlash(power: CGFloat) {
-        flashOpacity = Double(0.34 + (0.34 * power))
-        let motion = appleThemeMotionStyle(theme: model.settings.themeConfig.visualTheme)
+        flashOpacity = Double((reduceMotion ? 0.22 : 0.34) + ((reduceMotion ? 0.18 : 0.34) * power))
+        let motion = appleThemeMotionStyle(theme: model.settings.themeConfig.visualTheme, reducedMotion: reduceMotion)
         withAnimation(.easeOut(duration: motion.flashFadeDuration)) {
             flashOpacity = 0
         }
@@ -334,7 +342,7 @@ struct WatchGameView: View {
         intensity: IntensityLevel,
         power: CGFloat
     ) {
-        let motion = appleThemeMotionStyle(theme: model.settings.themeConfig.visualTheme)
+        let motion = appleThemeMotionStyle(theme: model.settings.themeConfig.visualTheme, reducedMotion: reduceMotion)
         let isHigh = intensity == .high
         let entry = AppleGameFloatingTextEntry(
             id: UUID().uuidString,
@@ -359,12 +367,12 @@ struct WatchGameView: View {
         power: CGFloat,
         particleCount: Int
     ) {
-        let motion = appleThemeMotionStyle(theme: model.settings.themeConfig.visualTheme)
+        let motion = appleThemeMotionStyle(theme: model.settings.themeConfig.visualTheme, reducedMotion: reduceMotion)
         let entry = AppleGameParticleBurstEntry(
             id: "\(burstId)-\(UUID().uuidString)",
             isHigh: intensity == .high,
             power: power,
-            particleCount: max(16, min(64, particleCount)),
+            particleCount: reduceMotion ? max(8, min(24, Int(CGFloat(particleCount) * 0.5))) : max(16, min(64, particleCount)),
             seed: Int(burstId),
             createdAt: Date(),
             duration: 0.5 * motion.particleDurationMultiplier
@@ -384,7 +392,7 @@ struct WatchGameView: View {
         intensity: IntensityLevel,
         power: CGFloat
     ) {
-        let motion = appleThemeMotionStyle(theme: model.settings.themeConfig.visualTheme)
+        let motion = appleThemeMotionStyle(theme: model.settings.themeConfig.visualTheme, reducedMotion: reduceMotion)
         let entry = AppleGameLineSweepEntry(
             id: "sweep-\(burstId)-\(UUID().uuidString)",
             clearedRows: clearedRows,
@@ -418,7 +426,7 @@ struct WatchGameView: View {
         intensity: IntensityLevel,
         power: CGFloat
     ) {
-        let motion = appleThemeMotionStyle(theme: model.settings.themeConfig.visualTheme)
+        let motion = appleThemeMotionStyle(theme: model.settings.themeConfig.visualTheme, reducedMotion: reduceMotion)
         let entry = AppleGameLockGlowEntry(
             id: "glow-\(burstId)-\(UUID().uuidString)",
             lockedCells: lockedCells,
@@ -702,6 +710,7 @@ private struct WatchMiniBoardView: View {
     let ghostY: Int32?
     let lineSweeps: [AppleGameLineSweepEntry]
     let lockGlows: [AppleGameLockGlowEntry]
+    let reducedMotion: Bool
 
     var body: some View {
         GeometryReader { geometry in
@@ -726,7 +735,8 @@ private struct WatchMiniBoardView: View {
                         rows: Int(gameState.board.height),
                         cellSize: cellSize,
                         profile: .watch,
-                        shimmerPhase: boardShimmerPhase(at: timeline.date)
+                        shimmerPhase: boardShimmerPhase(at: timeline.date),
+                        reducedMotion: reducedMotion
                     )
 
                     context.drawBoardGrid(

@@ -24,6 +24,7 @@ import com.yet.tetris.uikit.component.sheet.ModalBottomSheet
 fun GameScreen(component: GameComponent) {
     val model by component.model.subscribeAsState()
     val juiceOverlayState = rememberJuiceOverlayState()
+    val reducedMotion = rememberReducedMotion()
 
     val inputActions =
         remember(component) {
@@ -47,6 +48,7 @@ fun GameScreen(component: GameComponent) {
             juiceOverlayState.dispatchBurst(
                 burst = it,
                 theme = model.settings.themeConfig.visualTheme,
+                reducedMotion = reducedMotion,
             )
             component.onVisualEffectConsumed(model.visualEffectFeed.sequence)
         }
@@ -86,6 +88,7 @@ fun GameScreen(component: GameComponent) {
 
                 JuiceOverlay(
                     state = juiceOverlayState,
+                    reducedMotion = reducedMotion,
                     modifier = Modifier.fillMaxSize(),
                 )
             }

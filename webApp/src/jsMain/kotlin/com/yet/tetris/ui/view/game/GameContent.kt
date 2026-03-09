@@ -21,6 +21,7 @@ import com.yet.tetris.ui.view.game.rendering.WebLineSweepEffect
 import com.yet.tetris.ui.view.game.rendering.WebLockGlowEffect
 import com.yet.tetris.ui.view.game.rendering.WebBoardCell
 import com.yet.tetris.ui.view.game.rendering.colorWithAlpha
+import com.yet.tetris.ui.view.game.rendering.webBoardChromeStyle
 import com.yet.tetris.ui.view.game.rendering.webThemeEffectStyle
 import com.yet.tetris.ui.view.game.rendering.webThemeMotionStyle
 import js.objects.unsafeJso
@@ -137,17 +138,27 @@ val GameContent =
                     height = window.innerHeight,
                 ),
             )
+        val (reduceMotion, setReduceMotion) =
+            useState(
+                window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+            )
         val (layoutClass, layoutMetrics) = resolveWebLayoutMetrics(viewport)
         val gameState = model.gameState
         val formattedTime = formatTime(model.elapsedTime)
         val nextPieces = gameState?.previewPieces.orEmpty()
         val effectStyle = webThemeEffectStyle(model.settings)
         val motionStyle = webThemeMotionStyle(model.settings.themeConfig.visualTheme)
+        val boardChrome = webBoardChromeStyle(model.settings, reduceMotion)
 
         fun triggerScreenShake(
             intensity: IntensityLevel,
             power: Float,
         ) {
+            if (reduceMotion) {
+                setShakeClass("")
+                setContentScale(1.0)
+                return
+            }
             val isHigh = intensity == IntensityLevel.HIGH
             val durationMs = if (isHigh) motionStyle.shakeDurationHighMs else motionStyle.shakeDurationLowMs
             setShakeClass("")
@@ -177,8 +188,10 @@ val GameContent =
 
         fun triggerScreenFlash(power: Float) {
             setFlashColor(effectStyle.flashColor)
-            setFlashFadeDurationMs(motionStyle.flashFadeDurationMs)
-            setFlashAlpha(0.45 + ((effectStyle.flashBoost - 0.45) * power))
+            setFlashFadeDurationMs(if (reduceMotion) max(90, motionStyle.flashFadeDurationMs / 2) else motionStyle.flashFadeDurationMs)
+            val startAlpha = if (reduceMotion) 0.26 else 0.45
+            val endAlpha = if (reduceMotion) min(0.54, effectStyle.flashBoost) else effectStyle.flashBoost
+            setFlashAlpha(startAlpha + ((endAlpha - startAlpha) * power))
             window.setTimeout(
                 handler = {
                     setFlashAlpha(0.0)
@@ -202,7 +215,8 @@ val GameContent =
                         motionStyle.floatingDurationHighMultiplier
                     } else {
                         motionStyle.floatingDurationLowMultiplier
-                    }).toInt()
+                    } *
+                    if (reduceMotion) 0.72 else 1.0).toInt()
             val id = "$sequence-${window.performance.now()}"
             val entry =
                 WebFloatingText(
@@ -213,8 +227,8 @@ val GameContent =
                     durationMs = durationMs,
                     textColor = if (isHigh) effectStyle.textHigh else effectStyle.textLow,
                     strokeColor = if (isHigh) effectStyle.textStrokeHigh else effectStyle.textStrokeLow,
-                    pulseDurationMs = motionStyle.pulseDurationMs,
-                    pulseCount = if (isHigh) max(3, durationMs / motionStyle.pulseDurationMs) else 1,
+                    pulseDurationMs = if (reduceMotion) durationMs else motionStyle.pulseDurationMs,
+                    pulseCount = if (reduceMotion) 1 else if (isHigh) max(3, durationMs / motionStyle.pulseDurationMs) else 1,
                 )
 
             setFloatingTexts { previous -> previous + entry }
@@ -240,9 +254,9 @@ val GameContent =
                     id = id,
                     isHigh = intensity == IntensityLevel.HIGH,
                     power = power.toDouble(),
-                    particleCount = particleCount,
+                    particleCount = if (reduceMotion) max(6, (particleCount * 0.55).toInt()) else particleCount,
                     seed = burst.id.toInt(),
-                    durationMs = (550.0 * motionStyle.particleDurationMultiplier).toInt(),
+                    durationMs = (550.0 * motionStyle.particleDurationMultiplier * if (reduceMotion) 0.72 else 1.0).toInt(),
                     primaryColor = effectStyle.particlePrimary,
                     secondaryColor = effectStyle.particleSecondary,
                     opacityBoost = effectStyle.particleOpacityBoost,
@@ -264,7 +278,7 @@ val GameContent =
             sequence: Long,
         ) {
             if (burst.clearedRows.isEmpty()) return
-            val durationMs = 520.0 * motionStyle.sweepDurationMultiplier
+            val durationMs = 520.0 * motionStyle.sweepDurationMultiplier * if (reduceMotion) 0.8 else 1.0
             val id = "$sequence-sweep-${burst.id}"
             val entry =
                 WebLineSweepEffect(
@@ -291,7 +305,7 @@ val GameContent =
             sequence: Long,
         ) {
             if (burst.lockCells.isEmpty()) return
-            val durationMs = 460.0 * motionStyle.lockGlowDurationMultiplier
+            val durationMs = 460.0 * motionStyle.lockGlowDurationMultiplier * if (reduceMotion) 0.78 else 1.0
             val id = "$sequence-lock-${burst.id}"
             val entry =
                 WebLockGlowEffect(
@@ -357,8 +371,23 @@ val GameContent =
             }
         }
 
-        useEffect(lineSweeps.size, lockGlows.size) {
-            if (lineSweeps.isEmpty() && lockGlows.isEmpty()) {
+        useEffectOnce {
+            val mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)")
+            val listener: (dynamic) -> Unit = {
+                setReduceMotion(mediaQuery.matches)
+            }
+
+            mediaQuery.asDynamic().addEventListener("change", listener)
+
+            val cleanup: () -> Unit = {
+                mediaQuery.asDynamic().removeEventListener("change", listener)
+            }
+
+            cleanup
+        }
+
+        useEffect(lineSweeps.size, lockGlows.size, reduceMotion, boardChrome.shimmerEnabled) {
+            if (lineSweeps.isEmpty() && lockGlows.isEmpty() && !boardChrome.shimmerEnabled) {
                 return@useEffect
             }
 
@@ -619,6 +648,7 @@ val GameContent =
                                         this.lineSweeps = lineSweeps
                                         this.lockGlows = lockGlows
                                         this.effectTimeMs = boardEffectTimeMs
+                                        this.reducedMotion = reduceMotion
                                     }
                                 }
                             }
@@ -707,6 +737,7 @@ val GameContent =
                                         this.lineSweeps = lineSweeps
                                         this.lockGlows = lockGlows
                                         this.effectTimeMs = boardEffectTimeMs
+                                        this.reducedMotion = reduceMotion
                                     }
                                 }
                             }
@@ -978,6 +1009,7 @@ val GameContent =
                                         this.lineSweeps = lineSweeps
                                         this.lockGlows = lockGlows
                                         this.effectTimeMs = boardEffectTimeMs
+                                        this.reducedMotion = reduceMotion
                                     }
                                 }
                             }

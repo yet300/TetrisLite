@@ -340,10 +340,14 @@ func appleThemeEffectStyle(theme: VisualTheme) -> AppleThemeEffectStyle {
     }
 }
 
-func appleThemeMotionStyle(theme: VisualTheme) -> AppleThemeMotionStyle {
+func appleThemeMotionStyle(
+    theme: VisualTheme,
+    reducedMotion: Bool = false
+) -> AppleThemeMotionStyle {
+    let base: AppleThemeMotionStyle
     switch theme {
     case .retroGameboy:
-        return AppleThemeMotionStyle(
+        base = AppleThemeMotionStyle(
             flashFadeDuration: 0.12,
             shakeDurationHigh: 0.2,
             shakeDurationLow: 0.14,
@@ -359,7 +363,7 @@ func appleThemeMotionStyle(theme: VisualTheme) -> AppleThemeMotionStyle {
             lockGlowDurationMultiplier: 0.8
         )
     case .retroNes:
-        return AppleThemeMotionStyle(
+        base = AppleThemeMotionStyle(
             flashFadeDuration: 0.14,
             shakeDurationHigh: 0.22,
             shakeDurationLow: 0.15,
@@ -375,7 +379,7 @@ func appleThemeMotionStyle(theme: VisualTheme) -> AppleThemeMotionStyle {
             lockGlowDurationMultiplier: 0.84
         )
     case .neon:
-        return AppleThemeMotionStyle(
+        base = AppleThemeMotionStyle(
             flashFadeDuration: 0.24,
             shakeDurationHigh: 0.34,
             shakeDurationLow: 0.24,
@@ -391,7 +395,7 @@ func appleThemeMotionStyle(theme: VisualTheme) -> AppleThemeMotionStyle {
             lockGlowDurationMultiplier: 1.22
         )
     case .pastel:
-        return AppleThemeMotionStyle(
+        base = AppleThemeMotionStyle(
             flashFadeDuration: 0.22,
             shakeDurationHigh: 0.28,
             shakeDurationLow: 0.2,
@@ -407,7 +411,7 @@ func appleThemeMotionStyle(theme: VisualTheme) -> AppleThemeMotionStyle {
             lockGlowDurationMultiplier: 1.1
         )
     case .monochrome:
-        return AppleThemeMotionStyle(
+        base = AppleThemeMotionStyle(
             flashFadeDuration: 0.12,
             shakeDurationHigh: 0.18,
             shakeDurationLow: 0.13,
@@ -423,7 +427,7 @@ func appleThemeMotionStyle(theme: VisualTheme) -> AppleThemeMotionStyle {
             lockGlowDurationMultiplier: 0.8
         )
     case .ocean:
-        return AppleThemeMotionStyle(
+        base = AppleThemeMotionStyle(
             flashFadeDuration: 0.2,
             shakeDurationHigh: 0.3,
             shakeDurationLow: 0.22,
@@ -439,7 +443,7 @@ func appleThemeMotionStyle(theme: VisualTheme) -> AppleThemeMotionStyle {
             lockGlowDurationMultiplier: 1.14
         )
     case .sunset:
-        return AppleThemeMotionStyle(
+        base = AppleThemeMotionStyle(
             flashFadeDuration: 0.22,
             shakeDurationHigh: 0.32,
             shakeDurationLow: 0.22,
@@ -455,7 +459,7 @@ func appleThemeMotionStyle(theme: VisualTheme) -> AppleThemeMotionStyle {
             lockGlowDurationMultiplier: 1.14
         )
     case .forest:
-        return AppleThemeMotionStyle(
+        base = AppleThemeMotionStyle(
             flashFadeDuration: 0.18,
             shakeDurationHigh: 0.26,
             shakeDurationLow: 0.19,
@@ -473,7 +477,7 @@ func appleThemeMotionStyle(theme: VisualTheme) -> AppleThemeMotionStyle {
     case .classic:
         fallthrough
     default:
-        return AppleThemeMotionStyle(
+        base = AppleThemeMotionStyle(
             flashFadeDuration: 0.18,
             shakeDurationHigh: 0.3,
             shakeDurationLow: 0.2,
@@ -489,6 +493,26 @@ func appleThemeMotionStyle(theme: VisualTheme) -> AppleThemeMotionStyle {
             lockGlowDurationMultiplier: 1.0
         )
     }
+
+    guard reducedMotion else {
+        return base
+    }
+
+    return AppleThemeMotionStyle(
+        flashFadeDuration: min(base.flashFadeDuration, 0.12),
+        shakeDurationHigh: 0.01,
+        shakeDurationLow: 0.01,
+        scaleResponse: 0.12,
+        scaleDamping: 0.98,
+        scaleResetDelay: min(base.scaleResetDelay, 0.08),
+        scaleResetResponse: 0.12,
+        scaleResetDamping: 0.98,
+        floatingDurationHighMultiplier: base.floatingDurationHighMultiplier * 0.72,
+        floatingDurationLowMultiplier: base.floatingDurationLowMultiplier * 0.72,
+        particleDurationMultiplier: base.particleDurationMultiplier * 0.72,
+        sweepDurationMultiplier: base.sweepDurationMultiplier * 0.8,
+        lockGlowDurationMultiplier: base.lockGlowDurationMultiplier * 0.78
+    )
 }
 
 struct AppleGameFloatingTextEntry: Identifiable {
@@ -555,6 +579,7 @@ struct AppleGameEffectsOverlay: View {
     let flashOpacity: Double
     let floatingTexts: [AppleGameFloatingTextEntry]
     let particleBursts: [AppleGameParticleBurstEntry]
+    let reducedMotion: Bool
 
     var body: some View {
         let style = appleThemeEffectStyle(theme: theme)
@@ -597,16 +622,20 @@ struct AppleGameEffectsOverlay: View {
     ) -> some View {
         let style = appleThemeEffectStyle(theme: theme)
         let pulse =
-            entry.isHigh
-            ? 1 + (sin(progress * .pi * 10) * profile.highPulseAmplitude * (1 - progress))
-            : 1 + ((1 - progress) * profile.lowPulseAmplitude)
+            reducedMotion
+            ? 1
+            : (
+                entry.isHigh
+                ? 1 + (sin(progress * .pi * 10) * profile.highPulseAmplitude * (1 - progress))
+                : 1 + ((1 - progress) * profile.lowPulseAmplitude)
+            )
 
         let fontSize =
             entry.isHigh
             ? profile.highFontSize + (profile == .ios ? 12 * entry.power : 4 * entry.power)
             : profile.lowFontSize + (profile == .ios ? 6 * entry.power : 2 * entry.power)
 
-        let rise = entry.isHigh ? profile.highRise : profile.lowRise
+        let rise = (entry.isHigh ? profile.highRise : profile.lowRise) * (reducedMotion ? 0.55 : 1)
         let foreground = entry.isHigh ? style.textHigh : style.textLow
         let strokeColor = entry.isHigh ? style.textStrokeHigh : style.textStrokeLow
 

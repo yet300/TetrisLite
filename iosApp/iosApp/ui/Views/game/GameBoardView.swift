@@ -7,6 +7,7 @@ struct GameBoardView: View {
     let ghostY: Int32?
     let lineSweeps: [AppleGameLineSweepEntry]
     let lockGlows: [AppleGameLockGlowEntry]
+    let reducedMotion: Bool
     
     var body: some View {
         TimelineView(.animation(minimumInterval: 1.0 / 24.0)) { timeline in
@@ -21,7 +22,8 @@ struct GameBoardView: View {
                     rows: Int(gameState.board.height),
                     cellSize: cellSize,
                     profile: .ios,
-                    shimmerPhase: boardShimmerPhase(at: timeline.date)
+                    shimmerPhase: boardShimmerPhase(at: timeline.date),
+                    reducedMotion: reducedMotion
                 )
 
                 for (pos, tetrominoType) in gameState.board.cells {

@@ -4,6 +4,7 @@ import Shared
 
 struct GameView: View {
     private let component: GameComponent
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     @StateValue
     private var model: GameComponentModel
@@ -57,6 +58,7 @@ struct GameView: View {
                     ghostY: model.ghostPieceY?.int32Value,
                     lineSweeps: lineSweeps,
                     lockGlows: lockGlows,
+                    reducedMotion: reduceMotion,
                     actions: actions
                 )
                 .modifier(
@@ -69,11 +71,12 @@ struct GameView: View {
 
                 AppleGameEffectsOverlay(
                     profile: .ios,
-                    theme: model.settings.themeConfig.visualTheme,
-                    flashOpacity: flashOpacity,
-                    floatingTexts: floatingTexts,
-                    particleBursts: particleBursts
-                )
+                theme: model.settings.themeConfig.visualTheme,
+                flashOpacity: flashOpacity,
+                floatingTexts: floatingTexts,
+                particleBursts: particleBursts,
+                reducedMotion: reduceMotion
+            )
 
                 if let child = dialog.child?.instance {
                     GlassDialogContainer {
@@ -184,7 +187,12 @@ struct GameView: View {
         intensity: IntensityLevel,
         power: CGFloat
     ) {
-        let motion = appleThemeMotionStyle(theme: model.settings.themeConfig.visualTheme)
+        guard !reduceMotion else {
+            shakeAmount = 0
+            contentScale = 1
+            return
+        }
+        let motion = appleThemeMotionStyle(theme: model.settings.themeConfig.visualTheme, reducedMotion: reduceMotion)
         let isHigh = intensity == .high
         let amplitude = isHigh ? 10 + (14 * power) : 3 + (5 * power)
 
@@ -204,8 +212,8 @@ struct GameView: View {
     }
 
     private func triggerFlash(power: CGFloat) {
-        flashOpacity = Double(0.45 + (0.4 * power))
-        let motion = appleThemeMotionStyle(theme: model.settings.themeConfig.visualTheme)
+        flashOpacity = Double((reduceMotion ? 0.26 : 0.45) + ((reduceMotion ? 0.24 : 0.4) * power))
+        let motion = appleThemeMotionStyle(theme: model.settings.themeConfig.visualTheme, reducedMotion: reduceMotion)
         withAnimation(.easeOut(duration: motion.flashFadeDuration)) {
             flashOpacity = 0
         }
@@ -216,7 +224,7 @@ struct GameView: View {
         intensity: IntensityLevel,
         power: CGFloat
     ) {
-        let motion = appleThemeMotionStyle(theme: model.settings.themeConfig.visualTheme)
+        let motion = appleThemeMotionStyle(theme: model.settings.themeConfig.visualTheme, reducedMotion: reduceMotion)
         let isHigh = intensity == .high
         let entry = AppleGameFloatingTextEntry(
             id: UUID().uuidString,
@@ -241,12 +249,12 @@ struct GameView: View {
         power: CGFloat,
         particleCount: Int
     ) {
-        let motion = appleThemeMotionStyle(theme: model.settings.themeConfig.visualTheme)
+        let motion = appleThemeMotionStyle(theme: model.settings.themeConfig.visualTheme, reducedMotion: reduceMotion)
         let entry = AppleGameParticleBurstEntry(
             id: "\(burstId)-\(UUID().uuidString)",
             isHigh: intensity == .high,
             power: power,
-            particleCount: particleCount,
+            particleCount: reduceMotion ? max(8, Int(CGFloat(particleCount) * 0.55)) : particleCount,
             seed: Int(burstId),
             createdAt: Date(),
             duration: 0.55 * motion.particleDurationMultiplier
@@ -266,7 +274,7 @@ struct GameView: View {
         intensity: IntensityLevel,
         power: CGFloat
     ) {
-        let motion = appleThemeMotionStyle(theme: model.settings.themeConfig.visualTheme)
+        let motion = appleThemeMotionStyle(theme: model.settings.themeConfig.visualTheme, reducedMotion: reduceMotion)
         let entry = AppleGameLineSweepEntry(
             id: "sweep-\(burstId)-\(UUID().uuidString)",
             clearedRows: clearedRows,
@@ -300,7 +308,7 @@ struct GameView: View {
         intensity: IntensityLevel,
         power: CGFloat
     ) {
-        let motion = appleThemeMotionStyle(theme: model.settings.themeConfig.visualTheme)
+        let motion = appleThemeMotionStyle(theme: model.settings.themeConfig.visualTheme, reducedMotion: reduceMotion)
         let entry = AppleGameLockGlowEntry(
             id: "glow-\(burstId)-\(UUID().uuidString)",
             lockedCells: lockedCells,

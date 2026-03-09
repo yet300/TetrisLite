@@ -20,7 +20,10 @@ data class WebBoardChromeStyle(
     val shimmerEnabled: Boolean,
 )
 
-fun webBoardChromeStyle(settings: GameSettings): WebBoardChromeStyle {
+fun webBoardChromeStyle(
+    settings: GameSettings,
+    reducedMotion: Boolean = false,
+): WebBoardChromeStyle {
     val theme = settings.themeConfig.visualTheme
     val accent = boardAccentColor(settings)
     val grid = ThemeColors.getGridColor(settings)
@@ -75,7 +78,7 @@ fun webBoardChromeStyle(settings: GameSettings): WebBoardChromeStyle {
                 horizontalShadow = colorWithAlpha("#001c24", 0.16),
                 shimmerPrimary = colorWithAlpha("#00fff5", 0.0),
                 shimmerSecondary = colorWithAlpha("#ff35ea", 0.24),
-                shimmerEnabled = true,
+                shimmerEnabled = !reducedMotion,
             )
 
         VisualTheme.PASTEL ->
@@ -92,7 +95,7 @@ fun webBoardChromeStyle(settings: GameSettings): WebBoardChromeStyle {
                 horizontalShadow = colorWithAlpha("#c7b7d6", 0.1),
                 shimmerPrimary = colorWithAlpha("#ffffff", 0.0),
                 shimmerSecondary = colorWithAlpha("#ffffff", 0.0),
-                shimmerEnabled = settings.themeConfig.pieceStyle == PieceStyle.GLASS,
+                shimmerEnabled = settings.themeConfig.pieceStyle == PieceStyle.GLASS && !reducedMotion,
             )
 
         VisualTheme.MONOCHROME ->
@@ -126,7 +129,7 @@ fun webBoardChromeStyle(settings: GameSettings): WebBoardChromeStyle {
                 horizontalShadow = colorWithAlpha("#00162d", 0.13),
                 shimmerPrimary = colorWithAlpha("#5ae6f2", 0.0),
                 shimmerSecondary = colorWithAlpha("#a4f1ff", 0.18),
-                shimmerEnabled = settings.themeConfig.pieceStyle == PieceStyle.GLASS,
+                shimmerEnabled = settings.themeConfig.pieceStyle == PieceStyle.GLASS && !reducedMotion,
             )
 
         VisualTheme.SUNSET ->
@@ -143,7 +146,7 @@ fun webBoardChromeStyle(settings: GameSettings): WebBoardChromeStyle {
                 horizontalShadow = colorWithAlpha("#2a1006", 0.13),
                 shimmerPrimary = colorWithAlpha("#ff9d47", 0.0),
                 shimmerSecondary = colorWithAlpha("#ff3d8a", 0.18),
-                shimmerEnabled = settings.themeConfig.pieceStyle == PieceStyle.GLASS,
+                shimmerEnabled = settings.themeConfig.pieceStyle == PieceStyle.GLASS && !reducedMotion,
             )
 
         VisualTheme.FOREST ->
@@ -160,7 +163,7 @@ fun webBoardChromeStyle(settings: GameSettings): WebBoardChromeStyle {
                 horizontalShadow = colorWithAlpha("#091e0b", 0.13),
                 shimmerPrimary = colorWithAlpha("#61db7a", 0.0),
                 shimmerSecondary = colorWithAlpha("#d1fad1", 0.18),
-                shimmerEnabled = settings.themeConfig.pieceStyle == PieceStyle.GLASS,
+                shimmerEnabled = settings.themeConfig.pieceStyle == PieceStyle.GLASS && !reducedMotion,
             )
 
         VisualTheme.CLASSIC ->
@@ -177,7 +180,7 @@ fun webBoardChromeStyle(settings: GameSettings): WebBoardChromeStyle {
                 horizontalShadow = colorWithAlpha("#000000", 0.12),
                 shimmerPrimary = colorWithAlpha("#ffffff", 0.0),
                 shimmerSecondary = colorWithAlpha("#ffffff", 0.0),
-                shimmerEnabled = settings.themeConfig.pieceStyle == PieceStyle.GLASS,
+                shimmerEnabled = settings.themeConfig.pieceStyle == PieceStyle.GLASS && !reducedMotion,
             )
     }
 }

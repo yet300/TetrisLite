@@ -18,6 +18,7 @@ struct GameAdaptiveLayout: View {
     let ghostY: Int32?
     let lineSweeps: [AppleGameLineSweepEntry]
     let lockGlows: [AppleGameLockGlowEntry]
+    let reducedMotion: Bool
     let actions: GameInputActions
 
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
@@ -42,6 +43,7 @@ struct GameAdaptiveLayout: View {
                         ghostY: ghostY,
                         lineSweeps: lineSweeps,
                         lockGlows: lockGlows,
+                        reducedMotion: reducedMotion,
                         actions: actions,
                         metrics: config.metrics
                     )
@@ -53,6 +55,7 @@ struct GameAdaptiveLayout: View {
                         ghostY: ghostY,
                         lineSweeps: lineSweeps,
                         lockGlows: lockGlows,
+                        reducedMotion: reducedMotion,
                         actions: actions,
                         metrics: config.metrics
                     )
@@ -64,6 +67,7 @@ struct GameAdaptiveLayout: View {
                         ghostY: ghostY,
                         lineSweeps: lineSweeps,
                         lockGlows: lockGlows,
+                        reducedMotion: reducedMotion,
                         actions: actions,
                         metrics: config.metrics
                     )
@@ -83,6 +87,7 @@ private struct CompactGameLayout: View {
     let ghostY: Int32?
     let lineSweeps: [AppleGameLineSweepEntry]
     let lockGlows: [AppleGameLockGlowEntry]
+    let reducedMotion: Bool
     let actions: GameInputActions
     let metrics: GameAdaptiveMetrics
 
@@ -101,6 +106,7 @@ private struct CompactGameLayout: View {
                 ghostY: ghostY,
                 lineSweeps: lineSweeps,
                 lockGlows: lockGlows,
+                reducedMotion: reducedMotion,
                 actions: actions
             )
             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -124,6 +130,7 @@ private struct MediumGameLayout: View {
     let ghostY: Int32?
     let lineSweeps: [AppleGameLineSweepEntry]
     let lockGlows: [AppleGameLockGlowEntry]
+    let reducedMotion: Bool
     let actions: GameInputActions
     let metrics: GameAdaptiveMetrics
 
@@ -135,6 +142,7 @@ private struct MediumGameLayout: View {
                 ghostY: ghostY,
                 lineSweeps: lineSweeps,
                 lockGlows: lockGlows,
+                reducedMotion: reducedMotion,
                 actions: actions
             )
             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -193,6 +201,7 @@ private struct ExpandedGameLayout: View {
     let ghostY: Int32?
     let lineSweeps: [AppleGameLineSweepEntry]
     let lockGlows: [AppleGameLockGlowEntry]
+    let reducedMotion: Bool
     let actions: GameInputActions
     let metrics: GameAdaptiveMetrics
 
@@ -233,6 +242,7 @@ private struct ExpandedGameLayout: View {
                 ghostY: ghostY,
                 lineSweeps: lineSweeps,
                 lockGlows: lockGlows,
+                reducedMotion: reducedMotion,
                 actions: actions
             )
             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -418,6 +428,7 @@ private struct GameBoardPane: View {
     let ghostY: Int32?
     let lineSweeps: [AppleGameLineSweepEntry]
     let lockGlows: [AppleGameLockGlowEntry]
+    let reducedMotion: Bool
     let actions: GameInputActions
 
     @State private var lastDragTranslation: CGSize = .zero
@@ -437,7 +448,8 @@ private struct GameBoardPane: View {
                 settings: settings,
                 ghostY: ghostY,
                 lineSweeps: lineSweeps,
-                lockGlows: lockGlows
+                lockGlows: lockGlows,
+                reducedMotion: reducedMotion
             )
             .frame(width: boardSize.width, height: boardSize.height)
             .contentShape(Rectangle())

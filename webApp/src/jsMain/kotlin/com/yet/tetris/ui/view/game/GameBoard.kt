@@ -42,6 +42,7 @@ external interface GameBoardProps : Props {
     var lineSweeps: List<WebLineSweepEffect>
     var lockGlows: List<WebLockGlowEffect>
     var effectTimeMs: Double?
+    var reducedMotion: Boolean?
 }
 
 @OptIn(ExperimentalWasmJsInterop::class)
@@ -54,7 +55,7 @@ val GameBoard =
         val totalDragRef = useRef<dynamic>() // Track total drag distance
         val canvasWidth = props.canvasWidthPx ?: 380.0
         val maxBoardWidth = props.maxBoardWidthPx ?: canvasWidth
-        val chrome = webBoardChromeStyle(props.settings)
+        val chrome = webBoardChromeStyle(props.settings, props.reducedMotion ?: false)
 
         // Setup gesture event listeners
         useEffect(Unit) {
@@ -76,7 +77,7 @@ val GameBoard =
             cleanup
         }
 
-        useEffect(props.gameState, props.ghostY, props.canvasWidthPx, props.settings, props.lineSweeps, props.lockGlows, props.effectTimeMs) {
+        useEffect(props.gameState, props.ghostY, props.canvasWidthPx, props.settings, props.lineSweeps, props.lockGlows, props.effectTimeMs, props.reducedMotion) {
             val canvas = canvasRef.current ?: return@useEffect
             val ctx = canvas.getContext(CanvasRenderingContext2D.ID) ?: return@useEffect
 
@@ -93,6 +94,7 @@ val GameBoard =
                 lineSweeps = props.lineSweeps,
                 lockGlows = props.lockGlows,
                 effectTimeMs = props.effectTimeMs ?: window.performance.now(),
+                reducedMotion = props.reducedMotion ?: false,
             )
             props.onBoardSizeChanged?.invoke(canvas.getBoundingClientRect().height.toFloat())
         }

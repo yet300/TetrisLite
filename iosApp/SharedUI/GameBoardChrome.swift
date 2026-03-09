@@ -33,8 +33,11 @@ func boardShimmerPhase(at date: Date) -> CGFloat {
     return CGFloat(raw)
 }
 
-func boardShouldRenderShimmer(settings: GameSettings) -> Bool {
-    settings.themeConfig.visualTheme == .neon || settings.themeConfig.pieceStyle == .glass
+func boardShouldRenderShimmer(
+    settings: GameSettings,
+    reducedMotion: Bool = false
+) -> Bool {
+    !reducedMotion && (settings.themeConfig.visualTheme == .neon || settings.themeConfig.pieceStyle == .glass)
 }
 
 extension GraphicsContext {
@@ -45,7 +48,8 @@ extension GraphicsContext {
         rows: Int,
         cellSize: CGFloat,
         profile: AppleBoardChromeProfile,
-        shimmerPhase: CGFloat
+        shimmerPhase: CGFloat,
+        reducedMotion: Bool = false
     ) {
         let theme = settings.themeConfig.visualTheme
         let boardPath = Path(
@@ -102,7 +106,7 @@ extension GraphicsContext {
         )
         fill(Path(rimRect), with: .color(.white.opacity(0.06)))
 
-        if boardShouldRenderShimmer(settings: settings) {
+        if boardShouldRenderShimmer(settings: settings, reducedMotion: reducedMotion) {
             drawBoardShimmer(
                 boardPath: boardPath,
                 boardRect: boardRect,

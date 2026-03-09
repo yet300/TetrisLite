@@ -17,6 +17,7 @@ object BoardRenderer {
         lineSweeps: List<WebLineSweepEffect> = emptyList(),
         lockGlows: List<WebLockGlowEffect> = emptyList(),
         effectTimeMs: Double = 0.0,
+        reducedMotion: Boolean = false,
     ) {
         val board = gameState.board
         val rows = board.height
@@ -35,6 +36,7 @@ object BoardRenderer {
             cellSize = cellSize,
             settings = settings,
             effectTimeMs = effectTimeMs,
+            reducedMotion = reducedMotion,
         )
 
         // Draw locked blocks
@@ -130,8 +132,9 @@ object BoardRenderer {
         cellSize: Double,
         settings: GameSettings,
         effectTimeMs: Double,
+        reducedMotion: Boolean,
     ) {
-        val chrome = webBoardChromeStyle(settings)
+        val chrome = webBoardChromeStyle(settings, reducedMotion)
 
         ctx.save()
         ctx.fillStyle = chrome.backgroundColor.toJsString()
