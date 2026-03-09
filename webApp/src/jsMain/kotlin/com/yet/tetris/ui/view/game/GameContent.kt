@@ -461,42 +461,6 @@ val GameContent =
                                             label = Strings.LEVEL
                                             value = gameState?.level?.toString() ?: "1"
                                         }
-
-                                        StatItem {
-                                            label = Strings.TIME
-                                            value = formattedTime
-                                        }
-                                    }
-                                }
-
-                                gameState?.let { currentGameState ->
-                                    Box {
-                                        sx {
-                                            display = Display.flex
-                                            alignItems = AlignItems.center
-                                            gap = 0.45.rem
-                                            flexWrap = FlexWrap.wrap
-                                        }
-
-                                        NextPiecePreview {
-                                            piece = currentGameState.holdPiece
-                                            settings = model.settings
-                                            title = Strings.HOLD
-                                            canvasSize = layoutMetrics.previewSmallPx
-                                            compact = true
-                                        }
-
-                                        val compactQueueCount = min(nextPieces.size, 3)
-                                        for (index in 0 until compactQueueCount) {
-                                            NextPiecePreview {
-                                                piece = nextPieces[index]
-                                                settings = model.settings
-                                                title = Strings.NEXT
-                                                showTitle = index == 0
-                                                canvasSize = layoutMetrics.previewSmallPx
-                                                compact = true
-                                            }
-                                        }
                                     }
                                 }
                             }
@@ -529,6 +493,57 @@ val GameContent =
                                         this.canvasWidthPx = layoutMetrics.boardCanvasPx
                                         this.maxBoardWidthPx = layoutMetrics.boardMaxWidthPx
                                         this.maxBoardHeightPx = layoutMetrics.boardMaxHeightPx
+                                    }
+                                }
+                            }
+
+                            gameState?.let { currentGameState ->
+                                Box {
+                                    sx {
+                                        display = Display.flex
+                                        alignItems = AlignItems.center
+                                        gap = 0.45.rem
+                                        flexWrap = FlexWrap.wrap
+                                    }
+
+                                    NextPiecePreview {
+                                        piece = currentGameState.holdPiece
+                                        settings = model.settings
+                                        title = Strings.HOLD
+                                        canvasSize = layoutMetrics.previewSmallPx
+                                        compact = true
+                                    }
+
+                                    val compactQueueCount = min(nextPieces.size, 3)
+                                    for (index in 0 until compactQueueCount) {
+                                        NextPiecePreview {
+                                            piece = nextPieces[index]
+                                            settings = model.settings
+                                            title = Strings.NEXT
+                                            showTitle = index == 0
+                                            canvasSize = layoutMetrics.previewSmallPx
+                                            compact = true
+                                        }
+                                    }
+
+                                    Box {
+                                        sx {
+                                            display = Display.flex
+                                            alignItems = AlignItems.center
+                                            justifyContent = JustifyContent.center
+                                            padding = Padding(0.45.rem, 0.75.rem)
+                                            backgroundColor = Color("rgba(255, 255, 255, 0.1)")
+                                            backdropFilter = "blur(10px)".unsafeCast<BackdropFilter>()
+                                            border =
+                                                "1px solid rgba(255, 255, 255, 0.2)".unsafeCast<Border>()
+                                            borderRadius = 0.75.rem
+                                            minWidth = 88.px
+                                        }
+
+                                        StatItem {
+                                            label = Strings.TIME
+                                            value = formattedTime
+                                        }
                                     }
                                 }
                             }
@@ -642,10 +657,6 @@ val GameContent =
                                         label = Strings.LEVEL
                                         value = gameState?.level?.toString() ?: "1"
                                     }
-                                    StatItem {
-                                        label = Strings.TIME
-                                        value = formattedTime
-                                    }
                                 }
 
                                 gameState?.let { currentGameState ->
@@ -685,6 +696,31 @@ val GameContent =
                                         }
                                     }
                                 }
+
+                                Box {
+                                    sx {
+                                        flexGrow = number(1.0)
+                                    }
+                                }
+
+                                Box {
+                                    sx {
+                                        display = Display.flex
+                                        alignItems = AlignItems.center
+                                        justifyContent = JustifyContent.center
+                                        padding = Padding(0.55.rem, 0.85.rem)
+                                        backgroundColor = Color("rgba(255, 255, 255, 0.1)")
+                                        backdropFilter = "blur(10px)".unsafeCast<BackdropFilter>()
+                                        border =
+                                            "1px solid rgba(255, 255, 255, 0.2)".unsafeCast<Border>()
+                                        borderRadius = 0.75.rem
+                                    }
+
+                                    StatItem {
+                                        label = Strings.TIME
+                                        value = formattedTime
+                                    }
+                                }
                             }
                         }
 
@@ -696,6 +732,49 @@ val GameContent =
                                     flexDirection = FlexDirection.column
                                     gap = layoutMetrics.gapRem.rem
                                     minHeight = 0.px
+                                }
+
+                                Box {
+                                    sx {
+                                        display = Display.flex
+                                        gap = 0.8.rem
+                                        padding = Padding(0.65.rem, 0.95.rem)
+                                        backgroundColor = Color("rgba(255, 255, 255, 0.1)")
+                                        backdropFilter = "blur(10px)".unsafeCast<BackdropFilter>()
+                                        border =
+                                            "1px solid rgba(255, 255, 255, 0.2)".unsafeCast<Border>()
+                                        borderRadius = 0.75.rem
+                                        justifyContent = JustifyContent.spaceAround
+                                        flexWrap = FlexWrap.wrap
+                                    }
+
+                                    StatItem {
+                                        label = Strings.SCORE
+                                        value = gameState?.score?.toString() ?: "0"
+                                    }
+                                    StatItem {
+                                        label = Strings.LINES
+                                        value = gameState?.linesCleared?.toString() ?: "0"
+                                    }
+                                    StatItem {
+                                        label = Strings.LEVEL
+                                        value = gameState?.level?.toString() ?: "1"
+                                    }
+                                }
+
+                                gameState?.let { currentGameState ->
+                                    NextPiecePreview {
+                                        piece = currentGameState.holdPiece
+                                        settings = model.settings
+                                        title = Strings.HOLD
+                                        canvasSize = layoutMetrics.previewMainPx
+                                    }
+                                }
+
+                                Box {
+                                    sx {
+                                        flexGrow = number(1.0)
+                                    }
                                 }
 
                                 Box {
@@ -735,38 +814,6 @@ val GameContent =
                                         }
                                         onClick = { props.component.onHold() }
                                         +"H"
-                                    }
-                                }
-
-                                Box {
-                                    sx {
-                                        display = Display.flex
-                                        gap = 0.8.rem
-                                        padding = Padding(0.65.rem, 0.95.rem)
-                                        backgroundColor = Color("rgba(255, 255, 255, 0.1)")
-                                        backdropFilter = "blur(10px)".unsafeCast<BackdropFilter>()
-                                        border =
-                                            "1px solid rgba(255, 255, 255, 0.2)".unsafeCast<Border>()
-                                        borderRadius = 0.75.rem
-                                        justifyContent = JustifyContent.spaceAround
-                                        flexWrap = FlexWrap.wrap
-                                    }
-
-                                    StatItem {
-                                        label = Strings.SCORE
-                                        value = gameState?.score?.toString() ?: "0"
-                                    }
-                                    StatItem {
-                                        label = Strings.LINES
-                                        value = gameState?.linesCleared?.toString() ?: "0"
-                                    }
-                                    StatItem {
-                                        label = Strings.LEVEL
-                                        value = gameState?.level?.toString() ?: "1"
-                                    }
-                                    StatItem {
-                                        label = Strings.TIME
-                                        value = formattedTime
                                     }
                                 }
                             }
@@ -820,14 +867,6 @@ val GameContent =
                                         overflow = "auto".unsafeCast<Overflow>()
                                     }
 
-                                    NextPiecePreview {
-                                        piece = currentGameState.holdPiece
-                                        settings = model.settings
-                                        title = Strings.HOLD
-                                        canvasSize = layoutMetrics.previewMainPx
-                                        chrome = false
-                                    }
-
                                     val expandedQueueCount = min(nextPieces.size, 3)
                                     for (index in 0 until expandedQueueCount) {
                                         NextPiecePreview {
@@ -837,6 +876,31 @@ val GameContent =
                                             showTitle = index == 0
                                             canvasSize = layoutMetrics.previewMainPx
                                             chrome = false
+                                        }
+                                    }
+
+                                    Box {
+                                        sx {
+                                            flexGrow = number(1.0)
+                                        }
+                                    }
+
+                                    Box {
+                                        sx {
+                                            display = Display.flex
+                                            alignItems = AlignItems.center
+                                            justifyContent = JustifyContent.center
+                                            padding = Padding(0.55.rem, 0.85.rem)
+                                            backgroundColor = Color("rgba(255, 255, 255, 0.1)")
+                                            backdropFilter = "blur(10px)".unsafeCast<BackdropFilter>()
+                                            border =
+                                                "1px solid rgba(255, 255, 255, 0.2)".unsafeCast<Border>()
+                                            borderRadius = 0.75.rem
+                                        }
+
+                                        StatItem {
+                                            label = Strings.TIME
+                                            value = formattedTime
                                         }
                                     }
                                 }
