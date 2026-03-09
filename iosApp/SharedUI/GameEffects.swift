@@ -126,6 +126,22 @@ struct AppleThemeEffectStyle {
     let lockGlowCornerRadiusFactor: CGFloat
 }
 
+struct AppleThemeMotionStyle {
+    let flashFadeDuration: Double
+    let shakeDurationHigh: Double
+    let shakeDurationLow: Double
+    let scaleResponse: Double
+    let scaleDamping: Double
+    let scaleResetDelay: Double
+    let scaleResetResponse: Double
+    let scaleResetDamping: Double
+    let floatingDurationHighMultiplier: Double
+    let floatingDurationLowMultiplier: Double
+    let particleDurationMultiplier: Double
+    let sweepDurationMultiplier: Double
+    let lockGlowDurationMultiplier: Double
+}
+
 func appleThemeEffectStyle(theme: VisualTheme) -> AppleThemeEffectStyle {
     let accent = themeAccentColor(theme: theme)
 
@@ -320,6 +336,157 @@ func appleThemeEffectStyle(theme: VisualTheme) -> AppleThemeEffectStyle {
             lockGlowSecondary: Color.white,
             lockGlowOpacityBoost: 1.0,
             lockGlowCornerRadiusFactor: 0.35
+        )
+    }
+}
+
+func appleThemeMotionStyle(theme: VisualTheme) -> AppleThemeMotionStyle {
+    switch theme {
+    case .retroGameboy:
+        return AppleThemeMotionStyle(
+            flashFadeDuration: 0.12,
+            shakeDurationHigh: 0.2,
+            shakeDurationLow: 0.14,
+            scaleResponse: 0.18,
+            scaleDamping: 0.92,
+            scaleResetDelay: 0.13,
+            scaleResetResponse: 0.16,
+            scaleResetDamping: 0.96,
+            floatingDurationHighMultiplier: 0.82,
+            floatingDurationLowMultiplier: 0.8,
+            particleDurationMultiplier: 0.84,
+            sweepDurationMultiplier: 0.82,
+            lockGlowDurationMultiplier: 0.8
+        )
+    case .retroNes:
+        return AppleThemeMotionStyle(
+            flashFadeDuration: 0.14,
+            shakeDurationHigh: 0.22,
+            shakeDurationLow: 0.15,
+            scaleResponse: 0.2,
+            scaleDamping: 0.86,
+            scaleResetDelay: 0.15,
+            scaleResetResponse: 0.18,
+            scaleResetDamping: 0.9,
+            floatingDurationHighMultiplier: 0.86,
+            floatingDurationLowMultiplier: 0.84,
+            particleDurationMultiplier: 0.88,
+            sweepDurationMultiplier: 0.86,
+            lockGlowDurationMultiplier: 0.84
+        )
+    case .neon:
+        return AppleThemeMotionStyle(
+            flashFadeDuration: 0.24,
+            shakeDurationHigh: 0.34,
+            shakeDurationLow: 0.24,
+            scaleResponse: 0.36,
+            scaleDamping: 0.58,
+            scaleResetDelay: 0.26,
+            scaleResetResponse: 0.32,
+            scaleResetDamping: 0.74,
+            floatingDurationHighMultiplier: 1.14,
+            floatingDurationLowMultiplier: 1.08,
+            particleDurationMultiplier: 1.16,
+            sweepDurationMultiplier: 1.18,
+            lockGlowDurationMultiplier: 1.22
+        )
+    case .pastel:
+        return AppleThemeMotionStyle(
+            flashFadeDuration: 0.22,
+            shakeDurationHigh: 0.28,
+            shakeDurationLow: 0.2,
+            scaleResponse: 0.34,
+            scaleDamping: 0.82,
+            scaleResetDelay: 0.24,
+            scaleResetResponse: 0.3,
+            scaleResetDamping: 0.88,
+            floatingDurationHighMultiplier: 1.12,
+            floatingDurationLowMultiplier: 1.1,
+            particleDurationMultiplier: 1.08,
+            sweepDurationMultiplier: 1.08,
+            lockGlowDurationMultiplier: 1.1
+        )
+    case .monochrome:
+        return AppleThemeMotionStyle(
+            flashFadeDuration: 0.12,
+            shakeDurationHigh: 0.18,
+            shakeDurationLow: 0.13,
+            scaleResponse: 0.18,
+            scaleDamping: 0.94,
+            scaleResetDelay: 0.12,
+            scaleResetResponse: 0.14,
+            scaleResetDamping: 0.96,
+            floatingDurationHighMultiplier: 0.84,
+            floatingDurationLowMultiplier: 0.82,
+            particleDurationMultiplier: 0.86,
+            sweepDurationMultiplier: 0.84,
+            lockGlowDurationMultiplier: 0.8
+        )
+    case .ocean:
+        return AppleThemeMotionStyle(
+            flashFadeDuration: 0.2,
+            shakeDurationHigh: 0.3,
+            shakeDurationLow: 0.22,
+            scaleResponse: 0.34,
+            scaleDamping: 0.78,
+            scaleResetDelay: 0.24,
+            scaleResetResponse: 0.28,
+            scaleResetDamping: 0.86,
+            floatingDurationHighMultiplier: 1.1,
+            floatingDurationLowMultiplier: 1.06,
+            particleDurationMultiplier: 1.08,
+            sweepDurationMultiplier: 1.12,
+            lockGlowDurationMultiplier: 1.14
+        )
+    case .sunset:
+        return AppleThemeMotionStyle(
+            flashFadeDuration: 0.22,
+            shakeDurationHigh: 0.32,
+            shakeDurationLow: 0.22,
+            scaleResponse: 0.33,
+            scaleDamping: 0.72,
+            scaleResetDelay: 0.24,
+            scaleResetResponse: 0.28,
+            scaleResetDamping: 0.82,
+            floatingDurationHighMultiplier: 1.06,
+            floatingDurationLowMultiplier: 1.04,
+            particleDurationMultiplier: 1.1,
+            sweepDurationMultiplier: 1.12,
+            lockGlowDurationMultiplier: 1.14
+        )
+    case .forest:
+        return AppleThemeMotionStyle(
+            flashFadeDuration: 0.18,
+            shakeDurationHigh: 0.26,
+            shakeDurationLow: 0.19,
+            scaleResponse: 0.28,
+            scaleDamping: 0.82,
+            scaleResetDelay: 0.2,
+            scaleResetResponse: 0.24,
+            scaleResetDamping: 0.88,
+            floatingDurationHighMultiplier: 1.0,
+            floatingDurationLowMultiplier: 0.98,
+            particleDurationMultiplier: 1.0,
+            sweepDurationMultiplier: 1.02,
+            lockGlowDurationMultiplier: 1.04
+        )
+    case .classic:
+        fallthrough
+    default:
+        return AppleThemeMotionStyle(
+            flashFadeDuration: 0.18,
+            shakeDurationHigh: 0.3,
+            shakeDurationLow: 0.2,
+            scaleResponse: 0.3,
+            scaleDamping: 0.65,
+            scaleResetDelay: 0.22,
+            scaleResetResponse: 0.25,
+            scaleResetDamping: 0.82,
+            floatingDurationHighMultiplier: 1.0,
+            floatingDurationLowMultiplier: 1.0,
+            particleDurationMultiplier: 1.0,
+            sweepDurationMultiplier: 1.0,
+            lockGlowDurationMultiplier: 1.0
         )
     }
 }

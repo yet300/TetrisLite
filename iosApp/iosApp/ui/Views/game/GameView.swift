@@ -184,19 +184,20 @@ struct GameView: View {
         intensity: IntensityLevel,
         power: CGFloat
     ) {
+        let motion = appleThemeMotionStyle(theme: model.settings.themeConfig.visualTheme)
         let isHigh = intensity == .high
         let amplitude = isHigh ? 10 + (14 * power) : 3 + (5 * power)
 
         shakeAmount = amplitude
-        withAnimation(.linear(duration: isHigh ? 0.30 : 0.20)) {
+        withAnimation(.linear(duration: isHigh ? motion.shakeDurationHigh : motion.shakeDurationLow)) {
             shakePhase += 1
         }
 
-        withAnimation(.spring(response: 0.30, dampingFraction: 0.65)) {
+        withAnimation(.spring(response: motion.scaleResponse, dampingFraction: motion.scaleDamping)) {
             contentScale = isHigh ? 1.04 : 1.02
         }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.22) {
-            withAnimation(.spring(response: 0.25, dampingFraction: 0.82)) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + motion.scaleResetDelay) {
+            withAnimation(.spring(response: motion.scaleResetResponse, dampingFraction: motion.scaleResetDamping)) {
                 contentScale = 1
             }
         }
@@ -204,7 +205,8 @@ struct GameView: View {
 
     private func triggerFlash(power: CGFloat) {
         flashOpacity = Double(0.45 + (0.4 * power))
-        withAnimation(.easeOut(duration: 0.18)) {
+        let motion = appleThemeMotionStyle(theme: model.settings.themeConfig.visualTheme)
+        withAnimation(.easeOut(duration: motion.flashFadeDuration)) {
             flashOpacity = 0
         }
     }
@@ -214,6 +216,7 @@ struct GameView: View {
         intensity: IntensityLevel,
         power: CGFloat
     ) {
+        let motion = appleThemeMotionStyle(theme: model.settings.themeConfig.visualTheme)
         let isHigh = intensity == .high
         let entry = AppleGameFloatingTextEntry(
             id: UUID().uuidString,
@@ -221,7 +224,7 @@ struct GameView: View {
             isHigh: isHigh,
             power: power,
             createdAt: Date(),
-            duration: isHigh ? 1.1 : 0.78
+            duration: (isHigh ? 1.1 : 0.78) * (isHigh ? motion.floatingDurationHighMultiplier : motion.floatingDurationLowMultiplier)
         )
         floatingTexts.append(entry)
 
@@ -238,6 +241,7 @@ struct GameView: View {
         power: CGFloat,
         particleCount: Int
     ) {
+        let motion = appleThemeMotionStyle(theme: model.settings.themeConfig.visualTheme)
         let entry = AppleGameParticleBurstEntry(
             id: "\(burstId)-\(UUID().uuidString)",
             isHigh: intensity == .high,
@@ -245,7 +249,7 @@ struct GameView: View {
             particleCount: particleCount,
             seed: Int(burstId),
             createdAt: Date(),
-            duration: 0.55
+            duration: 0.55 * motion.particleDurationMultiplier
         )
         particleBursts.append(entry)
 
@@ -262,13 +266,14 @@ struct GameView: View {
         intensity: IntensityLevel,
         power: CGFloat
     ) {
+        let motion = appleThemeMotionStyle(theme: model.settings.themeConfig.visualTheme)
         let entry = AppleGameLineSweepEntry(
             id: "sweep-\(burstId)-\(UUID().uuidString)",
             clearedRows: clearedRows,
             isHigh: intensity == .high,
             power: power,
             createdAt: Date(),
-            duration: 0.38
+            duration: 0.38 * motion.sweepDurationMultiplier
         )
         lineSweeps.append(entry)
 
@@ -295,13 +300,14 @@ struct GameView: View {
         intensity: IntensityLevel,
         power: CGFloat
     ) {
+        let motion = appleThemeMotionStyle(theme: model.settings.themeConfig.visualTheme)
         let entry = AppleGameLockGlowEntry(
             id: "glow-\(burstId)-\(UUID().uuidString)",
             lockedCells: lockedCells,
             isHigh: intensity == .high,
             power: power,
             createdAt: Date(),
-            duration: 0.34
+            duration: 0.34 * motion.lockGlowDurationMultiplier
         )
         lockGlows.append(entry)
 

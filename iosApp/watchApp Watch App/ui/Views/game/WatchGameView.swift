@@ -301,20 +301,21 @@ struct WatchGameView: View {
         intensity: IntensityLevel,
         power: CGFloat
     ) {
+        let motion = appleThemeMotionStyle(theme: model.settings.themeConfig.visualTheme)
         let isHigh = intensity == .high
         let amplitude = isHigh ? 6 + (9 * power) : 1.8 + (3.2 * power)
 
         shakeAmount = amplitude
-        withAnimation(.linear(duration: isHigh ? 0.24 : 0.17)) {
+        withAnimation(.linear(duration: isHigh ? motion.shakeDurationHigh : motion.shakeDurationLow)) {
             shakePhase += 1
         }
 
-        withAnimation(.spring(response: 0.24, dampingFraction: 0.66)) {
+        withAnimation(.spring(response: motion.scaleResponse, dampingFraction: motion.scaleDamping)) {
             contentScale = isHigh ? 1.03 : 1.015
         }
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.18) {
-            withAnimation(.spring(response: 0.20, dampingFraction: 0.84)) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + motion.scaleResetDelay) {
+            withAnimation(.spring(response: motion.scaleResetResponse, dampingFraction: motion.scaleResetDamping)) {
                 contentScale = 1
             }
         }
@@ -322,7 +323,8 @@ struct WatchGameView: View {
 
     private func triggerFlash(power: CGFloat) {
         flashOpacity = Double(0.34 + (0.34 * power))
-        withAnimation(.easeOut(duration: 0.16)) {
+        let motion = appleThemeMotionStyle(theme: model.settings.themeConfig.visualTheme)
+        withAnimation(.easeOut(duration: motion.flashFadeDuration)) {
             flashOpacity = 0
         }
     }
@@ -332,6 +334,7 @@ struct WatchGameView: View {
         intensity: IntensityLevel,
         power: CGFloat
     ) {
+        let motion = appleThemeMotionStyle(theme: model.settings.themeConfig.visualTheme)
         let isHigh = intensity == .high
         let entry = AppleGameFloatingTextEntry(
             id: UUID().uuidString,
@@ -339,7 +342,7 @@ struct WatchGameView: View {
             isHigh: isHigh,
             power: power,
             createdAt: Date(),
-            duration: isHigh ? 0.95 : 0.65
+            duration: (isHigh ? 0.95 : 0.65) * (isHigh ? motion.floatingDurationHighMultiplier : motion.floatingDurationLowMultiplier)
         )
         floatingTexts.append(entry)
 
@@ -356,6 +359,7 @@ struct WatchGameView: View {
         power: CGFloat,
         particleCount: Int
     ) {
+        let motion = appleThemeMotionStyle(theme: model.settings.themeConfig.visualTheme)
         let entry = AppleGameParticleBurstEntry(
             id: "\(burstId)-\(UUID().uuidString)",
             isHigh: intensity == .high,
@@ -363,7 +367,7 @@ struct WatchGameView: View {
             particleCount: max(16, min(64, particleCount)),
             seed: Int(burstId),
             createdAt: Date(),
-            duration: 0.5
+            duration: 0.5 * motion.particleDurationMultiplier
         )
         particleBursts.append(entry)
 
@@ -380,13 +384,14 @@ struct WatchGameView: View {
         intensity: IntensityLevel,
         power: CGFloat
     ) {
+        let motion = appleThemeMotionStyle(theme: model.settings.themeConfig.visualTheme)
         let entry = AppleGameLineSweepEntry(
             id: "sweep-\(burstId)-\(UUID().uuidString)",
             clearedRows: clearedRows,
             isHigh: intensity == .high,
             power: power,
             createdAt: Date(),
-            duration: 0.36
+            duration: 0.36 * motion.sweepDurationMultiplier
         )
         lineSweeps.append(entry)
 
@@ -413,13 +418,14 @@ struct WatchGameView: View {
         intensity: IntensityLevel,
         power: CGFloat
     ) {
+        let motion = appleThemeMotionStyle(theme: model.settings.themeConfig.visualTheme)
         let entry = AppleGameLockGlowEntry(
             id: "glow-\(burstId)-\(UUID().uuidString)",
             lockedCells: lockedCells,
             isHigh: intensity == .high,
             power: power,
             createdAt: Date(),
-            duration: 0.32
+            duration: 0.32 * motion.lockGlowDurationMultiplier
         )
         lockGlows.append(entry)
 

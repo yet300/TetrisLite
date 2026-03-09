@@ -177,7 +177,7 @@ extension GraphicsContext {
             return
         }
 
-        let accent = themeAccentColor(theme: theme)
+        let style = appleThemeEffectStyle(theme: theme)
 
         for sweep in lineSweeps {
             let progress = sweep.progress(at: date)
@@ -187,7 +187,7 @@ extension GraphicsContext {
 
             let leadingX = boardRect.minX + (boardRect.width * progress)
             let sweepWidth = max(cellSize * 2.2, boardRect.width * (0.18 + 0.18 * sweep.power))
-            let opacity = Double((1 - progress) * (sweep.isHigh ? 0.62 : 0.42))
+            let opacity = Double((1 - progress) * (sweep.isHigh ? 0.62 : 0.42)) * style.sweepOpacityBoost
 
             for row in sweep.clearedRows where row >= 0 && row < totalRows {
                 let rowY = boardRect.minY + CGFloat(row) * cellSize
@@ -208,9 +208,9 @@ extension GraphicsContext {
                     Path(rowRect),
                     with: .linearGradient(
                         Gradient(colors: [
-                            .white.opacity(opacity * 0.08),
-                            accent.opacity(opacity * 0.18),
-                            .white.opacity(opacity * 0.08),
+                            style.sweepFill.opacity(opacity * 0.08),
+                            style.sweepPrimary.opacity(opacity * 0.18),
+                            style.sweepFill.opacity(opacity * 0.08),
                         ]),
                         startPoint: CGPoint(x: rowRect.minX, y: rowRect.midY),
                         endPoint: CGPoint(x: rowRect.maxX, y: rowRect.midY)
@@ -222,9 +222,9 @@ extension GraphicsContext {
                     with: .linearGradient(
                         Gradient(colors: [
                             .clear,
-                            accent.opacity(opacity * 0.45),
-                            .white.opacity(opacity),
-                            accent.opacity(opacity * 0.55),
+                            style.sweepPrimary.opacity(opacity * 0.45),
+                            style.sweepFill.opacity(opacity),
+                            style.sweepSecondary.opacity(opacity * 0.55),
                             .clear,
                         ]),
                         startPoint: CGPoint(x: bandRect.minX, y: bandRect.midY),
@@ -248,7 +248,7 @@ extension GraphicsContext {
             return
         }
 
-        let accent = themeAccentColor(theme: theme)
+        let style = appleThemeEffectStyle(theme: theme)
         let boardPath = Path(boardRect)
 
         for glow in lockGlows {
@@ -283,15 +283,15 @@ extension GraphicsContext {
             )
             let center = CGPoint(x: lockRect.midX, y: lockRect.midY)
             let radius = max(lockRect.width, lockRect.height) * (0.72 + progress * 0.55) + cellSize * (1.3 + 1.9 * glow.power)
-            let opacity = Double((1 - progress) * (glow.isHigh ? 0.30 : 0.17))
+            let opacity = Double((1 - progress) * (glow.isHigh ? 0.30 : 0.17)) * style.lockGlowOpacityBoost
 
             fill(
                 boardPath,
                 with: .radialGradient(
                     Gradient(colors: [
-                        .white.opacity(opacity * 0.22),
-                        accent.opacity(opacity),
-                        accent.opacity(opacity * 0.45),
+                        style.lockGlowSecondary.opacity(opacity * 0.22),
+                        style.lockGlowPrimary.opacity(opacity),
+                        style.lockGlowSecondary.opacity(opacity * 0.45),
                         .clear,
                     ]),
                     center: center,
@@ -301,12 +301,12 @@ extension GraphicsContext {
             )
 
             fill(
-                Path(roundedRect: expandedRect, cornerRadius: cellSize * 0.35),
+                Path(roundedRect: expandedRect, cornerRadius: cellSize * style.lockGlowCornerRadiusFactor),
                 with: .linearGradient(
                     Gradient(colors: [
-                        accent.opacity(opacity * 0.22),
-                        .white.opacity(opacity * 0.38),
-                        accent.opacity(opacity * 0.28),
+                        style.lockGlowPrimary.opacity(opacity * 0.22),
+                        style.lockGlowSecondary.opacity(opacity * 0.38),
+                        style.lockGlowPrimary.opacity(opacity * 0.28),
                     ]),
                     startPoint: CGPoint(x: expandedRect.minX, y: expandedRect.minY),
                     endPoint: CGPoint(x: expandedRect.maxX, y: expandedRect.maxY)
