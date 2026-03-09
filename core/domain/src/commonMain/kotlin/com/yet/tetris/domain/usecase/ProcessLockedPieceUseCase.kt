@@ -24,13 +24,16 @@ class ProcessLockedPieceUseCase(
         currentVisualSequence: Long,
     ): Result {
         val oldLinesCleared = gameState.linesCleared
-        val updatedState = lockPieceUseCase(gameState)
+        val lockResult = lockPieceUseCase.invokeDetailed(gameState)
+        val updatedState = lockResult.gameState
         val linesClearedThisLock = (updatedState.linesCleared - oldLinesCleared).toInt()
 
         val feedback =
             planVisualFeedbackUseCase(
                 currentComboStreak = currentComboStreak,
                 linesClearedThisLock = linesClearedThisLock,
+                clearedRowsThisLock = lockResult.clearedRows,
+                lockCellsThisLock = lockResult.lockCells,
             )
 
         val visualEffectFeed =
@@ -46,6 +49,8 @@ class ProcessLockedPieceUseCase(
                             intensity = burstSpec.intensity,
                             power = burstSpec.power,
                             events = burstSpec.events,
+                            clearedRows = burstSpec.clearedRows,
+                            lockCells = burstSpec.lockCells,
                         ),
                 )
             }

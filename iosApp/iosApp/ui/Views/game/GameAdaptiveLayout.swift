@@ -16,6 +16,8 @@ struct GameAdaptiveLayout: View {
     let settings: GameSettings
     let elapsedTime: Int64
     let ghostY: Int32?
+    let lineSweeps: [AppleGameLineSweepEntry]
+    let lockGlows: [AppleGameLockGlowEntry]
     let actions: GameInputActions
 
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
@@ -38,6 +40,8 @@ struct GameAdaptiveLayout: View {
                         settings: settings,
                         elapsedTime: elapsedTime,
                         ghostY: ghostY,
+                        lineSweeps: lineSweeps,
+                        lockGlows: lockGlows,
                         actions: actions,
                         metrics: config.metrics
                     )
@@ -47,6 +51,8 @@ struct GameAdaptiveLayout: View {
                         settings: settings,
                         elapsedTime: elapsedTime,
                         ghostY: ghostY,
+                        lineSweeps: lineSweeps,
+                        lockGlows: lockGlows,
                         actions: actions,
                         metrics: config.metrics
                     )
@@ -56,6 +62,8 @@ struct GameAdaptiveLayout: View {
                         settings: settings,
                         elapsedTime: elapsedTime,
                         ghostY: ghostY,
+                        lineSweeps: lineSweeps,
+                        lockGlows: lockGlows,
                         actions: actions,
                         metrics: config.metrics
                     )
@@ -73,6 +81,8 @@ private struct CompactGameLayout: View {
     let settings: GameSettings
     let elapsedTime: Int64
     let ghostY: Int32?
+    let lineSweeps: [AppleGameLineSweepEntry]
+    let lockGlows: [AppleGameLockGlowEntry]
     let actions: GameInputActions
     let metrics: GameAdaptiveMetrics
 
@@ -89,6 +99,8 @@ private struct CompactGameLayout: View {
                 gameState: gameState,
                 settings: settings,
                 ghostY: ghostY,
+                lineSweeps: lineSweeps,
+                lockGlows: lockGlows,
                 actions: actions
             )
             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -110,6 +122,8 @@ private struct MediumGameLayout: View {
     let settings: GameSettings
     let elapsedTime: Int64
     let ghostY: Int32?
+    let lineSweeps: [AppleGameLineSweepEntry]
+    let lockGlows: [AppleGameLockGlowEntry]
     let actions: GameInputActions
     let metrics: GameAdaptiveMetrics
 
@@ -119,6 +133,8 @@ private struct MediumGameLayout: View {
                 gameState: gameState,
                 settings: settings,
                 ghostY: ghostY,
+                lineSweeps: lineSweeps,
+                lockGlows: lockGlows,
                 actions: actions
             )
             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -175,6 +191,8 @@ private struct ExpandedGameLayout: View {
     let settings: GameSettings
     let elapsedTime: Int64
     let ghostY: Int32?
+    let lineSweeps: [AppleGameLineSweepEntry]
+    let lockGlows: [AppleGameLockGlowEntry]
     let actions: GameInputActions
     let metrics: GameAdaptiveMetrics
 
@@ -213,6 +231,8 @@ private struct ExpandedGameLayout: View {
                 gameState: gameState,
                 settings: settings,
                 ghostY: ghostY,
+                lineSweeps: lineSweeps,
+                lockGlows: lockGlows,
                 actions: actions
             )
             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -396,6 +416,8 @@ private struct GameBoardPane: View {
     let gameState: GameState
     let settings: GameSettings
     let ghostY: Int32?
+    let lineSweeps: [AppleGameLineSweepEntry]
+    let lockGlows: [AppleGameLockGlowEntry]
     let actions: GameInputActions
 
     @State private var lastDragTranslation: CGSize = .zero
@@ -413,7 +435,9 @@ private struct GameBoardPane: View {
             GameBoardView(
                 gameState: gameState,
                 settings: settings,
-                ghostY: ghostY
+                ghostY: ghostY,
+                lineSweeps: lineSweeps,
+                lockGlows: lockGlows
             )
             .frame(width: boardSize.width, height: boardSize.height)
             .contentShape(Rectangle())

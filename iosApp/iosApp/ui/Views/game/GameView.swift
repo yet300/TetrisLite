@@ -55,6 +55,8 @@ struct GameView: View {
                     settings: model.settings,
                     elapsedTime: model.elapsedTime,
                     ghostY: model.ghostPieceY?.int32Value,
+                    lineSweeps: lineSweeps,
+                    lockGlows: lockGlows,
                     actions: actions
                 )
                 .modifier(
@@ -70,9 +72,7 @@ struct GameView: View {
                     theme: model.settings.themeConfig.visualTheme,
                     flashOpacity: flashOpacity,
                     floatingTexts: floatingTexts,
-                    particleBursts: particleBursts,
-                    lineSweeps: lineSweeps,
-                    lockGlows: lockGlows
+                    particleBursts: particleBursts
                 )
 
                 if let child = dialog.child?.instance {
@@ -149,25 +149,31 @@ struct GameView: View {
                     intensity: text.intensity,
                     power: CGFloat(text.power)
                 )
-                if isLineClearTextKey(text.textKey) {
+                let clearedRows = clearedRows(from: burst)
+                if isLineClearTextKey(text.textKey) && !clearedRows.isEmpty {
                     addLineSweep(
                         burstId: burst.id,
+                        clearedRows: clearedRows,
                         intensity: text.intensity,
                         power: CGFloat(text.power)
                     )
                 }
             case let explosion as VisualEffectEventExplosion:
+                let lockCells = lockCells(from: burst)
                 addParticleBurst(
                     burstId: burst.id,
                     intensity: explosion.intensity,
                     power: CGFloat(explosion.power),
                     particleCount: Int(explosion.particleCount)
                 )
-                addLockGlow(
-                    burstId: burst.id,
-                    intensity: explosion.intensity,
-                    power: CGFloat(explosion.power)
-                )
+                if !lockCells.isEmpty {
+                    addLockGlow(
+                        burstId: burst.id,
+                        lockedCells: lockCells,
+                        intensity: explosion.intensity,
+                        power: CGFloat(explosion.power)
+                    )
+                }
             default:
                 continue
             }
@@ -252,11 +258,13 @@ struct GameView: View {
 
     private func addLineSweep(
         burstId: Int64,
+        clearedRows: [Int],
         intensity: IntensityLevel,
         power: CGFloat
     ) {
         let entry = AppleGameLineSweepEntry(
             id: "sweep-\(burstId)-\(UUID().uuidString)",
+            clearedRows: clearedRows,
             isHigh: intensity == .high,
             power: power,
             createdAt: Date(),
@@ -271,13 +279,25 @@ struct GameView: View {
         }
     }
 
+    private func clearedRows(from burst: VisualEffectBurst) -> [Int] {
+        burst.clearedRows.map { $0.intValue }
+    }
+
+    private func lockCells(from burst: VisualEffectBurst) -> [AppleGameBoardCell] {
+        burst.lockCells.map {
+            AppleGameBoardCell(x: Int($0.x), y: Int($0.y))
+        }
+    }
+
     private func addLockGlow(
         burstId: Int64,
+        lockedCells: [AppleGameBoardCell],
         intensity: IntensityLevel,
         power: CGFloat
     ) {
         let entry = AppleGameLockGlowEntry(
             id: "glow-\(burstId)-\(UUID().uuidString)",
+            lockedCells: lockedCells,
             isHigh: intensity == .high,
             power: power,
             createdAt: Date(),

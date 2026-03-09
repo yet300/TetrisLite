@@ -15,6 +15,12 @@ class LockPieceUseCase(
     private val checkCollision: CheckCollisionUseCase,
     private val previewQueueEngine: PreviewQueueEngine,
 ) {
+    data class Result(
+        val gameState: GameState,
+        val clearedRows: List<Int>,
+        val lockCells: List<Position>,
+    )
+
     companion object {
         // Standard spawn position for new pieces (top-center of board)
         private const val SPAWN_X = 3
@@ -32,14 +38,21 @@ class LockPieceUseCase(
      * @param state Current game state
      * @return Updated GameState with locked piece and new current piece
      */
-    operator fun invoke(state: GameState): GameState {
+    operator fun invoke(state: GameState): GameState = invokeDetailed(state).gameState
+
+    fun invokeDetailed(state: GameState): Result {
         val piece = state.currentPiece ?: return state
+            .let { Result(gameState = it, clearedRows = emptyList(), lockCells = emptyList()) }
+
+        val lockCells = piece.getAbsolutePositions(state.currentPosition)
 
         // 1. Lock the piece to the board
         val boardWithPiece = state.board.lockPiece(piece, state.currentPosition)
 
         // 2. Clear completed lines
-        val (clearedBoard, linesCleared) = boardWithPiece.clearLines()
+        val clearResult = boardWithPiece.clearLinesDetailed()
+        val clearedBoard = clearResult.board
+        val linesCleared = clearResult.linesCleared
 
         // 3. Calculate score increment
         val scoreIncrement = calculateScore(linesCleared)
@@ -55,17 +68,22 @@ class LockPieceUseCase(
         // 5. Check for game over (new piece collides immediately)
         val isGameOver = checkCollision(clearedBoard, newCurrentPiece, spawnPosition)
 
-        return state.copy(
-            board = clearedBoard,
-            currentPiece = if (isGameOver) null else newCurrentPiece,
-            currentPosition = spawnPosition,
-            nextPiece = preview.nextPiece,
-            nextQueue = preview.nextQueue,
-            canHold = true,
-            score = newScore,
-            linesCleared = newLinesCleared,
-            level = newLevel,
-            isGameOver = isGameOver,
+        return Result(
+            gameState =
+                state.copy(
+                    board = clearedBoard,
+                    currentPiece = if (isGameOver) null else newCurrentPiece,
+                    currentPosition = spawnPosition,
+                    nextPiece = preview.nextPiece,
+                    nextQueue = preview.nextQueue,
+                    canHold = true,
+                    score = newScore,
+                    linesCleared = newLinesCleared,
+                    level = newLevel,
+                    isGameOver = isGameOver,
+                ),
+            clearedRows = clearResult.clearedRows,
+            lockCells = lockCells,
         )
     }
 

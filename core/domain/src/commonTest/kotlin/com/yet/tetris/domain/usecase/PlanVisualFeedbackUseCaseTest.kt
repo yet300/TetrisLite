@@ -3,6 +3,7 @@ package com.yet.tetris.domain.usecase
 import com.yet.tetris.domain.model.effects.IntensityLevel
 import com.yet.tetris.domain.model.effects.VisualEffectEvent
 import com.yet.tetris.domain.model.effects.VisualTextKey
+import com.yet.tetris.domain.model.game.Position
 import kotlin.math.abs
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -80,6 +81,23 @@ class PlanVisualFeedbackUseCaseTest {
 
         val text = burst.events.filterIsInstance<VisualEffectEvent.FloatingText>().single()
         assertEquals(VisualTextKey.TETRIS, text.textKey)
+    }
+
+    @Test
+    fun includes_cleared_rows_in_burst() {
+        val lockCells = listOf(Position(4, 17), Position(4, 18), Position(5, 18), Position(5, 19))
+        val result =
+            useCase(
+                currentComboStreak = 0,
+                linesClearedThisLock = 2,
+                clearedRowsThisLock = listOf(18, 19),
+                lockCellsThisLock = lockCells,
+            )
+        val burst = result.burst
+        assertNotNull(burst)
+
+        assertEquals(listOf(18, 19), burst.clearedRows)
+        assertEquals(lockCells, burst.lockCells)
     }
 
     private fun assertClose(

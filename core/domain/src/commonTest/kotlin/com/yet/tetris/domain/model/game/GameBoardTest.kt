@@ -126,6 +126,25 @@ class GameBoardTest {
     }
 
     @Test
+    fun clearLinesDetailed_shouldReturnExactClearedRows() {
+        val cells =
+            (0 until 10)
+                .flatMap { x ->
+                    listOf(
+                        Position(x, 5) to TetrominoType.I,
+                        Position(x, 7) to TetrominoType.T,
+                    )
+                }.toMap()
+        val board = GameBoard(cells = cells)
+
+        val result = board.clearLinesDetailed()
+
+        assertEquals(2, result.linesCleared)
+        assertEquals(listOf(5, 7), result.clearedRows)
+        assertTrue(result.board.cells.isEmpty())
+    }
+
+    @Test
     fun clearLines_multipleLines_shouldClearAll() {
         // Given - Two complete lines
         val cells =

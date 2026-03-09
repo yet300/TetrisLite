@@ -46,7 +46,9 @@ struct WatchGameView: View {
                             WatchMiniBoardView(
                                 gameState: gameState,
                                 settings: model.settings,
-                                ghostY: model.ghostPieceY?.int32Value
+                                ghostY: model.ghostPieceY?.int32Value,
+                                lineSweeps: lineSweeps,
+                                lockGlows: lockGlows
                             )
                             .onAppear {
                                 component.onBoardSizeChanged(height: Float(geometry.size.height))
@@ -194,9 +196,7 @@ struct WatchGameView: View {
                 theme: model.settings.themeConfig.visualTheme,
                 flashOpacity: flashOpacity,
                 floatingTexts: floatingTexts,
-                particleBursts: particleBursts,
-                lineSweeps: lineSweeps,
-                lockGlows: lockGlows
+                particleBursts: particleBursts
             )
 
             if let child = dialog.child?.instance {
@@ -266,25 +266,31 @@ struct WatchGameView: View {
                     intensity: text.intensity,
                     power: CGFloat(text.power)
                 )
-                if isLineClearTextKey(text.textKey) {
+                let clearedRows = clearedRows(from: burst)
+                if isLineClearTextKey(text.textKey) && !clearedRows.isEmpty {
                     addLineSweep(
                         burstId: burst.id,
+                        clearedRows: clearedRows,
                         intensity: text.intensity,
                         power: CGFloat(text.power)
                     )
                 }
             case let explosion as VisualEffectEventExplosion:
+                let lockCells = lockCells(from: burst)
                 addParticleBurst(
                     burstId: burst.id,
                     intensity: explosion.intensity,
                     power: CGFloat(explosion.power),
                     particleCount: Int(explosion.particleCount)
                 )
-                addLockGlow(
-                    burstId: burst.id,
-                    intensity: explosion.intensity,
-                    power: CGFloat(explosion.power)
-                )
+                if !lockCells.isEmpty {
+                    addLockGlow(
+                        burstId: burst.id,
+                        lockedCells: lockCells,
+                        intensity: explosion.intensity,
+                        power: CGFloat(explosion.power)
+                    )
+                }
             default:
                 continue
             }
@@ -370,11 +376,13 @@ struct WatchGameView: View {
 
     private func addLineSweep(
         burstId: Int64,
+        clearedRows: [Int],
         intensity: IntensityLevel,
         power: CGFloat
     ) {
         let entry = AppleGameLineSweepEntry(
             id: "sweep-\(burstId)-\(UUID().uuidString)",
+            clearedRows: clearedRows,
             isHigh: intensity == .high,
             power: power,
             createdAt: Date(),
@@ -389,13 +397,25 @@ struct WatchGameView: View {
         }
     }
 
+    private func clearedRows(from burst: VisualEffectBurst) -> [Int] {
+        burst.clearedRows.map { $0.intValue }
+    }
+
+    private func lockCells(from burst: VisualEffectBurst) -> [AppleGameBoardCell] {
+        burst.lockCells.map {
+            AppleGameBoardCell(x: Int($0.x), y: Int($0.y))
+        }
+    }
+
     private func addLockGlow(
         burstId: Int64,
+        lockedCells: [AppleGameBoardCell],
         intensity: IntensityLevel,
         power: CGFloat
     ) {
         let entry = AppleGameLockGlowEntry(
             id: "glow-\(burstId)-\(UUID().uuidString)",
+            lockedCells: lockedCells,
             isHigh: intensity == .high,
             power: power,
             createdAt: Date(),
@@ -674,6 +694,8 @@ private struct WatchMiniBoardView: View {
     let gameState: GameState
     let settings: GameSettings
     let ghostY: Int32?
+    let lineSweeps: [AppleGameLineSweepEntry]
+    let lockGlows: [AppleGameLockGlowEntry]
 
     var body: some View {
         GeometryReader { geometry in
@@ -751,6 +773,25 @@ private struct WatchMiniBoardView: View {
                             }
                         }
                     }
+
+                    context.drawBoardLineSweeps(
+                        lineSweeps: lineSweeps,
+                        theme: settings.themeConfig.visualTheme,
+                        boardRect: boardRect,
+                        totalRows: Int(gameState.board.height),
+                        cellSize: cellSize,
+                        date: timeline.date
+                    )
+
+                    context.drawBoardLockGlows(
+                        lockGlows: lockGlows,
+                        theme: settings.themeConfig.visualTheme,
+                        boardRect: boardRect,
+                        totalColumns: Int(gameState.board.width),
+                        totalRows: Int(gameState.board.height),
+                        cellSize: cellSize,
+                        date: timeline.date
+                    )
                 }
             }
         }

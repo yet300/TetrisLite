@@ -5,6 +5,8 @@ struct GameBoardView: View {
     let gameState: GameState
     let settings: GameSettings
     let ghostY: Int32?
+    let lineSweeps: [AppleGameLineSweepEntry]
+    let lockGlows: [AppleGameLockGlowEntry]
     
     var body: some View {
         TimelineView(.animation(minimumInterval: 1.0 / 24.0)) { timeline in
@@ -65,6 +67,25 @@ struct GameBoardView: View {
                         }
                     }
                 }
+
+                context.drawBoardLineSweeps(
+                    lineSweeps: lineSweeps,
+                    theme: settings.themeConfig.visualTheme,
+                    boardRect: boardRect,
+                    totalRows: Int(gameState.board.height),
+                    cellSize: cellSize,
+                    date: timeline.date
+                )
+
+                context.drawBoardLockGlows(
+                    lockGlows: lockGlows,
+                    theme: settings.themeConfig.visualTheme,
+                    boardRect: boardRect,
+                    totalColumns: Int(gameState.board.width),
+                    totalRows: Int(gameState.board.height),
+                    cellSize: cellSize,
+                    date: timeline.date
+                )
 
                 context.drawBoardGrid(
                     theme: settings.themeConfig.visualTheme,
