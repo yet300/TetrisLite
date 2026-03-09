@@ -17,19 +17,38 @@ struct GameStatsView: View {
     let level: Int32
     let time: Int64
     let density: GameStatDensity
+    let includeTime: Bool
 
     var body: some View {
         HStack(spacing: horizontalSpacing) {
             StatItem(label: Strings.score, value: "\(score)", density: density)
             StatItem(label: Strings.lines, value: "\(lines)", density: density)
             StatItem(label: Strings.level, value: "\(level)", density: density)
-            StatItem(label: Strings.time, value: formattedTime, density: density)
+            if includeTime {
+                StatItem(label: Strings.time, value: formattedTime, density: density)
+            }
         }
         .padding(.horizontal, horizontalPadding)
         .padding(.vertical, verticalPadding)
         .frame(maxWidth: .infinity)
         .glassPanelStyle(cornerRadius: cornerRadius)
         .clipShape(.rect(cornerRadius: cornerRadius))
+    }
+
+    init(
+        score: Int64,
+        lines: Int32,
+        level: Int32,
+        time: Int64,
+        density: GameStatDensity,
+        includeTime: Bool = true
+    ) {
+        self.score = score
+        self.lines = lines
+        self.level = level
+        self.time = time
+        self.density = density
+        self.includeTime = includeTime
     }
 
     private var formattedTime: String {
@@ -82,6 +101,30 @@ struct GameStatsView: View {
         case .spacious:
             return 18
         }
+    }
+}
+
+struct TimeStatView: View {
+    let time: Int64
+    let density: GameStatDensity
+
+    private var formattedTime: String {
+        let totalSeconds = max(time, 0) / 1_000
+        let minutes = totalSeconds / 60
+        let seconds = totalSeconds % 60
+        let paddedSeconds = seconds < 10 ? "0\(seconds)" : "\(seconds)"
+        return "\(minutes):\(paddedSeconds)"
+    }
+
+    var body: some View {
+        HStack {
+            StatItem(label: Strings.time, value: formattedTime, density: density)
+        }
+        .padding(.horizontal, density.timePanelHorizontalPadding)
+        .padding(.vertical, density.timePanelVerticalPadding)
+        .frame(maxWidth: .infinity)
+        .glassPanelStyle(cornerRadius: density.timePanelCornerRadius)
+        .clipShape(.rect(cornerRadius: density.timePanelCornerRadius))
     }
 }
 
@@ -206,16 +249,19 @@ struct NextQueuePreviewView: View {
                 if pieces.isEmpty {
                     PiecePreviewPlaceholder(previewSize: queueItemSize)
                 } else {
+                    let visibleCount = min(pieces.count, 3)
                     if axis == .horizontal {
                         HStack(spacing: density.queueItemSpacing) {
-                            ForEach(pieces.indices, id: \.self) { index in
+                            ForEach(0..<visibleCount, id: \.self) { index in
                                 TetrominoPreviewCanvas(piece: pieces[index], previewSize: queueItemSize)
+                                    .opacity(queueOpacity(for: index))
                             }
                         }
                     } else {
                         VStack(spacing: density.queueItemSpacing) {
-                            ForEach(pieces.indices, id: \.self) { index in
+                            ForEach(0..<visibleCount, id: \.self) { index in
                                 TetrominoPreviewCanvas(piece: pieces[index], previewSize: queueItemSize)
+                                    .opacity(queueOpacity(for: index))
                             }
                         }
                     }
@@ -237,6 +283,14 @@ struct NextQueuePreviewView: View {
             return max(22, previewSize * 0.54)
         }
         return previewSize
+    }
+
+    private func queueOpacity(for index: Int) -> Double {
+        switch index {
+        case 0: return 1
+        case 1: return 0.68
+        default: return 0.42
+        }
     }
 }
 
@@ -274,8 +328,9 @@ struct HoldAndNextPreviewView: View {
                 if nextPieces.isEmpty {
                     PiecePreviewPlaceholder(previewSize: queuePreviewSize)
                 } else {
+                    let visibleCount = min(nextPieces.count, 3)
                     VStack(spacing: density.queueItemSpacing) {
-                        ForEach(nextPieces.indices, id: \.self) { index in
+                        ForEach(0..<visibleCount, id: \.self) { index in
                             TetrominoPreviewCanvas(piece: nextPieces[index], previewSize: queuePreviewSize)
                         }
                     }
@@ -409,6 +464,39 @@ private extension GameStatDensity {
             return 10
         case .spacious:
             return 12
+        }
+    }
+
+    var timePanelHorizontalPadding: CGFloat {
+        switch self {
+        case .compact:
+            return 10
+        case .regular:
+            return 12
+        case .spacious:
+            return 14
+        }
+    }
+
+    var timePanelVerticalPadding: CGFloat {
+        switch self {
+        case .compact:
+            return 8
+        case .regular:
+            return 10
+        case .spacious:
+            return 12
+        }
+    }
+
+    var timePanelCornerRadius: CGFloat {
+        switch self {
+        case .compact:
+            return 14
+        case .regular:
+            return 16
+        case .spacious:
+            return 18
         }
     }
 }

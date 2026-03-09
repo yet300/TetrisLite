@@ -199,21 +199,6 @@ private struct KeyboardHandler: UIViewRepresentable {
             }
         }
 
-        override func pressesBegan(_ presses: Set<UIPress>, with event: UIPressesEvent?) {
-            for press in presses {
-                guard let key = press.key else { continue }
-                if handleKeyCode(key.keyCode) {
-                    continue
-                }
-
-                let chars = key.charactersIgnoringModifiers
-                if !chars.isEmpty {
-                    onKey(chars)
-                }
-            }
-            super.pressesBegan(presses, with: event)
-        }
-
         deinit {
             if let didBecomeActiveObserver {
                 NotificationCenter.default.removeObserver(didBecomeActiveObserver)
@@ -222,31 +207,6 @@ private struct KeyboardHandler: UIViewRepresentable {
 
         private func keyCommand(_ input: String, action: Selector) -> UIKeyCommand {
             UIKeyCommand(input: input, modifierFlags: [], action: action)
-        }
-
-        private func handleKeyCode(_ keyCode: UIKeyboardHIDUsage) -> Bool {
-            switch keyCode {
-            case .keyboardLeftArrow:
-                onKey("directionleft")
-                return true
-            case .keyboardRightArrow:
-                onKey("directionright")
-                return true
-            case .keyboardUpArrow:
-                onKey("directionup")
-                return true
-            case .keyboardDownArrow:
-                onKey("directiondown")
-                return true
-            case .keyboardReturnOrEnter:
-                onKey("\r")
-                return true
-            case .keyboardEscape:
-                onKey("\u{1b}")
-                return true
-            default:
-                return false
-            }
         }
 
         @objc private func handleLeft() {

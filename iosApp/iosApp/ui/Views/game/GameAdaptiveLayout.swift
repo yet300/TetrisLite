@@ -78,54 +78,12 @@ private struct CompactGameLayout: View {
 
     var body: some View {
         VStack(spacing: metrics.sectionSpacing) {
-            ViewThatFits(in: .horizontal) {
-                HStack(alignment: .top, spacing: metrics.sectionSpacing) {
-                    VStack(alignment: .leading, spacing: metrics.sectionSpacing) {
-                        GameControlButtonsRow(
-                            buttonSize: metrics.buttonSize,
-                            iconSize: metrics.buttonIconSize,
-                            actions: actions
-                        )
-
-                        GameStatsView(
-                            score: gameState.score,
-                            lines: Int32(gameState.linesCleared),
-                            level: gameState.level,
-                            time: elapsedTime,
-                            density: .compact
-                        )
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-
-                    QueueCompactColumn(
-                        holdPiece: gameState.holdPiece,
-                        nextPieces: gameState.visibleNextPieces,
-                        pieceSize: metrics.compactPieceSize
-                    )
-                }
-
-                VStack(alignment: .leading, spacing: metrics.sectionSpacing) {
-                    GameControlButtonsRow(
-                        buttonSize: metrics.buttonSize,
-                        iconSize: metrics.buttonIconSize,
-                        actions: actions
-                    )
-
-                    GameStatsView(
-                        score: gameState.score,
-                        lines: Int32(gameState.linesCleared),
-                        level: gameState.level,
-                        time: elapsedTime,
-                        density: .compact
-                    )
-
-                    QueueCompactRow(
-                        holdPiece: gameState.holdPiece,
-                        nextPieces: gameState.visibleNextPieces,
-                        pieceSize: metrics.compactPieceSize
-                    )
-                }
-            }
+            CompactHeaderPane(
+                gameState: gameState,
+                elapsedTime: elapsedTime,
+                actions: actions,
+                metrics: metrics
+            )
 
             GameBoardPane(
                 gameState: gameState,
@@ -135,6 +93,12 @@ private struct CompactGameLayout: View {
             )
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .layoutPriority(1)
+
+            CompactFooterPane(
+                gameState: gameState,
+                elapsedTime: elapsedTime,
+                metrics: metrics
+            )
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
@@ -171,7 +135,8 @@ private struct MediumGameLayout: View {
                     lines: Int32(gameState.linesCleared),
                     level: gameState.level,
                     time: elapsedTime,
-                    density: .regular
+                    density: .regular,
+                    includeTime: false
                 )
 
                 PiecePreviewView(
@@ -189,6 +154,11 @@ private struct MediumGameLayout: View {
                 )
 
                 Spacer(minLength: 0)
+
+                TimeStatView(
+                    time: elapsedTime,
+                    density: .regular
+                )
             }
             .frame(width: metrics.secondaryPaneWidth, alignment: .topLeading)
             .frame(maxHeight: .infinity, alignment: .top)
@@ -208,10 +178,11 @@ private struct ExpandedGameLayout: View {
     var body: some View {
         HStack(spacing: metrics.sectionSpacing) {
             VStack(alignment: .leading, spacing: metrics.sectionSpacing) {
-                GameControlButtonsRow(
-                    buttonSize: metrics.buttonSize,
-                    iconSize: metrics.buttonIconSize,
-                    actions: actions
+                PiecePreviewView(
+                    title: Strings.hold,
+                    piece: gameState.holdPiece,
+                    previewSize: metrics.expandedPieceSize * 0.72,
+                    density: .spacious
                 )
 
                 GameStatsView(
@@ -219,10 +190,17 @@ private struct ExpandedGameLayout: View {
                     lines: Int32(gameState.linesCleared),
                     level: gameState.level,
                     time: elapsedTime,
-                    density: .spacious
+                    density: .spacious,
+                    includeTime: false
                 )
 
                 Spacer(minLength: 0)
+
+                GameControlButtonsRow(
+                    buttonSize: metrics.buttonSize,
+                    iconSize: metrics.buttonIconSize,
+                    actions: actions
+                )
             }
             .frame(width: metrics.secondaryPaneWidth, alignment: .topLeading)
             .frame(maxHeight: .infinity, alignment: .top)
@@ -237,15 +215,19 @@ private struct ExpandedGameLayout: View {
             .layoutPriority(2)
 
             VStack(alignment: .leading, spacing: metrics.sectionSpacing) {
-                HoldAndNextPreviewView(
-                    holdPiece: gameState.holdPiece,
-                    nextPieces: gameState.visibleNextPieces,
-                    holdPreviewSize: metrics.expandedPieceSize * 0.72,
-                    queuePreviewSize: metrics.expandedPieceSize * 0.58,
+                NextQueuePreviewView(
+                    title: Strings.next,
+                    pieces: gameState.visibleNextPieces,
+                    previewSize: metrics.expandedPieceSize * 0.58,
                     density: .spacious
                 )
 
                 Spacer(minLength: 0)
+
+                TimeStatView(
+                    time: elapsedTime,
+                    density: .spacious
+                )
             }
             .frame(width: metrics.tertiaryPaneWidth, alignment: .topLeading)
             .frame(maxHeight: .infinity, alignment: .top)
@@ -254,26 +236,86 @@ private struct ExpandedGameLayout: View {
     }
 }
 
-private struct QueueCompactColumn: View {
-    let holdPiece: Tetromino?
-    let nextPieces: [Tetromino]
-    let pieceSize: CGFloat
+private struct CompactHeaderPane: View {
+    let gameState: GameState
+    let elapsedTime: Int64
+    let actions: GameInputActions
+    let metrics: GameAdaptiveMetrics
 
     var body: some View {
-        VStack(spacing: 6) {
-            PiecePreviewView(
-                title: Strings.hold,
-                piece: holdPiece,
-                previewSize: pieceSize,
-                density: .compact
-            )
-            NextQueuePreviewView(
-                title: Strings.next,
-                pieces: nextPieces,
-                previewSize: pieceSize,
-                density: .compact,
-                axis: .horizontal
-            )
+        ViewThatFits(in: .horizontal) {
+            HStack(alignment: .top, spacing: metrics.sectionSpacing) {
+                GameControlButtonsRow(
+                    buttonSize: metrics.buttonSize,
+                    iconSize: metrics.buttonIconSize,
+                    actions: actions
+                )
+
+                GameStatsView(
+                    score: gameState.score,
+                    lines: Int32(gameState.linesCleared),
+                    level: gameState.level,
+                    time: elapsedTime,
+                    density: .compact,
+                    includeTime: false
+                )
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+
+            VStack(alignment: .leading, spacing: metrics.sectionSpacing) {
+                GameControlButtonsRow(
+                    buttonSize: metrics.buttonSize,
+                    iconSize: metrics.buttonIconSize,
+                    actions: actions
+                )
+
+                GameStatsView(
+                    score: gameState.score,
+                    lines: Int32(gameState.linesCleared),
+                    level: gameState.level,
+                    time: elapsedTime,
+                    density: .compact,
+                    includeTime: false
+                )
+            }
+        }
+    }
+}
+
+private struct CompactFooterPane: View {
+    let gameState: GameState
+    let elapsedTime: Int64
+    let metrics: GameAdaptiveMetrics
+
+    var body: some View {
+        ViewThatFits(in: .horizontal) {
+            HStack(alignment: .top, spacing: metrics.sectionSpacing) {
+                QueueCompactRow(
+                    holdPiece: gameState.holdPiece,
+                    nextPieces: gameState.visibleNextPieces,
+                    pieceSize: metrics.compactPieceSize
+                )
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+                TimeStatView(
+                    time: elapsedTime,
+                    density: .compact
+                )
+                .frame(width: 92)
+            }
+
+            VStack(alignment: .leading, spacing: metrics.sectionSpacing) {
+                QueueCompactRow(
+                    holdPiece: gameState.holdPiece,
+                    nextPieces: gameState.visibleNextPieces,
+                    pieceSize: metrics.compactPieceSize
+                )
+
+                TimeStatView(
+                    time: elapsedTime,
+                    density: .compact
+                )
+            }
         }
     }
 }
@@ -516,7 +558,7 @@ private struct GameAdaptiveMetrics {
             compactPieceSize = 58
             regularPieceSize = 86
             expandedPieceSize = regularPieceSize
-            secondaryPaneWidth = Self.clamp(size.width * 0.30, min: 220, max: 340)
+            secondaryPaneWidth = Self.clamp(size.width * 0.28, min: 200, max: 320)
             tertiaryPaneWidth = 0
         case .expanded:
             horizontalPadding = 12
@@ -527,8 +569,8 @@ private struct GameAdaptiveMetrics {
             compactPieceSize = 62
             regularPieceSize = 90
             expandedPieceSize = 110
-            secondaryPaneWidth = Self.clamp(size.width * 0.22, min: 240, max: 360)
-            tertiaryPaneWidth = Self.clamp(size.width * 0.18, min: 210, max: 300)
+            secondaryPaneWidth = Self.clamp(size.width * 0.19, min: 210, max: 300)
+            tertiaryPaneWidth = Self.clamp(size.width * 0.17, min: 190, max: 270)
         }
     }
 
