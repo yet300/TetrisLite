@@ -96,6 +96,7 @@ private struct CompactGameLayout: View {
 
             CompactFooterPane(
                 gameState: gameState,
+                settings: settings,
                 elapsedTime: elapsedTime,
                 metrics: metrics
             )
@@ -142,6 +143,7 @@ private struct MediumGameLayout: View {
                 PiecePreviewView(
                     title: Strings.hold,
                     piece: gameState.holdPiece,
+                    settings: settings,
                     previewSize: metrics.regularPieceSize,
                     density: .regular
                 )
@@ -149,6 +151,7 @@ private struct MediumGameLayout: View {
                 NextQueuePreviewView(
                     title: Strings.next,
                     pieces: gameState.visibleNextPieces,
+                    settings: settings,
                     previewSize: metrics.regularPieceSize,
                     density: .regular
                 )
@@ -181,6 +184,7 @@ private struct ExpandedGameLayout: View {
                 PiecePreviewView(
                     title: Strings.hold,
                     piece: gameState.holdPiece,
+                    settings: settings,
                     previewSize: metrics.expandedPieceSize * 0.72,
                     density: .spacious
                 )
@@ -218,6 +222,7 @@ private struct ExpandedGameLayout: View {
                 NextQueuePreviewView(
                     title: Strings.next,
                     pieces: gameState.visibleNextPieces,
+                    settings: settings,
                     previewSize: metrics.expandedPieceSize * 0.58,
                     density: .spacious
                 )
@@ -284,6 +289,7 @@ private struct CompactHeaderPane: View {
 
 private struct CompactFooterPane: View {
     let gameState: GameState
+    let settings: GameSettings
     let elapsedTime: Int64
     let metrics: GameAdaptiveMetrics
 
@@ -293,6 +299,7 @@ private struct CompactFooterPane: View {
                 QueueCompactRow(
                     holdPiece: gameState.holdPiece,
                     nextPieces: gameState.visibleNextPieces,
+                    settings: settings,
                     pieceSize: metrics.compactPieceSize
                 )
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -308,6 +315,7 @@ private struct CompactFooterPane: View {
                 QueueCompactRow(
                     holdPiece: gameState.holdPiece,
                     nextPieces: gameState.visibleNextPieces,
+                    settings: settings,
                     pieceSize: metrics.compactPieceSize
                 )
 
@@ -323,6 +331,7 @@ private struct CompactFooterPane: View {
 private struct QueueCompactRow: View {
     let holdPiece: Tetromino?
     let nextPieces: [Tetromino]
+    let settings: GameSettings
     let pieceSize: CGFloat
 
     var body: some View {
@@ -330,12 +339,14 @@ private struct QueueCompactRow: View {
             PiecePreviewView(
                 title: Strings.hold,
                 piece: holdPiece,
+                settings: settings,
                 previewSize: pieceSize,
                 density: .compact
             )
             NextQueuePreviewView(
                 title: Strings.next,
                 pieces: nextPieces,
+                settings: settings,
                 previewSize: pieceSize,
                 density: .compact,
                 axis: .horizontal

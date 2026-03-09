@@ -189,6 +189,7 @@ private struct StatItem: View {
 struct PiecePreviewView: View {
     let title: String
     let piece: Tetromino?
+    let settings: GameSettings
     let previewSize: CGFloat
     let density: GameStatDensity
 
@@ -201,7 +202,7 @@ struct PiecePreviewView: View {
                 .minimumScaleFactor(0.8)
 
             if let piece {
-                TetrominoPreviewCanvas(piece: piece, previewSize: previewSize)
+                TetrominoPreviewCanvas(piece: piece, settings: settings, previewSize: previewSize)
             } else {
                 PiecePreviewPlaceholder(previewSize: previewSize)
             }
@@ -219,6 +220,7 @@ struct PiecePreviewView: View {
 struct NextQueuePreviewView: View {
     let title: String
     let pieces: [Tetromino]
+    let settings: GameSettings
     let previewSize: CGFloat
     let density: GameStatDensity
     let axis: Axis
@@ -226,12 +228,14 @@ struct NextQueuePreviewView: View {
     init(
         title: String,
         pieces: [Tetromino],
+        settings: GameSettings,
         previewSize: CGFloat,
         density: GameStatDensity,
         axis: Axis = .vertical
     ) {
         self.title = title
         self.pieces = pieces
+        self.settings = settings
         self.previewSize = previewSize
         self.density = density
         self.axis = axis
@@ -253,14 +257,22 @@ struct NextQueuePreviewView: View {
                     if axis == .horizontal {
                         HStack(spacing: density.queueItemSpacing) {
                             ForEach(0..<visibleCount, id: \.self) { index in
-                                TetrominoPreviewCanvas(piece: pieces[index], previewSize: queueItemSize)
+                                TetrominoPreviewCanvas(
+                                    piece: pieces[index],
+                                    settings: settings,
+                                    previewSize: queueItemSize
+                                )
                                     .opacity(queueOpacity(for: index))
                             }
                         }
                     } else {
                         VStack(spacing: density.queueItemSpacing) {
                             ForEach(0..<visibleCount, id: \.self) { index in
-                                TetrominoPreviewCanvas(piece: pieces[index], previewSize: queueItemSize)
+                                TetrominoPreviewCanvas(
+                                    piece: pieces[index],
+                                    settings: settings,
+                                    previewSize: queueItemSize
+                                )
                                     .opacity(queueOpacity(for: index))
                             }
                         }
@@ -297,6 +309,7 @@ struct NextQueuePreviewView: View {
 struct HoldAndNextPreviewView: View {
     let holdPiece: Tetromino?
     let nextPieces: [Tetromino]
+    let settings: GameSettings
     let holdPreviewSize: CGFloat
     let queuePreviewSize: CGFloat
     let density: GameStatDensity
@@ -311,7 +324,7 @@ struct HoldAndNextPreviewView: View {
                     .minimumScaleFactor(0.8)
 
                 if let holdPiece {
-                    TetrominoPreviewCanvas(piece: holdPiece, previewSize: holdPreviewSize)
+                    TetrominoPreviewCanvas(piece: holdPiece, settings: settings, previewSize: holdPreviewSize)
                 } else {
                     PiecePreviewPlaceholder(previewSize: holdPreviewSize)
                 }
@@ -331,7 +344,11 @@ struct HoldAndNextPreviewView: View {
                     let visibleCount = min(nextPieces.count, 3)
                     VStack(spacing: density.queueItemSpacing) {
                         ForEach(0..<visibleCount, id: \.self) { index in
-                            TetrominoPreviewCanvas(piece: nextPieces[index], previewSize: queuePreviewSize)
+                            TetrominoPreviewCanvas(
+                                piece: nextPieces[index],
+                                settings: settings,
+                                previewSize: queuePreviewSize
+                            )
                         }
                     }
                 }
@@ -350,6 +367,7 @@ struct HoldAndNextPreviewView: View {
 
 private struct TetrominoPreviewCanvas: View {
     let piece: Tetromino
+    let settings: GameSettings
     let previewSize: CGFloat
 
     var body: some View {
@@ -375,14 +393,12 @@ private struct TetrominoPreviewCanvas: View {
                 let x = CGFloat(block.x) * cellSize + offsetX
                 let y = CGFloat(block.y) * cellSize + offsetY
 
-                let rect = CGRect(
-                    x: x,
-                    y: y,
-                    width: max(cellSize - 1, 1),
-                    height: max(cellSize - 1, 1)
+                context.drawStyledBlock(
+                    type: piece.type,
+                    settings: settings,
+                    topLeft: CGPoint(x: x, y: y),
+                    cellSize: cellSize
                 )
-
-                context.fill(Path(rect), with: .color(tetrominoColor(for: piece.type)))
             }
         }
         .frame(width: previewSize, height: previewSize)
@@ -498,26 +514,5 @@ private extension GameStatDensity {
         case .spacious:
             return 18
         }
-    }
-}
-
-private func tetrominoColor(for type: TetrominoType) -> Color {
-    switch type {
-    case .i:
-        return Color(red: 0, green: 0.94, blue: 0.94)
-    case .o:
-        return Color(red: 0.94, green: 0.94, blue: 0)
-    case .t:
-        return Color(red: 0.63, green: 0, blue: 0.94)
-    case .s:
-        return Color(red: 0, green: 0.94, blue: 0)
-    case .z:
-        return Color(red: 0.94, green: 0, blue: 0)
-    case .j:
-        return Color(red: 0, green: 0, blue: 0.94)
-    case .l:
-        return Color(red: 0.94, green: 0.63, blue: 0)
-    default:
-        return .gray
     }
 }

@@ -18,8 +18,10 @@ struct GameView: View {
     @State private var shakeAmount: CGFloat = 0
     @State private var contentScale: CGFloat = 1
     @State private var flashOpacity: Double = 0
-    @State private var floatingTexts: [JuiceFloatingTextEntry] = []
-    @State private var particleBursts: [JuiceParticleBurstEntry] = []
+    @State private var floatingTexts: [AppleGameFloatingTextEntry] = []
+    @State private var particleBursts: [AppleGameParticleBurstEntry] = []
+    @State private var lineSweeps: [AppleGameLineSweepEntry] = []
+    @State private var lockGlows: [AppleGameLockGlowEntry] = []
 
     init(_ component: GameComponent) {
         self.component = component
@@ -63,10 +65,14 @@ struct GameView: View {
                     )
                 )
 
-                JuiceOverlayView(
+                AppleGameEffectsOverlay(
+                    profile: .ios,
+                    theme: model.settings.themeConfig.visualTheme,
                     flashOpacity: flashOpacity,
                     floatingTexts: floatingTexts,
-                    particleBursts: particleBursts
+                    particleBursts: particleBursts,
+                    lineSweeps: lineSweeps,
+                    lockGlows: lockGlows
                 )
 
                 if let child = dialog.child?.instance {
@@ -143,12 +149,24 @@ struct GameView: View {
                     intensity: text.intensity,
                     power: CGFloat(text.power)
                 )
+                if isLineClearTextKey(text.textKey) {
+                    addLineSweep(
+                        burstId: burst.id,
+                        intensity: text.intensity,
+                        power: CGFloat(text.power)
+                    )
+                }
             case let explosion as VisualEffectEventExplosion:
                 addParticleBurst(
                     burstId: burst.id,
                     intensity: explosion.intensity,
                     power: CGFloat(explosion.power),
                     particleCount: Int(explosion.particleCount)
+                )
+                addLockGlow(
+                    burstId: burst.id,
+                    intensity: explosion.intensity,
+                    power: CGFloat(explosion.power)
                 )
             default:
                 continue
@@ -191,7 +209,7 @@ struct GameView: View {
         power: CGFloat
     ) {
         let isHigh = intensity == .high
-        let entry = JuiceFloatingTextEntry(
+        let entry = AppleGameFloatingTextEntry(
             id: UUID().uuidString,
             text: text,
             isHigh: isHigh,
@@ -214,7 +232,7 @@ struct GameView: View {
         power: CGFloat,
         particleCount: Int
     ) {
-        let entry = JuiceParticleBurstEntry(
+        let entry = AppleGameParticleBurstEntry(
             id: "\(burstId)-\(UUID().uuidString)",
             isHigh: intensity == .high,
             power: power,
@@ -227,6 +245,48 @@ struct GameView: View {
 
         DispatchQueue.main.asyncAfter(deadline: .now() + entry.duration + 0.1) {
             particleBursts.removeAll {
+                $0.id == entry.id
+            }
+        }
+    }
+
+    private func addLineSweep(
+        burstId: Int64,
+        intensity: IntensityLevel,
+        power: CGFloat
+    ) {
+        let entry = AppleGameLineSweepEntry(
+            id: "sweep-\(burstId)-\(UUID().uuidString)",
+            isHigh: intensity == .high,
+            power: power,
+            createdAt: Date(),
+            duration: 0.38
+        )
+        lineSweeps.append(entry)
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + entry.duration + 0.1) {
+            lineSweeps.removeAll {
+                $0.id == entry.id
+            }
+        }
+    }
+
+    private func addLockGlow(
+        burstId: Int64,
+        intensity: IntensityLevel,
+        power: CGFloat
+    ) {
+        let entry = AppleGameLockGlowEntry(
+            id: "glow-\(burstId)-\(UUID().uuidString)",
+            isHigh: intensity == .high,
+            power: power,
+            createdAt: Date(),
+            duration: 0.34
+        )
+        lockGlows.append(entry)
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + entry.duration + 0.1) {
+            lockGlows.removeAll {
                 $0.id == entry.id
             }
         }

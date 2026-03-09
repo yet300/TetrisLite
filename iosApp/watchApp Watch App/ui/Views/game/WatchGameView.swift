@@ -21,8 +21,10 @@ struct WatchGameView: View {
     @State private var shakeAmount: CGFloat = 0
     @State private var contentScale: CGFloat = 1
     @State private var flashOpacity: Double = 0
-    @State private var floatingTexts: [WatchJuiceFloatingTextEntry] = []
-    @State private var particleBursts: [WatchJuiceParticleBurstEntry] = []
+    @State private var floatingTexts: [AppleGameFloatingTextEntry] = []
+    @State private var particleBursts: [AppleGameParticleBurstEntry] = []
+    @State private var lineSweeps: [AppleGameLineSweepEntry] = []
+    @State private var lockGlows: [AppleGameLockGlowEntry] = []
 
     init(_ component: GameComponent) {
         self.component = component
@@ -120,7 +122,7 @@ struct WatchGameView: View {
                             VStack(spacing: 0) {
                                 Text(Strings.next.uppercased())
                                     .font(.system(size: 6, weight: .bold))
-                                    .foregroundStyle(getAccentColor(for: model.settings.themeConfig.visualTheme))
+                                    .foregroundStyle(themeAccentColor(theme: model.settings.themeConfig.visualTheme))
                                 WatchNextPieceView(piece: gameState.nextPiece, settings: model.settings)
                                     .frame(width: 20, height: 20)
                             }
@@ -129,7 +131,7 @@ struct WatchGameView: View {
                         VStack(spacing: 0) {
                             Text(Strings.score.uppercased())
                                 .font(.system(size: 6, weight: .bold))
-                                .foregroundStyle(getAccentColor(for: model.settings.themeConfig.visualTheme))
+                                .foregroundStyle(themeAccentColor(theme: model.settings.themeConfig.visualTheme))
                             Text(formatScore(model.gameState?.score ?? 0))
                                 .font(.system(size: 9, weight: .bold, design: .monospaced))
                                 .minimumScaleFactor(0.5)
@@ -139,7 +141,7 @@ struct WatchGameView: View {
                         VStack(spacing: 0) {
                             Text(Strings.level.uppercased())
                                 .font(.system(size: 6, weight: .bold))
-                                .foregroundStyle(getAccentColor(for: model.settings.themeConfig.visualTheme))
+                                .foregroundStyle(themeAccentColor(theme: model.settings.themeConfig.visualTheme))
                             Text("\(model.gameState?.level ?? Int32(1))")
                                 .font(.system(size: 9, weight: .bold, design: .monospaced))
                                 .minimumScaleFactor(0.5)
@@ -149,7 +151,7 @@ struct WatchGameView: View {
                         VStack(spacing: 0) {
                             Text(Strings.time.uppercased())
                                 .font(.system(size: 6, weight: .bold))
-                                .foregroundStyle(getAccentColor(for: model.settings.themeConfig.visualTheme))
+                                .foregroundStyle(themeAccentColor(theme: model.settings.themeConfig.visualTheme))
                             Text(formatElapsedTime(model.elapsedTime))
                                 .font(.system(size: 9, weight: .bold, design: .monospaced))
                         }
@@ -162,14 +164,14 @@ struct WatchGameView: View {
                         } label: {
                             ZStack {
                                 Circle()
-                                    .fill(getAccentColor(for: model.settings.themeConfig.visualTheme).opacity(0.15))
+                                    .fill(themeAccentColor(theme: model.settings.themeConfig.visualTheme).opacity(0.15))
                                     .frame(width: 24, height: 24)
                                     .overlay(
-                                        Circle().stroke(getAccentColor(for: model.settings.themeConfig.visualTheme).opacity(0.3), lineWidth: 1)
+                                        Circle().stroke(themeAccentColor(theme: model.settings.themeConfig.visualTheme).opacity(0.3), lineWidth: 1)
                                     )
                                 Image(systemName: "pause.fill")
                                     .font(.system(size: 8, weight: .bold))
-                                    .foregroundStyle(getAccentColor(for: model.settings.themeConfig.visualTheme))
+                                    .foregroundStyle(themeAccentColor(theme: model.settings.themeConfig.visualTheme))
                             }
                             .contentShape(Circle())
                         }
@@ -187,10 +189,14 @@ struct WatchGameView: View {
                 )
             }
 
-            WatchJuiceOverlayView(
+            AppleGameEffectsOverlay(
+                profile: .watch,
+                theme: model.settings.themeConfig.visualTheme,
                 flashOpacity: flashOpacity,
                 floatingTexts: floatingTexts,
-                particleBursts: particleBursts
+                particleBursts: particleBursts,
+                lineSweeps: lineSweeps,
+                lockGlows: lockGlows
             )
 
             if let child = dialog.child?.instance {
@@ -260,12 +266,24 @@ struct WatchGameView: View {
                     intensity: text.intensity,
                     power: CGFloat(text.power)
                 )
+                if isLineClearTextKey(text.textKey) {
+                    addLineSweep(
+                        burstId: burst.id,
+                        intensity: text.intensity,
+                        power: CGFloat(text.power)
+                    )
+                }
             case let explosion as VisualEffectEventExplosion:
                 addParticleBurst(
                     burstId: burst.id,
                     intensity: explosion.intensity,
                     power: CGFloat(explosion.power),
                     particleCount: Int(explosion.particleCount)
+                )
+                addLockGlow(
+                    burstId: burst.id,
+                    intensity: explosion.intensity,
+                    power: CGFloat(explosion.power)
                 )
             default:
                 continue
@@ -309,7 +327,7 @@ struct WatchGameView: View {
         power: CGFloat
     ) {
         let isHigh = intensity == .high
-        let entry = WatchJuiceFloatingTextEntry(
+        let entry = AppleGameFloatingTextEntry(
             id: UUID().uuidString,
             text: text,
             isHigh: isHigh,
@@ -332,7 +350,7 @@ struct WatchGameView: View {
         power: CGFloat,
         particleCount: Int
     ) {
-        let entry = WatchJuiceParticleBurstEntry(
+        let entry = AppleGameParticleBurstEntry(
             id: "\(burstId)-\(UUID().uuidString)",
             isHigh: intensity == .high,
             power: power,
@@ -345,6 +363,48 @@ struct WatchGameView: View {
 
         DispatchQueue.main.asyncAfter(deadline: .now() + entry.duration + 0.08) {
             particleBursts.removeAll {
+                $0.id == entry.id
+            }
+        }
+    }
+
+    private func addLineSweep(
+        burstId: Int64,
+        intensity: IntensityLevel,
+        power: CGFloat
+    ) {
+        let entry = AppleGameLineSweepEntry(
+            id: "sweep-\(burstId)-\(UUID().uuidString)",
+            isHigh: intensity == .high,
+            power: power,
+            createdAt: Date(),
+            duration: 0.36
+        )
+        lineSweeps.append(entry)
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + entry.duration + 0.08) {
+            lineSweeps.removeAll {
+                $0.id == entry.id
+            }
+        }
+    }
+
+    private func addLockGlow(
+        burstId: Int64,
+        intensity: IntensityLevel,
+        power: CGFloat
+    ) {
+        let entry = AppleGameLockGlowEntry(
+            id: "glow-\(burstId)-\(UUID().uuidString)",
+            isHigh: intensity == .high,
+            power: power,
+            createdAt: Date(),
+            duration: 0.32
+        )
+        lockGlows.append(entry)
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + entry.duration + 0.08) {
+            lockGlows.removeAll {
                 $0.id == entry.id
             }
         }
@@ -405,7 +465,7 @@ private struct WatchDialogView: View {
             WatchPauseScreen(
                 score: model.gameState?.score ?? 0,
                 lines: model.gameState?.linesCleared ?? 0,
-                accentColor: getAccentColor(for: model.settings.themeConfig.visualTheme),
+                accentColor: themeAccentColor(theme: model.settings.themeConfig.visualTheme),
                 onResume: { component.onResume() },
                 onSettings: { component.onSettings() },
                 onQuit: { component.onQuit() }
@@ -599,8 +659,7 @@ private struct WatchNextPieceView: View {
                 let x = CGFloat(block.x) * cellSize + offsetX
                 let y = CGFloat(block.y) * cellSize + offsetY
 
-                drawStyledBlock(
-                    context: &context,
+                context.drawStyledBlock(
                     type: piece.type,
                     settings: settings,
                     topLeft: CGPoint(x: x, y: y),
@@ -628,193 +687,72 @@ private struct WatchMiniBoardView: View {
             let offsetX = (geometry.size.width - boardWidth) / 2
             let offsetY = (geometry.size.height - boardHeight) / 2
 
-            Canvas { context, size in
-                let boardRect = CGRect(x: offsetX, y: offsetY, width: boardWidth, height: boardHeight)
-                let boardPath = RoundedRectangle(cornerRadius: 6, style: .continuous).path(in: boardRect)
-                context.fill(boardPath, with: .color(getBackgroundColor(for: settings.themeConfig.visualTheme)))
+            TimelineView(.animation(minimumInterval: 1.0 / 20.0)) { timeline in
+                Canvas { context, size in
+                    let boardRect = CGRect(x: offsetX, y: offsetY, width: boardWidth, height: boardHeight)
 
-                // Grid lines (optional for mini board)
-                drawGrid(context: &context, size: CGSize(width: boardWidth, height: boardHeight), offsetX: offsetX, offsetY: offsetY, cellSize: cellSize, theme: settings.themeConfig.visualTheme)
+                    context.drawBoardChrome(
+                        settings: settings,
+                        boardRect: boardRect,
+                        columns: Int(gameState.board.width),
+                        rows: Int(gameState.board.height),
+                        cellSize: cellSize,
+                        profile: .watch,
+                        shimmerPhase: boardShimmerPhase(at: timeline.date)
+                    )
 
-                for (pos, tetrominoType) in gameState.board.cells {
-                    if pos.y >= 0 {
-                        drawStyledBlock(
-                            context: &context,
-                            type: tetrominoType,
-                            settings: settings,
-                            topLeft: CGPoint(x: offsetX + CGFloat(pos.x) * cellSize, y: offsetY + CGFloat(pos.y) * cellSize),
-                            cellSize: cellSize
-                        )
-                    }
-                }
+                    context.drawBoardGrid(
+                        theme: settings.themeConfig.visualTheme,
+                        boardRect: boardRect,
+                        columns: Int(gameState.board.width),
+                        rows: Int(gameState.board.height),
+                        cellSize: cellSize,
+                        profile: .watch
+                    )
 
-                // Ghost Piece
-                if let piece = gameState.currentPiece, let gy = ghostY {
-                    for blockPos in piece.blocks {
-                        let absoluteX = gameState.currentPosition.x + blockPos.x
-                        let absoluteY = gy + blockPos.y
-                        if absoluteY >= 0 && absoluteY < gameState.board.height {
-                            drawStyledBlock(
-                                context: &context,
-                                type: piece.type,
+                    for (pos, tetrominoType) in gameState.board.cells {
+                        if pos.y >= 0 {
+                            context.drawStyledBlock(
+                                type: tetrominoType,
                                 settings: settings,
-                                topLeft: CGPoint(x: offsetX + CGFloat(absoluteX) * cellSize, y: offsetY + CGFloat(absoluteY) * cellSize),
-                                cellSize: cellSize,
-                                alpha: 0.3
-                            )
-                        }
-                    }
-                }
-
-                if let piece = gameState.currentPiece {
-                    for blockPos in piece.blocks {
-                        let absoluteX = gameState.currentPosition.x + blockPos.x
-                        let absoluteY = gameState.currentPosition.y + blockPos.y
-                        if absoluteY >= 0 && absoluteY < gameState.board.height {
-                            drawStyledBlock(
-                                context: &context,
-                                type: piece.type,
-                                settings: settings,
-                                topLeft: CGPoint(x: offsetX + CGFloat(absoluteX) * cellSize, y: offsetY + CGFloat(absoluteY) * cellSize),
+                                topLeft: CGPoint(x: offsetX + CGFloat(pos.x) * cellSize, y: offsetY + CGFloat(pos.y) * cellSize),
                                 cellSize: cellSize
                             )
                         }
                     }
+
+                    if let piece = gameState.currentPiece, let gy = ghostY {
+                        for blockPos in piece.blocks {
+                            let absoluteX = gameState.currentPosition.x + blockPos.x
+                            let absoluteY = gy + blockPos.y
+                            if absoluteY >= 0 && absoluteY < gameState.board.height {
+                                context.drawStyledBlock(
+                                    type: piece.type,
+                                    settings: settings,
+                                    topLeft: CGPoint(x: offsetX + CGFloat(absoluteX) * cellSize, y: offsetY + CGFloat(absoluteY) * cellSize),
+                                    cellSize: cellSize,
+                                    alpha: 0.3
+                                )
+                            }
+                        }
+                    }
+
+                    if let piece = gameState.currentPiece {
+                        for blockPos in piece.blocks {
+                            let absoluteX = gameState.currentPosition.x + blockPos.x
+                            let absoluteY = gameState.currentPosition.y + blockPos.y
+                            if absoluteY >= 0 && absoluteY < gameState.board.height {
+                                context.drawStyledBlock(
+                                    type: piece.type,
+                                    settings: settings,
+                                    topLeft: CGPoint(x: offsetX + CGFloat(absoluteX) * cellSize, y: offsetY + CGFloat(absoluteY) * cellSize),
+                                    cellSize: cellSize
+                                )
+                            }
+                        }
+                    }
                 }
             }
-        }
-    }
-
-    private func getBackgroundColor(for theme: VisualTheme) -> Color {
-        switch theme {
-        case .retroGameboy: return Color(red: 0.6, green: 0.73, blue: 0.05)
-        case .ocean: return Color(red: 0.0, green: 0.1, blue: 0.25)
-        case .forest: return Color(red: 0.05, green: 0.12, blue: 0.05)
-        default: return WatchPalette.boardBackground
-        }
-    }
-
-    private func drawGrid(context: inout GraphicsContext, size: CGSize, offsetX: CGFloat, offsetY: CGFloat, cellSize: CGFloat, theme: VisualTheme) {
-        let gridColor: Color
-        switch theme {
-        case .retroGameboy: gridColor = Color(red: 0.54, green: 0.67, blue: 0.05)
-        case .neon: gridColor = Color(red: 0.0, green: 1.0, blue: 1.0).opacity(0.1)
-        default: gridColor = Color.white.opacity(0.05)
-        }
-
-        context.stroke(
-            Path { path in
-                for x in 0...10 {
-                    path.move(to: CGPoint(x: offsetX + CGFloat(x) * cellSize, y: offsetY))
-                    path.addLine(to: CGPoint(x: offsetX + CGFloat(x) * cellSize, y: offsetY + size.height))
-                }
-                for y in 0...20 {
-                    path.move(to: CGPoint(x: offsetX, y: offsetY + CGFloat(y) * cellSize))
-                    path.addLine(to: CGPoint(x: offsetX + size.width, y: offsetY + CGFloat(y) * cellSize))
-                }
-            },
-            with: .color(gridColor),
-            lineWidth: 0.5
-        )
-    }
-}
-
-// MARK: - Styled Block Drawing Helper
-extension View {
-    func drawStyledBlock(
-        context: inout GraphicsContext,
-        type: TetrominoType,
-        settings: GameSettings,
-        topLeft: CGPoint,
-        cellSize: CGFloat,
-        alpha: CGFloat = 1.0
-    ) {
-        let baseColor = getTetrominoColor(type: type, theme: settings.themeConfig.visualTheme).opacity(alpha)
-        let blockSize = CGSize(width: cellSize - 0.5, height: cellSize - 0.5)
-        let rect = CGRect(origin: topLeft, size: blockSize)
-
-        switch settings.themeConfig.pieceStyle {
-        case .bordered:
-            context.fill(Path(rect), with: .color(baseColor))
-            let innerRect = rect.insetBy(dx: cellSize * 0.15, dy: cellSize * 0.15)
-            context.stroke(Path(rect), with: .color(.white.opacity(alpha * 0.3)), lineWidth: 0.5)
-            context.fill(Path(innerRect), with: .color(.white.opacity(alpha * 0.2)))
-
-        case .gradient:
-            let gradient = Gradient(colors: [baseColor, baseColor.opacity(0.6)])
-            context.fill(Path(rect), with: .linearGradient(gradient, startPoint: topLeft, endPoint: CGPoint(x: topLeft.x + blockSize.width, y: topLeft.y + blockSize.height)))
-
-        case .retroPixel:
-            context.fill(Path(rect), with: .color(baseColor))
-            let pixelSize = cellSize / 3
-            let highlightRect = CGRect(x: topLeft.x, y: topLeft.y, width: pixelSize, height: pixelSize)
-            context.fill(Path(highlightRect), with: .color(.white.opacity(alpha * 0.3)))
-
-        case .glass:
-            let path = RoundedRectangle(cornerRadius: cellSize * 0.2, style: .continuous).path(in: rect)
-            context.fill(path, with: .color(baseColor.opacity(0.7)))
-            context.stroke(path, with: .color(.white.opacity(alpha * 0.5)), lineWidth: 0.5)
-
-        default: // Solid
-            context.fill(Path(rect), with: .color(baseColor))
-        }
-    }
-
-    private func getTetrominoColor(type: TetrominoType, theme: VisualTheme) -> Color {
-        switch theme {
-        case .retroGameboy:
-            return (type == .i || type == .t || type == .z || type == .l) ? Color(red: 0.05, green: 0.22, blue: 0.05) : Color(red: 0.19, green: 0.38, blue: 0.19)
-
-        case .monochrome:
-            switch type {
-            case .i: return .white
-            case .o: return .gray.opacity(0.9)
-            case .t: return .gray.opacity(0.8)
-            case .s: return .gray.opacity(0.7)
-            case .z: return .gray.opacity(0.6)
-            case .j: return .gray.opacity(0.5)
-            case .l: return .gray.opacity(0.4)
-            default: return .white
-            }
-
-        case .neon:
-            switch type {
-            case .i: return Color(red: 0.0, green: 1.0, blue: 1.0)
-            case .o: return Color(red: 1.0, green: 1.0, blue: 0.0)
-            case .t: return Color(red: 1.0, green: 0.0, blue: 1.0)
-            case .s: return Color(red: 0.0, green: 1.0, blue: 0.0)
-            case .z: return Color(red: 1.0, green: 0.0, blue: 0.4)
-            case .j: return Color(red: 0.0, green: 0.4, blue: 1.0)
-            case .l: return Color(red: 1.0, green: 0.4, blue: 0.0)
-            default: return .white
-            }
-
-        default: // Classic & Others
-            switch type {
-            case .i: return Color(red: 0.0, green: 0.94, blue: 0.94)
-            case .o: return Color(red: 0.94, green: 0.94, blue: 0.0)
-            case .t: return Color(red: 0.63, green: 0.0, blue: 0.94)
-            case .s: return Color(red: 0.0, green: 0.94, blue: 0.0)
-            case .z: return Color(red: 0.94, green: 0.0, blue: 0.0)
-            case .j: return Color(red: 0.0, green: 0.0, blue: 0.94)
-            case .l: return Color(red: 0.94, green: 0.63, blue: 0.0)
-            default: return .gray
-            }
-        }
-    }
-
-    func getAccentColor(for theme: VisualTheme) -> Color {
-        switch theme {
-        case .classic: return WatchPalette.accent
-        case .retroGameboy: return Color(red: 0.05, green: 0.22, blue: 0.05)
-        case .retroNes: return Color(red: 1.0, green: 0.47, blue: 0.0)
-        case .neon: return Color(red: 0.0, green: 1.0, blue: 1.0)
-        case .pastel: return Color(red: 0.7, green: 0.9, blue: 1.0)
-        case .monochrome: return .white
-        case .ocean: return Color(red: 0.0, green: 0.8, blue: 1.0)
-        case .sunset: return Color(red: 1.0, green: 0.4, blue: 0.2)
-        case .forest: return Color(red: 0.1, green: 0.8, blue: 0.1)
-        default: return WatchPalette.accent
         }
     }
 }
@@ -848,161 +786,6 @@ private struct WatchJuiceModifier: ViewModifier {
         content
             .modifier(WatchJuiceShakeEffect(amount: shakeAmount, phase: shakePhase))
             .scaleEffect(scale)
-    }
-}
-
-private struct WatchJuiceFloatingTextEntry: Identifiable {
-    let id: String
-    let text: String
-    let isHigh: Bool
-    let power: CGFloat
-    let createdAt: Date
-    let duration: TimeInterval
-
-    func progress(at date: Date) -> CGFloat {
-        guard duration > 0 else {
-            return 1
-        }
-        let elapsed = date.timeIntervalSince(createdAt)
-        let raw = elapsed / duration
-        return CGFloat(min(max(raw, 0), 1))
-    }
-}
-
-private struct WatchJuiceParticleBurstEntry: Identifiable {
-    let id: String
-    let isHigh: Bool
-    let power: CGFloat
-    let particleCount: Int
-    let seed: Int
-    let createdAt: Date
-    let duration: TimeInterval
-
-    func progress(at date: Date) -> CGFloat {
-        guard duration > 0 else {
-            return 1
-        }
-        let elapsed = date.timeIntervalSince(createdAt)
-        let raw = elapsed / duration
-        return CGFloat(min(max(raw, 0), 1))
-    }
-}
-
-private struct WatchJuiceOverlayView: View {
-    let flashOpacity: Double
-    let floatingTexts: [WatchJuiceFloatingTextEntry]
-    let particleBursts: [WatchJuiceParticleBurstEntry]
-
-    var body: some View {
-        ZStack {
-            if flashOpacity > 0.001 {
-                Color.white
-                    .opacity(flashOpacity)
-                    .ignoresSafeArea()
-            }
-
-            TimelineView(.animation(minimumInterval: 1.0 / 45.0)) { timeline in
-                ZStack {
-                    ForEach(floatingTexts) { entry in
-                        let progress = entry.progress(at: timeline.date)
-                        if progress < 1 {
-                            let pulse =
-                                entry.isHigh
-                                    ? 1 + (sin(progress * .pi * 8) * 0.08 * (1 - progress))
-                                    : 1 + ((1 - progress) * 0.02)
-                            let fontSize = entry.isHigh ? 18 + (4 * entry.power) : 11 + (2 * entry.power)
-                            let rise = entry.isHigh ? 40.0 : 24.0
-
-                            Text(entry.text)
-                                .font(
-                                    .system(
-                                        size: fontSize,
-                                        weight: .black,
-                                        design: .rounded
-                                    )
-                                )
-                                .foregroundStyle(entry.isHigh ? Color.yellow : Color.white)
-                                .kerning(entry.isHigh ? 0.8 : 0.4)
-                                .watchGameStroke(
-                                    color: entry.isHigh ? Color(red: 0.2, green: 0.08, blue: 0) : Color.black.opacity(0.95),
-                                    width: entry.isHigh ? 1.8 : 1.2
-                                )
-                                .scaleEffect(pulse)
-                                .offset(y: -(rise * progress))
-                                .opacity(1 - progress)
-                        }
-                    }
-
-                    Canvas { context, size in
-                        let center = CGPoint(x: size.width / 2, y: size.height / 2)
-
-                        for burst in particleBursts {
-                            let progress = burst.progress(at: timeline.date)
-                            guard progress < 1 else {
-                                continue
-                            }
-
-                            let maxRadius: CGFloat = 22 + ((48 - 22) * burst.power)
-                            let alpha = (1 - progress) * (0.6 + (0.3 * burst.power))
-
-                            for index in 0..<burst.particleCount {
-                                let angle = watchSeededFloat(seed: burst.seed, index: index, salt: 11) * (.pi * 2)
-                                let speedScale = 0.45 + (watchSeededFloat(seed: burst.seed, index: index, salt: 23) * 0.75)
-                                let radius = maxRadius * progress * speedScale
-                                let x = center.x + cos(angle) * radius
-                                let y = center.y + sin(angle) * radius - (progress * 8)
-                                let particleRadius = 0.8 + (watchSeededFloat(seed: burst.seed, index: index, salt: 37) * 1.6)
-
-                                let rect = CGRect(
-                                    x: x - particleRadius,
-                                    y: y - particleRadius,
-                                    width: particleRadius * 2,
-                                    height: particleRadius * 2
-                                )
-
-                                context.fill(
-                                    Path(ellipseIn: rect),
-                                    with: .color((burst.isHigh ? Color(red: 1, green: 0.95, blue: 0.7) : .white).opacity(alpha))
-                                )
-                            }
-                        }
-                    }
-                }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-            }
-        }
-        .allowsHitTesting(false)
-    }
-}
-
-private func watchSeededFloat(
-    seed: Int,
-    index: Int,
-    salt: Int
-) -> CGFloat {
-    var value = Int64(seed) * 1_103_515_245 + Int64(index) * 12_345 + Int64(salt) * 1_013_904_223
-    value ^= (value << 13)
-    value ^= (value >> 17)
-    value ^= (value << 5)
-
-    let positive = value & 0x7fff_ffff
-    return CGFloat(Double(positive) / Double(0x7fff_ffff))
-}
-
-private extension View {
-    func watchGameStroke(
-        color: Color,
-        width: CGFloat
-    ) -> some View {
-        self
-            .shadow(color: color, radius: 0, x: width, y: 0)
-            .shadow(color: color, radius: 0, x: -width, y: 0)
-            .shadow(color: color, radius: 0, x: 0, y: width)
-            .shadow(color: color, radius: 0, x: 0, y: -width)
-            .shadow(color: color, radius: 0, x: width * 0.7, y: width * 0.7)
-            .shadow(color: color, radius: 0, x: -width * 0.7, y: width * 0.7)
-            .shadow(color: color, radius: 0, x: width * 0.7, y: -width * 0.7)
-            .shadow(color: color, radius: 0, x: -width * 0.7, y: -width * 0.7)
     }
 }
 

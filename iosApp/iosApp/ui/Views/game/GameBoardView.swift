@@ -7,82 +7,74 @@ struct GameBoardView: View {
     let ghostY: Int32?
     
     var body: some View {
-        Canvas { context, size in
-            let cellSize = size.width / CGFloat(gameState.board.width)
-            
-            // Draw background
-            context.fill(
-                Path(CGRect(origin: .zero, size: size)),
-                with: .color(getBackgroundColor())
-            )
-            
-            // Draw locked blocks
-            for (pos, tetrominoType) in gameState.board.cells {
-                 if pos.y >= 0 {
-                     context.drawStyledBlock(
-                         type: tetrominoType,
-                         settings: settings,
-                         topLeft: CGPoint(x: CGFloat(pos.x) * cellSize, y: CGFloat(pos.y) * cellSize),
-                         cellSize: cellSize,
-                     )
-                 }
-             }
-            
-            // Draw ghost piece
-            if let piece = gameState.currentPiece, let landingY = ghostY, landingY > gameState.currentPosition.y {
-                for blockPos in piece.blocks {
-                    let absoluteX = gameState.currentPosition.x + blockPos.x
-                    let absoluteY = landingY + blockPos.y
-                    
-                    if absoluteY >= 0 && absoluteY < gameState.board.height {
+        TimelineView(.animation(minimumInterval: 1.0 / 24.0)) { timeline in
+            Canvas { context, size in
+                let cellSize = size.width / CGFloat(gameState.board.width)
+                let boardRect = CGRect(origin: .zero, size: size)
+
+                context.drawBoardChrome(
+                    settings: settings,
+                    boardRect: boardRect,
+                    columns: Int(gameState.board.width),
+                    rows: Int(gameState.board.height),
+                    cellSize: cellSize,
+                    profile: .ios,
+                    shimmerPhase: boardShimmerPhase(at: timeline.date)
+                )
+
+                for (pos, tetrominoType) in gameState.board.cells {
+                    if pos.y >= 0 {
                         context.drawStyledBlock(
-                            type: piece.type,
+                            type: tetrominoType,
                             settings: settings,
-                            topLeft: CGPoint(x: CGFloat(absoluteX) * cellSize, y: CGFloat(absoluteY) * cellSize),
-                            cellSize: cellSize,
-                            alpha: 0.3
-                        )
-                    }
-                }
-            }
-            
-            // Draw current piece
-            if let piece = gameState.currentPiece {
-                for blockPos in piece.blocks {
-                    let absoluteX = gameState.currentPosition.x + blockPos.x
-                    let absoluteY = gameState.currentPosition.y + blockPos.y
-                    
-                    if absoluteY >= 0 && absoluteY < gameState.board.height {
-                        context.drawStyledBlock(
-                            type: piece.type,
-                            settings: settings,
-                            topLeft: CGPoint(x: CGFloat(absoluteX) * cellSize, y: CGFloat(absoluteY) * cellSize),
+                            topLeft: CGPoint(x: CGFloat(pos.x) * cellSize, y: CGFloat(pos.y) * cellSize),
                             cellSize: cellSize
                         )
                     }
                 }
+
+                if let piece = gameState.currentPiece, let landingY = ghostY, landingY > gameState.currentPosition.y {
+                    for blockPos in piece.blocks {
+                        let absoluteX = gameState.currentPosition.x + blockPos.x
+                        let absoluteY = landingY + blockPos.y
+
+                        if absoluteY >= 0 && absoluteY < gameState.board.height {
+                            context.drawStyledBlock(
+                                type: piece.type,
+                                settings: settings,
+                                topLeft: CGPoint(x: CGFloat(absoluteX) * cellSize, y: CGFloat(absoluteY) * cellSize),
+                                cellSize: cellSize,
+                                alpha: 0.3
+                            )
+                        }
+                    }
+                }
+
+                if let piece = gameState.currentPiece {
+                    for blockPos in piece.blocks {
+                        let absoluteX = gameState.currentPosition.x + blockPos.x
+                        let absoluteY = gameState.currentPosition.y + blockPos.y
+
+                        if absoluteY >= 0 && absoluteY < gameState.board.height {
+                            context.drawStyledBlock(
+                                type: piece.type,
+                                settings: settings,
+                                topLeft: CGPoint(x: CGFloat(absoluteX) * cellSize, y: CGFloat(absoluteY) * cellSize),
+                                cellSize: cellSize
+                            )
+                        }
+                    }
+                }
+
+                context.drawBoardGrid(
+                    theme: settings.themeConfig.visualTheme,
+                    boardRect: boardRect,
+                    columns: Int(gameState.board.width),
+                    rows: Int(gameState.board.height),
+                    cellSize: cellSize,
+                    profile: .ios
+                )
             }
-            
-            // Draw grid lines
-            context.stroke(
-                Path { path in
-                    for x in 0...Int(gameState.board.width) {
-                        path.move(to: CGPoint(x: CGFloat(x) * cellSize, y: 0))
-                        path.addLine(to: CGPoint(x: CGFloat(x) * cellSize, y: size.height))
-                    }
-                    for y in 0...Int(gameState.board.height) {
-                        path.move(to: CGPoint(x: 0, y: CGFloat(y) * cellSize))
-                        path.addLine(to: CGPoint(x: size.width, y: CGFloat(y) * cellSize))
-                    }
-                },
-                with: .color(.secondarySystemFill.opacity(0.2)),
-                lineWidth: 1
-            )
         }
-        .border(Color.secondarySystemFill.opacity(0.5), width: 2)
-    }
-    
-    private func getBackgroundColor() -> Color {
-        return .systemBackground.opacity(0.4)
     }
 }
