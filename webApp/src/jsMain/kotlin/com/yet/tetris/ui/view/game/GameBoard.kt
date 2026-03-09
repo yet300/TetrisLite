@@ -5,6 +5,7 @@ import com.yet.tetris.ui.view.game.gestures.GestureHandler
 import com.yet.tetris.ui.view.game.rendering.BoardRenderer
 import com.yet.tetris.ui.view.game.rendering.WebLineSweepEffect
 import com.yet.tetris.ui.view.game.rendering.WebLockGlowEffect
+import com.yet.tetris.ui.view.game.rendering.webBoardChromeStyle
 import kotlinx.browser.window
 import js.objects.unsafeJso
 import mui.material.Box
@@ -53,6 +54,7 @@ val GameBoard =
         val totalDragRef = useRef<dynamic>() // Track total drag distance
         val canvasWidth = props.canvasWidthPx ?: 380.0
         val maxBoardWidth = props.maxBoardWidthPx ?: canvasWidth
+        val chrome = webBoardChromeStyle(props.settings)
 
         // Setup gesture event listeners
         useEffect(Unit) {
@@ -129,10 +131,10 @@ val GameBoard =
                         width = canvasWidth.px
                         maxWidth = maxBoardWidth.px
                         height = "auto".unsafeCast<web.cssom.Height>()
-                        border = "2px solid rgba(255, 255, 255, 0.3)".unsafeCast<Border>()
-                        borderRadius = 8.px
-                        backgroundColor = Color("#000000")
-                        boxShadow = "0 10px 40px rgba(0, 0, 0, 0.5)".unsafeCast<BoxShadow>()
+                        border = "2px solid ${chrome.borderColor}".unsafeCast<Border>()
+                        borderRadius = 12.px
+                        backgroundColor = Color(chrome.backgroundColor)
+                        boxShadow = chrome.boxShadow.unsafeCast<BoxShadow>()
                         touchAction = "none".unsafeCast<web.cssom.TouchAction>()
                         cursor = "pointer".unsafeCast<web.cssom.Cursor>()
                         display = "block".unsafeCast<Display>()

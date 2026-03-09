@@ -118,7 +118,7 @@ object ThemeColors {
         settings: GameSettings,
     ): String {
         val baseColor = getTetrominoColor(type, settings)
-        return lightenColorHex(baseColor, 0.3)
+        return lightenHexColor(baseColor, 0.3)
     }
 
     fun getTetrominoDarkColor(
@@ -126,7 +126,7 @@ object ThemeColors {
         settings: GameSettings,
     ): String {
         val baseColor = getTetrominoColor(type, settings)
-        return darkenColorHex(baseColor, 0.3)
+        return darkenHexColor(baseColor, 0.3)
     }
 
     fun getBackgroundColor(settings: GameSettings): String {
@@ -161,7 +161,7 @@ object ThemeColors {
         return "#${color.toString(16).padStart(6, '0')}"
     }
 
-    private fun lightenColorHex(
+    fun lightenHexColor(
         hex: String,
         factor: Double,
     ): String {
@@ -177,7 +177,7 @@ object ThemeColors {
         return "#${((newR shl 16) or (newG shl 8) or newB).toString(16).padStart(6, '0')}"
     }
 
-    private fun darkenColorHex(
+    fun darkenHexColor(
         hex: String,
         factor: Double,
     ): String {

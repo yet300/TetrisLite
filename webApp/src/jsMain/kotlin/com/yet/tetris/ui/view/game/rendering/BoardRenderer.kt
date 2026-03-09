@@ -26,10 +26,16 @@ object BoardRenderer {
         val cellSize = canvas.width.toDouble() / cols
         canvas.height = (rows * cellSize).toInt()
 
-        // Clear canvas with theme background color
-        val bgColor = ThemeColors.getBackgroundColor(settings)
-        ctx.fillStyle = bgColor.toJsString()
-        ctx.fillRect(0.0, 0.0, canvas.width.toDouble(), canvas.height.toDouble())
+        drawBoardSurface(
+            ctx = ctx,
+            width = canvas.width.toDouble(),
+            height = canvas.height.toDouble(),
+            cols = cols,
+            rows = rows,
+            cellSize = cellSize,
+            settings = settings,
+            effectTimeMs = effectTimeMs,
+        )
 
         // Draw locked blocks
         board.cells.forEach { (pos, type) ->
@@ -113,6 +119,69 @@ object BoardRenderer {
 
         // Draw grid lines
         drawGrid(ctx, canvas, rows, cols, cellSize, settings)
+    }
+
+    private fun drawBoardSurface(
+        ctx: CanvasRenderingContext2D,
+        width: Double,
+        height: Double,
+        cols: Int,
+        rows: Int,
+        cellSize: Double,
+        settings: GameSettings,
+        effectTimeMs: Double,
+    ) {
+        val chrome = webBoardChromeStyle(settings)
+
+        ctx.save()
+        ctx.fillStyle = chrome.backgroundColor.toJsString()
+        ctx.fillRect(0.0, 0.0, width, height)
+
+        for (row in 0 until rows) {
+            for (column in 0 until cols) {
+                ctx.fillStyle =
+                    if ((row + column) % 2 == 0) {
+                        chrome.checkerPrimary.toJsString()
+                    } else {
+                        chrome.checkerSecondary.toJsString()
+                    }
+                ctx.fillRect(column * cellSize, row * cellSize, cellSize, cellSize)
+            }
+        }
+
+        val verticalGradient = ctx.createLinearGradient(0.0, 0.0, 0.0, height)
+        verticalGradient.addColorStop(0.0, chrome.rimLight)
+        verticalGradient.addColorStop(0.18, chrome.verticalLight)
+        verticalGradient.addColorStop(0.55, "rgba(0, 0, 0, 0)")
+        verticalGradient.addColorStop(1.0, chrome.verticalShadow)
+        ctx.fillStyle = verticalGradient
+        ctx.fillRect(0.0, 0.0, width, height)
+
+        val horizontalGradient = ctx.createLinearGradient(0.0, 0.0, width, 0.0)
+        horizontalGradient.addColorStop(0.0, chrome.horizontalLight)
+        horizontalGradient.addColorStop(0.45, "rgba(0, 0, 0, 0)")
+        horizontalGradient.addColorStop(1.0, chrome.horizontalShadow)
+        ctx.fillStyle = horizontalGradient
+        ctx.fillRect(0.0, 0.0, width, height)
+
+        ctx.fillStyle = chrome.rimLight.toJsString()
+        ctx.fillRect(0.0, 0.0, width, kotlin.math.max(2.0, cellSize * 0.2))
+
+        if (chrome.shimmerEnabled) {
+            val shimmerWidth = kotlin.math.max(width * 0.3, cellSize * 3.5)
+            val shimmerProgress = (effectTimeMs % 2200.0) / 2200.0
+            val shimmerLeft = -shimmerWidth + ((width + shimmerWidth) * shimmerProgress)
+            val shimmer = ctx.createLinearGradient(shimmerLeft, 0.0, shimmerLeft + shimmerWidth, 0.0)
+            shimmer.addColorStop(0.0, "rgba(0, 0, 0, 0)")
+            shimmer.addColorStop(0.35, chrome.shimmerPrimary)
+            shimmer.addColorStop(0.5, chrome.shimmerSecondary)
+            shimmer.addColorStop(0.65, chrome.shimmerPrimary)
+            shimmer.addColorStop(1.0, "rgba(0, 0, 0, 0)")
+            ctx.fillStyle = shimmer
+            ctx.fillRect(shimmerLeft, 0.0, shimmerWidth, height)
+        }
+
+        ctx.restore()
     }
 
     private fun drawLineSweeps(
@@ -240,11 +309,19 @@ object BoardRenderer {
         settings: GameSettings,
     ) {
         val gridColor = ThemeColors.getGridColor(settings)
-        ctx.strokeStyle = gridColor.toJsString()
         ctx.lineWidth = 1.0
 
         // Vertical lines
         for (x in 0..cols) {
+            ctx.strokeStyle =
+                colorWithAlpha(
+                    gridColor,
+                    if (x == 0 || x == cols) {
+                        0.28
+                    } else {
+                        0.16
+                    },
+                ).toJsString()
             ctx.beginPath()
             ctx.moveTo(x * cellSize, 0.0)
             ctx.lineTo(x * cellSize, canvas.height.toDouble())
@@ -253,6 +330,15 @@ object BoardRenderer {
 
         // Horizontal lines
         for (y in 0..rows) {
+            ctx.strokeStyle =
+                colorWithAlpha(
+                    gridColor,
+                    if (y == 0 || y == rows) {
+                        0.28
+                    } else {
+                        0.16
+                    },
+                ).toJsString()
             ctx.beginPath()
             ctx.moveTo(0.0, y * cellSize)
             ctx.lineTo(canvas.width.toDouble(), y * cellSize)
