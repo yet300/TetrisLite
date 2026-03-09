@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -50,15 +51,12 @@ internal fun CompactGameLayout(
         modifier = modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(metrics.paneSpacing),
     ) {
-        CompactTopPane(
+        CompactHeaderPane(
             gameState = gameState,
             elapsedTime = model.elapsedTime,
-            settings = model.settings,
             onPause = actions.onPause,
             onHold = actions.onHold,
             buttonSize = metrics.buttonSize,
-            holdPieceSize = metrics.holdPieceSize,
-            queuePieceSize = metrics.queuePieceSize,
         )
 
         GameBoardPane(
@@ -71,6 +69,14 @@ internal fun CompactGameLayout(
             ghostPieceY = model.ghostPieceY,
             boardMaxWidth = metrics.boardMaxWidth,
             actions = actions,
+        )
+
+        CompactBottomPane(
+            gameState = gameState,
+            elapsedTime = model.elapsedTime,
+            settings = model.settings,
+            holdPieceSize = metrics.holdPieceSize,
+            queuePieceSize = metrics.queuePieceSize,
         )
     }
 }
@@ -112,7 +118,7 @@ internal fun CanonicalSupportingPaneGameLayout(
             )
         },
         supportingPane = {
-            AdaptiveInfoPane(
+            MediumSupportingPane(
                 gameState = gameState,
                 elapsedTime = model.elapsedTime,
                 settings = model.settings,
@@ -128,35 +134,107 @@ internal fun CanonicalSupportingPaneGameLayout(
 }
 
 @Composable
-private fun CompactTopPane(
+internal fun ExpandedGameLayout(
+    modifier: Modifier,
+    gameState: GameState,
+    model: GameComponent.Model,
+    actions: GameInputActions,
+    metrics: GameLayoutMetrics,
+) {
+    Row(
+        modifier = modifier.fillMaxSize(),
+        horizontalArrangement = Arrangement.spacedBy(metrics.paneSpacing),
+    ) {
+        Column(
+            modifier =
+                Modifier
+                    .weight(0.92f)
+                    .fillMaxHeight(),
+            verticalArrangement = Arrangement.spacedBy(metrics.paneSpacing),
+        ) {
+            HoldPreviewPanel(
+                holdPiece = gameState.holdPiece,
+                settings = model.settings,
+                pieceSize = metrics.holdPieceSize,
+                modifier = Modifier.fillMaxWidth(),
+            )
+
+            GameStatsPanel(
+                score = gameState.score,
+                lines = gameState.linesCleared,
+                level = gameState.level,
+                time = model.elapsedTime,
+                compact = false,
+                includeTime = false,
+                modifier = Modifier.fillMaxWidth(),
+            )
+
+            Spacer(modifier = Modifier.weight(1f))
+
+            GameActionButtons(
+                onPause = actions.onPause,
+                onHold = actions.onHold,
+                buttonSize = metrics.buttonSize,
+            )
+        }
+
+        GameBoardPane(
+            modifier =
+                Modifier
+                    .weight(1.42f)
+                    .fillMaxHeight(),
+            gameState = gameState,
+            settings = model.settings,
+            ghostPieceY = model.ghostPieceY,
+            boardMaxWidth = metrics.boardMaxWidth,
+            actions = actions,
+            fitHeightFirst = true,
+            paneAlignment = Alignment.Center,
+        )
+
+        Column(
+            modifier =
+                Modifier
+                    .weight(1f)
+                    .fillMaxHeight(),
+            verticalArrangement = Arrangement.spacedBy(metrics.paneSpacing),
+        ) {
+            NextQueuePanel(
+                previewPieces = gameState.previewPieces,
+                settings = model.settings,
+                pieceSize = metrics.queuePieceSize,
+                modifier = Modifier.fillMaxWidth(),
+            )
+
+            Spacer(modifier = Modifier.weight(1f))
+
+            TimeStatPanel(
+                time = model.elapsedTime,
+                compact = false,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
+    }
+}
+
+@Composable
+private fun CompactHeaderPane(
     gameState: GameState,
     elapsedTime: Long,
-    settings: GameSettings,
     onPause: () -> Unit,
     onHold: () -> Unit,
     buttonSize: Dp,
-    holdPieceSize: Dp,
-    queuePieceSize: Dp,
 ) {
-    Column(
+    Row(
         modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(4.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            FrostedGlassButton(
-                onClick = onPause,
-                modifier = Modifier.size(buttonSize),
-                icon = Icons.Default.Pause,
-            )
-            FrostedGlassButton(
-                onClick = onHold,
-                modifier = Modifier.size(buttonSize),
-                icon = Icons.Default.SwapHoriz,
-            )
-        }
+        GameActionButtons(
+            onPause = onPause,
+            onHold = onHold,
+            buttonSize = buttonSize,
+        )
 
         GameStatsPanel(
             score = gameState.score,
@@ -164,21 +242,44 @@ private fun CompactTopPane(
             level = gameState.level,
             time = elapsedTime,
             compact = true,
-            modifier = Modifier.fillMaxWidth(),
+            includeTime = false,
+            modifier = Modifier.weight(1f),
         )
+    }
+}
 
+@Composable
+private fun CompactBottomPane(
+    gameState: GameState,
+    elapsedTime: Long,
+    settings: GameSettings,
+    holdPieceSize: Dp,
+    queuePieceSize: Dp,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
         QueuePreviewCompact(
             holdPiece = gameState.holdPiece,
             previewPieces = gameState.previewPieces,
             settings = settings,
             holdPieceSize = holdPieceSize,
             queuePieceSize = queuePieceSize,
+            modifier = Modifier.weight(1f),
+        )
+
+        TimeStatPanel(
+            time = elapsedTime,
+            compact = true,
+            modifier = Modifier.width(92.dp),
         )
     }
 }
 
 @Composable
-private fun AdaptiveInfoPane(
+private fun MediumSupportingPane(
     gameState: GameState,
     elapsedTime: Long,
     settings: GameSettings,
@@ -193,21 +294,11 @@ private fun AdaptiveInfoPane(
         modifier = modifier.fillMaxHeight(),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            FrostedGlassButton(
-                onClick = onPause,
-                modifier = Modifier.size(buttonSize),
-                icon = Icons.Default.Pause,
-            )
-            FrostedGlassButton(
-                onClick = onHold,
-                modifier = Modifier.size(buttonSize),
-                icon = Icons.Default.SwapHoriz,
-            )
-        }
+        GameActionButtons(
+            onPause = onPause,
+            onHold = onHold,
+            buttonSize = buttonSize,
+        )
 
         GameStatsPanel(
             score = gameState.score,
@@ -215,6 +306,7 @@ private fun AdaptiveInfoPane(
             level = gameState.level,
             time = elapsedTime,
             compact = false,
+            includeTime = false,
             modifier = Modifier.fillMaxWidth(),
         )
 
@@ -225,6 +317,37 @@ private fun AdaptiveInfoPane(
             holdPieceSize = holdPieceSize,
             queuePieceSize = queuePieceSize,
             modifier = Modifier.fillMaxWidth(),
+        )
+
+        Spacer(modifier = Modifier.weight(1f))
+
+        TimeStatPanel(
+            time = elapsedTime,
+            compact = false,
+            modifier = Modifier.fillMaxWidth(),
+        )
+    }
+}
+
+@Composable
+private fun GameActionButtons(
+    onPause: () -> Unit,
+    onHold: () -> Unit,
+    buttonSize: Dp,
+) {
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        FrostedGlassButton(
+            onClick = onPause,
+            modifier = Modifier.size(buttonSize),
+            icon = Icons.Default.Pause,
+        )
+        FrostedGlassButton(
+            onClick = onHold,
+            modifier = Modifier.size(buttonSize),
+            icon = Icons.Default.SwapHoriz,
         )
     }
 }

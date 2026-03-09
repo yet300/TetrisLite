@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
@@ -14,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.window.core.layout.WindowSizeClass.Companion.WIDTH_DP_EXPANDED_LOWER_BOUND
 import com.yet.tetris.feature.game.GameComponent
 
 internal data class GameInputActions(
@@ -43,6 +43,7 @@ internal fun GamePlayingContent(
             calculatePaneScaffoldDirectiveWithTwoPanesOnMediumWidth(adaptiveInfo)
         }
     val singlePane = remember(paneDirective.maxHorizontalPartitions) { paneDirective.maxHorizontalPartitions <= 1 }
+    val expandedWidth = remember(adaptiveInfo.windowSizeClass) { adaptiveInfo.windowSizeClass.minWidthDp >= WIDTH_DP_EXPANDED_LOWER_BOUND }
 
     BoxWithConstraints(
         modifier =
@@ -61,20 +62,22 @@ internal fun GamePlayingContent(
         contentAlignment = Alignment.TopCenter,
     ) {
         val metrics = remember(maxWidth, maxHeight, paneDirective) { resolveLayoutMetrics(maxWidth, maxHeight, paneDirective) }
-        val contentMaxWidth =
-            remember(paneDirective) {
-                paneDirective.defaultPanePreferredWidth * (paneDirective.maxHorizontalPartitions + 2)
-            }
-
-        val boundedContentModifier =
+        val contentModifier =
             Modifier
                 .fillMaxSize()
                 .padding(horizontal = metrics.horizontalPadding, vertical = metrics.verticalPadding)
-                .widthIn(max = contentMaxWidth)
 
         if (singlePane) {
             CompactGameLayout(
-                modifier = boundedContentModifier,
+                modifier = contentModifier,
+                gameState = gameState,
+                model = model,
+                actions = actions,
+                metrics = metrics,
+            )
+        } else if (expandedWidth) {
+            ExpandedGameLayout(
+                modifier = contentModifier,
                 gameState = gameState,
                 model = model,
                 actions = actions,
@@ -82,7 +85,7 @@ internal fun GamePlayingContent(
             )
         } else {
             CanonicalSupportingPaneGameLayout(
-                modifier = boundedContentModifier,
+                modifier = contentModifier,
                 gameState = gameState,
                 model = model,
                 actions = actions,

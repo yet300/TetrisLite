@@ -38,6 +38,7 @@ internal fun GameStatsPanel(
     level: Int,
     time: Long,
     compact: Boolean,
+    includeTime: Boolean = true,
     modifier: Modifier = Modifier,
 ) {
     val formattedTime = remember(time) { formatTime(time) }
@@ -68,11 +69,38 @@ internal fun GameStatsPanel(
             compact = compact,
             modifier = Modifier.weight(1f),
         )
+        if (includeTime) {
+            StatItem(
+                label = stringResource(Res.string.time),
+                value = formattedTime,
+                compact = compact,
+                modifier = Modifier.weight(1f),
+            )
+        }
+    }
+}
+
+@Composable
+internal fun TimeStatPanel(
+    time: Long,
+    compact: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    val formattedTime = remember(time) { formatTime(time) }
+
+    Row(
+        modifier =
+            modifier
+                .glassPanel(shape = RoundedCornerShape(16.dp))
+                .padding(horizontal = 12.dp, vertical = 8.dp),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
         StatItem(
             label = stringResource(Res.string.time),
             value = formattedTime,
             compact = compact,
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.fillMaxWidth(),
         )
     }
 }
@@ -180,7 +208,7 @@ internal fun QueuePreview(
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurface,
             )
-            val count = minOf(previewPieces.size, 5)
+            val count = minOf(previewPieces.size, 3)
             for (i in 0 until count) {
                 NextPieceCanvas(
                     nextPiece = previewPieces[i],
@@ -199,9 +227,10 @@ internal fun QueuePreviewCompact(
     settings: GameSettings,
     holdPieceSize: Dp,
     queuePieceSize: Dp,
+    modifier: Modifier = Modifier,
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(6.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -235,6 +264,63 @@ internal fun QueuePreviewCompact(
                     modifier = Modifier.size(queuePieceSize),
                 )
             }
+        }
+    }
+}
+
+@Composable
+internal fun HoldPreviewPanel(
+    holdPiece: Tetromino?,
+    settings: GameSettings,
+    pieceSize: Dp,
+    modifier: Modifier = Modifier,
+) {
+    NextPiecePreview(
+        title = stringResource(Res.string.hold),
+        piece = holdPiece,
+        settings = settings,
+        pieceSize = pieceSize,
+        modifier = modifier,
+    )
+}
+
+@Composable
+internal fun NextQueuePanel(
+    previewPieces: List<Tetromino>,
+    settings: GameSettings,
+    pieceSize: Dp,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier =
+            modifier
+                .glassPanel(shape = RoundedCornerShape(16.dp))
+                .padding(8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        Text(
+            text = stringResource(Res.string.next),
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
+
+        val count = minOf(previewPieces.size, 3)
+        for (i in 0 until count) {
+            NextPieceCanvas(
+                nextPiece = previewPieces[i],
+                settings = settings,
+                modifier =
+                    Modifier
+                        .graphicsLayer {
+                            alpha =
+                                when (i) {
+                                    0 -> 1f
+                                    1 -> 0.68f
+                                    else -> 0.42f
+                                }
+                        }.size(pieceSize),
+            )
         }
     }
 }
