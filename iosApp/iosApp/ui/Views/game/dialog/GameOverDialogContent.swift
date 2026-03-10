@@ -18,6 +18,15 @@ struct GameOverDialogContent: View {
             Text(Strings.linesCleared(Int(model.finalLinesCleared)))
                 .font(.title2)
                 .foregroundColor(.primaryLabel)
+            if let gameState = model.gameState {
+                Text("Level \(gameState.level) • \(formatDuration(model.elapsedTime))")
+                    .foregroundColor(.primaryLabel)
+                Text("Pieces \(gameState.piecesPlaced) • Max combo \(gameState.maxCombo)")
+                    .foregroundColor(.primaryLabel)
+                Text("Tetrises \(gameState.tetrisesCleared) • T-Spins \(gameState.tSpinClears) • Perfect clears \(gameState.perfectClears)")
+                    .multilineTextAlignment(.center)
+                    .foregroundColor(.primaryLabel)
+            }
         }
 
         VStack(spacing: 16) {
@@ -25,6 +34,11 @@ struct GameOverDialogContent: View {
             GlassDialogButton(title: Strings.backToHome, action: component.onQuit)
         }
     }
-}
 
+    private func formatDuration(_ milliseconds: Int64) -> String {
+        let seconds = (milliseconds / 1000) % 60
+        let minutes = (milliseconds / 1000) / 60
+        return "\(minutes):" + String(format: "%02d", seconds)
+    }
+}
 

@@ -18,6 +18,7 @@ struct SettingsView: View {
                 visualThemeSection
                 pieceStyleSection
                 audioSection
+                controlsSection
             }
             .formStyle(.grouped)
             .navigationTitle(Strings.settings)
@@ -93,6 +94,33 @@ struct SettingsView: View {
         }
     }
 
+    private var controlsSection: some View {
+        Section("Controls") {
+            Picker("Primary Rotation", selection: Binding(
+                get: { model.settings.controlSettings.primaryRotateDirection },
+                set: { component.onPrimaryRotateDirectionChanged(direction: $0) }
+            )) {
+                ForEach(RotationDirection.entries, id: \.self) { direction in
+                    Text(rotationLabel(direction)).tag(direction)
+                }
+            }
+
+            Toggle("Enable 180 Rotation", isOn: Binding(
+                get: { model.settings.controlSettings.enable180Rotation },
+                set: { component.on180RotationToggled(enabled: $0) }
+            ))
+
+            Picker("Gesture Sensitivity", selection: Binding(
+                get: { model.settings.controlSettings.gestureSensitivity },
+                set: { component.onGestureSensitivityChanged(sensitivity: $0) }
+            )) {
+                ForEach(GestureSensitivity.entries, id: \.self) { sensitivity in
+                    Text(gestureLabel(sensitivity)).tag(sensitivity)
+                }
+            }
+        }
+    }
+
     @ViewBuilder
     private var musicSettings: some View {
             VStack(alignment: .leading) {
@@ -120,6 +148,32 @@ struct SettingsView: View {
                 get: { Double(model.settings.audioSettings.sfxVolume) },
                 set: { component.onSFXVolumeChanged(volume: Float($0)) }
             ), in: 0...1)
+        }
+    }
+
+    private func rotationLabel(_ direction: RotationDirection) -> String {
+        switch direction {
+        case .clockwise:
+            return "CW"
+        case .counterclockwise:
+            return "CCW"
+        case .oneEighty:
+            return "180"
+        default:
+            return direction.name
+        }
+    }
+
+    private func gestureLabel(_ sensitivity: GestureSensitivity) -> String {
+        switch sensitivity {
+        case .relaxed:
+            return "Relaxed"
+        case .normal:
+            return "Normal"
+        case .competitive:
+            return "Competitive"
+        default:
+            return sensitivity.name
         }
     }
 }

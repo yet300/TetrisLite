@@ -117,6 +117,14 @@ struct GameRecordCard: View {
             Text(Strings.linesLabel(Int(game.linesCleared)))
                 .font(.subheadline)
                 .foregroundColor(.secondary)
+
+            Text("Level \(game.level) • \(formatDuration(game.durationMs)) • \(game.piecesPlaced) pieces")
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+
+            Text("Max combo \(game.maxCombo) • Tetrises \(game.tetrisesCleared) • T-Spins \(game.tSpinClears)")
+                .font(.caption)
+                .foregroundColor(.secondary)
         }
         .padding()
         .background(.thinMaterial)
@@ -130,6 +138,12 @@ struct GameRecordCard: View {
         formatter.dateStyle = .medium
         formatter.timeStyle = .short
         return formatter.string(from: date)
+    }
+
+    private func formatDuration(_ milliseconds: Int64) -> String {
+        let seconds = (milliseconds / 1000) % 60
+        let minutes = (milliseconds / 1000) / 60
+        return "\(minutes):" + String(format: "%02d", seconds)
     }
 }
 

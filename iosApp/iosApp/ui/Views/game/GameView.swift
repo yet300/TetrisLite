@@ -114,7 +114,24 @@ struct GameView: View {
             case "s", "directiondown":
                 component.onMoveDown()
             case "w", " ", "directionup":
-                component.onRotate()
+                switch model.settings.controlSettings.primaryRotateDirection {
+                case .clockwise:
+                    component.onRotate()
+                case .counterclockwise:
+                    component.onRotateCounterClockwise()
+                case .oneEighty:
+                    component.onRotate180()
+                default:
+                    component.onRotate()
+                }
+            case "q", "z":
+                component.onRotateCounterClockwise()
+            case "e", "x":
+                component.onRotateClockwise()
+            case "r":
+                if model.settings.controlSettings.enable180Rotation {
+                    component.onRotate180()
+                }
             case "\r", "\n":
                 component.onHardDrop()
             case "c", "h":

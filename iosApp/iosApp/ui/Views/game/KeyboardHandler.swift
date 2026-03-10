@@ -27,7 +27,7 @@ private struct KeyboardHandler: NSViewRepresentable {
     private class KeyCatcherView: NSView {
         var onKey: ((String) -> Void)?
         private var localMonitor: Any?
-        private let handledCharacterKeys: Set<String> = ["a", "d", "s", "w", " ", "c", "h", "p", "\r", "\n"]
+        private let handledCharacterKeys: Set<String> = ["a", "d", "s", "w", "q", "e", "z", "x", "r", " ", "c", "h", "p", "\r", "\n"]
 
         override var acceptsFirstResponder: Bool { true }
 
@@ -171,6 +171,11 @@ private struct KeyboardHandler: UIViewRepresentable {
                 keyCommand("a", action: #selector(handleLeft)),
                 keyCommand("d", action: #selector(handleRight)),
                 keyCommand("w", action: #selector(handleRotate)),
+                keyCommand("q", action: #selector(handleRotateCounterClockwise)),
+                keyCommand("z", action: #selector(handleRotateCounterClockwise)),
+                keyCommand("e", action: #selector(handleRotateClockwise)),
+                keyCommand("x", action: #selector(handleRotateClockwise)),
+                keyCommand("r", action: #selector(handleRotate180)),
                 keyCommand("s", action: #selector(handleDown)),
                 keyCommand(" ", action: #selector(handleRotate)),
                 keyCommand("h", action: #selector(handleHold)),
@@ -235,6 +240,18 @@ private struct KeyboardHandler: UIViewRepresentable {
 
         @objc private func handleRotate() {
             onKey("w")
+        }
+
+        @objc private func handleRotateCounterClockwise() {
+            onKey("q")
+        }
+
+        @objc private func handleRotateClockwise() {
+            onKey("e")
+        }
+
+        @objc private func handleRotate180() {
+            onKey("r")
         }
 
         @objc private func handleHold() {
