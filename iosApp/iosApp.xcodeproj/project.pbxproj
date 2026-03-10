@@ -74,6 +74,11 @@
 			path = iosApp;
 			sourceTree = "<group>";
 		};
+		C2A4B7D12A6E4C7F8D9E0112 /* SharedUI */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = SharedUI;
+			sourceTree = "<group>";
+		};
 		D48B48412F13965C002112B4 /* watchApp Watch App */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = "watchApp Watch App";
@@ -119,6 +124,7 @@
 			isa = PBXGroup;
 			children = (
 				FA7F4B5EC044113742F5AD78 /* Configuration */,
+				C2A4B7D12A6E4C7F8D9E0112 /* SharedUI */,
 				D48B48412F13965C002112B4 /* watchApp Watch App */,
 				0CB9379909047BF150640F6D /* Products */,
 				7291D45327638A8E2B819CE0 /* iosApp */,
@@ -155,6 +161,7 @@
 			);
 			fileSystemSynchronizedGroups = (
 				7291D45327638A8E2B819CE0 /* iosApp */,
+				C2A4B7D12A6E4C7F8D9E0112 /* SharedUI */,
 			);
 			name = iosApp;
 			packageProductDependencies = (
@@ -177,6 +184,7 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
+				C2A4B7D12A6E4C7F8D9E0112 /* SharedUI */,
 				D48B48412F13965C002112B4 /* watchApp Watch App */,
 			);
 			name = "watchApp Watch App";
