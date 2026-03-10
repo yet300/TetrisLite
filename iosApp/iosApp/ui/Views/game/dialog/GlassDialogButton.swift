@@ -15,11 +15,11 @@ struct GlassDialogButton: View {
                 .background(
                     isPrimary ?
                     AnyShapeStyle(
-                        LinearGradient(colors: [.accentColor, .secondaryAccent], startPoint: .leading, endPoint: .trailing)
+                        LinearGradient(colors: [.accentColor, .gameSecondaryAccent], startPoint: .leading, endPoint: .trailing)
                     ) :
                     AnyShapeStyle(.ultraThinMaterial)
                 )
-                .foregroundColor(.primaryLabel)
+                .foregroundColor(.gamePrimaryLabel)
                 .cornerRadius(16)
         }
         .buttonStyle(.plain)

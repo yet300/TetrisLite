@@ -155,10 +155,10 @@ struct EmptyHistoryView: View {
                 .foregroundColor(.accent)
             Text(Strings.noGamesYet)
                 .font(.title2)
-                .foregroundColor(.label)
+                .foregroundColor(.gameLabel)
             Text(Strings.startGamePrompt)
                 .font(.subheadline)
-                .foregroundColor(.label)
+                .foregroundColor(.gameLabel)
         }
     }
 }

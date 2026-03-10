@@ -8,24 +8,24 @@ struct GameOverDialogContent: View {
     var body: some View {
         Text(Strings.gameOver)
             .font(.largeTitle.bold())
-            .foregroundColor(.primaryLabel)
-            .shadow(color: .systemRed, radius: 10)
+            .foregroundColor(.gamePrimaryLabel)
+            .shadow(color: .gameSystemRed, radius: 10)
 
         VStack {
             Text(Strings.finalScore(Int(model.finalScore)))
                 .font(.title2)
-                .foregroundColor(.primaryLabel)
+                .foregroundColor(.gamePrimaryLabel)
             Text(Strings.linesCleared(Int(model.finalLinesCleared)))
                 .font(.title2)
-                .foregroundColor(.primaryLabel)
+                .foregroundColor(.gamePrimaryLabel)
             if let gameState = model.gameState {
                 Text("Level \(gameState.level) • \(formatDuration(model.elapsedTime))")
-                    .foregroundColor(.primaryLabel)
+                    .foregroundColor(.gamePrimaryLabel)
                 Text("Pieces \(gameState.piecesPlaced) • Max combo \(gameState.maxCombo)")
-                    .foregroundColor(.primaryLabel)
+                    .foregroundColor(.gamePrimaryLabel)
                 Text("Tetrises \(gameState.tetrisesCleared) • T-Spins \(gameState.tSpinClears) • Perfect clears \(gameState.perfectClears)")
                     .multilineTextAlignment(.center)
-                    .foregroundColor(.primaryLabel)
+                    .foregroundColor(.gamePrimaryLabel)
             }
         }
 
@@ -41,4 +41,3 @@ struct GameOverDialogContent: View {
         return "\(minutes):" + String(format: "%02d", seconds)
     }
 }
-

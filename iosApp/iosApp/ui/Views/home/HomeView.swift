@@ -230,14 +230,14 @@ struct GlassButton: View {
                 Text(title)
                     .font(.headline)
             }
-            .foregroundColor(style == .primary ? .primaryLabel : .label)
+            .foregroundColor(style == .primary ? .gamePrimaryLabel : .gameLabel)
             .padding()
             .frame(maxWidth: .infinity)
             .background(
                 ZStack {
                     if style == .primary {
                         LinearGradient(
-                            colors: [.accentColor.opacity(0.5), .secondaryAccent.opacity(0.4)],
+                            colors: [.accentColor.opacity(0.5), .gameSecondaryAccent.opacity(0.4)],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         )
@@ -269,4 +269,3 @@ struct GlassButton: View {
 
 private typealias HistoryChild = HomeComponentBottomSheetChildHistoryChild
 private typealias SettingsChild = HomeComponentBottomSheetChildSettingsChild
-
