@@ -3,7 +3,9 @@ package com.yet.tetris.feature.settings.store
 import com.arkivanov.mvikotlin.core.store.Store
 import com.yet.tetris.domain.model.audio.MusicTheme
 import com.yet.tetris.domain.model.game.Difficulty
+import com.yet.tetris.domain.model.game.RotationDirection
 import com.yet.tetris.domain.model.settings.GameSettings
+import com.yet.tetris.domain.model.settings.GestureSensitivity
 
 internal interface SettingsStore : Store<SettingsStore.Intent, SettingsStore.State, SettingsStore.Label> {
     data class State(
@@ -42,6 +44,18 @@ internal interface SettingsStore : Store<SettingsStore.Intent, SettingsStore.Sta
 
         data class ChangeMusicTheme(
             val theme: MusicTheme,
+        ) : Intent()
+
+        data class ChangePrimaryRotateDirection(
+            val direction: RotationDirection,
+        ) : Intent()
+
+        data class Toggle180Rotation(
+            val enabled: Boolean,
+        ) : Intent()
+
+        data class ChangeGestureSensitivity(
+            val sensitivity: GestureSensitivity,
         ) : Intent()
     }
 

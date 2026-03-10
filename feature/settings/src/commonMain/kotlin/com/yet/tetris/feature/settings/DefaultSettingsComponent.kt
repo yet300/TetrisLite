@@ -9,6 +9,8 @@ import com.arkivanov.mvikotlin.core.instancekeeper.getStore
 import com.arkivanov.mvikotlin.extensions.coroutines.labels
 import com.yet.tetris.domain.model.audio.MusicTheme
 import com.yet.tetris.domain.model.game.Difficulty
+import com.yet.tetris.domain.model.game.RotationDirection
+import com.yet.tetris.domain.model.settings.GestureSensitivity
 import com.yet.tetris.domain.model.theme.PieceStyle
 import com.yet.tetris.domain.model.theme.VisualTheme
 import com.yet.tetris.feature.settings.integration.stateToModel
@@ -69,6 +71,18 @@ internal class DefaultSettingsComponent(
 
     override fun onMusicThemeChanged(theme: MusicTheme) {
         store.accept(SettingsStore.Intent.ChangeMusicTheme(theme))
+    }
+
+    override fun onPrimaryRotateDirectionChanged(direction: RotationDirection) {
+        store.accept(SettingsStore.Intent.ChangePrimaryRotateDirection(direction))
+    }
+
+    override fun on180RotationToggled(enabled: Boolean) {
+        store.accept(SettingsStore.Intent.Toggle180Rotation(enabled))
+    }
+
+    override fun onGestureSensitivityChanged(sensitivity: GestureSensitivity) {
+        store.accept(SettingsStore.Intent.ChangeGestureSensitivity(sensitivity))
     }
 
     override fun onClose() {

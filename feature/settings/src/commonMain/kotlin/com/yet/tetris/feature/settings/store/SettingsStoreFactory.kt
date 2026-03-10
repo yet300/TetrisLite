@@ -5,6 +5,7 @@ import com.arkivanov.mvikotlin.core.store.SimpleBootstrapper
 import com.arkivanov.mvikotlin.core.store.Store
 import com.arkivanov.mvikotlin.core.store.StoreFactory
 import com.arkivanov.mvikotlin.extensions.coroutines.CoroutineExecutor
+import com.yet.tetris.domain.model.game.RotationDirection
 import com.yet.tetris.domain.model.settings.GameSettings
 import com.yet.tetris.domain.repository.GameSettingsRepository
 import kotlinx.coroutines.CancellationException
@@ -87,6 +88,43 @@ internal class SettingsStoreFactory
                     is SettingsStore.Intent.ChangeMusicTheme ->
                         updateSettings(getState) {
                             it.copy(audioSettings = it.audioSettings.copy(selectedMusicTheme = intent.theme))
+                        }
+
+                    is SettingsStore.Intent.ChangePrimaryRotateDirection ->
+                        updateSettings(getState) {
+                            it.copy(
+                                controlSettings =
+                                    it.controlSettings.copy(
+                                        primaryRotateDirection = intent.direction,
+                                    ),
+                            )
+                        }
+
+                    is SettingsStore.Intent.Toggle180Rotation ->
+                        updateSettings(getState) {
+                            val nextPrimaryDirection =
+                                if (!intent.enabled && it.controlSettings.primaryRotateDirection == RotationDirection.ONE_EIGHTY) {
+                                    RotationDirection.CLOCKWISE
+                                } else {
+                                    it.controlSettings.primaryRotateDirection
+                                }
+                            it.copy(
+                                controlSettings =
+                                    it.controlSettings.copy(
+                                        enable180Rotation = intent.enabled,
+                                        primaryRotateDirection = nextPrimaryDirection,
+                                    ),
+                            )
+                        }
+
+                    is SettingsStore.Intent.ChangeGestureSensitivity ->
+                        updateSettings(getState) {
+                            it.copy(
+                                controlSettings =
+                                    it.controlSettings.copy(
+                                        gestureSensitivity = intent.sensitivity,
+                                    ),
+                            )
                         }
                 }
             }
