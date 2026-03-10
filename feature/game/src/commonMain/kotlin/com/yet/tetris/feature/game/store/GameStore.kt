@@ -36,6 +36,12 @@ internal interface GameStore : Store<GameStore.Intent, GameStore.State, GameStor
 
         data object Rotate : Intent()
 
+        data object RotateClockwise : Intent()
+
+        data object RotateCounterClockwise : Intent()
+
+        data object Rotate180 : Intent()
+
         data object HardDrop : Intent()
 
         data object Hold : Intent()

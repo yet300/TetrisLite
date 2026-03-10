@@ -65,6 +65,18 @@ class PreviewGameComponent :
         TODO("Not yet implemented")
     }
 
+    override fun onRotateClockwise() {
+        TODO("Not yet implemented")
+    }
+
+    override fun onRotateCounterClockwise() {
+        TODO("Not yet implemented")
+    }
+
+    override fun onRotate180() {
+        TODO("Not yet implemented")
+    }
+
     override fun onHardDrop() {
         TODO("Not yet implemented")
     }
