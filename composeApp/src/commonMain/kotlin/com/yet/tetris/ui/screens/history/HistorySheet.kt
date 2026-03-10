@@ -281,8 +281,26 @@ private fun GameRecordCard(
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
+
+            Text(
+                text = "Level ${game.level} • ${formatDuration(game.durationMs)} • ${game.piecesPlaced} pieces",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+
+            Text(
+                text = "Max combo ${game.maxCombo} • Tetrises ${game.tetrisesCleared} • T-Spins ${game.tSpinClears}",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
     }
+}
+
+private fun formatDuration(milliseconds: Long): String {
+    val seconds = (milliseconds / 1000) % 60
+    val minutes = (milliseconds / 1000) / 60
+    return "$minutes:${seconds.toString().padStart(2, '0')}"
 }
 
 @Composable

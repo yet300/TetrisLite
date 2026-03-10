@@ -35,11 +35,16 @@ fun GameScreen(component: GameComponent) {
                 onMoveRight = component::onMoveRight,
                 onMoveDown = component::onMoveDown,
                 onRotate = component::onRotate,
+                onRotateClockwise = component::onRotateClockwise,
+                onRotateCounterClockwise = component::onRotateCounterClockwise,
+                onRotate180 = component::onRotate180,
                 onHardDrop = component::onHardDrop,
                 onBoardSizeChanged = component::onBoardSizeChanged,
                 onDragStarted = component::onDragStarted,
                 onDragged = component::onDragged,
                 onDragEnded = component::onDragEnded,
+                primaryRotateDirection = model.settings.controlSettings.primaryRotateDirection,
+                enable180Rotation = model.settings.controlSettings.enable180Rotation,
             )
         }
 

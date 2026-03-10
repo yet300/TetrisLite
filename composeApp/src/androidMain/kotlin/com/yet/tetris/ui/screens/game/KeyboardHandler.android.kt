@@ -13,6 +13,7 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
+import com.yet.tetris.domain.model.game.RotationDirection
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -21,9 +22,14 @@ actual fun Modifier.keyboardHandler(
     onMoveRight: () -> Unit,
     onMoveDown: () -> Unit,
     onRotate: () -> Unit,
+    onRotateClockwise: () -> Unit,
+    onRotateCounterClockwise: () -> Unit,
+    onRotate180: () -> Unit,
     onHardDrop: () -> Unit,
     onHold: () -> Unit,
     onPause: () -> Unit,
+    primaryRotateDirection: RotationDirection,
+    enable180Rotation: Boolean,
 ): Modifier {
     val focusRequester = remember { FocusRequester() }
 
@@ -50,8 +56,28 @@ actual fun Modifier.keyboardHandler(
                         true
                     }
                     Key.DirectionUp, Key.W, Key.Spacebar -> {
-                        onRotate()
+                        when (primaryRotateDirection) {
+                            RotationDirection.CLOCKWISE -> onRotate()
+                            RotationDirection.COUNTERCLOCKWISE -> onRotateCounterClockwise()
+                            RotationDirection.ONE_EIGHTY -> onRotate180()
+                        }
                         true
+                    }
+                    Key.Q, Key.Z -> {
+                        onRotateCounterClockwise()
+                        true
+                    }
+                    Key.E, Key.X -> {
+                        onRotateClockwise()
+                        true
+                    }
+                    Key.R -> {
+                        if (enable180Rotation) {
+                            onRotate180()
+                            true
+                        } else {
+                            false
+                        }
                     }
                     Key.Enter -> {
                         onHardDrop()

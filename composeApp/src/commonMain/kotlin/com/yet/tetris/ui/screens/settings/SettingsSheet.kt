@@ -26,6 +26,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
+import com.yet.tetris.domain.model.game.RotationDirection
+import com.yet.tetris.domain.model.settings.GestureSensitivity
 import com.yet.tetris.feature.settings.PreviewSettingsComponent
 import com.yet.tetris.feature.settings.SettingsComponent
 import com.yet.tetris.uikit.component.button.EnumSegmentedButtonRow
@@ -167,6 +169,38 @@ private fun SettingsScreenContent(
         }
 
         item {
+            SettingsSection(title = "Controls") {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Text("Primary rotation", style = MaterialTheme.typography.bodyMedium)
+                    EnumSegmentedButtonRow(
+                        selectedValue = model.settings.controlSettings.primaryRotateDirection,
+                        onValueChange = component::onPrimaryRotateDirectionChanged,
+                        getLabel = ::rotationDirectionLabel,
+                    )
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text("Enable 180 rotation")
+                        Switch(
+                            checked = model.settings.controlSettings.enable180Rotation,
+                            onCheckedChange = component::on180RotationToggled,
+                        )
+                    }
+
+                    Text("Gesture sensitivity", style = MaterialTheme.typography.bodyMedium)
+                    EnumSegmentedButtonRow(
+                        selectedValue = model.settings.controlSettings.gestureSensitivity,
+                        onValueChange = component::onGestureSensitivityChanged,
+                        getLabel = ::gestureSensitivityLabel,
+                    )
+                }
+            }
+        }
+
+        item {
             Spacer(Modifier.height(32.dp))
         }
     }
@@ -211,6 +245,20 @@ private fun SliderRow(
         )
     }
 }
+
+private fun rotationDirectionLabel(direction: RotationDirection): String =
+    when (direction) {
+        RotationDirection.CLOCKWISE -> "CW"
+        RotationDirection.COUNTERCLOCKWISE -> "CCW"
+        RotationDirection.ONE_EIGHTY -> "180"
+    }
+
+private fun gestureSensitivityLabel(sensitivity: GestureSensitivity): String =
+    when (sensitivity) {
+        GestureSensitivity.RELAXED -> "Relaxed"
+        GestureSensitivity.NORMAL -> "Normal"
+        GestureSensitivity.COMPETITIVE -> "Competitive"
+    }
 
 @Composable
 @Preview

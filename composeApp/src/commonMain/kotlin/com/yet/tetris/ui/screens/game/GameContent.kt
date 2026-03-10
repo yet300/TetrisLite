@@ -15,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.window.core.layout.WindowSizeClass.Companion.WIDTH_DP_EXPANDED_LOWER_BOUND
 import com.yet.tetris.feature.game.GameComponent
+import com.yet.tetris.domain.model.game.RotationDirection
 
 internal data class GameInputActions(
     val onPause: () -> Unit,
@@ -23,11 +24,16 @@ internal data class GameInputActions(
     val onMoveRight: () -> Unit,
     val onMoveDown: () -> Unit,
     val onRotate: () -> Unit,
+    val onRotateClockwise: () -> Unit,
+    val onRotateCounterClockwise: () -> Unit,
+    val onRotate180: () -> Unit,
     val onHardDrop: () -> Unit,
     val onBoardSizeChanged: (Float) -> Unit,
     val onDragStarted: () -> Unit,
     val onDragged: (Float, Float) -> Unit,
     val onDragEnded: () -> Unit,
+    val primaryRotateDirection: RotationDirection,
+    val enable180Rotation: Boolean,
 )
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
@@ -56,9 +62,14 @@ internal fun GamePlayingContent(
                     onMoveRight = actions.onMoveRight,
                     onMoveDown = actions.onMoveDown,
                     onRotate = actions.onRotate,
+                    onRotateClockwise = actions.onRotateClockwise,
+                    onRotateCounterClockwise = actions.onRotateCounterClockwise,
+                    onRotate180 = actions.onRotate180,
                     onHardDrop = actions.onHardDrop,
                     onHold = actions.onHold,
                     onPause = actions.onPause,
+                    primaryRotateDirection = actions.primaryRotateDirection,
+                    enable180Rotation = actions.enable180Rotation,
                 ),
         contentAlignment = Alignment.TopCenter,
     ) {

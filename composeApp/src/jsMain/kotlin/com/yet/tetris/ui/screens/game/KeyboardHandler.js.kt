@@ -3,6 +3,7 @@ package com.yet.tetris.ui.screens.game
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.Modifier
+import com.yet.tetris.domain.model.game.RotationDirection
 import kotlinx.browser.window
 import org.w3c.dom.events.KeyboardEvent
 
@@ -23,9 +24,14 @@ actual fun Modifier.keyboardHandler(
     onMoveRight: () -> Unit,
     onMoveDown: () -> Unit,
     onRotate: () -> Unit,
+    onRotateClockwise: () -> Unit,
+    onRotateCounterClockwise: () -> Unit,
+    onRotate180: () -> Unit,
     onHardDrop: () -> Unit,
     onHold: () -> Unit,
     onPause: () -> Unit,
+    primaryRotateDirection: RotationDirection,
+    enable180Rotation: Boolean,
 ): Modifier {
     DisposableEffect(Unit) {
         val handleKeyDown = { event: dynamic ->
@@ -46,7 +52,25 @@ actual fun Modifier.keyboardHandler(
                     keyboardEvent.preventDefault()
                 }
                 "arrowup", "w", " " -> { // Space key
-                    onRotate()
+                    when (primaryRotateDirection) {
+                        RotationDirection.CLOCKWISE -> onRotate()
+                        RotationDirection.COUNTERCLOCKWISE -> onRotateCounterClockwise()
+                        RotationDirection.ONE_EIGHTY -> onRotate180()
+                    }
+                    keyboardEvent.preventDefault()
+                }
+                "q", "z" -> {
+                    onRotateCounterClockwise()
+                    keyboardEvent.preventDefault()
+                }
+                "e", "x" -> {
+                    onRotateClockwise()
+                    keyboardEvent.preventDefault()
+                }
+                "r" -> {
+                    if (enable180Rotation) {
+                        onRotate180()
+                    }
                     keyboardEvent.preventDefault()
                 }
                 "enter" -> {
