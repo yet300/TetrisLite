@@ -8,4 +8,5 @@ data class GameSettings(
     val difficulty: Difficulty = Difficulty.NORMAL,
     val themeConfig: ThemeConfig = ThemeConfig(),
     val audioSettings: AudioSettings = AudioSettings(),
+    val controlSettings: ControlSettings = ControlSettings(),
 )

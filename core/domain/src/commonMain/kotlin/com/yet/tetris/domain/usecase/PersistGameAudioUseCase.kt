@@ -67,14 +67,25 @@ class PersistGameAudioUseCase(
     suspend fun saveCompletedGame(
         gameState: GameState,
         settings: GameSettings,
+        durationMs: Long = 0,
     ) {
         val record =
             GameRecord(
                 id = Uuid.random().toString(),
                 score = gameState.score,
                 linesCleared = gameState.linesCleared,
+                level = gameState.level,
                 difficulty = settings.difficulty,
                 timestamp = Clock.System.now().toEpochMilliseconds(),
+                durationMs = durationMs,
+                piecesPlaced = gameState.piecesPlaced,
+                maxCombo = gameState.maxCombo,
+                tetrisesCleared = gameState.tetrisesCleared,
+                tSpinClears = gameState.tSpinClears,
+                perfectClears = gameState.perfectClears,
+                hardDrops = gameState.hardDrops,
+                hardDropCells = gameState.hardDropCells,
+                softDropCells = gameState.softDropCells,
             )
         gameHistoryRepository.saveGame(record)
         gameStateRepository.clearGameState()

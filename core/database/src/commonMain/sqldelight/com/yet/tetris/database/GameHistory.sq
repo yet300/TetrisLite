@@ -4,14 +4,27 @@ CREATE TABLE IF NOT EXISTS GameHistory (
     id TEXT NOT NULL PRIMARY KEY,
     score INTEGER NOT NULL,
     linesCleared INTEGER NOT NULL,
+    level INTEGER NOT NULL DEFAULT 1,
     difficulty TEXT AS Difficulty NOT NULL,
-    timestamp INTEGER NOT NULL
+    timestamp INTEGER NOT NULL,
+    durationMs INTEGER NOT NULL DEFAULT 0,
+    piecesPlaced INTEGER NOT NULL DEFAULT 0,
+    maxCombo INTEGER NOT NULL DEFAULT 0,
+    tetrisesCleared INTEGER NOT NULL DEFAULT 0,
+    tSpinClears INTEGER NOT NULL DEFAULT 0,
+    perfectClears INTEGER NOT NULL DEFAULT 0,
+    hardDrops INTEGER NOT NULL DEFAULT 0,
+    hardDropCells INTEGER NOT NULL DEFAULT 0,
+    softDropCells INTEGER NOT NULL DEFAULT 0
 );
 
 -- Queries
 insertGame:
-INSERT INTO GameHistory (id, score, linesCleared, difficulty, timestamp)
-VALUES (?, ?, ?, ?, ?);
+INSERT INTO GameHistory (
+    id, score, linesCleared, level, difficulty, timestamp, durationMs, piecesPlaced,
+    maxCombo, tetrisesCleared, tSpinClears, perfectClears, hardDrops, hardDropCells, softDropCells
+)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 getAllGames:
 SELECT * FROM GameHistory

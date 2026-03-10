@@ -74,5 +74,15 @@ data class Tetromino(
         return create(type, newRotation)
     }
 
+    fun rotateCounterClockwise(): Tetromino {
+        val newRotation = (rotation + 3) % 4
+        return create(type, newRotation)
+    }
+
+    fun rotate180(): Tetromino {
+        val newRotation = (rotation + 2) % 4
+        return create(type, newRotation)
+    }
+
     fun getAbsolutePositions(offset: Position): List<Position> = blocks.map { it + offset }
 }

@@ -90,7 +90,7 @@ class LockPieceUseCaseTest {
         // Then
         assertEquals(1, newState.linesCleared)
         assertTrue(newState.score > 0)
-        assertEquals(100, newState.score) // Single line = 100 points
+        assertEquals(2100, newState.score) // Single line + perfect clear bonus
     }
 
     @Test
@@ -174,7 +174,7 @@ class LockPieceUseCaseTest {
         val newState = useCase(state)
 
         // Then
-        assertEquals(600, newState.score) // 500 + 100
+        assertEquals(2600, newState.score) // 500 + single line + perfect clear bonus
     }
 
     @Test

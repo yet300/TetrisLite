@@ -2,6 +2,7 @@ package com.yet.tetris.domain.usecase
 
 import com.yet.tetris.domain.model.game.GameState
 import com.yet.tetris.domain.model.game.Position
+import com.yet.tetris.domain.model.game.RotationDirection
 import com.yet.tetris.domain.model.game.Tetromino
 
 /**
@@ -34,14 +35,37 @@ class RotatePieceUseCase(
      *
      * @return Explicit rotation result with updated state or blocking reason
      */
-    operator fun invoke(state: GameState): Result {
+    operator fun invoke(
+        state: GameState,
+        direction: RotationDirection = RotationDirection.CLOCKWISE,
+    ): Result {
         val piece =
             state.currentPiece
                 ?: return Result.Blocked(BlockedReason.NO_CURRENT_PIECE)
         if (state.isGameOver) return Result.Blocked(BlockedReason.GAME_OVER)
         if (state.isPaused) return Result.Blocked(BlockedReason.PAUSED)
 
-        val rotatedPiece = piece.rotate()
+        return when (direction) {
+            RotationDirection.CLOCKWISE, RotationDirection.COUNTERCLOCKWISE -> rotateQuarterTurn(
+                state = state,
+                piece = piece,
+                direction = direction,
+            )
+            RotationDirection.ONE_EIGHTY -> rotateOneEighty(state, piece)
+        }
+    }
+
+    private fun rotateQuarterTurn(
+        state: GameState,
+        piece: Tetromino,
+        direction: RotationDirection,
+    ): Result {
+        val rotatedPiece =
+            when (direction) {
+                RotationDirection.CLOCKWISE -> piece.rotate()
+                RotationDirection.COUNTERCLOCKWISE -> piece.rotateCounterClockwise()
+                RotationDirection.ONE_EIGHTY -> piece.rotate180()
+            }
 
         // Try rotation at current position first
         if (!checkCollision(state.board, rotatedPiece, state.currentPosition)) {
@@ -68,6 +92,20 @@ class RotatePieceUseCase(
         return Result.Blocked(BlockedReason.COLLISION)
     }
 
+    private fun rotateOneEighty(
+        state: GameState,
+        piece: Tetromino,
+    ): Result {
+        val firstTurn = rotateQuarterTurn(state = state, piece = piece, direction = RotationDirection.CLOCKWISE)
+        val firstApplied = firstTurn as? Result.Applied ?: return firstTurn
+        val nextPiece = firstApplied.gameState.currentPiece ?: return Result.Blocked(BlockedReason.NO_CURRENT_PIECE)
+        return rotateQuarterTurn(
+            state = firstApplied.gameState,
+            piece = nextPiece,
+            direction = RotationDirection.CLOCKWISE,
+        )
+    }
+
     /**
      * Gets the SRS wall kick offset table for the rotation.
      * Different offsets are used for I-piece vs other pieces.
@@ -92,8 +130,12 @@ class RotatePieceUseCase(
     ): List<Position> =
         when (fromRotation to toRotation) {
             0 to 1 -> listOf(Position(-1, 0), Position(-1, 1), Position(0, -2), Position(-1, -2))
+            0 to 3 -> listOf(Position(1, 0), Position(1, 1), Position(0, -2), Position(1, -2))
+            1 to 0 -> listOf(Position(1, 0), Position(1, -1), Position(0, 2), Position(1, 2))
             1 to 2 -> listOf(Position(1, 0), Position(1, -1), Position(0, 2), Position(1, 2))
+            2 to 1 -> listOf(Position(-1, 0), Position(-1, 1), Position(0, -2), Position(-1, -2))
             2 to 3 -> listOf(Position(1, 0), Position(1, 1), Position(0, -2), Position(1, -2))
+            3 to 2 -> listOf(Position(-1, 0), Position(-1, -1), Position(0, 2), Position(-1, 2))
             3 to 0 -> listOf(Position(-1, 0), Position(-1, -1), Position(0, 2), Position(-1, 2))
             else -> emptyList()
         }
@@ -107,8 +149,12 @@ class RotatePieceUseCase(
     ): List<Position> =
         when (fromRotation to toRotation) {
             0 to 1 -> listOf(Position(-2, 0), Position(1, 0), Position(-2, -1), Position(1, 2))
+            0 to 3 -> listOf(Position(-1, 0), Position(2, 0), Position(-1, 2), Position(2, -1))
+            1 to 0 -> listOf(Position(2, 0), Position(-1, 0), Position(2, 1), Position(-1, -2))
             1 to 2 -> listOf(Position(-1, 0), Position(2, 0), Position(-1, 2), Position(2, -1))
+            2 to 1 -> listOf(Position(1, 0), Position(-2, 0), Position(1, -2), Position(-2, 1))
             2 to 3 -> listOf(Position(2, 0), Position(-1, 0), Position(2, 1), Position(-1, -2))
+            3 to 2 -> listOf(Position(-2, 0), Position(1, 0), Position(-2, -1), Position(1, 2))
             3 to 0 -> listOf(Position(1, 0), Position(-2, 0), Position(1, -2), Position(-2, 1))
             else -> emptyList()
         }

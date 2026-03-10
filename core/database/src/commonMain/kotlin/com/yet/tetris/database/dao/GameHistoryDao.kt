@@ -22,8 +22,18 @@ class GameHistoryDao(
                 id = gameHistory.id,
                 score = gameHistory.score,
                 linesCleared = gameHistory.linesCleared,
+                level = gameHistory.level,
                 difficulty = gameHistory.difficulty,
                 timestamp = gameHistory.timestamp,
+                durationMs = gameHistory.durationMs,
+                piecesPlaced = gameHistory.piecesPlaced,
+                maxCombo = gameHistory.maxCombo,
+                tetrisesCleared = gameHistory.tetrisesCleared,
+                tSpinClears = gameHistory.tSpinClears,
+                perfectClears = gameHistory.perfectClears,
+                hardDrops = gameHistory.hardDrops,
+                hardDropCells = gameHistory.hardDropCells,
+                softDropCells = gameHistory.softDropCells,
             )
         }
 

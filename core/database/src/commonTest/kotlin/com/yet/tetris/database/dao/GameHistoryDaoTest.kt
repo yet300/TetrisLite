@@ -178,7 +178,17 @@ class GameHistoryDaoTest : RobolectricTestRunner() {
         id = id,
         score = score,
         linesCleared = linesCleared,
+        level = 1,
         difficulty = difficulty,
         timestamp = timestamp,
+        durationMs = 0,
+        piecesPlaced = 0,
+        maxCombo = 0,
+        tetrisesCleared = 0,
+        tSpinClears = 0,
+        perfectClears = 0,
+        hardDrops = 0,
+        hardDropCells = 0,
+        softDropCells = 0,
     )
 }

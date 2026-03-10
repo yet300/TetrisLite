@@ -1,6 +1,7 @@
 package com.yet.tetris.domain.usecase
 
 import com.yet.tetris.domain.model.game.GameState
+import com.yet.tetris.domain.model.settings.GestureSensitivity
 import kotlin.math.abs
 
 /**
@@ -51,8 +52,9 @@ class HandleSwipeInputUseCase(
         deltaY: Float,
         velocityX: Float,
         velocityY: Float,
+        gestureSensitivity: GestureSensitivity = GestureSensitivity.NORMAL,
     ): Result? {
-        val action = determineSwipeAction(deltaX, deltaY, velocityX, velocityY)
+        val action = determineSwipeAction(deltaX, deltaY, velocityX, velocityY, gestureSensitivity)
 
         val newState =
             when (action) {
@@ -76,9 +78,11 @@ class HandleSwipeInputUseCase(
         deltaY: Float,
         velocityX: Float,
         velocityY: Float,
+        gestureSensitivity: GestureSensitivity,
     ): SwipeAction {
         val absX = abs(deltaX)
         val absY = abs(deltaY)
+        val normalizedVelocity = abs(velocityY) / gestureSensitivity.velocityMultiplier
 
         // Determine primary direction
         return if (absX > absY) {
@@ -86,7 +90,6 @@ class HandleSwipeInputUseCase(
             if (deltaX > 0) SwipeAction.MoveRight else SwipeAction.MoveLeft
         } else if (absY > absX) {
             // Vertical swipe - check velocity to determine soft vs hard drop
-            val normalizedVelocity = abs(velocityY)
             if (normalizedVelocity > HARD_DROP_THRESHOLD) {
                 SwipeAction.HardDrop
             } else {
