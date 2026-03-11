@@ -2,7 +2,6 @@ package com.yet.tetris.ui.screens.game
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-
 import com.yet.tetris.domain.model.game.RotationDirection
 
 @Composable

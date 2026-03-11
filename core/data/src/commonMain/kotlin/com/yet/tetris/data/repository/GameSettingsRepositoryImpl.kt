@@ -70,6 +70,5 @@ class GameSettingsRepositoryImpl(
                 } else {
                     GameSettings()
                 }
-            }
-            .flowOn(dispatchers.io)
+            }.flowOn(dispatchers.io)
 }

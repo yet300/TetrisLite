@@ -142,8 +142,7 @@ fun GameState.toEntities(): GameStateEntities {
     return GameStateEntities(gameStateData, boardCells)
 }
 
-private fun serializeQueue(queue: List<Tetromino>): String =
-    queue.joinToString(separator = "|") { "${it.type.name}:${it.rotation}" }
+private fun serializeQueue(queue: List<Tetromino>): String = queue.joinToString(separator = "|") { "${it.type.name}:${it.rotation}" }
 
 private fun deserializeQueue(serialized: String): List<Tetromino> {
     if (serialized.isBlank()) return emptyList()

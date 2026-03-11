@@ -14,8 +14,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.window.core.layout.WindowSizeClass.Companion.WIDTH_DP_EXPANDED_LOWER_BOUND
-import com.yet.tetris.feature.game.GameComponent
 import com.yet.tetris.domain.model.game.RotationDirection
+import com.yet.tetris.feature.game.GameComponent
 
 internal data class GameInputActions(
     val onPause: () -> Unit,

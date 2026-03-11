@@ -183,7 +183,7 @@ private fun HomeContent(
                 modifier =
                     Modifier
                         .widthIn(max = 520.dp)
-                .fillMaxWidth(),
+                        .fillMaxWidth(),
             )
         }
 
@@ -284,7 +284,9 @@ private fun ProgressionOverviewCard(
                                 Modifier
                                     .background(
                                         color = MaterialTheme.colorScheme.background,
-                                        shape = androidx.compose.foundation.shape.RoundedCornerShape(999.dp),
+                                        shape =
+                                            androidx.compose.foundation.shape
+                                                .RoundedCornerShape(999.dp),
                                     ).padding(horizontal = 10.dp, vertical = 6.dp),
                         ) {
                             Icon(

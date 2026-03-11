@@ -6,8 +6,8 @@ import com.yet.tetris.ui.view.game.rendering.BoardRenderer
 import com.yet.tetris.ui.view.game.rendering.WebLineSweepEffect
 import com.yet.tetris.ui.view.game.rendering.WebLockGlowEffect
 import com.yet.tetris.ui.view.game.rendering.webBoardChromeStyle
-import kotlinx.browser.window
 import js.objects.unsafeJso
+import kotlinx.browser.window
 import mui.material.Box
 import mui.system.sx
 import react.FC
@@ -77,7 +77,16 @@ val GameBoard =
             cleanup
         }
 
-        useEffect(props.gameState, props.ghostY, props.canvasWidthPx, props.settings, props.lineSweeps, props.lockGlows, props.effectTimeMs, props.reducedMotion) {
+        useEffect(
+            props.gameState,
+            props.ghostY,
+            props.canvasWidthPx,
+            props.settings,
+            props.lineSweeps,
+            props.lockGlows,
+            props.effectTimeMs,
+            props.reducedMotion,
+        ) {
             val canvas = canvasRef.current ?: return@useEffect
             val ctx = canvas.getContext(CanvasRenderingContext2D.ID) ?: return@useEffect
 

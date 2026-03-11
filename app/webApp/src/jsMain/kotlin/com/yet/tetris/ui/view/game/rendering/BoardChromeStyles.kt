@@ -185,4 +185,5 @@ fun webBoardChromeStyle(
     }
 }
 
-private fun boardAccentColor(settings: GameSettings): String = ThemeColors.lightenHexColor(ThemeColors.getTetrominoColor(com.yet.tetris.domain.model.game.TetrominoType.I, settings), 0.22)
+private fun boardAccentColor(settings: GameSettings): String =
+    ThemeColors.lightenHexColor(ThemeColors.getTetrominoColor(com.yet.tetris.domain.model.game.TetrominoType.I, settings), 0.22)

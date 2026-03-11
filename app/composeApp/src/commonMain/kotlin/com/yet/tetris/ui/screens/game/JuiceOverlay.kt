@@ -20,7 +20,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -107,13 +106,15 @@ class JuiceOverlayState internal constructor(
     ) {
         val baseDurationMillis = if (event.intensity == IntensityLevel.HIGH) 1100f else 780f
         val durationMillis =
-            (baseDurationMillis *
-                if (event.intensity == IntensityLevel.HIGH) {
-                    motionStyle.floatingDurationHighMultiplier
-                } else {
-                    motionStyle.floatingDurationLowMultiplier
-                } *
-                if (reducedMotion) 0.72f else 1f).toLong()
+            (
+                baseDurationMillis *
+                    if (event.intensity == IntensityLevel.HIGH) {
+                        motionStyle.floatingDurationHighMultiplier
+                    } else {
+                        motionStyle.floatingDurationLowMultiplier
+                    } *
+                    if (reducedMotion) 0.72f else 1f
+            ).toLong()
         val entry =
             JuiceFloatingText(
                 id = nextLocalId(burst.id),
@@ -485,7 +486,9 @@ fun JuiceOverlay(
                         drawRect(
                             color = color,
                             topLeft = Offset(x = x - particleSize, y = y - particleSize),
-                            size = androidx.compose.ui.geometry.Size(particleSize * 2f, particleSize * 2f),
+                            size =
+                                androidx.compose.ui.geometry
+                                    .Size(particleSize * 2f, particleSize * 2f),
                         )
                     } else {
                         drawCircle(

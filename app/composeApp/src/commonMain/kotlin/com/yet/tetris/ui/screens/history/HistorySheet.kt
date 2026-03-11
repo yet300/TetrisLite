@@ -71,8 +71,8 @@ import tetrislite.composeapp.generated.resources.best_score_value
 import tetrislite.composeapp.generated.resources.career_summary_title
 import tetrislite.composeapp.generated.resources.game_history
 import tetrislite.composeapp.generated.resources.games_played_value
-import tetrislite.composeapp.generated.resources.history_empty_filter
 import tetrislite.composeapp.generated.resources.highest_level_value
+import tetrislite.composeapp.generated.resources.history_empty_filter
 import tetrislite.composeapp.generated.resources.lines_label
 import tetrislite.composeapp.generated.resources.no_games_yet
 import tetrislite.composeapp.generated.resources.score_label

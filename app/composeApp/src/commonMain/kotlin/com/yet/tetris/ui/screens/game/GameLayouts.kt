@@ -399,13 +399,11 @@ private fun GameBoardPane(
                     .aspectRatio(boardAspectRatio)
                     .onSizeChanged { size ->
                         actions.onBoardSizeChanged(size.height.toFloat())
-                    }
-                    .pointerInput(actions) {
+                    }.pointerInput(actions) {
                         detectTapGestures(
                             onTap = { actions.onRotate() },
                         )
-                    }
-                    .pointerInput(actions) {
+                    }.pointerInput(actions) {
                         detectDragGestures(
                             onDragStart = { actions.onDragStarted() },
                             onDragEnd = actions.onDragEnded,

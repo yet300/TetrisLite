@@ -12,18 +12,18 @@ import com.yet.tetris.ui.view.game.components.StatItem
 import com.yet.tetris.ui.view.game.dialog.ErrorDialog
 import com.yet.tetris.ui.view.game.dialog.GameOverDialog
 import com.yet.tetris.ui.view.game.dialog.PauseDialog
+import com.yet.tetris.ui.view.game.rendering.WebBoardCell
+import com.yet.tetris.ui.view.game.rendering.WebLineSweepEffect
+import com.yet.tetris.ui.view.game.rendering.WebLockGlowEffect
+import com.yet.tetris.ui.view.game.rendering.colorWithAlpha
+import com.yet.tetris.ui.view.game.rendering.webBoardChromeStyle
+import com.yet.tetris.ui.view.game.rendering.webThemeEffectStyle
+import com.yet.tetris.ui.view.game.rendering.webThemeMotionStyle
 import com.yet.tetris.ui.view.settings.SettingsSheet
 import com.yet.tetris.utils.RProps
 import com.yet.tetris.utils.formatTime
 import com.yet.tetris.utils.reactKey
 import com.yet.tetris.utils.useAsState
-import com.yet.tetris.ui.view.game.rendering.WebLineSweepEffect
-import com.yet.tetris.ui.view.game.rendering.WebLockGlowEffect
-import com.yet.tetris.ui.view.game.rendering.WebBoardCell
-import com.yet.tetris.ui.view.game.rendering.colorWithAlpha
-import com.yet.tetris.ui.view.game.rendering.webBoardChromeStyle
-import com.yet.tetris.ui.view.game.rendering.webThemeEffectStyle
-import com.yet.tetris.ui.view.game.rendering.webThemeMotionStyle
 import js.objects.unsafeJso
 import kotlinx.browser.window
 import mui.icons.material.Pause
@@ -210,13 +210,15 @@ val GameContent =
             val isHigh = intensity == IntensityLevel.HIGH
             val baseDurationMs = if (isHigh) 1100.0 else 780.0
             val durationMs =
-                (baseDurationMs *
-                    if (isHigh) {
-                        motionStyle.floatingDurationHighMultiplier
-                    } else {
-                        motionStyle.floatingDurationLowMultiplier
-                    } *
-                    if (reduceMotion) 0.72 else 1.0).toInt()
+                (
+                    baseDurationMs *
+                        if (isHigh) {
+                            motionStyle.floatingDurationHighMultiplier
+                        } else {
+                            motionStyle.floatingDurationLowMultiplier
+                        } *
+                        if (reduceMotion) 0.72 else 1.0
+                ).toInt()
             val id = "$sequence-${window.performance.now()}"
             val entry =
                 WebFloatingText(
@@ -228,7 +230,14 @@ val GameContent =
                     textColor = if (isHigh) effectStyle.textHigh else effectStyle.textLow,
                     strokeColor = if (isHigh) effectStyle.textStrokeHigh else effectStyle.textStrokeLow,
                     pulseDurationMs = if (reduceMotion) durationMs else motionStyle.pulseDurationMs,
-                    pulseCount = if (reduceMotion) 1 else if (isHigh) max(3, durationMs / motionStyle.pulseDurationMs) else 1,
+                    pulseCount =
+                        if (reduceMotion) {
+                            1
+                        } else if (isHigh) {
+                            max(3, durationMs / motionStyle.pulseDurationMs)
+                        } else {
+                            1
+                        },
                 )
 
             setFloatingTexts { previous -> previous + entry }
@@ -1185,11 +1194,13 @@ val GameContent =
                                                         burst.secondaryColor
                                                     },
                                                 alpha =
-                                                    (if (burst.isHigh) {
-                                                        0.95
-                                                    } else {
-                                                        0.9
-                                                    }) * burst.opacityBoost,
+                                                    (
+                                                        if (burst.isHigh) {
+                                                            0.95
+                                                        } else {
+                                                            0.9
+                                                        }
+                                                    ) * burst.opacityBoost,
                                             ),
                                         )
                                     transform = "translate(-50%, -50%)".unsafeCast<Transform>()
