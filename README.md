@@ -47,9 +47,12 @@ The project follows clean architecture principles with clear separation of conce
 
 ```
 TetrisLite/
-├── composeApp/          # Compose Multiplatform UI (Android, Desktop, Web)
-├── iosApp/              # Native iOS app entry point with SwiftUI
-├── webApp/              # Kotlin/JS + React wrappers web app
+├── app/
+│   ├── androidApp/      # Android app module
+│   ├── composeApp/      # Compose Multiplatform UI (Android, Desktop, Web)
+│   ├── iosApp/          # Native iOS/macOS app entry point with SwiftUI
+│   ├── wearApp/         # Wear OS app module
+│   └── webApp/          # Kotlin/JS + React wrappers web app
 ├── shared/              # Shared business logic and data layer
 ├── core/                # Core modules
 │   ├── domain/          # Business logic, use cases, domain models
@@ -87,7 +90,7 @@ TetrisLite/
 ```
 
 #### iOS
-Open `iosApp/iosApp.xcodeproj` in Xcode and run the project.
+Open `app/iosApp/iosApp.xcodeproj` in Xcode and run the project.
 
 #### Web (Compose)
 ```bash

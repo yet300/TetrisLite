@@ -3,11 +3,11 @@
   "version": "1.2.0",
   "private": true,
   "workspaces": [
-    "webApp",
+    "app/webApp",
     "shared/build/dist/js/developmentLibrary"
   ],
   "scripts": {
-    "build": "cd webApp && npm run build",
-    "start": "cd webApp && npm run start"
+    "build": "cd app/webApp && npm run build",
+    "start": "cd app/webApp && npm run start"
   }
 }

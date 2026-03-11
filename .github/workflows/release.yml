@@ -97,7 +97,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.create-release.outputs.upload_url }}
-          asset_path: androidApp/build/outputs/apk/release/androidApp-release.apk
+          asset_path: app/androidApp/build/outputs/apk/release/androidApp-release.apk
           asset_name: TetrisLite-${{ needs.create-release.outputs.version }}-android.apk
           asset_content_type: application/vnd.android.package-archive
 
@@ -107,7 +107,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.create-release.outputs.upload_url }}
-          asset_path: androidApp/build/outputs/bundle/release/androidApp-release.aab
+          asset_path: app/androidApp/build/outputs/bundle/release/androidApp-release.aab
           asset_name: TetrisLite-${{ needs.create-release.outputs.version }}-android.aab
           asset_content_type: application/octet-stream
 
@@ -157,7 +157,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.create-release.outputs.upload_url }}
-          asset_path: wearApp/build/outputs/apk/release/wearApp-release.apk
+          asset_path: app/wearApp/build/outputs/apk/release/wearApp-release.apk
           asset_name: TetrisLite-${{ needs.create-release.outputs.version }}-wear.apk
           asset_content_type: application/vnd.android.package-archive
 
@@ -167,7 +167,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.create-release.outputs.upload_url }}
-          asset_path: wearApp/build/outputs/bundle/release/wearApp-release.aab
+          asset_path: app/wearApp/build/outputs/bundle/release/wearApp-release.aab
           asset_name: TetrisLite-${{ needs.create-release.outputs.version }}-wear.aab
           asset_content_type: application/octet-stream
 
@@ -215,22 +215,22 @@ jobs:
         if: runner.os != 'Windows'
         run: |
           echo "Listing build output directory:"
-          ls -la composeApp/build/compose/binaries/main/ || true
-          find composeApp/build/compose/binaries/main/ -type f -name "*.${{ matrix.artifact }}" || true
+          ls -la app/composeApp/build/compose/binaries/main/ || true
+          find app/composeApp/build/compose/binaries/main/ -type f -name "*.${{ matrix.artifact }}" || true
 
       - name: List build output (debug - Windows)
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
           Write-Host "Listing build output directory:"
-          Get-ChildItem -Path "composeApp/build/compose/binaries/main/" -Recurse -ErrorAction SilentlyContinue
-          Get-ChildItem -Path "composeApp/build/compose/binaries/main/" -Recurse -Filter "*.${{ matrix.artifact }}" -ErrorAction SilentlyContinue
+          Get-ChildItem -Path "app/composeApp/build/compose/binaries/main/" -Recurse -ErrorAction SilentlyContinue
+          Get-ChildItem -Path "app/composeApp/build/compose/binaries/main/" -Recurse -Filter "*.${{ matrix.artifact }}" -ErrorAction SilentlyContinue
 
       - name: Find package file (Unix)
         if: runner.os != 'Windows'
         id: find_package_unix
         run: |
-          FILE=$(find composeApp/build/compose/binaries/main/ -type f -name "*.${{ matrix.artifact }}" | head -n 1)
+          FILE=$(find app/composeApp/build/compose/binaries/main/ -type f -name "*.${{ matrix.artifact }}" | head -n 1)
           if [ -z "$FILE" ]; then
             echo "Error: No .${{ matrix.artifact }} file found"
             exit 1
@@ -244,7 +244,7 @@ jobs:
         id: find_package_windows
         shell: pwsh
         run: |
-          $FILE = Get-ChildItem -Path "composeApp/build/compose/binaries/main/" -Recurse -Filter "*.${{ matrix.artifact }}" | Select-Object -First 1 -ExpandProperty FullName
+          $FILE = Get-ChildItem -Path "app/composeApp/build/compose/binaries/main/" -Recurse -Filter "*.${{ matrix.artifact }}" | Select-Object -First 1 -ExpandProperty FullName
           if (-not $FILE) {
             Write-Error "No .${{ matrix.artifact }} file found"
             exit 1
@@ -287,11 +287,11 @@ jobs:
       - name: Build native macOS app
         run: |
           xcodebuild \
-            -project iosApp/iosApp.xcodeproj \
+            -project app/iosApp/iosApp.xcodeproj \
             -scheme iosApp \
             -configuration Release \
             -destination "generic/platform=macOS" \
-            -derivedDataPath iosApp/build/DerivedData \
+            -derivedDataPath app/iosApp/build/DerivedData \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             build
@@ -300,13 +300,13 @@ jobs:
         id: package_macos_native
         run: |
           set -euo pipefail
-          APP_PATH=$(find iosApp/build/DerivedData/Build/Products -type d -name "*.app" \
+          APP_PATH=$(find app/iosApp/build/DerivedData/Build/Products -type d -name "*.app" \
             | grep -E '/Release' \
             | grep -v "watchApp" \
             | head -n 1 || true)
           if [ -z "$APP_PATH" ]; then
             echo "Error: No macOS .app bundle found in release output"
-            find iosApp/build/DerivedData/Build/Products -type d -name "*.app" || true
+            find app/iosApp/build/DerivedData/Build/Products -type d -name "*.app" || true
             exit 1
           fi
 
@@ -349,7 +349,7 @@ jobs:
 
       - name: Prepare for GitHub Pages
         run: |
-          cd webApp/build/dist/js/productionExecutable
+          cd app/webApp/build/dist/js/productionExecutable
           # Create .nojekyll to prevent GitHub Pages from ignoring files
           touch .nojekyll
           # Enable SPA fallback on GitHub Pages
@@ -366,13 +366,13 @@ jobs:
       - name: Show content of deployment directory
         run: |
           echo "--- Recursive listing of productionExecutable directory ---"
-          ls -R webApp/build/dist/js/productionExecutable
+          ls -R app/webApp/build/dist/js/productionExecutable
           echo "---------------------------------------------------------"
 
       - name: Create web archive for release
         if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
         run: |
-          cd webApp/build/dist/js/productionExecutable
+          cd app/webApp/build/dist/js/productionExecutable
           tar -czf ../../../../../web-release.tar.gz .
 
       - name: Upload Web Package to Release
@@ -392,7 +392,7 @@ jobs:
       - name: Upload GitHub Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./webApp/build/dist/js/productionExecutable
+          path: ./app/webApp/build/dist/js/productionExecutable
 
       - name: Deploy to GitHub Pages
         id: deployment
