@@ -6,15 +6,20 @@ import com.arkivanov.mvikotlin.core.store.Store
 import com.arkivanov.mvikotlin.core.store.StoreFactory
 import com.arkivanov.mvikotlin.extensions.coroutines.CoroutineExecutor
 import com.yet.tetris.domain.model.game.Difficulty
+import com.yet.tetris.domain.repository.GameHistoryRepository
 import com.yet.tetris.domain.repository.GameSettingsRepository
 import com.yet.tetris.domain.repository.GameStateRepository
+import com.yet.tetris.domain.usecase.CalculateProgressionSummaryUseCase
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 internal class HomeStoreFactory
     constructor(
         private val storeFactory: StoreFactory,
+        private val gameHistoryRepository: GameHistoryRepository,
         private val gameSettingsRepository: GameSettingsRepository,
         private val gameStateRepository: GameStateRepository,
+        private val calculateProgressionSummaryUseCase: CalculateProgressionSummaryUseCase,
     ) {
         fun create(): HomeStore =
             object :
@@ -33,6 +38,7 @@ internal class HomeStoreFactory
                     is HomeStore.Msg.SettingsLoaded -> copy(settings = msg.settings)
                     is HomeStore.Msg.SavedGameStateChanged -> copy(hasSavedGame = msg.hasSavedGame)
                     is HomeStore.Msg.DifficultyChanged -> copy(settings = settings.copy(difficulty = msg.difficulty))
+                    is HomeStore.Msg.ProgressionUpdated -> copy(progression = msg.progression)
                     is HomeStore.Msg.LoadingChanged -> copy(isLoading = msg.isLoading)
                 }
         }
@@ -54,6 +60,7 @@ internal class HomeStoreFactory
             }
 
             private fun loadInitialData() {
+                observeProgression()
                 scope.launch {
                     try {
                         dispatch(HomeStore.Msg.LoadingChanged(true))
@@ -70,6 +77,18 @@ internal class HomeStoreFactory
                     } catch (e: Exception) {
                         dispatch(HomeStore.Msg.LoadingChanged(false))
                         publish(HomeStore.Label.ShowError(e.message ?: "Failed to load data"))
+                    }
+                }
+            }
+
+            private fun observeProgression() {
+                scope.launch {
+                    gameHistoryRepository.observeGames().collectLatest { games ->
+                        dispatch(
+                            HomeStore.Msg.ProgressionUpdated(
+                                progression = calculateProgressionSummaryUseCase(games),
+                            ),
+                        )
                     }
                 }
             }

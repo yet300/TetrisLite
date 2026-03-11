@@ -4,9 +4,12 @@ import com.arkivanov.decompose.DefaultComponentContext
 import com.arkivanov.essenty.lifecycle.LifecycleRegistry
 import com.arkivanov.mvikotlin.main.store.DefaultStoreFactory
 import com.yet.tetris.domain.model.game.Difficulty
+import com.yet.tetris.domain.model.history.GameRecord
 import com.yet.tetris.domain.model.settings.GameSettings
+import com.yet.tetris.domain.usecase.CalculateProgressionSummaryUseCase
 import com.yet.tetris.feature.history.HistoryComponent
 import com.yet.tetris.feature.history.PreviewHistoryComponent
+import com.yet.tetris.feature.home.store.FakeGameHistoryRepository
 import com.yet.tetris.feature.home.store.FakeGameSettingsRepository
 import com.yet.tetris.feature.home.store.FakeGameStateRepository
 import com.yet.tetris.feature.home.store.HomeStoreFactory
@@ -29,6 +32,7 @@ import kotlin.test.assertTrue
 @OptIn(ExperimentalCoroutinesApi::class)
 @Suppress("TestFunctionName")
 class HomeComponentTest {
+    private lateinit var historyRepository: FakeGameHistoryRepository
     private lateinit var settingsRepository: FakeGameSettingsRepository
     private lateinit var gameStateRepository: FakeGameStateRepository
     private val testDispatcher = StandardTestDispatcher()
@@ -37,6 +41,7 @@ class HomeComponentTest {
     fun before() {
         Dispatchers.setMain(testDispatcher)
 
+        historyRepository = FakeGameHistoryRepository()
         settingsRepository = FakeGameSettingsRepository()
         gameStateRepository = FakeGameStateRepository()
     }
@@ -79,6 +84,31 @@ class HomeComponentTest {
 
             val model = component.model.value as HomeComponent.Model.Content
             assertFalse(model.hasSavedGame)
+        }
+
+    @Test
+    fun WHEN_history_exists_THEN_progression_is_exposed_in_model() =
+        runTest {
+            historyRepository.setGames(
+                listOf(
+                    GameRecord(
+                        id = "1",
+                        score = 5_500,
+                        linesCleared = 20,
+                        level = 5,
+                        difficulty = Difficulty.NORMAL,
+                        timestamp = 0L,
+                        tetrisesCleared = 1,
+                    ),
+                ),
+            )
+
+            val component = createComponent()
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            val model = component.model.value as HomeComponent.Model.Content
+            assertEquals(1, model.progression.totalGames)
+            assertEquals(5_500, model.progression.bestScore)
         }
 
     @Test
@@ -238,8 +268,10 @@ class HomeComponentTest {
     private fun createHomeStoreFactory(): HomeStoreFactory =
         HomeStoreFactory(
             storeFactory = DefaultStoreFactory(),
+            gameHistoryRepository = historyRepository,
             gameSettingsRepository = settingsRepository,
             gameStateRepository = gameStateRepository,
+            calculateProgressionSummaryUseCase = CalculateProgressionSummaryUseCase(),
         )
 
     private fun createSettingsComponentFactory(): SettingsComponent.Factory =

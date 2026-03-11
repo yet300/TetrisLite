@@ -9,7 +9,9 @@ import com.yet.tetris.domain.model.game.GameState
 import com.yet.tetris.domain.model.game.Position
 import com.yet.tetris.domain.model.game.Tetromino
 import com.yet.tetris.domain.model.game.TetrominoType
+import com.yet.tetris.domain.model.history.GameRecord
 import com.yet.tetris.domain.model.settings.GameSettings
+import com.yet.tetris.domain.usecase.CalculateProgressionSummaryUseCase
 import com.yet.tetris.feature.home.store.HomeStore.Intent
 import com.yet.tetris.feature.home.store.HomeStore.Label
 import kotlinx.coroutines.Dispatchers
@@ -30,6 +32,7 @@ import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class HomeStoreTest {
+    private lateinit var historyRepository: FakeGameHistoryRepository
     private lateinit var settingsRepository: FakeGameSettingsRepository
     private lateinit var gameStateRepository: FakeGameStateRepository
     private lateinit var store: HomeStore
@@ -40,6 +43,7 @@ class HomeStoreTest {
         isAssertOnMainThreadEnabled = false
         Dispatchers.setMain(testDispatcher)
 
+        historyRepository = FakeGameHistoryRepository()
         settingsRepository = FakeGameSettingsRepository()
         gameStateRepository = FakeGameStateRepository()
     }
@@ -98,6 +102,31 @@ class HomeStoreTest {
 
             // After initialization completes, isLoading should be false
             assertFalse(store.state.isLoading)
+        }
+
+    @Test
+    fun calculates_progression_from_game_history_WHEN_created() =
+        runTest {
+            historyRepository.setGames(
+                listOf(
+                    GameRecord(
+                        id = "1",
+                        score = 6_000,
+                        linesCleared = 18,
+                        level = 4,
+                        difficulty = Difficulty.NORMAL,
+                        timestamp = 0L,
+                        maxCombo = 5,
+                        tetrisesCleared = 1,
+                    ),
+                ),
+            )
+
+            createStore()
+
+            assertEquals(1, store.state.progression.totalGames)
+            assertEquals(6_000, store.state.progression.bestScore)
+            assertTrue(store.state.progression.unlockedAchievements.isNotEmpty())
         }
 
     @Test
@@ -256,8 +285,10 @@ class HomeStoreTest {
     private fun createStoreFactory(): HomeStoreFactory =
         HomeStoreFactory(
             storeFactory = DefaultStoreFactory(),
+            gameHistoryRepository = historyRepository,
             gameSettingsRepository = settingsRepository,
             gameStateRepository = gameStateRepository,
+            calculateProgressionSummaryUseCase = CalculateProgressionSummaryUseCase(),
         )
 
     private fun createTestGameState(): GameState =
