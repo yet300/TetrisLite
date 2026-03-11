@@ -200,8 +200,7 @@ class MovePieceUseCaseTest {
         assertEquals(Position(3, 10), state.currentPosition)
     }
 
-    private fun assertApplied(result: MovePieceUseCase.Result): GameState =
-        assertIs<MovePieceUseCase.Result.Applied>(result).gameState
+    private fun assertApplied(result: MovePieceUseCase.Result): GameState = assertIs<MovePieceUseCase.Result.Applied>(result).gameState
 
     private fun assertBlocked(result: MovePieceUseCase.Result): MovePieceUseCase.Result.Blocked =
         assertIs<MovePieceUseCase.Result.Blocked>(result)

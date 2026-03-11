@@ -49,19 +49,20 @@ class LockPieceUseCase(
     operator fun invoke(state: GameState): GameState = invokeDetailed(state).gameState
 
     fun invokeDetailed(state: GameState): Result {
-        val piece = state.currentPiece ?: return state
-            .let {
-                Result(
-                    gameState = it,
-                    clearedRows = emptyList(),
-                    lockCells = emptyList(),
-                    linesCleared = 0,
-                    clearType = ClearType.NONE,
-                    scoreAwarded = 0,
-                    perfectClear = false,
-                    didBackToBackBonus = false,
-                )
-            }
+        val piece =
+            state.currentPiece ?: return state
+                .let {
+                    Result(
+                        gameState = it,
+                        clearedRows = emptyList(),
+                        lockCells = emptyList(),
+                        linesCleared = 0,
+                        clearType = ClearType.NONE,
+                        scoreAwarded = 0,
+                        perfectClear = false,
+                        didBackToBackBonus = false,
+                    )
+                }
 
         val lockCells = piece.getAbsolutePositions(state.currentPosition)
 
@@ -111,7 +112,16 @@ class LockPieceUseCase(
                     level = newLevel,
                     piecesPlaced = state.piecesPlaced + 1,
                     tetrisesCleared = state.tetrisesCleared + if (clearType == ClearType.TETRIS) 1 else 0,
-                    tSpinClears = state.tSpinClears + if (clearType == ClearType.T_SPIN_SINGLE || clearType == ClearType.T_SPIN_DOUBLE || clearType == ClearType.T_SPIN_TRIPLE) 1 else 0,
+                    tSpinClears =
+                        state.tSpinClears +
+                            if (clearType == ClearType.T_SPIN_SINGLE ||
+                                clearType == ClearType.T_SPIN_DOUBLE ||
+                                clearType == ClearType.T_SPIN_TRIPLE
+                            ) {
+                                1
+                            } else {
+                                0
+                            },
                     perfectClears = state.perfectClears + if (perfectClear) 1 else 0,
                     backToBackChain = scoreResult.nextBackToBackChain,
                     isTSpinEligible = false,

@@ -46,11 +46,12 @@ class RotatePieceUseCase(
         if (state.isPaused) return Result.Blocked(BlockedReason.PAUSED)
 
         return when (direction) {
-            RotationDirection.CLOCKWISE, RotationDirection.COUNTERCLOCKWISE -> rotateQuarterTurn(
-                state = state,
-                piece = piece,
-                direction = direction,
-            )
+            RotationDirection.CLOCKWISE, RotationDirection.COUNTERCLOCKWISE ->
+                rotateQuarterTurn(
+                    state = state,
+                    piece = piece,
+                    direction = direction,
+                )
             RotationDirection.ONE_EIGHTY -> rotateOneEighty(state, piece)
         }
     }

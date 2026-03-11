@@ -30,8 +30,9 @@ data class GameState(
     }
 
     val previewPieces: List<Tetromino>
-        get() = buildList {
-            add(nextPiece)
-            addAll(nextQueue)
-        }
+        get() =
+            buildList {
+                add(nextPiece)
+                addAll(nextQueue)
+            }
 }

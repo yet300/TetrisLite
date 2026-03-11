@@ -17,8 +17,8 @@ class AdvanceGameTickUseCase(
         ) : Result
     }
 
-    operator fun invoke(gameState: GameState): Result {
-        return when (val moveResult = movePieceUseCase.moveDown(gameState)) {
+    operator fun invoke(gameState: GameState): Result =
+        when (val moveResult = movePieceUseCase.moveDown(gameState)) {
             is MovePieceUseCase.Result.Applied -> {
                 Result.Moved(
                     gameState = moveResult.gameState,
@@ -30,7 +30,6 @@ class AdvanceGameTickUseCase(
                 Result.RequiresLock(gameState)
             }
         }
-    }
 
     fun calculateGhostY(gameState: GameState): Int? =
         gameState.currentPiece?.let { piece ->

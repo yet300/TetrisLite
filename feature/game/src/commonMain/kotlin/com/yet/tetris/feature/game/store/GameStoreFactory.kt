@@ -379,6 +379,7 @@ internal class GameStoreFactory
                     is HoldPieceUseCase.Result.Blocked -> Unit
                 }
             }
+
             private fun handleSwipe(
                 intent: GameStore.Intent.HandleSwipe,
                 state: GameStore.State,
@@ -412,7 +413,8 @@ internal class GameStoreFactory
 
                             HandleSwipeInputUseCase.SwipeAction.MoveLeft,
                             HandleSwipeInputUseCase.SwipeAction.MoveRight,
-                            HandleSwipeInputUseCase.SwipeAction.None ->
+                            HandleSwipeInputUseCase.SwipeAction.None,
+                            ->
                                 result.state.copy(isTSpinEligible = false)
                         }
                     dispatch(

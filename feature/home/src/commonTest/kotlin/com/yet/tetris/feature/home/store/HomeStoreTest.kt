@@ -126,7 +126,10 @@ class HomeStoreTest {
 
             assertEquals(1, store.state.progression.totalGames)
             assertEquals(6_000, store.state.progression.bestScore)
-            assertTrue(store.state.progression.unlockedAchievements.isNotEmpty())
+            assertTrue(
+                store.state.progression.unlockedAchievements
+                    .isNotEmpty(),
+            )
         }
 
     @Test

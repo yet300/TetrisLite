@@ -215,6 +215,5 @@ class RotatePieceUseCaseTest {
         }
     }
 
-    private fun assertApplied(result: RotatePieceUseCase.Result): GameState =
-        assertIs<RotatePieceUseCase.Result.Applied>(result).gameState
+    private fun assertApplied(result: RotatePieceUseCase.Result): GameState = assertIs<RotatePieceUseCase.Result.Applied>(result).gameState
 }
