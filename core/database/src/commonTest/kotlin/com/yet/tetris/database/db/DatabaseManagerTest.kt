@@ -1,9 +1,12 @@
 package com.yet.tetris.database.db
 
+import com.app.common.AppDispatchers
 import com.yet.tetris.database.RobolectricTestRunner
 import com.yet.tetris.database.createTestDatabaseDriverFactory
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlin.test.AfterTest
 import kotlin.test.Test
@@ -14,7 +17,14 @@ import kotlin.test.assertSame
 class DatabaseManagerTest : RobolectricTestRunner() {
     private val driverFactory = createTestDatabaseDriverFactory()
 
-    private fun createManager() = DatabaseManager(driverFactory)
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private val dispatchers = AppDispatchers(io = UnconfinedTestDispatcher())
+
+    private fun createManager() =
+        DatabaseManager(
+            driverFactory = driverFactory,
+            dispatchers = dispatchers,
+        )
 
     @AfterTest
     fun tearDown() {

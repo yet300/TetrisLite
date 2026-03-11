@@ -7,6 +7,7 @@ data class GameSettingsDto(
     val difficulty: DifficultyDto = DifficultyDto.NORMAL,
     val themeConfig: ThemeConfigDto = ThemeConfigDto(),
     val audioSettings: AudioSettingsDto = AudioSettingsDto(),
+    val controlSettings: ControlSettingsDto = ControlSettingsDto(),
 )
 
 @Serializable
@@ -51,5 +52,29 @@ enum class MusicThemeDto {
     CLASSIC,
     MODERN,
     MINIMAL,
+    ARCADE,
+    DUSK,
+    BATTLE,
     NONE,
+}
+
+@Serializable
+data class ControlSettingsDto(
+    val primaryRotateDirection: RotationDirectionDto = RotationDirectionDto.CLOCKWISE,
+    val enable180Rotation: Boolean = true,
+    val gestureSensitivity: GestureSensitivityDto = GestureSensitivityDto.NORMAL,
+)
+
+@Serializable
+enum class RotationDirectionDto {
+    CLOCKWISE,
+    COUNTERCLOCKWISE,
+    ONE_EIGHTY,
+}
+
+@Serializable
+enum class GestureSensitivityDto {
+    RELAXED,
+    NORMAL,
+    COMPETITIVE,
 }

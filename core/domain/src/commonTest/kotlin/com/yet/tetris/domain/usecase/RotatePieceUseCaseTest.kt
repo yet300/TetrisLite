@@ -7,8 +7,7 @@ import com.yet.tetris.domain.model.game.Tetromino
 import com.yet.tetris.domain.model.game.TetrominoType
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
-import kotlin.test.assertNull
+import kotlin.test.assertIs
 
 class RotatePieceUseCaseTest {
     private val checkCollision = CheckCollisionUseCase()
@@ -36,10 +35,10 @@ class RotatePieceUseCaseTest {
         val state = createTestState(piece = Tetromino.create(TetrominoType.T, 0))
 
         // When
-        val newState = useCase(state)
+        val result = useCase(state)
+        val newState = assertApplied(result)
 
         // Then
-        assertNotNull(newState)
         assertEquals(1, newState.currentPiece?.rotation)
     }
 
@@ -49,17 +48,17 @@ class RotatePieceUseCaseTest {
         var state = createTestState(piece = Tetromino.create(TetrominoType.T, 0))
 
         // When - Rotate 4 times
-        state = useCase(state)!!
-        state = useCase(state)!!
-        state = useCase(state)!!
-        state = useCase(state)!!
+        state = assertApplied(useCase(state))
+        state = assertApplied(useCase(state))
+        state = assertApplied(useCase(state))
+        state = assertApplied(useCase(state))
 
         // Then - Should be back to rotation 0
         assertEquals(0, state.currentPiece?.rotation)
     }
 
     @Test
-    fun invoke_blockedRotation_shouldReturnNull() {
+    fun invoke_blockedRotation_shouldReturnBlocked() {
         // Given - Surround piece so it can't rotate
         val cells = mutableMapOf<Position, TetrominoType>()
         for (x in 2..4) {
@@ -73,10 +72,11 @@ class RotatePieceUseCaseTest {
         val state = createTestState(position = Position(3, 10), board = board)
 
         // When
-        val newState = useCase(state)
+        val result = useCase(state)
+        val blocked = assertIs<RotatePieceUseCase.Result.Blocked>(result)
 
         // Then
-        assertNull(newState, "Rotation should fail when blocked")
+        assertEquals(RotatePieceUseCase.BlockedReason.COLLISION, blocked.reason)
     }
 
     @Test
@@ -89,10 +89,10 @@ class RotatePieceUseCaseTest {
             )
 
         // When - Try to rotate (would go out of bounds without wall kick)
-        val newState = useCase(state)
+        val result = useCase(state)
+        val newState = assertApplied(result)
 
         // Then - Should succeed with wall kick adjustment
-        assertNotNull(newState, "Wall kick should allow rotation")
         assertEquals(1, newState.currentPiece?.rotation)
     }
 
@@ -102,47 +102,50 @@ class RotatePieceUseCaseTest {
         val state = createTestState(piece = Tetromino.create(TetrominoType.O, 0))
 
         // When
-        val newState = useCase(state)
+        val result = useCase(state)
+        val newState = assertApplied(result)
 
         // Then
-        assertNotNull(newState)
         assertEquals(1, newState.currentPiece?.rotation)
     }
 
     @Test
-    fun invoke_whenGameOver_shouldReturnNull() {
+    fun invoke_whenGameOver_shouldReturnBlocked() {
         // Given
         val state = createTestState().copy(isGameOver = true)
 
         // When
-        val newState = useCase(state)
+        val result = useCase(state)
+        val blocked = assertIs<RotatePieceUseCase.Result.Blocked>(result)
 
         // Then
-        assertNull(newState, "Cannot rotate when game is over")
+        assertEquals(RotatePieceUseCase.BlockedReason.GAME_OVER, blocked.reason)
     }
 
     @Test
-    fun invoke_whenPaused_shouldReturnNull() {
+    fun invoke_whenPaused_shouldReturnBlocked() {
         // Given
         val state = createTestState().copy(isPaused = true)
 
         // When
-        val newState = useCase(state)
+        val result = useCase(state)
+        val blocked = assertIs<RotatePieceUseCase.Result.Blocked>(result)
 
         // Then
-        assertNull(newState, "Cannot rotate when game is paused")
+        assertEquals(RotatePieceUseCase.BlockedReason.PAUSED, blocked.reason)
     }
 
     @Test
-    fun invoke_withNoPiece_shouldReturnNull() {
+    fun invoke_withNoPiece_shouldReturnBlocked() {
         // Given
         val state = createTestState().copy(currentPiece = null)
 
         // When
-        val newState = useCase(state)
+        val result = useCase(state)
+        val blocked = assertIs<RotatePieceUseCase.Result.Blocked>(result)
 
         // Then
-        assertNull(newState, "Cannot rotate when there is no current piece")
+        assertEquals(RotatePieceUseCase.BlockedReason.NO_CURRENT_PIECE, blocked.reason)
     }
 
     @Test
@@ -155,10 +158,10 @@ class RotatePieceUseCaseTest {
             )
 
         // When
-        val newState = useCase(state)
+        val result = useCase(state)
 
         // Then - Should succeed with I-piece specific wall kicks
-        assertNotNull(newState)
+        assertIs<RotatePieceUseCase.Result.Applied>(result)
     }
 
     @Test
@@ -171,10 +174,10 @@ class RotatePieceUseCaseTest {
             )
 
         // When
-        val newState = useCase(state)
+        val result = useCase(state)
 
         // Then
-        assertNotNull(newState)
+        assertIs<RotatePieceUseCase.Result.Applied>(result)
     }
 
     @Test
@@ -187,10 +190,10 @@ class RotatePieceUseCaseTest {
             )
 
         // When - Rotate (may need wall kick)
-        val newState = useCase(state)
+        val result = useCase(state)
 
         // Then - Should succeed with wall kick or normal rotation
-        assertNotNull(newState)
+        assertIs<RotatePieceUseCase.Result.Applied>(result)
     }
 
     @Test
@@ -203,12 +206,14 @@ class RotatePieceUseCaseTest {
             )
 
         // When
-        val newState = useCase(state)
+        val result = useCase(state)
 
         // Then - May or may not succeed depending on exact position
         // Just verify it doesn't crash
-        if (newState != null) {
-            assertEquals(1, newState.currentPiece?.rotation)
+        if (result is RotatePieceUseCase.Result.Applied) {
+            assertEquals(1, result.gameState.currentPiece?.rotation)
         }
     }
+
+    private fun assertApplied(result: RotatePieceUseCase.Result): GameState = assertIs<RotatePieceUseCase.Result.Applied>(result).gameState
 }

@@ -1,11 +1,14 @@
 package com.yet.tetris.database.dao
 
 import app.cash.turbine.test
+import com.app.common.AppDispatchers
 import com.yet.tetris.database.GameHistory
 import com.yet.tetris.database.RobolectricTestRunner
 import com.yet.tetris.database.createTestDatabaseDriverFactory
 import com.yet.tetris.database.db.DatabaseManager
 import com.yet.tetris.domain.model.game.Difficulty
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -19,11 +22,16 @@ import kotlin.time.ExperimentalTime
 class GameHistoryDaoTest : RobolectricTestRunner() {
     private lateinit var dao: GameHistoryDao
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     @BeforeTest
     fun setup() {
-        val driverFactory = createTestDatabaseDriverFactory()
-        val databaseManager = DatabaseManager(driverFactory)
-        dao = GameHistoryDao(databaseManager)
+        val dispatchers = AppDispatchers(io = UnconfinedTestDispatcher())
+        val databaseManager =
+            DatabaseManager(
+                driverFactory = createTestDatabaseDriverFactory(),
+                dispatchers = dispatchers,
+            )
+        dao = GameHistoryDao(databaseManager, dispatchers)
     }
 
     @AfterTest
@@ -178,7 +186,17 @@ class GameHistoryDaoTest : RobolectricTestRunner() {
         id = id,
         score = score,
         linesCleared = linesCleared,
+        level = 1,
         difficulty = difficulty,
         timestamp = timestamp,
+        durationMs = 0,
+        piecesPlaced = 0,
+        maxCombo = 0,
+        tetrisesCleared = 0,
+        tSpinClears = 0,
+        perfectClears = 0,
+        hardDrops = 0,
+        hardDropCells = 0,
+        softDropCells = 0,
     )
 }

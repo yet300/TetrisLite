@@ -11,6 +11,7 @@ internal val stateToModel: (HomeStore.State) -> HomeComponent.Model =
             HomeComponent.Model.Content(
                 settings = state.settings,
                 hasSavedGame = state.hasSavedGame,
+                progression = state.progression,
             )
         }
     }

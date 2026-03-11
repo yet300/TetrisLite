@@ -4,6 +4,7 @@ import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.router.slot.ChildSlot
 import com.arkivanov.decompose.value.Value
 import com.yet.tetris.domain.model.game.Difficulty
+import com.yet.tetris.domain.model.progression.ProgressionSummary
 import com.yet.tetris.domain.model.settings.GameSettings
 import com.yet.tetris.feature.history.HistoryComponent
 import com.yet.tetris.feature.settings.SettingsComponent
@@ -31,6 +32,7 @@ interface HomeComponent {
         data class Content(
             val settings: GameSettings,
             val hasSavedGame: Boolean,
+            val progression: ProgressionSummary,
         ) : Model
     }
 

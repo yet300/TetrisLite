@@ -1,11 +1,13 @@
 package com.yet.tetris.database.db
 
 import app.cash.sqldelight.db.SqlDriver
+import com.app.common.AppDispatchers
 import com.yet.tetris.database.TetrisLiteDatabase
 import com.yet.tetris.database.utils.enumAdapter
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 
 /**
  * Manages the singleton instance of the database, handling its asynchronous initialization.
@@ -13,6 +15,7 @@ import kotlinx.coroutines.sync.withLock
  */
 class DatabaseManager(
     private val driverFactory: DatabaseDriverFactory,
+    private val dispatchers: AppDispatchers,
 ) {
     private var driver: SqlDriver? = null
 
@@ -39,25 +42,28 @@ class DatabaseManager(
             if (!deferredDb.isCompleted) {
                 // This is the first coroutine, so it performs the initialization.
                 try {
-                    val driver = driverFactory.provideDbDriver(TetrisLiteDatabase.Schema)
-                    this.driver = driver
                     val database =
-                        TetrisLiteDatabase(
-                            driver = driver,
-                            GameHistoryAdapter =
-                                com.yet.tetris.database.GameHistory.Adapter(
-                                    difficultyAdapter = enumAdapter(),
-                                ),
-                            CurrentGameStateAdapter =
-                                com.yet.tetris.database.CurrentGameState.Adapter(
-                                    currentPieceTypeAdapter = enumAdapter(),
-                                    nextPieceTypeAdapter = enumAdapter(),
-                                ),
-                            BoardCellsAdapter =
-                                com.yet.tetris.database.BoardCells.Adapter(
-                                    pieceTypeAdapter = enumAdapter(),
-                                ),
-                        )
+                        withContext(dispatchers.io) {
+                            val driver = driverFactory.provideDbDriver(TetrisLiteDatabase.Schema)
+                            this@DatabaseManager.driver = driver
+                            TetrisLiteDatabase(
+                                driver = driver,
+                                GameHistoryAdapter =
+                                    com.yet.tetris.database.GameHistory.Adapter(
+                                        difficultyAdapter = enumAdapter(),
+                                    ),
+                                CurrentGameStateAdapter =
+                                    com.yet.tetris.database.CurrentGameState.Adapter(
+                                        currentPieceTypeAdapter = enumAdapter(),
+                                        nextPieceTypeAdapter = enumAdapter(),
+                                        holdPieceTypeAdapter = enumAdapter(),
+                                    ),
+                                BoardCellsAdapter =
+                                    com.yet.tetris.database.BoardCells.Adapter(
+                                        pieceTypeAdapter = enumAdapter(),
+                                    ),
+                            )
+                        }
                     // Once initialized, complete the deferred object with the result.
                     deferredDb.complete(database)
                 } catch (e: Exception) {

@@ -15,8 +15,18 @@ class GameHistoryMapperTest {
                 id = "test-id",
                 score = 5000,
                 linesCleared = 50,
+                level = 1,
                 difficulty = Difficulty.HARD,
                 timestamp = 1234567890,
+                durationMs = 0,
+                piecesPlaced = 0,
+                maxCombo = 0,
+                tetrisesCleared = 0,
+                tSpinClears = 0,
+                perfectClears = 0,
+                hardDrops = 0,
+                hardDropCells = 0,
+                softDropCells = 0,
             )
 
         // When

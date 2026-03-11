@@ -16,7 +16,8 @@ class LockPieceUseCaseTest {
     private val checkCollision = CheckCollisionUseCase()
     private val calculateScore = CalculateScoreUseCase()
     private val generateTetromino = GenerateTetrominoUseCase()
-    private val useCase = LockPieceUseCase(calculateScore, generateTetromino, checkCollision)
+    private val previewQueueEngine = PreviewQueueEngine(generateTetromino)
+    private val useCase = LockPieceUseCase(calculateScore, checkCollision, previewQueueEngine)
 
     private fun createTestState(
         position: Position = Position(3, 17),
@@ -89,7 +90,7 @@ class LockPieceUseCaseTest {
         // Then
         assertEquals(1, newState.linesCleared)
         assertTrue(newState.score > 0)
-        assertEquals(100, newState.score) // Single line = 100 points
+        assertEquals(2100, newState.score) // Single line + perfect clear bonus
     }
 
     @Test
@@ -173,7 +174,7 @@ class LockPieceUseCaseTest {
         val newState = useCase(state)
 
         // Then
-        assertEquals(600, newState.score) // 500 + 100
+        assertEquals(2600, newState.score) // 500 + single line + perfect clear bonus
     }
 
     @Test

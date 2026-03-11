@@ -3,11 +3,14 @@ package com.yet.tetris.domain.usecase
 import com.yet.tetris.domain.model.effects.IntensityLevel
 import com.yet.tetris.domain.model.effects.VisualEffectEvent
 import com.yet.tetris.domain.model.effects.VisualTextKey
+import com.yet.tetris.domain.model.game.Position
 import kotlin.math.floor
 
 class PlanVisualFeedbackUseCase {
     data class BurstSpec(
         val linesCleared: Int,
+        val clearedRows: List<Int>,
+        val lockCells: List<Position>,
         val comboStreak: Int,
         val intensity: IntensityLevel,
         val power: Float,
@@ -22,6 +25,8 @@ class PlanVisualFeedbackUseCase {
     operator fun invoke(
         currentComboStreak: Int,
         linesClearedThisLock: Int,
+        clearedRowsThisLock: List<Int> = emptyList(),
+        lockCellsThisLock: List<Position> = emptyList(),
     ): Result {
         val nextComboStreak =
             if (linesClearedThisLock > 0) {
@@ -34,6 +39,8 @@ class PlanVisualFeedbackUseCase {
             if (linesClearedThisLock > 0) {
                 createBurst(
                     linesCleared = linesClearedThisLock,
+                    clearedRows = clearedRowsThisLock,
+                    lockCells = lockCellsThisLock,
                     comboStreak = nextComboStreak,
                 )
             } else {
@@ -48,6 +55,8 @@ class PlanVisualFeedbackUseCase {
 
     private fun createBurst(
         linesCleared: Int,
+        clearedRows: List<Int>,
+        lockCells: List<Position>,
         comboStreak: Int,
     ): BurstSpec {
         val baseIntensity = if (linesCleared >= 3) IntensityLevel.HIGH else IntensityLevel.LOW
@@ -106,6 +115,8 @@ class PlanVisualFeedbackUseCase {
 
         return BurstSpec(
             linesCleared = linesCleared,
+            clearedRows = clearedRows,
+            lockCells = lockCells,
             comboStreak = comboStreak,
             intensity = intensity,
             power = power,

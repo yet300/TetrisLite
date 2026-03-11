@@ -1,5 +1,6 @@
 package com.yet.tetris.data.repository
 
+import com.app.common.AppDispatchers
 import com.yet.tetris.data.music.AudioCacheManager
 import com.yet.tetris.data.music.AudioSynthesizer
 import com.yet.tetris.domain.model.audio.AudioSettings
@@ -19,7 +20,6 @@ import kotlinx.cinterop.ptr
 import kotlinx.cinterop.usePinned
 import kotlinx.cinterop.value
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
@@ -35,6 +35,7 @@ import platform.posix.memcpy
 @OptIn(ExperimentalForeignApi::class, BetaInteropApi::class, UnsafeNumber::class)
 class IosAudioRepositoryImpl(
     private val cacheManager: AudioCacheManager,
+    private val dispatchers: AppDispatchers,
 ) : AudioRepository {
     /**
      * An isolated, thread-local object that holds all AVFoundation state.
@@ -73,27 +74,26 @@ class IosAudioRepositoryImpl(
     }
 
     // All AVFoundation operations are dispatched to this scope, which runs on the main thread.
-    private val mainScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
+    private val mainScope = CoroutineScope(dispatchers.main + SupervisorJob())
 
     /**
      * Pre-heats the PCM cache on a background thread, then converts the data to
      * platform-specific AVAudioPCMBuffers on the main thread.
      */
     override suspend fun initialize() {
-        val synthesizedCache = mutableMapOf<SoundEffect, AVAudioPCMBuffer>()
-        // Perform CPU-heavy synthesis on a background thread.
-        withContext(Dispatchers.Default) {
+        val synthesizedCache = mutableMapOf<SoundEffect, FloatArray>()
+        withContext(dispatchers.default) {
             cacheManager.preheatSfxCache()
             SoundEffect.entries.forEach { effect ->
                 cacheManager.getSfxPcm(effect)?.let { pcmData ->
-                    val buffer = pcmDataToPcmBuffer(AudioEngine.audioFormat, pcmData)
-                    synthesizedCache[effect] = buffer
+                    synthesizedCache[effect] = pcmData
                 }
             }
         }
-        // Safely update the main-thread cache.
-        mainScope.launch {
-            AudioEngine.sfxCache.putAll(synthesizedCache)
+        withContext(dispatchers.main) {
+            synthesizedCache.forEach { (effect, pcmData) ->
+                AudioEngine.sfxCache[effect] = pcmDataToPcmBuffer(AudioEngine.audioFormat, pcmData)
+            }
         }
     }
 
@@ -119,7 +119,7 @@ class IosAudioRepositoryImpl(
             // Ленивое кэширование: если звука нет в кэше, синтезируем его.
             if (AudioEngine.sfxCache[effect] == null) {
                 val pcmData =
-                    withContext(Dispatchers.Default) {
+                    withContext(dispatchers.default) {
                         cacheManager.getSfxPcm(effect)
                     }
                 if (pcmData != null) {

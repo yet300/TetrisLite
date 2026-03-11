@@ -5,11 +5,11 @@ import app.cash.sqldelight.async.coroutines.awaitAsOne
 import app.cash.sqldelight.async.coroutines.awaitAsOneOrNull
 import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToOneOrNull
+import com.app.common.AppDispatchers
 import com.yet.tetris.database.BoardCells
 import com.yet.tetris.database.CurrentGameState
 import com.yet.tetris.database.db.DatabaseManager
 import com.yet.tetris.domain.model.game.TetrominoType
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
@@ -17,35 +17,64 @@ import kotlinx.coroutines.withContext
 
 class GameStateDao(
     private val databaseManager: DatabaseManager,
+    private val dispatchers: AppDispatchers,
 ) {
     suspend fun saveGameState(
         score: Long,
         linesCleared: Long,
         level: Long,
+        piecesPlaced: Long = 0,
+        maxCombo: Long = 0,
+        tetrisesCleared: Long = 0,
+        tSpinClears: Long = 0,
+        perfectClears: Long = 0,
+        hardDrops: Long = 0,
+        hardDropCells: Long = 0,
+        softDropCells: Long = 0,
+        backToBackChain: Long = 0,
+        isTSpinEligible: Boolean = false,
         currentPieceType: TetrominoType?,
         currentPieceRotation: Long,
         currentPositionX: Long,
         currentPositionY: Long,
         nextPieceType: TetrominoType,
         nextPieceRotation: Long,
+        nextQueue: String = "",
+        holdPieceType: TetrominoType? = null,
+        holdPieceRotation: Long = 0,
+        canHold: Boolean = true,
         isGameOver: Boolean,
         isPaused: Boolean,
         boardWidth: Long,
         boardHeight: Long,
         boardCells: List<BoardCells>,
-    ) = withContext(Dispatchers.Default) {
+    ) = withContext(dispatchers.io) {
         databaseManager.getDb().transaction {
             // Save game state
             databaseManager.getDb().currentGameStateQueries.insertOrReplaceGameState(
                 score = score,
                 linesCleared = linesCleared,
                 level = level,
+                piecesPlaced = piecesPlaced,
+                maxCombo = maxCombo,
+                tetrisesCleared = tetrisesCleared,
+                tSpinClears = tSpinClears,
+                perfectClears = perfectClears,
+                hardDrops = hardDrops,
+                hardDropCells = hardDropCells,
+                softDropCells = softDropCells,
+                backToBackChain = backToBackChain,
+                isTSpinEligible = isTSpinEligible,
                 currentPieceType = currentPieceType,
                 currentPieceRotation = currentPieceRotation,
                 currentPositionX = currentPositionX,
                 currentPositionY = currentPositionY,
                 nextPieceType = nextPieceType,
                 nextPieceRotation = nextPieceRotation,
+                nextQueue = nextQueue,
+                holdPieceType = holdPieceType,
+                holdPieceRotation = holdPieceRotation,
+                canHold = canHold,
                 isGameOver = isGameOver,
                 isPaused = isPaused,
                 boardWidth = boardWidth,
@@ -67,7 +96,7 @@ class GameStateDao(
     }
 
     suspend fun getGameState(): CurrentGameState? =
-        withContext(Dispatchers.Default) {
+        withContext(dispatchers.io) {
             databaseManager
                 .getDb()
                 .currentGameStateQueries
@@ -76,7 +105,7 @@ class GameStateDao(
         }
 
     suspend fun getBoardCells(): List<BoardCells> =
-        withContext(Dispatchers.Default) {
+        withContext(dispatchers.io) {
             databaseManager
                 .getDb()
                 .boardCellsQueries
@@ -85,7 +114,7 @@ class GameStateDao(
         }
 
     suspend fun clearGameState() =
-        withContext(Dispatchers.Default) {
+        withContext(dispatchers.io) {
             databaseManager.getDb().transaction {
                 databaseManager.getDb().currentGameStateQueries.clearGameState()
                 databaseManager.getDb().boardCellsQueries.clearAllCells()
@@ -93,7 +122,7 @@ class GameStateDao(
         }
 
     suspend fun hasSavedState(): Boolean =
-        withContext(Dispatchers.Default) {
+        withContext(dispatchers.io) {
             databaseManager
                 .getDb()
                 .currentGameStateQueries
@@ -108,7 +137,7 @@ class GameStateDao(
                 db.currentGameStateQueries
                     .getGameState()
                     .asFlow()
-                    .mapToOneOrNull(Dispatchers.Default),
+                    .mapToOneOrNull(dispatchers.io),
             )
         }
 }

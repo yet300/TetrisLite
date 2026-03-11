@@ -1,8 +1,10 @@
 package com.yet.tetris.feature.home.di
 
 import com.arkivanov.mvikotlin.core.store.StoreFactory
+import com.yet.tetris.domain.repository.GameHistoryRepository
 import com.yet.tetris.domain.repository.GameSettingsRepository
 import com.yet.tetris.domain.repository.GameStateRepository
+import com.yet.tetris.domain.usecase.CalculateProgressionSummaryUseCase
 import com.yet.tetris.feature.history.HistoryComponent
 import com.yet.tetris.feature.home.DefaultHomeComponentFactory
 import com.yet.tetris.feature.home.HomeComponent
@@ -24,13 +26,16 @@ abstract class HomeBindings {
         @Provides
         internal fun provideHomeStoreFactory(
             storeFactory: StoreFactory,
+            gameHistoryRepository: GameHistoryRepository,
             gameSettingsRepository: GameSettingsRepository,
             gameStateRepository: GameStateRepository,
         ): HomeStoreFactory =
             HomeStoreFactory(
                 storeFactory = storeFactory,
+                gameHistoryRepository = gameHistoryRepository,
                 gameSettingsRepository = gameSettingsRepository,
                 gameStateRepository = gameStateRepository,
+                calculateProgressionSummaryUseCase = CalculateProgressionSummaryUseCase(),
             )
 
         @Provides

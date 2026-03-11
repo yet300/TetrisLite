@@ -12,11 +12,13 @@ import com.yet.tetris.domain.usecase.GenerateTetrominoUseCase
 import com.yet.tetris.domain.usecase.GestureHandlingUseCase
 import com.yet.tetris.domain.usecase.HandleSwipeInputUseCase
 import com.yet.tetris.domain.usecase.HardDropUseCase
+import com.yet.tetris.domain.usecase.HoldPieceUseCase
 import com.yet.tetris.domain.usecase.InitializeGameSessionUseCase
 import com.yet.tetris.domain.usecase.LockPieceUseCase
 import com.yet.tetris.domain.usecase.MovePieceUseCase
 import com.yet.tetris.domain.usecase.PersistGameAudioUseCase
 import com.yet.tetris.domain.usecase.PlanVisualFeedbackUseCase
+import com.yet.tetris.domain.usecase.PreviewQueueEngine
 import com.yet.tetris.domain.usecase.ProcessLockedPieceUseCase
 import com.yet.tetris.domain.usecase.RotatePieceUseCase
 import com.yet.tetris.domain.usecase.StartGameUseCase
@@ -43,6 +45,11 @@ object DomainBindings {
 
     @SingleIn(AppScope::class)
     @Provides
+    fun providePreviewQueueEngine(generateTetrominoUseCase: GenerateTetrominoUseCase): PreviewQueueEngine =
+        PreviewQueueEngine(generateTetrominoUseCase = generateTetrominoUseCase)
+
+    @SingleIn(AppScope::class)
+    @Provides
     fun provideMovePieceUseCase(checkCollisionUseCase: CheckCollisionUseCase): MovePieceUseCase =
         MovePieceUseCase(checkCollision = checkCollisionUseCase)
 
@@ -58,21 +65,38 @@ object DomainBindings {
 
     @SingleIn(AppScope::class)
     @Provides
-    fun provideLockPieceUseCase(
-        calculateScoreUseCase: CalculateScoreUseCase,
-        generateTetrominoUseCase: GenerateTetrominoUseCase,
+    fun provideHoldPieceUseCase(
         checkCollisionUseCase: CheckCollisionUseCase,
-    ): LockPieceUseCase =
-        LockPieceUseCase(
-            calculateScore = calculateScoreUseCase,
-            generateTetromino = generateTetrominoUseCase,
-            checkCollision = checkCollisionUseCase,
+        previewQueueEngine: PreviewQueueEngine,
+    ): HoldPieceUseCase =
+        HoldPieceUseCase(
+            checkCollisionUseCase = checkCollisionUseCase,
+            previewQueueEngine = previewQueueEngine,
         )
 
     @SingleIn(AppScope::class)
     @Provides
-    fun provideStartGameUseCase(generateTetrominoUseCase: GenerateTetrominoUseCase): StartGameUseCase =
-        StartGameUseCase(generateTetromino = generateTetrominoUseCase)
+    fun provideLockPieceUseCase(
+        calculateScoreUseCase: CalculateScoreUseCase,
+        checkCollisionUseCase: CheckCollisionUseCase,
+        previewQueueEngine: PreviewQueueEngine,
+    ): LockPieceUseCase =
+        LockPieceUseCase(
+            calculateScore = calculateScoreUseCase,
+            checkCollision = checkCollisionUseCase,
+            previewQueueEngine = previewQueueEngine,
+        )
+
+    @SingleIn(AppScope::class)
+    @Provides
+    fun provideStartGameUseCase(
+        generateTetrominoUseCase: GenerateTetrominoUseCase,
+        previewQueueEngine: PreviewQueueEngine,
+    ): StartGameUseCase =
+        StartGameUseCase(
+            generateTetromino = generateTetrominoUseCase,
+            previewQueueEngine = previewQueueEngine,
+        )
 
     @SingleIn(AppScope::class)
     @Provides

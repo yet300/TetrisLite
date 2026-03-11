@@ -5,6 +5,12 @@ data class GameBoard(
     val height: Int = 20,
     val cells: Map<Position, TetrominoType> = emptyMap(),
 ) {
+    data class ClearLinesResult(
+        val board: GameBoard,
+        val linesCleared: Int,
+        val clearedRows: List<Int>,
+    )
+
     fun isPositionOccupied(position: Position): Boolean = cells.containsKey(position)
 
     fun isPositionValid(position: Position): Boolean = position.x in 0 until width && position.y >= 0 && position.y < height
@@ -20,14 +26,18 @@ data class GameBoard(
         return copy(cells = newCells)
     }
 
-    fun clearLines(): Pair<GameBoard, Int> {
+    fun clearLinesDetailed(): ClearLinesResult {
         val completedLines =
             (0 until height).filter { y ->
                 (0 until width).all { x -> cells.containsKey(Position(x, y)) }
             }
 
         if (completedLines.isEmpty()) {
-            return this to 0
+            return ClearLinesResult(
+                board = this,
+                linesCleared = 0,
+                clearedRows = emptyList(),
+            )
         }
 
         val newCells = mutableMapOf<Position, TetrominoType>()
@@ -45,6 +55,15 @@ data class GameBoard(
             }
         }
 
-        return copy(cells = newCells) to completedLines.size
+        return ClearLinesResult(
+            board = copy(cells = newCells),
+            linesCleared = completedLines.size,
+            clearedRows = completedLines,
+        )
+    }
+
+    fun clearLines(): Pair<GameBoard, Int> {
+        val result = clearLinesDetailed()
+        return result.board to result.linesCleared
     }
 }

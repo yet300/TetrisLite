@@ -6,12 +6,26 @@ CREATE TABLE IF NOT EXISTS CurrentGameState (
     score INTEGER NOT NULL,
     linesCleared INTEGER NOT NULL,
     level INTEGER NOT NULL DEFAULT 1,
+    piecesPlaced INTEGER NOT NULL DEFAULT 0,
+    maxCombo INTEGER NOT NULL DEFAULT 0,
+    tetrisesCleared INTEGER NOT NULL DEFAULT 0,
+    tSpinClears INTEGER NOT NULL DEFAULT 0,
+    perfectClears INTEGER NOT NULL DEFAULT 0,
+    hardDrops INTEGER NOT NULL DEFAULT 0,
+    hardDropCells INTEGER NOT NULL DEFAULT 0,
+    softDropCells INTEGER NOT NULL DEFAULT 0,
+    backToBackChain INTEGER NOT NULL DEFAULT 0,
+    isTSpinEligible INTEGER AS Boolean NOT NULL DEFAULT 0,
     currentPieceType TEXT AS TetrominoType,
     currentPieceRotation INTEGER NOT NULL DEFAULT 0,
     currentPositionX INTEGER NOT NULL,
     currentPositionY INTEGER NOT NULL,
     nextPieceType TEXT AS TetrominoType NOT NULL,
     nextPieceRotation INTEGER NOT NULL DEFAULT 0,
+    nextQueue TEXT NOT NULL DEFAULT '',
+    holdPieceType TEXT AS TetrominoType,
+    holdPieceRotation INTEGER NOT NULL DEFAULT 0,
+    canHold INTEGER AS Boolean NOT NULL DEFAULT 1,
     isGameOver INTEGER AS Boolean NOT NULL DEFAULT 0,
     isPaused INTEGER AS Boolean NOT NULL DEFAULT 0,
     boardWidth INTEGER NOT NULL DEFAULT 10,
@@ -21,10 +35,12 @@ CREATE TABLE IF NOT EXISTS CurrentGameState (
 -- Queries
 insertOrReplaceGameState:
 INSERT OR REPLACE INTO CurrentGameState (
-    id, score, linesCleared, level, currentPieceType, currentPieceRotation,
-    currentPositionX, currentPositionY, nextPieceType, nextPieceRotation,
-    isGameOver, isPaused, boardWidth, boardHeight
-) VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+    id, score, linesCleared, level, piecesPlaced, maxCombo, tetrisesCleared, tSpinClears,
+    perfectClears, hardDrops, hardDropCells, softDropCells, backToBackChain, isTSpinEligible,
+    currentPieceType, currentPieceRotation,
+    currentPositionX, currentPositionY, nextPieceType, nextPieceRotation, nextQueue,
+    holdPieceType, holdPieceRotation, canHold, isGameOver, isPaused, boardWidth, boardHeight
+) VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 getGameState:
 SELECT * FROM CurrentGameState WHERE id = 1;

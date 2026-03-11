@@ -23,14 +23,20 @@ class ProcessLockedPieceUseCase(
         currentComboStreak: Int,
         currentVisualSequence: Long,
     ): Result {
-        val oldLinesCleared = gameState.linesCleared
-        val updatedState = lockPieceUseCase(gameState)
-        val linesClearedThisLock = (updatedState.linesCleared - oldLinesCleared).toInt()
+        val lockResult = lockPieceUseCase.invokeDetailed(gameState)
+        val updatedState = lockResult.gameState
 
         val feedback =
             planVisualFeedbackUseCase(
                 currentComboStreak = currentComboStreak,
-                linesClearedThisLock = linesClearedThisLock,
+                linesClearedThisLock = lockResult.linesCleared,
+                clearedRowsThisLock = lockResult.clearedRows,
+                lockCellsThisLock = lockResult.lockCells,
+            )
+
+        val finalState =
+            updatedState.copy(
+                maxCombo = maxOf(updatedState.maxCombo, feedback.nextComboStreak),
             )
 
         val visualEffectFeed =
@@ -46,17 +52,19 @@ class ProcessLockedPieceUseCase(
                             intensity = burstSpec.intensity,
                             power = burstSpec.power,
                             events = burstSpec.events,
+                            clearedRows = burstSpec.clearedRows,
+                            lockCells = burstSpec.lockCells,
                         ),
                 )
             }
 
         return Result(
-            gameState = updatedState,
-            ghostPieceY = advanceGameTickUseCase.calculateGhostY(updatedState),
-            linesCleared = linesClearedThisLock,
+            gameState = finalState,
+            ghostPieceY = advanceGameTickUseCase.calculateGhostY(finalState),
+            linesCleared = lockResult.linesCleared,
             nextComboStreak = feedback.nextComboStreak,
             visualEffectFeed = visualEffectFeed,
-            levelIncreased = updatedState.level > gameState.level,
+            levelIncreased = finalState.level > gameState.level,
         )
     }
 }

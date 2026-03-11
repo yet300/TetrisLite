@@ -55,7 +55,15 @@ interface GameComponent : BackHandlerOwner {
 
     fun onRotate()
 
+    fun onRotateClockwise()
+
+    fun onRotateCounterClockwise()
+
+    fun onRotate180()
+
     fun onHardDrop()
+
+    fun onHold()
 
     fun onSwipe(
         deltaX: Float,

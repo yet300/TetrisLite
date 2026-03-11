@@ -17,11 +17,13 @@ import com.yet.tetris.domain.usecase.GenerateTetrominoUseCase
 import com.yet.tetris.domain.usecase.GestureHandlingUseCase
 import com.yet.tetris.domain.usecase.HandleSwipeInputUseCase
 import com.yet.tetris.domain.usecase.HardDropUseCase
+import com.yet.tetris.domain.usecase.HoldPieceUseCase
 import com.yet.tetris.domain.usecase.InitializeGameSessionUseCase
 import com.yet.tetris.domain.usecase.LockPieceUseCase
 import com.yet.tetris.domain.usecase.MovePieceUseCase
 import com.yet.tetris.domain.usecase.PersistGameAudioUseCase
 import com.yet.tetris.domain.usecase.PlanVisualFeedbackUseCase
+import com.yet.tetris.domain.usecase.PreviewQueueEngine
 import com.yet.tetris.domain.usecase.ProcessLockedPieceUseCase
 import com.yet.tetris.domain.usecase.RotatePieceUseCase
 import com.yet.tetris.domain.usecase.StartGameUseCase
@@ -61,6 +63,7 @@ class GameComponentTest {
     private lateinit var movePieceUseCase: MovePieceUseCase
     private lateinit var rotatePieceUseCase: RotatePieceUseCase
     private lateinit var hardDropUseCase: HardDropUseCase
+    private lateinit var holdPieceUseCase: HoldPieceUseCase
     private lateinit var handleSwipeInputUseCase: HandleSwipeInputUseCase
     private lateinit var gestureHandlingUseCase: GestureHandlingUseCase
     private lateinit var initializeGameSessionUseCase: InitializeGameSessionUseCase
@@ -86,14 +89,17 @@ class GameComponentTest {
         val hardDrop = HardDropUseCase(checkCollision)
         val calculateScore = CalculateScoreUseCase()
         val generateTetromino = GenerateTetrominoUseCase()
-        val lockPiece = LockPieceUseCase(calculateScore, generateTetromino, checkCollision)
+        val previewQueueEngine = PreviewQueueEngine(generateTetromino)
+        val holdPiece = HoldPieceUseCase(checkCollision, previewQueueEngine)
+        val lockPiece = LockPieceUseCase(calculateScore, checkCollision, previewQueueEngine)
         movePieceUseCase = movePiece
         rotatePieceUseCase = rotatePiece
         hardDropUseCase = hardDrop
+        holdPieceUseCase = holdPiece
         handleSwipeInputUseCase = HandleSwipeInputUseCase(movePiece, hardDrop)
         gestureHandlingUseCase = GestureHandlingUseCase()
 
-        val startGameUseCase = StartGameUseCase(generateTetromino)
+        val startGameUseCase = StartGameUseCase(generateTetromino, previewQueueEngine)
         val calculateGhostPositionUseCase = CalculateGhostPositionUseCase()
         val planVisualFeedbackUseCase = PlanVisualFeedbackUseCase()
         initializeGameSessionUseCase =
@@ -146,6 +152,7 @@ class GameComponentTest {
             movePieceUseCase = movePieceUseCase,
             rotatePieceUseCase = rotatePieceUseCase,
             hardDropUseCase = hardDropUseCase,
+            holdPieceUseCase = holdPieceUseCase,
             handleSwipeInputUseCase = handleSwipeInputUseCase,
             gestureHandlingUseCase = gestureHandlingUseCase,
             initializeGameSessionUseCase = initializeGameSessionUseCase,

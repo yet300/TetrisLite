@@ -125,7 +125,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: instrumented-test-results-api-${{ matrix.api-level }}
-          path: composeApp/build/reports/androidTests/
+          path: app/androidApp/build/reports/androidTests/
           retention-days: 30
 
   desktop-tests:
@@ -158,7 +158,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: desktop-test-results-${{ matrix.os }}
-          path: composeApp/build/reports/tests/jvmTest/
+          path: app/composeApp/build/reports/tests/jvmTest/
           retention-days: 30
 
   test-report:

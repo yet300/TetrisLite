@@ -18,11 +18,12 @@ class ProcessLockedPieceUseCaseTest {
     private val calculateGhostPositionUseCase = CalculateGhostPositionUseCase()
     private val calculateScoreUseCase = CalculateScoreUseCase()
     private val generateTetrominoUseCase = GenerateTetrominoUseCase()
+    private val previewQueueEngine = PreviewQueueEngine(generateTetrominoUseCase)
     private val lockPieceUseCase =
         LockPieceUseCase(
             calculateScore = calculateScoreUseCase,
-            generateTetromino = generateTetrominoUseCase,
             checkCollision = checkCollisionUseCase,
+            previewQueueEngine = previewQueueEngine,
         )
     private val useCase =
         ProcessLockedPieceUseCase(
@@ -76,6 +77,11 @@ class ProcessLockedPieceUseCaseTest {
         assertNotNull(burst)
         assertEquals(6L, burst.id)
         assertEquals(1, burst.linesCleared)
+        assertEquals(listOf(19), burst.clearedRows)
+        assertEquals(
+            listOf(Position(0, 18), Position(1, 18), Position(0, 19), Position(1, 19)),
+            burst.lockCells,
+        )
     }
 
     @Test

@@ -11,6 +11,8 @@ internal val stateToModel: (HistoryStore.State) -> HistoryComponent.Model =
             HistoryComponent.Model.Content(
                 games = state.filteredGames,
                 currentFilter = state.dateFilter,
+                totalGamesCount = state.games.size,
+                progression = state.progression,
             )
         }
     }

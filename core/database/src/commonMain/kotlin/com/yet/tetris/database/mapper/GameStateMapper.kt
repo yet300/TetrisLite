@@ -28,17 +28,35 @@ fun CurrentGameState.toDomain(boardCells: List<BoardCells>): GameState {
             Tetromino.create(type, currentPieceRotation.toInt())
         }
 
-    // Reconstruct next piece
+    // Reconstruct preview queue and hold piece
     val nextPiece = Tetromino.create(nextPieceType, nextPieceRotation.toInt())
+    val queuePieces = deserializeQueue(nextQueue)
+    val holdPiece =
+        holdPieceType?.let { type ->
+            Tetromino.create(type, holdPieceRotation.toInt())
+        }
 
     return GameState(
         board = board,
         currentPiece = currentPiece,
         currentPosition = Position(currentPositionX.toInt(), currentPositionY.toInt()),
         nextPiece = nextPiece,
+        nextQueue = queuePieces,
+        holdPiece = holdPiece,
+        canHold = canHold,
         score = score,
         linesCleared = linesCleared,
         level = level.toInt(),
+        piecesPlaced = piecesPlaced,
+        maxCombo = maxCombo.toInt(),
+        tetrisesCleared = tetrisesCleared,
+        tSpinClears = tSpinClears,
+        perfectClears = perfectClears,
+        hardDrops = hardDrops,
+        hardDropCells = hardDropCells,
+        softDropCells = softDropCells,
+        backToBackChain = backToBackChain.toInt(),
+        isTSpinEligible = isTSpinEligible,
         isGameOver = isGameOver,
         isPaused = isPaused,
     )
@@ -54,12 +72,26 @@ data class CurrentGameStateData(
     val score: Long,
     val linesCleared: Long,
     val level: Long,
+    val piecesPlaced: Long,
+    val maxCombo: Long,
+    val tetrisesCleared: Long,
+    val tSpinClears: Long,
+    val perfectClears: Long,
+    val hardDrops: Long,
+    val hardDropCells: Long,
+    val softDropCells: Long,
+    val backToBackChain: Long,
+    val isTSpinEligible: Boolean,
     val currentPieceType: TetrominoType?,
     val currentPieceRotation: Long,
     val currentPositionX: Long,
     val currentPositionY: Long,
     val nextPieceType: TetrominoType,
     val nextPieceRotation: Long,
+    val nextQueue: String = "",
+    val holdPieceType: TetrominoType? = null,
+    val holdPieceRotation: Long = 0,
+    val canHold: Boolean = true,
     val isGameOver: Boolean,
     val isPaused: Boolean,
     val boardWidth: Long,
@@ -81,12 +113,26 @@ fun GameState.toEntities(): GameStateEntities {
             score = score,
             linesCleared = linesCleared,
             level = level.toLong(),
+            piecesPlaced = piecesPlaced,
+            maxCombo = maxCombo.toLong(),
+            tetrisesCleared = tetrisesCleared,
+            tSpinClears = tSpinClears,
+            perfectClears = perfectClears,
+            hardDrops = hardDrops,
+            hardDropCells = hardDropCells,
+            softDropCells = softDropCells,
+            backToBackChain = backToBackChain.toLong(),
+            isTSpinEligible = isTSpinEligible,
             currentPieceType = currentPiece?.type,
             currentPieceRotation = (currentPiece?.rotation ?: 0).toLong(),
             currentPositionX = currentPosition.x.toLong(),
             currentPositionY = currentPosition.y.toLong(),
             nextPieceType = nextPiece.type,
             nextPieceRotation = nextPiece.rotation.toLong(),
+            nextQueue = serializeQueue(nextQueue),
+            holdPieceType = holdPiece?.type,
+            holdPieceRotation = (holdPiece?.rotation ?: 0).toLong(),
+            canHold = canHold,
             isGameOver = isGameOver,
             isPaused = isPaused,
             boardWidth = board.width.toLong(),
@@ -94,4 +140,22 @@ fun GameState.toEntities(): GameStateEntities {
         )
 
     return GameStateEntities(gameStateData, boardCells)
+}
+
+private fun serializeQueue(queue: List<Tetromino>): String = queue.joinToString(separator = "|") { "${it.type.name}:${it.rotation}" }
+
+private fun deserializeQueue(serialized: String): List<Tetromino> {
+    if (serialized.isBlank()) return emptyList()
+    return serialized
+        .split("|")
+        .mapNotNull(::decodePiece)
+}
+
+private fun decodePiece(token: String): Tetromino? {
+    val parts = token.split(":")
+    if (parts.size != 2) return null
+
+    val type = runCatching { TetrominoType.valueOf(parts[0]) }.getOrNull() ?: return null
+    val rotation = parts[1].toIntOrNull() ?: return null
+    return Tetromino.create(type, rotation)
 }

@@ -22,12 +22,26 @@ class GameStateMapperTest {
                 score = 1000,
                 linesCleared = 10,
                 level = 2,
+                piecesPlaced = 0,
+                maxCombo = 0,
+                tetrisesCleared = 0,
+                tSpinClears = 0,
+                perfectClears = 0,
+                hardDrops = 0,
+                hardDropCells = 0,
+                softDropCells = 0,
+                backToBackChain = 0,
+                isTSpinEligible = false,
                 currentPieceType = TetrominoType.T,
                 currentPieceRotation = 1,
                 currentPositionX = 5,
                 currentPositionY = 3,
                 nextPieceType = TetrominoType.L,
                 nextPieceRotation = 2,
+                nextQueue = "I:0|O:0|T:0|S:0",
+                holdPieceType = TetrominoType.Z,
+                holdPieceRotation = 0,
+                canHold = false,
                 isGameOver = false,
                 isPaused = false,
                 boardWidth = 10,
@@ -53,6 +67,9 @@ class GameStateMapperTest {
         assertEquals(3, domain.currentPosition.y)
         assertEquals(TetrominoType.L, domain.nextPiece.type)
         assertEquals(2, domain.nextPiece.rotation)
+        assertEquals(4, domain.nextQueue.size)
+        assertEquals(TetrominoType.Z, domain.holdPiece?.type)
+        assertEquals(false, domain.canHold)
         assertEquals(false, domain.isGameOver)
         assertEquals(false, domain.isPaused)
         assertEquals(10, domain.board.width)
@@ -69,12 +86,26 @@ class GameStateMapperTest {
                 score = 500,
                 linesCleared = 5,
                 level = 1,
+                piecesPlaced = 0,
+                maxCombo = 0,
+                tetrisesCleared = 0,
+                tSpinClears = 0,
+                perfectClears = 0,
+                hardDrops = 0,
+                hardDropCells = 0,
+                softDropCells = 0,
+                backToBackChain = 0,
+                isTSpinEligible = false,
                 currentPieceType = null,
                 currentPieceRotation = 0,
                 currentPositionX = 0,
                 currentPositionY = 0,
                 nextPieceType = TetrominoType.I,
                 nextPieceRotation = 0,
+                nextQueue = "",
+                holdPieceType = null,
+                holdPieceRotation = 0,
+                canHold = true,
                 isGameOver = true,
                 isPaused = false,
                 boardWidth = 10,
@@ -113,6 +144,9 @@ class GameStateMapperTest {
                 currentPiece = currentPiece,
                 currentPosition = Position(5, 3),
                 nextPiece = nextPiece,
+                nextQueue = listOf(Tetromino.create(TetrominoType.I), Tetromino.create(TetrominoType.O)),
+                holdPiece = Tetromino.create(TetrominoType.J),
+                canHold = false,
                 score = 2000,
                 linesCleared = 20,
                 level = 3,
@@ -133,6 +167,9 @@ class GameStateMapperTest {
         assertEquals(3, entities.gameState.currentPositionY)
         assertEquals(TetrominoType.Z, entities.gameState.nextPieceType)
         assertEquals(2, entities.gameState.nextPieceRotation)
+        assertEquals("I:0|O:0", entities.gameState.nextQueue)
+        assertEquals(TetrominoType.J, entities.gameState.holdPieceType)
+        assertEquals(false, entities.gameState.canHold)
         assertEquals(false, entities.gameState.isGameOver)
         assertEquals(true, entities.gameState.isPaused)
         assertEquals(10, entities.gameState.boardWidth)
@@ -151,6 +188,9 @@ class GameStateMapperTest {
                 currentPiece = null,
                 currentPosition = Position(0, 0),
                 nextPiece = nextPiece,
+                nextQueue = emptyList(),
+                holdPiece = null,
+                canHold = true,
                 score = 0,
                 linesCleared = 0,
                 level = 1,
@@ -188,6 +228,9 @@ class GameStateMapperTest {
                 currentPiece = Tetromino.create(TetrominoType.T, 1),
                 currentPosition = Position(5, 5),
                 nextPiece = Tetromino.create(TetrominoType.L, 2),
+                nextQueue = listOf(Tetromino.create(TetrominoType.I), Tetromino.create(TetrominoType.O)),
+                holdPiece = Tetromino.create(TetrominoType.S),
+                canHold = false,
                 score = 3000,
                 linesCleared = 30,
                 level = 4,
@@ -203,12 +246,26 @@ class GameStateMapperTest {
                 score = entities.gameState.score,
                 linesCleared = entities.gameState.linesCleared,
                 level = entities.gameState.level,
+                piecesPlaced = entities.gameState.piecesPlaced,
+                maxCombo = entities.gameState.maxCombo,
+                tetrisesCleared = entities.gameState.tetrisesCleared,
+                tSpinClears = entities.gameState.tSpinClears,
+                perfectClears = entities.gameState.perfectClears,
+                hardDrops = entities.gameState.hardDrops,
+                hardDropCells = entities.gameState.hardDropCells,
+                softDropCells = entities.gameState.softDropCells,
+                backToBackChain = entities.gameState.backToBackChain,
+                isTSpinEligible = entities.gameState.isTSpinEligible,
                 currentPieceType = entities.gameState.currentPieceType,
                 currentPieceRotation = entities.gameState.currentPieceRotation,
                 currentPositionX = entities.gameState.currentPositionX,
                 currentPositionY = entities.gameState.currentPositionY,
                 nextPieceType = entities.gameState.nextPieceType,
                 nextPieceRotation = entities.gameState.nextPieceRotation,
+                nextQueue = entities.gameState.nextQueue,
+                holdPieceType = entities.gameState.holdPieceType,
+                holdPieceRotation = entities.gameState.holdPieceRotation,
+                canHold = entities.gameState.canHold,
                 isGameOver = entities.gameState.isGameOver,
                 isPaused = entities.gameState.isPaused,
                 boardWidth = entities.gameState.boardWidth,
@@ -225,6 +282,9 @@ class GameStateMapperTest {
         assertEquals(originalState.currentPosition, result.currentPosition)
         assertEquals(originalState.nextPiece.type, result.nextPiece.type)
         assertEquals(originalState.nextPiece.rotation, result.nextPiece.rotation)
+        assertEquals(originalState.nextQueue.map { it.type }, result.nextQueue.map { it.type })
+        assertEquals(originalState.holdPiece?.type, result.holdPiece?.type)
+        assertEquals(originalState.canHold, result.canHold)
         assertEquals(originalState.isGameOver, result.isGameOver)
         assertEquals(originalState.isPaused, result.isPaused)
         assertEquals(originalState.board.width, result.board.width)

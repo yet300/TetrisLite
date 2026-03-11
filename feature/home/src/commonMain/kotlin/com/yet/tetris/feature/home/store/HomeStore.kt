@@ -2,12 +2,14 @@ package com.yet.tetris.feature.home.store
 
 import com.arkivanov.mvikotlin.core.store.Store
 import com.yet.tetris.domain.model.game.Difficulty
+import com.yet.tetris.domain.model.progression.ProgressionSummary
 import com.yet.tetris.domain.model.settings.GameSettings
 
 internal interface HomeStore : Store<HomeStore.Intent, HomeStore.State, HomeStore.Label> {
     data class State(
         val settings: GameSettings = GameSettings(),
         val hasSavedGame: Boolean = false,
+        val progression: ProgressionSummary = ProgressionSummary.EMPTY,
         val isLoading: Boolean = false,
     )
 
@@ -32,6 +34,10 @@ internal interface HomeStore : Store<HomeStore.Intent, HomeStore.State, HomeStor
 
         data class DifficultyChanged(
             val difficulty: Difficulty,
+        ) : Msg()
+
+        data class ProgressionUpdated(
+            val progression: ProgressionSummary,
         ) : Msg()
 
         data class LoadingChanged(

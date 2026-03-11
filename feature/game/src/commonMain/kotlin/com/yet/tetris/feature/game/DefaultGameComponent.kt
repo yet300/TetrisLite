@@ -151,8 +151,24 @@ internal class DefaultGameComponent(
         store.accept(GameStore.Intent.Rotate)
     }
 
+    override fun onRotateClockwise() {
+        store.accept(GameStore.Intent.RotateClockwise)
+    }
+
+    override fun onRotateCounterClockwise() {
+        store.accept(GameStore.Intent.RotateCounterClockwise)
+    }
+
+    override fun onRotate180() {
+        store.accept(GameStore.Intent.Rotate180)
+    }
+
     override fun onHardDrop() {
         store.accept(GameStore.Intent.HardDrop)
+    }
+
+    override fun onHold() {
+        store.accept(GameStore.Intent.Hold)
     }
 
     override fun onSwipe(

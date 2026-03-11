@@ -6,6 +6,7 @@ import com.arkivanov.mvikotlin.core.store.Store
 import com.arkivanov.mvikotlin.core.store.StoreFactory
 import com.arkivanov.mvikotlin.extensions.coroutines.CoroutineExecutor
 import com.yet.tetris.domain.repository.GameHistoryRepository
+import com.yet.tetris.domain.usecase.CalculateProgressionSummaryUseCase
 import com.yet.tetris.feature.history.DateFilter
 import kotlinx.coroutines.launch
 
@@ -13,6 +14,7 @@ internal class HistoryStoreFactory
     constructor(
         private val storeFactory: StoreFactory,
         private val gameHistoryRepository: GameHistoryRepository,
+        private val calculateProgressionSummaryUseCase: CalculateProgressionSummaryUseCase,
     ) {
         fun create(): HistoryStore =
             object :
@@ -47,7 +49,12 @@ internal class HistoryStoreFactory
                         dispatch(HistoryStore.Msg.LoadingChanged(true))
 
                         val games = gameHistoryRepository.getAllGames()
-                        dispatch(HistoryStore.Msg.GamesLoaded(games))
+                        dispatch(
+                            HistoryStore.Msg.GamesLoaded(
+                                games = games,
+                                progression = calculateProgressionSummaryUseCase(games),
+                            ),
+                        )
 
                         dispatch(HistoryStore.Msg.LoadingChanged(false))
                     } catch (e: Exception) {
@@ -65,10 +72,7 @@ internal class HistoryStoreFactory
                 scope.launch {
                     try {
                         gameHistoryRepository.deleteGame(id)
-                        dispatch(HistoryStore.Msg.GameDeleted(id))
                         publish(HistoryStore.Label.GameDeleted(id))
-
-                        // Reload to get updated list
                         loadHistory()
                     } catch (e: Exception) {
                         publish(HistoryStore.Label.ShowError(e.message ?: "Failed to delete game"))
@@ -80,17 +84,13 @@ internal class HistoryStoreFactory
         private object ReducerImpl : Reducer<HistoryStore.State, HistoryStore.Msg> {
             override fun HistoryStore.State.reduce(msg: HistoryStore.Msg): HistoryStore.State =
                 when (msg) {
-                    is HistoryStore.Msg.GamesLoaded -> copy(games = msg.games)
+                    is HistoryStore.Msg.GamesLoaded -> copy(games = msg.games, progression = msg.progression)
                     is HistoryStore.Msg.FilterChanged ->
                         copy(
                             dateFilter = msg.filter,
                         )
 
                     is HistoryStore.Msg.LoadingChanged -> copy(isLoading = msg.isLoading)
-                    is HistoryStore.Msg.GameDeleted -> {
-                        val updatedGames = games.filter { it.id != msg.id }
-                        copy(games = updatedGames)
-                    }
                 }
         }
     }

@@ -1,5 +1,6 @@
 package com.yet.tetris.domain.usecase
 
+import com.yet.tetris.domain.model.settings.GestureSensitivity
 import kotlin.math.abs
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
@@ -53,7 +54,11 @@ class GestureHandlingUseCase {
      * @param event The raw gesture event from the UI layer.
      * @return A [GestureResult] representing a game action, or null if no action is triggered.
      */
-    operator fun invoke(event: GestureEvent): GestureResult? {
+    operator fun invoke(
+        event: GestureEvent,
+        gestureSensitivity: GestureSensitivity = GestureSensitivity.NORMAL,
+    ): GestureResult? {
+        val threshold = swipeThreshold * gestureSensitivity.distanceMultiplier
         return when (event) {
             is GestureEvent.DragStarted -> {
                 state = State(boardHeightPx = event.boardHeightPx, dragStartTime = Clock.System.now().toEpochMilliseconds())
@@ -68,11 +73,11 @@ class GestureHandlingUseCase {
                         // Check for a hard drop (fast flick down)
                         !currentState.isHorizontalSwipeDetermined &&
                             currentState.totalDragDistanceY > currentState.boardHeightPx * 0.25f &&
-                            dragDuration < 500 -> GestureResult.HardDrop
+                            dragDuration < (500 * gestureSensitivity.velocityMultiplier).toLong() -> GestureResult.HardDrop
 
                         // Check for a regular soft drop
                         !currentState.isHorizontalSwipeDetermined &&
-                            currentState.totalDragDistanceY > swipeThreshold -> GestureResult.MoveDown
+                            currentState.totalDragDistanceY > threshold -> GestureResult.MoveDown
 
                         else -> null
                     }
@@ -101,7 +106,7 @@ class GestureHandlingUseCase {
                 var result: GestureResult? = null
                 if (isHorizontal) {
                     val newAccumulatedX = currentState.accumulatedDragX + event.deltaX
-                    if (abs(newAccumulatedX) > swipeThreshold) {
+                    if (abs(newAccumulatedX) > threshold) {
                         result = if (newAccumulatedX > 0) GestureResult.MoveRight else GestureResult.MoveLeft
                         // Reset accumulator for the next horizontal movement within the same drag
                         currentState = currentState.copy(accumulatedDragX = 0f, isHorizontalSwipeDetermined = true)

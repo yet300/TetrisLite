@@ -7,8 +7,7 @@ import com.yet.tetris.domain.model.game.Tetromino
 import com.yet.tetris.domain.model.game.TetrominoType
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
-import kotlin.test.assertNull
+import kotlin.test.assertIs
 
 class MovePieceUseCaseTest {
     private val checkCollision = CheckCollisionUseCase()
@@ -36,23 +35,24 @@ class MovePieceUseCaseTest {
         val state = createTestState(position = Position(5, 10))
 
         // When
-        val newState = useCase.moveLeft(state)
+        val result = useCase.moveLeft(state)
+        val newState = assertApplied(result)
 
         // Then
-        assertNotNull(newState)
         assertEquals(Position(4, 10), newState.currentPosition)
     }
 
     @Test
-    fun moveLeft_atLeftBoundary_shouldReturnNull() {
+    fun moveLeft_atLeftBoundary_shouldReturnBlocked() {
         // Given
         val state = createTestState(position = Position(0, 10))
 
         // When
-        val newState = useCase.moveLeft(state)
+        val result = useCase.moveLeft(state)
+        val blocked = assertIs<MovePieceUseCase.Result.Blocked>(result)
 
         // Then
-        assertNull(newState, "Cannot move left from left boundary")
+        assertEquals(MovePieceUseCase.BlockedReason.COLLISION, blocked.reason)
     }
 
     @Test
@@ -61,23 +61,24 @@ class MovePieceUseCaseTest {
         val state = createTestState(position = Position(3, 10))
 
         // When
-        val newState = useCase.moveRight(state)
+        val result = useCase.moveRight(state)
+        val newState = assertApplied(result)
 
         // Then
-        assertNotNull(newState)
         assertEquals(Position(4, 10), newState.currentPosition)
     }
 
     @Test
-    fun moveRight_atRightBoundary_shouldReturnNull() {
+    fun moveRight_atRightBoundary_shouldReturnBlocked() {
         // Given
         val state = createTestState(position = Position(9, 10))
 
         // When
-        val newState = useCase.moveRight(state)
+        val result = useCase.moveRight(state)
+        val blocked = assertIs<MovePieceUseCase.Result.Blocked>(result)
 
         // Then
-        assertNull(newState, "Cannot move right from right boundary")
+        assertEquals(MovePieceUseCase.BlockedReason.COLLISION, blocked.reason)
     }
 
     @Test
@@ -86,23 +87,24 @@ class MovePieceUseCaseTest {
         val state = createTestState(position = Position(3, 10))
 
         // When
-        val newState = useCase.moveDown(state)
+        val result = useCase.moveDown(state)
+        val newState = assertApplied(result)
 
         // Then
-        assertNotNull(newState)
         assertEquals(Position(3, 11), newState.currentPosition)
     }
 
     @Test
-    fun moveDown_atBottom_shouldReturnNull() {
+    fun moveDown_atBottom_shouldReturnBlocked() {
         // Given
         val state = createTestState(position = Position(3, 18))
 
         // When
-        val newState = useCase.moveDown(state)
+        val result = useCase.moveDown(state)
+        val blocked = assertIs<MovePieceUseCase.Result.Blocked>(result)
 
         // Then
-        assertNull(newState, "Cannot move down when at bottom")
+        assertEquals(MovePieceUseCase.BlockedReason.COLLISION, blocked.reason)
     }
 
     @Test
@@ -116,18 +118,15 @@ class MovePieceUseCaseTest {
         val movedDown = useCase(state, MovePieceUseCase.Direction.DOWN)
 
         // Then
-        assertNotNull(movedLeft)
-        assertEquals(Position(4, 10), movedLeft.currentPosition)
+        assertEquals(Position(4, 10), assertApplied(movedLeft).currentPosition)
 
-        assertNotNull(movedRight)
-        assertEquals(Position(6, 10), movedRight.currentPosition)
+        assertEquals(Position(6, 10), assertApplied(movedRight).currentPosition)
 
-        assertNotNull(movedDown)
-        assertEquals(Position(5, 11), movedDown.currentPosition)
+        assertEquals(Position(5, 11), assertApplied(movedDown).currentPosition)
     }
 
     @Test
-    fun move_blockedByLockedPiece_shouldReturnNull() {
+    fun move_blockedByLockedPiece_shouldReturnBlocked() {
         // Given - Create a wall of blocks to the left
         val cells = mutableMapOf<Position, TetrominoType>()
         for (y in 9..11) {
@@ -137,14 +136,15 @@ class MovePieceUseCaseTest {
         val state = createTestState(position = Position(3, 10), board = board)
 
         // When
-        val newState = useCase.moveLeft(state)
+        val result = useCase.moveLeft(state)
+        val blocked = assertIs<MovePieceUseCase.Result.Blocked>(result)
 
         // Then
-        assertNull(newState, "Cannot move into locked piece")
+        assertEquals(MovePieceUseCase.BlockedReason.COLLISION, blocked.reason)
     }
 
     @Test
-    fun move_whenGameOver_shouldReturnNull() {
+    fun move_whenGameOver_shouldReturnBlocked() {
         // Given
         val state = createTestState().copy(isGameOver = true)
 
@@ -154,13 +154,13 @@ class MovePieceUseCaseTest {
         val movedDown = useCase.moveDown(state)
 
         // Then
-        assertNull(movedLeft, "Cannot move when game is over")
-        assertNull(movedRight, "Cannot move when game is over")
-        assertNull(movedDown, "Cannot move when game is over")
+        assertEquals(MovePieceUseCase.BlockedReason.GAME_OVER, assertBlocked(movedLeft).reason)
+        assertEquals(MovePieceUseCase.BlockedReason.GAME_OVER, assertBlocked(movedRight).reason)
+        assertEquals(MovePieceUseCase.BlockedReason.GAME_OVER, assertBlocked(movedDown).reason)
     }
 
     @Test
-    fun move_whenPaused_shouldReturnNull() {
+    fun move_whenPaused_shouldReturnBlocked() {
         // Given
         val state = createTestState().copy(isPaused = true)
 
@@ -170,13 +170,13 @@ class MovePieceUseCaseTest {
         val movedDown = useCase.moveDown(state)
 
         // Then
-        assertNull(movedLeft, "Cannot move when game is paused")
-        assertNull(movedRight, "Cannot move when game is paused")
-        assertNull(movedDown, "Cannot move when game is paused")
+        assertEquals(MovePieceUseCase.BlockedReason.PAUSED, assertBlocked(movedLeft).reason)
+        assertEquals(MovePieceUseCase.BlockedReason.PAUSED, assertBlocked(movedRight).reason)
+        assertEquals(MovePieceUseCase.BlockedReason.PAUSED, assertBlocked(movedDown).reason)
     }
 
     @Test
-    fun move_withNoPiece_shouldReturnNull() {
+    fun move_withNoPiece_shouldReturnBlocked() {
         // Given
         val state = createTestState().copy(currentPiece = null)
 
@@ -184,7 +184,7 @@ class MovePieceUseCaseTest {
         val movedLeft = useCase.moveLeft(state)
 
         // Then
-        assertNull(movedLeft, "Cannot move when there is no current piece")
+        assertEquals(MovePieceUseCase.BlockedReason.NO_CURRENT_PIECE, assertBlocked(movedLeft).reason)
     }
 
     @Test
@@ -193,10 +193,15 @@ class MovePieceUseCaseTest {
         var state = createTestState(position = Position(5, 10))
 
         // When - Move left twice
-        state = useCase.moveLeft(state)!!
-        state = useCase.moveLeft(state)!!
+        state = assertApplied(useCase.moveLeft(state))
+        state = assertApplied(useCase.moveLeft(state))
 
         // Then
         assertEquals(Position(3, 10), state.currentPosition)
     }
+
+    private fun assertApplied(result: MovePieceUseCase.Result): GameState = assertIs<MovePieceUseCase.Result.Applied>(result).gameState
+
+    private fun assertBlocked(result: MovePieceUseCase.Result): MovePieceUseCase.Result.Blocked =
+        assertIs<MovePieceUseCase.Result.Blocked>(result)
 }

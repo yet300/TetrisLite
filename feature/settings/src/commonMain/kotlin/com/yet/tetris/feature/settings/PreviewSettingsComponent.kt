@@ -8,7 +8,9 @@ import com.arkivanov.decompose.value.MutableValue
 import com.arkivanov.decompose.value.Value
 import com.yet.tetris.domain.model.audio.MusicTheme
 import com.yet.tetris.domain.model.game.Difficulty
+import com.yet.tetris.domain.model.game.RotationDirection
 import com.yet.tetris.domain.model.settings.GameSettings
+import com.yet.tetris.domain.model.settings.GestureSensitivity
 import com.yet.tetris.domain.model.theme.PieceStyle
 import com.yet.tetris.domain.model.theme.VisualTheme
 
@@ -54,6 +56,18 @@ class PreviewSettingsComponent :
     }
 
     override fun onMusicThemeChanged(theme: MusicTheme) {
+        TODO("Not yet implemented")
+    }
+
+    override fun onPrimaryRotateDirectionChanged(direction: RotationDirection) {
+        TODO("Not yet implemented")
+    }
+
+    override fun on180RotationToggled(enabled: Boolean) {
+        TODO("Not yet implemented")
+    }
+
+    override fun onGestureSensitivityChanged(sensitivity: GestureSensitivity) {
         TODO("Not yet implemented")
     }
 

@@ -28,7 +28,7 @@ dependencyResolutionManagement {
         mavenCentral()
         versionCatalogs {
             create("kotlinWrappers") {
-                val wrappersVersion = "2025.10.11"
+                val wrappersVersion = "2026.3.2"
                 from("org.jetbrains.kotlin-wrappers:kotlin-wrappers-catalog:$wrappersVersion")
             }
         }
@@ -43,6 +43,10 @@ include(":composeApp")
 include(":androidApp")
 include(":webApp")
 include(":wearApp")
+project(":composeApp").projectDir = file("app/composeApp")
+project(":androidApp").projectDir = file("app/androidApp")
+project(":webApp").projectDir = file("app/webApp")
+project(":wearApp").projectDir = file("app/wearApp")
 
 include(":shared")
 include(":core")

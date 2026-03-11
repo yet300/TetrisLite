@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>TetrisLite</title>
+    <meta content="width=device-width, initial-scale=1.0, minimum-scale=1, initial-scale=1"
+          name="viewport">
+    <meta content="TetrisLite - A modern Tetris game built with Kotlin Multiplatform"
+          name="description">
+    <meta content="#667eea" name="theme-color">
+    <link href="data:," rel="icon">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+                'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        #root {
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .app {
+            width: 100%;
+            height: 100%;
+        }
+
+        @keyframes juice-shake-low {
+            0% { transform: translate(0, 0); }
+            20% { transform: translate(-4px, 1px); }
+            40% { transform: translate(4px, -1px); }
+            60% { transform: translate(-3px, 1px); }
+            80% { transform: translate(3px, -1px); }
+            100% { transform: translate(0, 0); }
+        }
+
+        @keyframes juice-shake-high {
+            0% { transform: translate(0, 0); }
+            10% { transform: translate(-12px, 4px); }
+            20% { transform: translate(12px, -5px); }
+            30% { transform: translate(-9px, 5px); }
+            40% { transform: translate(9px, -4px); }
+            50% { transform: translate(-8px, 3px); }
+            60% { transform: translate(8px, -3px); }
+            70% { transform: translate(-6px, 2px); }
+            80% { transform: translate(6px, -2px); }
+            90% { transform: translate(-3px, 1px); }
+            100% { transform: translate(0, 0); }
+        }
+
+        .juice-shake-low {
+            animation: juice-shake-low 220ms linear;
+            transform-origin: center;
+        }
+
+        .juice-shake-high {
+            animation: juice-shake-high 320ms linear;
+            transform-origin: center;
+        }
+
+        @keyframes juice-text-rise {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -40%) scale(0.8);
+            }
+            10% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(-50%, -150%) scale(1.05);
+            }
+        }
+
+        @keyframes juice-text-pulse-high {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.18); }
+        }
+
+        .juice-floating-text {
+            position: absolute;
+            font-family: 'Impact', 'Arial Black', 'Segoe UI', sans-serif;
+            text-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            pointer-events: none;
+            user-select: none;
+            white-space: nowrap;
+        }
+
+        .juice-text-rise {
+            animation-name: juice-text-rise;
+            animation-duration: var(--juice-duration, 780ms);
+            animation-timing-function: ease-out;
+            animation-fill-mode: forwards;
+        }
+
+        .juice-text-pulse-high {
+            animation-name: juice-text-rise, juice-text-pulse-high;
+            animation-duration: var(--juice-duration, 1100ms), var(--juice-pulse-duration, 180ms);
+            animation-iteration-count: 1, var(--juice-pulse-count, 6);
+            animation-timing-function: ease-out, ease-in-out;
+            animation-fill-mode: forwards, none;
+        }
+
+        @keyframes juice-flash-fade {
+            0% { opacity: 0.85; }
+            100% { opacity: 0; }
+        }
+
+        .juice-flash-fade {
+            animation: juice-flash-fade 180ms ease-out forwards;
+            pointer-events: none;
+        }
+
+        @keyframes juice-particle-burst {
+            0% {
+                opacity: 0.95;
+                transform: translate(-50%, -50%) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform:
+                    translate(
+                        calc(-50% + var(--juice-dx)),
+                        calc(-50% + var(--juice-dy))
+                    )
+                    scale(0.35);
+            }
+        }
+
+        .juice-particle-burst {
+            pointer-events: none;
+            animation: juice-particle-burst var(--juice-duration, 550ms) ease-out forwards;
+            will-change: transform, opacity;
+        }
+    </style>
+</head>
+<body>
+<div id="root"></div>
+<script src="webApp.js"></script>
+</body>
+</html>

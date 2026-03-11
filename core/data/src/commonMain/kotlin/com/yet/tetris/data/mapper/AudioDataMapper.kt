@@ -6,6 +6,7 @@ import com.yet.tetris.domain.model.audio.MusicTheme
 import com.yet.tetris.domain.model.audio.SoundEffect
 import com.yet.tetris.domain.model.audio.SoundEffectParams
 import com.yet.tetris.domain.model.audio.SoundEffectPresets
+import com.yet.tetris.domain.model.audio.WaveformType
 
 fun getParamsForEffect(effect: SoundEffect): SoundEffectParams? =
     when (effect) {
@@ -23,5 +24,19 @@ fun getSequenceForTheme(theme: MusicTheme): MusicSequence? =
         MusicTheme.CLASSIC -> MusicSequencePresets.CLASSIC_THEME
         MusicTheme.MODERN -> MusicSequencePresets.MODERN_THEME
         MusicTheme.MINIMAL -> MusicSequencePresets.MINIMAL_THEME
+        MusicTheme.ARCADE -> MusicSequencePresets.ARCADE_THEME
+        MusicTheme.DUSK -> MusicSequencePresets.DUSK_THEME
+        MusicTheme.BATTLE -> MusicSequencePresets.BATTLE_THEME
         MusicTheme.NONE -> null
+    }
+
+fun getWaveformForTheme(theme: MusicTheme): WaveformType =
+    when (theme) {
+        MusicTheme.CLASSIC -> WaveformType.SQUARE
+        MusicTheme.MODERN -> WaveformType.SAWTOOTH
+        MusicTheme.MINIMAL -> WaveformType.TRIANGLE
+        MusicTheme.ARCADE -> WaveformType.SQUARE
+        MusicTheme.DUSK -> WaveformType.TRIANGLE
+        MusicTheme.BATTLE -> WaveformType.SAWTOOTH
+        MusicTheme.NONE -> WaveformType.SINE
     }

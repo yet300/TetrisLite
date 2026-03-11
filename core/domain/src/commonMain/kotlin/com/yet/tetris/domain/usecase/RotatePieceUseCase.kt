@@ -2,6 +2,7 @@ package com.yet.tetris.domain.usecase
 
 import com.yet.tetris.domain.model.game.GameState
 import com.yet.tetris.domain.model.game.Position
+import com.yet.tetris.domain.model.game.RotationDirection
 import com.yet.tetris.domain.model.game.Tetromino
 
 /**
@@ -11,21 +12,67 @@ import com.yet.tetris.domain.model.game.Tetromino
 class RotatePieceUseCase(
     private val checkCollision: CheckCollisionUseCase,
 ) {
+    sealed interface Result {
+        data class Applied(
+            val gameState: GameState,
+        ) : Result
+
+        data class Blocked(
+            val reason: BlockedReason,
+        ) : Result
+    }
+
+    enum class BlockedReason {
+        NO_CURRENT_PIECE,
+        GAME_OVER,
+        PAUSED,
+        COLLISION,
+    }
+
     /**
      * Attempts to rotate the current piece clockwise.
      * Uses SRS wall kick system to find a valid rotation position.
      *
-     * @return Updated GameState with rotated piece, or null if rotation is not possible
+     * @return Explicit rotation result with updated state or blocking reason
      */
-    operator fun invoke(state: GameState): GameState? {
-        val piece = state.currentPiece ?: return null
-        if (state.isGameOver || state.isPaused) return null
+    operator fun invoke(
+        state: GameState,
+        direction: RotationDirection = RotationDirection.CLOCKWISE,
+    ): Result {
+        val piece =
+            state.currentPiece
+                ?: return Result.Blocked(BlockedReason.NO_CURRENT_PIECE)
+        if (state.isGameOver) return Result.Blocked(BlockedReason.GAME_OVER)
+        if (state.isPaused) return Result.Blocked(BlockedReason.PAUSED)
 
-        val rotatedPiece = piece.rotate()
+        return when (direction) {
+            RotationDirection.CLOCKWISE, RotationDirection.COUNTERCLOCKWISE ->
+                rotateQuarterTurn(
+                    state = state,
+                    piece = piece,
+                    direction = direction,
+                )
+            RotationDirection.ONE_EIGHTY -> rotateOneEighty(state, piece)
+        }
+    }
+
+    private fun rotateQuarterTurn(
+        state: GameState,
+        piece: Tetromino,
+        direction: RotationDirection,
+    ): Result {
+        val rotatedPiece =
+            when (direction) {
+                RotationDirection.CLOCKWISE -> piece.rotate()
+                RotationDirection.COUNTERCLOCKWISE -> piece.rotateCounterClockwise()
+                RotationDirection.ONE_EIGHTY -> piece.rotate180()
+            }
 
         // Try rotation at current position first
         if (!checkCollision(state.board, rotatedPiece, state.currentPosition)) {
-            return state.copy(currentPiece = rotatedPiece)
+            return Result.Applied(
+                state.copy(currentPiece = rotatedPiece),
+            )
         }
 
         // Try wall kick offsets
@@ -33,15 +80,31 @@ class RotatePieceUseCase(
         for (offset in kickOffsets) {
             val newPosition = state.currentPosition + offset
             if (!checkCollision(state.board, rotatedPiece, newPosition)) {
-                return state.copy(
-                    currentPiece = rotatedPiece,
-                    currentPosition = newPosition,
+                return Result.Applied(
+                    state.copy(
+                        currentPiece = rotatedPiece,
+                        currentPosition = newPosition,
+                    ),
                 )
             }
         }
 
         // Rotation not possible
-        return null
+        return Result.Blocked(BlockedReason.COLLISION)
+    }
+
+    private fun rotateOneEighty(
+        state: GameState,
+        piece: Tetromino,
+    ): Result {
+        val firstTurn = rotateQuarterTurn(state = state, piece = piece, direction = RotationDirection.CLOCKWISE)
+        val firstApplied = firstTurn as? Result.Applied ?: return firstTurn
+        val nextPiece = firstApplied.gameState.currentPiece ?: return Result.Blocked(BlockedReason.NO_CURRENT_PIECE)
+        return rotateQuarterTurn(
+            state = firstApplied.gameState,
+            piece = nextPiece,
+            direction = RotationDirection.CLOCKWISE,
+        )
     }
 
     /**
@@ -68,8 +131,12 @@ class RotatePieceUseCase(
     ): List<Position> =
         when (fromRotation to toRotation) {
             0 to 1 -> listOf(Position(-1, 0), Position(-1, 1), Position(0, -2), Position(-1, -2))
+            0 to 3 -> listOf(Position(1, 0), Position(1, 1), Position(0, -2), Position(1, -2))
+            1 to 0 -> listOf(Position(1, 0), Position(1, -1), Position(0, 2), Position(1, 2))
             1 to 2 -> listOf(Position(1, 0), Position(1, -1), Position(0, 2), Position(1, 2))
+            2 to 1 -> listOf(Position(-1, 0), Position(-1, 1), Position(0, -2), Position(-1, -2))
             2 to 3 -> listOf(Position(1, 0), Position(1, 1), Position(0, -2), Position(1, -2))
+            3 to 2 -> listOf(Position(-1, 0), Position(-1, -1), Position(0, 2), Position(-1, 2))
             3 to 0 -> listOf(Position(-1, 0), Position(-1, -1), Position(0, 2), Position(-1, 2))
             else -> emptyList()
         }
@@ -83,8 +150,12 @@ class RotatePieceUseCase(
     ): List<Position> =
         when (fromRotation to toRotation) {
             0 to 1 -> listOf(Position(-2, 0), Position(1, 0), Position(-2, -1), Position(1, 2))
+            0 to 3 -> listOf(Position(-1, 0), Position(2, 0), Position(-1, 2), Position(2, -1))
+            1 to 0 -> listOf(Position(2, 0), Position(-1, 0), Position(2, 1), Position(-1, -2))
             1 to 2 -> listOf(Position(-1, 0), Position(2, 0), Position(-1, 2), Position(2, -1))
+            2 to 1 -> listOf(Position(1, 0), Position(-2, 0), Position(1, -2), Position(-2, 1))
             2 to 3 -> listOf(Position(2, 0), Position(-1, 0), Position(2, 1), Position(-1, -2))
+            3 to 2 -> listOf(Position(-2, 0), Position(1, 0), Position(-2, -1), Position(1, 2))
             3 to 0 -> listOf(Position(1, 0), Position(-2, 0), Position(1, -2), Position(-2, 1))
             else -> emptyList()
         }

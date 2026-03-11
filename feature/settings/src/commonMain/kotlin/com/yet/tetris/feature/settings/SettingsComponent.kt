@@ -4,7 +4,9 @@ import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.value.Value
 import com.yet.tetris.domain.model.audio.MusicTheme
 import com.yet.tetris.domain.model.game.Difficulty
+import com.yet.tetris.domain.model.game.RotationDirection
 import com.yet.tetris.domain.model.settings.GameSettings
+import com.yet.tetris.domain.model.settings.GestureSensitivity
 import com.yet.tetris.domain.model.theme.PieceStyle
 import com.yet.tetris.domain.model.theme.VisualTheme
 
@@ -31,6 +33,12 @@ interface SettingsComponent {
     fun onSFXVolumeChanged(volume: Float)
 
     fun onMusicThemeChanged(theme: MusicTheme)
+
+    fun onPrimaryRotateDirectionChanged(direction: RotationDirection)
+
+    fun on180RotationToggled(enabled: Boolean)
+
+    fun onGestureSensitivityChanged(sensitivity: GestureSensitivity)
 
     fun onClose()
 
