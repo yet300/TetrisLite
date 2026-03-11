@@ -44,7 +44,7 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		E28714D7F0CE4ED7294D0E15 /* Exceptions for "iosApp" folder in "iosApp" target */ = {
+		E28714D7F0CE4ED7294D0E15 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				DecomposeHelpers/MutableValue.swift,
@@ -56,7 +56,7 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
-		D4D7D6612E96A07E0072FABE /* Exceptions for "iosApp" folder in "Copy Bundle Resources" phase from "iosApp" target */ = {
+		D4D7D6612E96A07E0072FABE /* PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet */ = {
 			isa = PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet;
 			buildPhase = 60EB5AA7A81ED5581BD46896 /* Resources */;
 			membershipExceptions = (
@@ -68,8 +68,8 @@
 		7291D45327638A8E2B819CE0 /* iosApp */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				E28714D7F0CE4ED7294D0E15 /* Exceptions for "iosApp" folder in "iosApp" target */,
-				D4D7D6612E96A07E0072FABE /* Exceptions for "iosApp" folder in "Copy Bundle Resources" phase from "iosApp" target */,
+				E28714D7F0CE4ED7294D0E15 /* PBXFileSystemSynchronizedBuildFileExceptionSet */,
+				D4D7D6612E96A07E0072FABE /* PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet */,
 			);
 			path = iosApp;
 			sourceTree = "<group>";
@@ -267,7 +267,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "if [ \"YES\" = \"$OVERRIDE_KOTLIN_BUILD_IDE_SUPPORTED\" ]; then\n  echo \"Skipping Gradle build task invocation due to OVERRIDE_KOTLIN_BUILD_IDE_SUPPORTED environment variable set to \\\"YES\\\"\"\n  exit 0\nfi\ncd \"$SRCROOT/..\"\n./gradlew :shared:embedAndSignAppleFrameworkForXcode\n";
+			shellScript = "if [ \"YES\" = \"$OVERRIDE_KOTLIN_BUILD_IDE_SUPPORTED\" ]; then\n  echo \"Skipping Gradle build task invocation due to OVERRIDE_KOTLIN_BUILD_IDE_SUPPORTED environment variable set to \\\"YES\\\"\"\n  exit 0\nfi\nROOT_DIR=\"$SRCROOT\"\nwhile [ ! -f \"$ROOT_DIR/gradlew\" ] && [ \"$ROOT_DIR\" != \"/\" ]; do\n  ROOT_DIR=$(dirname \"$ROOT_DIR\")\ndone\nif [ ! -f \"$ROOT_DIR/gradlew\" ]; then\n  echo \"Unable to locate gradlew from SRCROOT=$SRCROOT\" >&2\n  exit 1\nfi\ncd \"$ROOT_DIR\"\n./gradlew :shared:embedAndSignAppleFrameworkForXcode\n";
 		};
 		D48B485D2F139CB6002112B4 /* Compile Kotlin Framework */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -286,7 +286,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "if [ \"YES\" = \"$OVERRIDE_KOTLIN_BUILD_IDE_SUPPORTED\" ]; then\n  echo \"Skipping Gradle build task invocation due to OVERRIDE_KOTLIN_BUILD_IDE_SUPPORTED environment variable set to \\\"YES\\\"\"\n  exit 0\nfi\ncd \"$SRCROOT/..\"\n./gradlew :shared:embedAndSignAppleFrameworkForXcode\n";
+			shellScript = "if [ \"YES\" = \"$OVERRIDE_KOTLIN_BUILD_IDE_SUPPORTED\" ]; then\n  echo \"Skipping Gradle build task invocation due to OVERRIDE_KOTLIN_BUILD_IDE_SUPPORTED environment variable set to \\\"YES\\\"\"\n  exit 0\nfi\nROOT_DIR=\"$SRCROOT\"\nwhile [ ! -f \"$ROOT_DIR/gradlew\" ] && [ \"$ROOT_DIR\" != \"/\" ]; do\n  ROOT_DIR=$(dirname \"$ROOT_DIR\")\ndone\nif [ ! -f \"$ROOT_DIR/gradlew\" ]; then\n  echo \"Unable to locate gradlew from SRCROOT=$SRCROOT\" >&2\n  exit 1\nfi\ncd \"$ROOT_DIR\"\n./gradlew :shared:embedAndSignAppleFrameworkForXcode\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -338,17 +338,17 @@
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				KOTLIN_FRAMEWORK_BUILD_TYPE = Release;
-					LD_RUNPATH_SEARCH_PATHS = (
-						"$(inherited)",
-						"@executable_path/Frameworks",
-					);
-					OTHER_LDFLAGS = (
-						"$(inherited)",
-						"-framework",
-						Shared,
-					);
-					SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
-					SUPPORTS_MACCATALYST = NO;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-framework",
+					Shared,
+				);
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -431,7 +431,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_ASSET_PATHS = "\"iosApp/Preview Content\"";
-				DEVELOPMENT_TEAM = 3KKQ642Q9H;
+				DEVELOPMENT_TEAM = "${TEAM_ID}";
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
@@ -445,17 +445,17 @@
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				KOTLIN_FRAMEWORK_BUILD_TYPE = Debug;
-					LD_RUNPATH_SEARCH_PATHS = (
-						"$(inherited)",
-						"@executable_path/Frameworks",
-					);
-					OTHER_LDFLAGS = (
-						"$(inherited)",
-						"-framework",
-						Shared,
-					);
-					REGISTER_APP_GROUPS = YES;
-					SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-framework",
+					Shared,
+				);
+				REGISTER_APP_GROUPS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -525,9 +525,9 @@
 		D48B484C2F13965D002112B4 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				"ARCHS[sdk=watchos*]" = arm64_32;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				"ARCHS[sdk=watchos*]" = arm64_32;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 2;
@@ -539,17 +539,17 @@
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.yet.tetris.TetrisLite;
 				KOTLIN_FRAMEWORK_BUILD_TYPE = Debug;
-					LD_RUNPATH_SEARCH_PATHS = (
-						"$(inherited)",
-						"@executable_path/Frameworks",
-					);
-					OTHER_LDFLAGS = (
-						"$(inherited)",
-						"-framework",
-						Shared,
-					);
-					MARKETING_VERSION = 1.2.0;
-					PRODUCT_BUNDLE_IDENTIFIER = com.yet.tetris.TetrisLite.watchkitapp;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.2.0;
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-framework",
+					Shared,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.yet.tetris.TetrisLite.watchkitapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
@@ -567,9 +567,9 @@
 		D48B484D2F13965D002112B4 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				"ARCHS[sdk=watchos*]" = arm64_32;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				"ARCHS[sdk=watchos*]" = arm64_32;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 2;
@@ -581,17 +581,17 @@
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.yet.tetris.TetrisLite;
 				KOTLIN_FRAMEWORK_BUILD_TYPE = Release;
-					LD_RUNPATH_SEARCH_PATHS = (
-						"$(inherited)",
-						"@executable_path/Frameworks",
-					);
-					OTHER_LDFLAGS = (
-						"$(inherited)",
-						"-framework",
-						Shared,
-					);
-					MARKETING_VERSION = 1.2.0;
-					PRODUCT_BUNDLE_IDENTIFIER = com.yet.tetris.TetrisLite.watchkitapp;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.2.0;
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-framework",
+					Shared,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.yet.tetris.TetrisLite.watchkitapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;

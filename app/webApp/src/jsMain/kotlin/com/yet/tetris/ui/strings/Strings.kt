@@ -2,7 +2,7 @@ package com.yet.tetris.ui.strings
 
 /**
  * Localized strings for the web application
- * Based on composeApp/src/commonMain/composeResources/values/strings.xml
+ * Based on app/composeApp/src/commonMain/composeResources/values/strings.xml
  *
  * TODO: Add support for multiple languages
  */

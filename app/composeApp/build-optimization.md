@@ -81,14 +81,14 @@ This project uses ProGuard for code shrinking, obfuscation, and optimization.
 2. **Check what's being removed**:
    ```bash
    # View removed classes
-   grep "removed" composeApp/build/outputs/mapping/release/usage.txt
+   grep "removed" app/composeApp/build/outputs/mapping/release/usage.txt
    ```
 
 3. **Analyze APK contents**:
    ```bash
    # Use Android Studio APK Analyzer
    # Or command line tools
-   aapt dump badging composeApp/build/outputs/apk/release/composeApp-release.apk
+   aapt dump badging app/composeApp/build/outputs/apk/release/composeApp-release.apk
    ```
 
 ### Performance Impact
