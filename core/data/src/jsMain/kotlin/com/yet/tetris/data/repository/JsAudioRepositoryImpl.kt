@@ -1,5 +1,6 @@
 package com.yet.tetris.data.repository
 
+import com.app.common.AppDispatchers
 import com.yet.tetris.data.music.AudioCacheManager
 import com.yet.tetris.data.music.AudioSynthesizer
 import com.yet.tetris.domain.model.audio.AudioSettings
@@ -9,7 +10,6 @@ import com.yet.tetris.domain.repository.AudioRepository
 import js.buffer.ArrayBuffer
 import js.typedarrays.Float32Array
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
@@ -28,6 +28,7 @@ import web.audio.suspended
  */
 class JsAudioRepositoryImpl(
     private val cacheManager: AudioCacheManager,
+    private val dispatchers: AppDispatchers,
 ) : AudioRepository {
     // A lazy-initialized AudioContext. Browsers require a user interaction to start it.
     private val audioContext: AudioContext by lazy { AudioContext() }
@@ -36,7 +37,7 @@ class JsAudioRepositoryImpl(
     private val sfxGain: GainNode by lazy { audioContext.createGain().also { it.connect(audioContext.destination) } }
     private val musicGain: GainNode by lazy { audioContext.createGain().also { it.connect(audioContext.destination) } }
 
-    private val audioScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
+    private val audioScope = CoroutineScope(dispatchers.io + SupervisorJob())
 
     // Platform-specific cache for ready-to-play AudioBuffers.
     private val sfxBufferCache = mutableMapOf<SoundEffect, AudioBuffer>()

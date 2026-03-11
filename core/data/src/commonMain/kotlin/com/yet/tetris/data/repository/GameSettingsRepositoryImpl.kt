@@ -1,5 +1,6 @@
 package com.yet.tetris.data.repository
 
+import com.app.common.AppDispatchers
 import com.russhwolf.settings.ExperimentalSettingsApi
 import com.russhwolf.settings.coroutines.FlowSettings
 import com.yet.tetris.data.mapper.toDomain
@@ -8,7 +9,9 @@ import com.yet.tetris.data.model.GameSettingsDto
 import com.yet.tetris.domain.model.settings.GameSettings
 import com.yet.tetris.domain.repository.GameSettingsRepository
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
 
@@ -19,33 +22,37 @@ import kotlinx.serialization.serializer
 class GameSettingsRepositoryImpl(
     private val flowSettings: FlowSettings,
     private val json: Json,
+    private val dispatchers: AppDispatchers,
 ) : GameSettingsRepository {
     companion object {
         private const val KEY_SETTINGS = "game_settings"
     }
 
     override suspend fun getSettings(): GameSettings =
-        try {
-            val settingsJson = flowSettings.getStringOrNull(KEY_SETTINGS)
-            if (settingsJson != null) {
-                val dto = json.decodeFromString<GameSettingsDto>(settingsJson)
-                dto.toDomain()
-            } else {
-                GameSettings() // Return default settings
+        withContext(dispatchers.io) {
+            try {
+                val settingsJson = flowSettings.getStringOrNull(KEY_SETTINGS)
+                if (settingsJson != null) {
+                    val dto = json.decodeFromString<GameSettingsDto>(settingsJson)
+                    dto.toDomain()
+                } else {
+                    GameSettings() // Return default settings
+                }
+            } catch (e: Exception) {
+                // If deserialization fails, return default settings
+                GameSettings()
             }
-        } catch (e: Exception) {
-            // If deserialization fails, return default settings
-            GameSettings()
         }
 
     override suspend fun saveSettings(settings: GameSettings) {
-        try {
-            val dto = settings.toDto()
-            val settingsJson = json.encodeToString(serializer<GameSettingsDto>(), dto)
-            flowSettings.putString(KEY_SETTINGS, settingsJson)
-        } catch (e: Exception) {
-            // Log error in production
-            throw e
+        withContext(dispatchers.io) {
+            try {
+                val dto = settings.toDto()
+                val settingsJson = json.encodeToString(serializer<GameSettingsDto>(), dto)
+                flowSettings.putString(KEY_SETTINGS, settingsJson)
+            } catch (e: Exception) {
+                throw e
+            }
         }
     }
 
@@ -64,4 +71,5 @@ class GameSettingsRepositoryImpl(
                     GameSettings()
                 }
             }
+            .flowOn(dispatchers.io)
 }

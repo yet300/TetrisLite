@@ -1,6 +1,7 @@
 package com.yet.tetris.data.repository
 
 import app.cash.turbine.test
+import com.app.common.AppDispatchers
 import com.russhwolf.settings.ExperimentalSettingsApi
 import com.russhwolf.settings.MapSettings
 import com.russhwolf.settings.coroutines.toFlowSettings
@@ -37,7 +38,12 @@ class GameSettingsRepositoryImplTest : RobolectricTestRunner() {
 
         val flowSettings = settings.makeObservable().toFlowSettings(testDispatcher)
         val json = Json { ignoreUnknownKeys = true }
-        repository = GameSettingsRepositoryImpl(flowSettings, json)
+        repository =
+            GameSettingsRepositoryImpl(
+                flowSettings = flowSettings,
+                json = json,
+                dispatchers = AppDispatchers(io = testDispatcher),
+            )
     }
 
     @Test

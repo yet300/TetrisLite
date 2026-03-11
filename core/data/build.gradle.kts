@@ -9,6 +9,7 @@ kotlin {
         commonMain.dependencies {
             implementation(projects.core.domain)
             implementation(projects.core.database)
+            implementation(projects.core.common)
 
             implementation(libs.bundles.multiplatform.settings)
 

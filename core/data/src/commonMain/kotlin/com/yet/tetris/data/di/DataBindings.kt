@@ -1,5 +1,6 @@
 package com.yet.tetris.data.di
 
+import com.app.common.AppDispatchers
 import com.russhwolf.settings.ExperimentalSettingsApi
 import com.russhwolf.settings.ObservableSettings
 import com.russhwolf.settings.Settings
@@ -48,11 +49,14 @@ object DataBindings {
 
     @SingleIn(AppScope::class)
     @Provides
-    fun provideAudioCacheManager(): AudioCacheManager = AudioCacheManager()
+    fun provideAudioCacheManager(dispatchers: AppDispatchers): AudioCacheManager = AudioCacheManager(dispatchers)
 
     @SingleIn(AppScope::class)
     @Provides
-    fun provideAudioRepository(cacheManager: AudioCacheManager): AudioRepository = DataPlatformModule().provideAudioRepository(cacheManager)
+    fun provideAudioRepository(
+        cacheManager: AudioCacheManager,
+        dispatchers: AppDispatchers,
+    ): AudioRepository = DataPlatformModule().provideAudioRepository(cacheManager, dispatchers)
 
     @OptIn(ExperimentalSettingsApi::class)
     @SingleIn(AppScope::class)
@@ -60,7 +64,13 @@ object DataBindings {
     fun provideGameSettingsRepository(
         flowSettings: FlowSettings,
         json: Json,
-    ): GameSettingsRepository = GameSettingsRepositoryImpl(flowSettings = flowSettings, json = json)
+        dispatchers: AppDispatchers,
+    ): GameSettingsRepository =
+        GameSettingsRepositoryImpl(
+            flowSettings = flowSettings,
+            json = json,
+            dispatchers = dispatchers,
+        )
 
     @SingleIn(AppScope::class)
     @Provides

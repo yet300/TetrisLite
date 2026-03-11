@@ -1,5 +1,6 @@
 package com.yet.tetris.data.repository
 
+import com.app.common.AppDispatchers
 import com.yet.tetris.data.music.AudioCacheManager
 import com.yet.tetris.data.music.AudioSynthesizer
 import com.yet.tetris.domain.model.audio.AudioSettings
@@ -7,7 +8,6 @@ import com.yet.tetris.domain.model.audio.MusicTheme
 import com.yet.tetris.domain.model.audio.SoundEffect
 import com.yet.tetris.domain.repository.AudioRepository
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
@@ -25,8 +25,9 @@ import kotlin.math.min
  */
 class JvmAudioRepositoryImpl(
     private val cacheManager: AudioCacheManager,
+    private val dispatchers: AppDispatchers,
 ) : AudioRepository {
-    private val audioScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
+    private val audioScope = CoroutineScope(dispatchers.io + SupervisorJob())
     private var musicLine: SourceDataLine? = null
     private var isMusicPlaying = false
     private var currentSettings = AudioSettings()

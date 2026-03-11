@@ -1,5 +1,6 @@
 package com.yet.tetris.data.repository
 
+import com.app.common.AppDispatchers
 import com.yet.tetris.data.music.AudioCacheManager
 import com.yet.tetris.data.music.AudioSynthesizer
 import com.yet.tetris.domain.model.audio.AudioSettings
@@ -35,6 +36,7 @@ import platform.posix.memcpy
 @OptIn(ExperimentalForeignApi::class, BetaInteropApi::class, UnsafeNumber::class)
 class IosAudioRepositoryImpl(
     private val cacheManager: AudioCacheManager,
+    private val dispatchers: AppDispatchers,
 ) : AudioRepository {
     /**
      * An isolated, thread-local object that holds all AVFoundation state.
@@ -73,7 +75,7 @@ class IosAudioRepositoryImpl(
     }
 
     // All AVFoundation operations are dispatched to this scope, which runs on the main thread.
-    private val mainScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
+    private val mainScope = CoroutineScope(dispatchers.main + SupervisorJob())
 
     /**
      * Pre-heats the PCM cache on a background thread, then converts the data to
@@ -82,7 +84,7 @@ class IosAudioRepositoryImpl(
     override suspend fun initialize() {
         val synthesizedCache = mutableMapOf<SoundEffect, AVAudioPCMBuffer>()
         // Perform CPU-heavy synthesis on a background thread.
-        withContext(Dispatchers.Default) {
+        withContext(dispatchers.default) {
             cacheManager.preheatSfxCache()
             SoundEffect.entries.forEach { effect ->
                 cacheManager.getSfxPcm(effect)?.let { pcmData ->
@@ -119,7 +121,7 @@ class IosAudioRepositoryImpl(
             // Ленивое кэширование: если звука нет в кэше, синтезируем его.
             if (AudioEngine.sfxCache[effect] == null) {
                 val pcmData =
-                    withContext(Dispatchers.Default) {
+                    withContext(dispatchers.default) {
                         cacheManager.getSfxPcm(effect)
                     }
                 if (pcmData != null) {
