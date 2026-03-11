@@ -11,8 +11,8 @@ android {
         applicationId = "com.yet.tetris.wear"
         minSdk = 28
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 2
-        versionName = "1.2.0"
+        versionCode = 3
+        versionName = "1.3.0"
     }
 
     buildTypes {
