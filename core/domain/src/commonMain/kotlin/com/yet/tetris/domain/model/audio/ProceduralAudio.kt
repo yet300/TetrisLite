@@ -25,6 +25,10 @@ data class Note(
         const val G5 = 783.99f
         const val A5 = 880.00f
         const val B5 = 987.77f
+        const val C6 = 1046.50f
+        const val D6 = 1174.66f
+        const val E6 = 1318.51f
+        const val F6 = 1396.91f
 
         // Common note durations (at 120 BPM)
         const val WHOLE = 2.0f
@@ -246,6 +250,85 @@ object MusicSequencePresets {
                     Note(Note.E4, Note.HALF),
                 ),
             tempo = 100,
+            loop = true,
+        )
+
+    val ARCADE_THEME =
+        MusicSequence(
+            notes =
+                listOf(
+                    Note(Note.E5, Note.SIXTEENTH, volume = 0.85f),
+                    Note(Note.G5, Note.SIXTEENTH, volume = 0.85f),
+                    Note(Note.B5, Note.SIXTEENTH, volume = 0.85f),
+                    Note(Note.E6, Note.EIGHTH, volume = 0.9f),
+                    Note(Note.D6, Note.SIXTEENTH, volume = 0.82f),
+                    Note(Note.B5, Note.SIXTEENTH, volume = 0.82f),
+                    Note(Note.G5, Note.SIXTEENTH, volume = 0.82f),
+                    Note(Note.A5, Note.EIGHTH, volume = 0.84f),
+                    Note(Note.E5, Note.SIXTEENTH, volume = 0.85f),
+                    Note(Note.G5, Note.SIXTEENTH, volume = 0.85f),
+                    Note(Note.C6, Note.SIXTEENTH, volume = 0.88f),
+                    Note(Note.E6, Note.EIGHTH, volume = 0.92f),
+                    Note(Note.D6, Note.SIXTEENTH, volume = 0.82f),
+                    Note(Note.C6, Note.SIXTEENTH, volume = 0.82f),
+                    Note(Note.A5, Note.SIXTEENTH, volume = 0.82f),
+                    Note(Note.G5, Note.EIGHTH, volume = 0.8f),
+                    Note(Note.F5, Note.SIXTEENTH, volume = 0.78f),
+                    Note(Note.A5, Note.SIXTEENTH, volume = 0.8f),
+                    Note(Note.C6, Note.SIXTEENTH, volume = 0.84f),
+                    Note(Note.F6, Note.EIGHTH, volume = 0.9f),
+                    Note(Note.E6, Note.SIXTEENTH, volume = 0.82f),
+                    Note(Note.C6, Note.SIXTEENTH, volume = 0.82f),
+                    Note(Note.A5, Note.SIXTEENTH, volume = 0.82f),
+                    Note(Note.B5, Note.EIGHTH, volume = 0.84f),
+                ),
+            tempo = 156,
+            loop = true,
+        )
+
+    val DUSK_THEME =
+        MusicSequence(
+            notes =
+                listOf(
+                    Note(Note.A4, Note.QUARTER, volume = 0.55f),
+                    Note(Note.C5, Note.EIGHTH, volume = 0.5f),
+                    Note(Note.E5, Note.QUARTER, volume = 0.58f),
+                    Note(Note.G5, Note.EIGHTH, volume = 0.48f),
+                    Note(Note.E5, Note.QUARTER, volume = 0.56f),
+                    Note(Note.C5, Note.EIGHTH, volume = 0.5f),
+                    Note(Note.D5, Note.QUARTER, volume = 0.54f),
+                    Note(Note.F5, Note.EIGHTH, volume = 0.5f),
+                    Note(Note.A5, Note.QUARTER, volume = 0.58f),
+                    Note(Note.G5, Note.EIGHTH, volume = 0.48f),
+                    Note(Note.E5, Note.QUARTER, volume = 0.56f),
+                    Note(Note.C5, Note.QUARTER, volume = 0.5f),
+                ),
+            tempo = 92,
+            loop = true,
+        )
+
+    val BATTLE_THEME =
+        MusicSequence(
+            notes =
+                listOf(
+                    Note(Note.E4, Note.EIGHTH, volume = 0.8f),
+                    Note(Note.E4, Note.EIGHTH, volume = 0.76f),
+                    Note(Note.G4, Note.SIXTEENTH, volume = 0.82f),
+                    Note(Note.A4, Note.SIXTEENTH, volume = 0.84f),
+                    Note(Note.B4, Note.EIGHTH, volume = 0.88f),
+                    Note(Note.A4, Note.SIXTEENTH, volume = 0.8f),
+                    Note(Note.G4, Note.SIXTEENTH, volume = 0.78f),
+                    Note(Note.E4, Note.EIGHTH, volume = 0.82f),
+                    Note(Note.D4, Note.EIGHTH, volume = 0.76f),
+                    Note(Note.E4, Note.EIGHTH, volume = 0.8f),
+                    Note(Note.G4, Note.SIXTEENTH, volume = 0.82f),
+                    Note(Note.A4, Note.SIXTEENTH, volume = 0.84f),
+                    Note(Note.C5, Note.EIGHTH, volume = 0.9f),
+                    Note(Note.B4, Note.SIXTEENTH, volume = 0.82f),
+                    Note(Note.G4, Note.SIXTEENTH, volume = 0.8f),
+                    Note(Note.E4, Note.EIGHTH, volume = 0.84f),
+                ),
+            tempo = 138,
             loop = true,
         )
 }

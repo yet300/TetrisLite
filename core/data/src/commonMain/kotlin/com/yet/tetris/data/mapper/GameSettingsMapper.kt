@@ -70,6 +70,9 @@ fun MusicTheme.toDto(): MusicThemeDto =
         MusicTheme.CLASSIC -> MusicThemeDto.CLASSIC
         MusicTheme.MODERN -> MusicThemeDto.MODERN
         MusicTheme.MINIMAL -> MusicThemeDto.MINIMAL
+        MusicTheme.ARCADE -> MusicThemeDto.ARCADE
+        MusicTheme.DUSK -> MusicThemeDto.DUSK
+        MusicTheme.BATTLE -> MusicThemeDto.BATTLE
         MusicTheme.NONE -> MusicThemeDto.NONE
     }
 
@@ -145,6 +148,9 @@ fun MusicThemeDto.toDomain(): MusicTheme =
         MusicThemeDto.CLASSIC -> MusicTheme.CLASSIC
         MusicThemeDto.MODERN -> MusicTheme.MODERN
         MusicThemeDto.MINIMAL -> MusicTheme.MINIMAL
+        MusicThemeDto.ARCADE -> MusicTheme.ARCADE
+        MusicThemeDto.DUSK -> MusicTheme.DUSK
+        MusicThemeDto.BATTLE -> MusicTheme.BATTLE
         MusicThemeDto.NONE -> MusicTheme.NONE
     }
 

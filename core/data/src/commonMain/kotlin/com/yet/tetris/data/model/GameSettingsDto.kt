@@ -52,6 +52,9 @@ enum class MusicThemeDto {
     CLASSIC,
     MODERN,
     MINIMAL,
+    ARCADE,
+    DUSK,
+    BATTLE,
     NONE,
 }
 

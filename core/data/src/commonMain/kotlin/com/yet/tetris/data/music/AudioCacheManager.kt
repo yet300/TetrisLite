@@ -2,9 +2,9 @@ package com.yet.tetris.data.music
 
 import com.yet.tetris.data.mapper.getParamsForEffect
 import com.yet.tetris.data.mapper.getSequenceForTheme
+import com.yet.tetris.data.mapper.getWaveformForTheme
 import com.yet.tetris.domain.model.audio.MusicTheme
 import com.yet.tetris.domain.model.audio.SoundEffect
-import com.yet.tetris.domain.model.audio.WaveformType
 import com.app.common.AppDispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -48,7 +48,7 @@ class AudioCacheManager(
         }
 
         val sequence = getSequenceForTheme(theme) ?: return@withContext FloatArray(0)
-        val waveform = if (theme == MusicTheme.CLASSIC) WaveformType.SQUARE else WaveformType.TRIANGLE
+        val waveform = getWaveformForTheme(theme)
         val synthesized = AudioSynthesizer.synthesizeMusicSequence(sequence, waveform)
 
         cacheMutex.withLock {

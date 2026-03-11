@@ -114,7 +114,7 @@ val AudioSettingsSection =
                                             ButtonVariant.outlined
                                         }
                                     onClick = { props.onMusicThemeChanged(theme) }
-                                    +theme.name.replace("_", " ")
+                                    +formatMusicTheme(theme)
                                 }
                             }
                         }
@@ -171,4 +171,15 @@ val AudioSettingsSection =
                 }
             }
         }
+    }
+
+private fun formatMusicTheme(theme: MusicTheme): String =
+    when (theme) {
+        MusicTheme.CLASSIC -> "Classic"
+        MusicTheme.MODERN -> "Modern"
+        MusicTheme.MINIMAL -> "Minimal"
+        MusicTheme.ARCADE -> "Arcade"
+        MusicTheme.DUSK -> "Dusk"
+        MusicTheme.BATTLE -> "Battle"
+        MusicTheme.NONE -> "Off"
     }

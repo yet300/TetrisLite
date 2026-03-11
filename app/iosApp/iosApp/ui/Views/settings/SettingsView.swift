@@ -136,7 +136,7 @@ struct SettingsView: View {
                 set: { component.onMusicThemeChanged(theme: $0) }
             )) {
                 ForEach(MusicTheme.entries, id: \.self) { theme in
-                    Text(theme.name).tag(theme)
+                    Text(musicThemeLabel(theme)).tag(theme)
                 }
             }
     }
@@ -174,6 +174,27 @@ struct SettingsView: View {
             return "Competitive"
         default:
             return sensitivity.name
+        }
+    }
+
+    private func musicThemeLabel(_ theme: MusicTheme) -> String {
+        switch theme {
+        case .classic:
+            return "Classic"
+        case .modern:
+            return "Modern"
+        case .minimal:
+            return "Minimal"
+        case .arcade:
+            return "Arcade"
+        case .dusk:
+            return "Dusk"
+        case .battle:
+            return "Battle"
+        case .none:
+            return "Off"
+        default:
+            return theme.name
         }
     }
 }

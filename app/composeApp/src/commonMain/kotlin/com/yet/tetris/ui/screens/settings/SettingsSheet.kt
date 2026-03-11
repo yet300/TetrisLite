@@ -26,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
+import com.yet.tetris.domain.model.audio.MusicTheme
 import com.yet.tetris.domain.model.game.RotationDirection
 import com.yet.tetris.domain.model.settings.GestureSensitivity
 import com.yet.tetris.feature.settings.PreviewSettingsComponent
@@ -139,9 +140,10 @@ private fun SettingsScreenContent(
 
                         Text(stringResource(Res.string.music_theme), style = MaterialTheme.typography.bodyMedium)
 
-                        EnumSegmentedButtonRow(
+                        EnumFlowRowChips(
                             selectedValue = model.settings.audioSettings.selectedMusicTheme,
                             onValueChange = { newTheme -> component.onMusicThemeChanged(newTheme) },
+                            getLabel = ::musicThemeLabel,
                         )
                     }
 
@@ -258,6 +260,17 @@ private fun gestureSensitivityLabel(sensitivity: GestureSensitivity): String =
         GestureSensitivity.RELAXED -> "Relaxed"
         GestureSensitivity.NORMAL -> "Normal"
         GestureSensitivity.COMPETITIVE -> "Competitive"
+    }
+
+private fun musicThemeLabel(theme: MusicTheme): String =
+    when (theme) {
+        MusicTheme.CLASSIC -> "Classic"
+        MusicTheme.MODERN -> "Modern"
+        MusicTheme.MINIMAL -> "Minimal"
+        MusicTheme.ARCADE -> "Arcade"
+        MusicTheme.DUSK -> "Dusk"
+        MusicTheme.BATTLE -> "Battle"
+        MusicTheme.NONE -> "Off"
     }
 
 @Composable

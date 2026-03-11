@@ -18,6 +18,9 @@ enum class MusicTheme {
     CLASSIC, // Chiptune-inspired lead with modern float PCM playback
     MODERN, // More contemporary electronic sound
     MINIMAL, // Ambient, minimal background music
+    ARCADE, // Fast arcade-style lead with bright motion
+    DUSK, // Warm mid-tempo theme with softer phrasing
+    BATTLE, // Tense driving line for higher-energy play
     NONE, // No music
 }
 
