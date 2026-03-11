@@ -4,6 +4,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -20,6 +22,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.icons.filled.MilitaryTech
 import androidx.compose.material.icons.filled.SportsEsports
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -41,6 +44,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
 import com.yet.tetris.domain.model.history.GameRecord
+import com.yet.tetris.domain.model.progression.ProgressAchievementId
+import com.yet.tetris.domain.model.progression.ProgressionSummary
 import com.yet.tetris.feature.history.DateFilter
 import com.yet.tetris.feature.history.HistoryComponent
 import com.yet.tetris.feature.history.PreviewHistoryComponent
@@ -53,11 +58,28 @@ import com.yet.tetris.uikit.theme.TetrisLiteAppTheme
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import tetrislite.composeapp.generated.resources.Res
+import tetrislite.composeapp.generated.resources.achievement_combo_5
+import tetrislite.composeapp.generated.resources.achievement_first_game
+import tetrislite.composeapp.generated.resources.achievement_first_tetris
+import tetrislite.composeapp.generated.resources.achievement_first_tspin
+import tetrislite.composeapp.generated.resources.achievement_perfect_clear
+import tetrislite.composeapp.generated.resources.achievement_score_20000
+import tetrislite.composeapp.generated.resources.achievement_score_5000
+import tetrislite.composeapp.generated.resources.achievement_ten_games
+import tetrislite.composeapp.generated.resources.achievements_unlocked_value
+import tetrislite.composeapp.generated.resources.best_score_value
+import tetrislite.composeapp.generated.resources.career_summary_title
 import tetrislite.composeapp.generated.resources.game_history
+import tetrislite.composeapp.generated.resources.games_played_value
+import tetrislite.composeapp.generated.resources.history_empty_filter
+import tetrislite.composeapp.generated.resources.highest_level_value
 import tetrislite.composeapp.generated.resources.lines_label
 import tetrislite.composeapp.generated.resources.no_games_yet
 import tetrislite.composeapp.generated.resources.score_label
 import tetrislite.composeapp.generated.resources.start_game_prompt
+import tetrislite.composeapp.generated.resources.total_lines_value
+import tetrislite.composeapp.generated.resources.total_tetrises_value
+import tetrislite.composeapp.generated.resources.total_tspins_value
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -82,7 +104,7 @@ fun HistorySheet(component: HistoryComponent) {
             }
 
             is HistoryComponent.Model.Content -> {
-                if (state.games.isEmpty()) {
+                if (state.games.isEmpty() && state.totalGamesCount == 0) {
                     EmptyHistoryState(
                         modifier = Modifier.fillMaxSize(),
                     )
@@ -90,6 +112,8 @@ fun HistorySheet(component: HistoryComponent) {
                     HistoryList(
                         modifier = Modifier.fillMaxSize(),
                         games = state.games,
+                        totalGamesCount = state.totalGamesCount,
+                        progression = state.progression,
                         onDeleteGame = component::onDeleteGame,
                     )
                 }
@@ -163,6 +187,8 @@ private fun EmptyHistoryState(modifier: Modifier = Modifier) {
 private fun HistoryList(
     modifier: Modifier = Modifier,
     games: List<GameRecord>,
+    totalGamesCount: Int,
+    progression: ProgressionSummary,
     onDeleteGame: (String) -> Unit,
 ) {
     var revealedId by remember { mutableStateOf<String?>(null) }
@@ -177,6 +203,14 @@ private fun HistoryList(
                 text = stringResource(Res.string.game_history),
             )
         }
+        item(key = "summary") {
+            HistorySummaryCard(progression = progression)
+        }
+        if (games.isEmpty()) {
+            item(key = "filtered-empty") {
+                FilteredHistoryState(totalGamesCount = totalGamesCount)
+            }
+        }
         items(games, key = { it.id }) { game ->
             GameRecordSwipeableItem(
                 game = game,
@@ -185,6 +219,102 @@ private fun HistoryList(
                 onCollapse = { revealedId = null },
                 onDelete = { onDeleteGame(game.id) },
             )
+        }
+    }
+}
+
+@Composable
+private fun FilteredHistoryState(
+    totalGamesCount: Int,
+    modifier: Modifier = Modifier,
+) {
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            Text(
+                text = stringResource(Res.string.history_empty_filter),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+            )
+            Text(
+                text = stringResource(Res.string.games_played_value, totalGamesCount),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun HistorySummaryCard(
+    progression: ProgressionSummary,
+    modifier: Modifier = Modifier,
+) {
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Text(
+                text = stringResource(Res.string.career_summary_title),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+            )
+            Text(text = stringResource(Res.string.best_score_value, progression.bestScore))
+            Text(text = stringResource(Res.string.highest_level_value, progression.highestLevel))
+            Text(text = stringResource(Res.string.total_lines_value, progression.totalLines))
+            Text(text = stringResource(Res.string.total_tetrises_value, progression.totalTetrises))
+            Text(text = stringResource(Res.string.total_tspins_value, progression.totalTSpins))
+            Text(
+                text =
+                    stringResource(
+                        Res.string.achievements_unlocked_value,
+                        progression.unlockedAchievements.size,
+                        progression.totalAchievements,
+                    ),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            if (progression.unlockedAchievements.isNotEmpty()) {
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    for (achievement in progression.unlockedAchievements) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            modifier =
+                                Modifier
+                                    .background(
+                                        color = MaterialTheme.colorScheme.background,
+                                        shape = RoundedCornerShape(999.dp),
+                                    ).padding(horizontal = 10.dp, vertical = 6.dp),
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.MilitaryTech,
+                                contentDescription = null,
+                                modifier = Modifier.size(14.dp),
+                                tint = MaterialTheme.colorScheme.primary,
+                            )
+                            Text(
+                                text = achievement.title(),
+                                style = MaterialTheme.typography.labelMedium,
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 }
@@ -310,3 +440,16 @@ fun HistoryScreenPreview() {
         HistorySheet(PreviewHistoryComponent())
     }
 }
+
+@Composable
+private fun ProgressAchievementId.title(): String =
+    when (this) {
+        ProgressAchievementId.FIRST_GAME -> stringResource(Res.string.achievement_first_game)
+        ProgressAchievementId.SCORE_5000 -> stringResource(Res.string.achievement_score_5000)
+        ProgressAchievementId.SCORE_20000 -> stringResource(Res.string.achievement_score_20000)
+        ProgressAchievementId.FIRST_TETRIS -> stringResource(Res.string.achievement_first_tetris)
+        ProgressAchievementId.FIRST_TSPIN -> stringResource(Res.string.achievement_first_tspin)
+        ProgressAchievementId.COMBO_5 -> stringResource(Res.string.achievement_combo_5)
+        ProgressAchievementId.PERFECT_CLEAR -> stringResource(Res.string.achievement_perfect_clear)
+        ProgressAchievementId.TEN_GAMES -> stringResource(Res.string.achievement_ten_games)
+    }

@@ -16,6 +16,8 @@ struct ContentView: View {
     }
 }
 
-#Preview {
-    ContentView(rootComponent: PreviewRootComponent())
+struct ContentView_Previews: PreviewProvider {
+    static var previews: some View {
+        ContentView(rootComponent: PreviewRootComponent())
+    }
 }

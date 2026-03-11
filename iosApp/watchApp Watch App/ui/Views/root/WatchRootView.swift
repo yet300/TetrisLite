@@ -34,6 +34,8 @@ private func watchChildView(for child: RootComponentChild) -> some View {
     }
 }
 
-#Preview {
-    WatchRootView(rootComponent: PreviewRootComponent())
+struct WatchRootView_Previews: PreviewProvider {
+    static var previews: some View {
+        WatchRootView(rootComponent: PreviewRootComponent())
+    }
 }

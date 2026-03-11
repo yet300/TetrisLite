@@ -141,6 +141,8 @@ private struct WatchSheetItem: Identifiable {
     }
 }
 
-#Preview {
-    WatchHomeView(PreviewHomeComponent())
+struct WatchHomeView_Previews: PreviewProvider {
+    static var previews: some View {
+        WatchHomeView(PreviewHomeComponent())
+    }
 }

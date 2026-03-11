@@ -97,6 +97,8 @@ struct WatchSettingsView: View {
     }
 }
 
-#Preview {
-    WatchSettingsView(PreviewSettingsComponent())
+struct WatchSettingsView_Previews: PreviewProvider {
+    static var previews: some View {
+        WatchSettingsView(PreviewSettingsComponent())
+    }
 }

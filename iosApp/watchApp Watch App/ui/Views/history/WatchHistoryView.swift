@@ -92,6 +92,8 @@ struct WatchHistoryView: View {
     }
 }
 
-#Preview {
-    WatchHistoryView(PreviewHistoryComponent())
+struct WatchHistoryView_Previews: PreviewProvider {
+    static var previews: some View {
+        WatchHistoryView(PreviewHistoryComponent())
+    }
 }

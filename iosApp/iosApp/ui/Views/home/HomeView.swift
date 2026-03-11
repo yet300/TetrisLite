@@ -53,7 +53,16 @@ struct HomeView: View {
                             )
                             .frame(maxWidth: isIPadOrLandscape ? 600 : .infinity)
 
-                            Spacer()
+                            if content.progression.hasProgress {
+                                ProgressionOverviewCard(
+                                    progression: content.progression,
+                                    selectedDifficulty: content.settings.difficulty
+                                )
+                                .frame(maxWidth: isIPadOrLandscape ? 560 : .infinity)
+                                .padding(.horizontal, 24)
+                            } else {
+                                Spacer()
+                            }
 
                             VStack(spacing: 24) {
                                 VStack(spacing: 16) {
@@ -269,3 +278,58 @@ struct GlassButton: View {
 
 private typealias HistoryChild = HomeComponentBottomSheetChildHistoryChild
 private typealias SettingsChild = HomeComponentBottomSheetChildSettingsChild
+
+private struct ProgressionOverviewCard: View {
+    let progression: ProgressionSummary
+    let selectedDifficulty: Difficulty
+
+    private var difficultyBest: DifficultyProgress? {
+        progression.bestByDifficulty.first { $0.difficulty == selectedDifficulty }
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(Strings.progressTitle)
+                .font(.headline)
+                .foregroundColor(.gamePrimaryLabel)
+
+            Text(Strings.bestScoreValue(Int(truncatingIfNeeded: progression.bestScore)))
+            Text(Strings.highestLevelValue(Int(truncatingIfNeeded: progression.highestLevel)))
+            Text(Strings.gamesPlayedValue(Int(truncatingIfNeeded: progression.totalGames)))
+            Text(Strings.achievementsUnlockedValue(progression.unlockedAchievements.count, Int(truncatingIfNeeded: progression.totalAchievements)))
+
+            if let difficultyBest, difficultyBest.gamesPlayed > 0 {
+                let difficultyName = selectedDifficulty.name.capitalized
+                Text(Strings.difficultyBestScoreValue(difficultyName, Int(truncatingIfNeeded: difficultyBest.bestScore)))
+                Text(Strings.difficultyBestLevelValue(difficultyName, Int(truncatingIfNeeded: difficultyBest.highestLevel)))
+            }
+
+            if !progression.unlockedAchievements.isEmpty {
+                FlexibleBadgeRow(achievements: Array(progression.unlockedAchievements.suffix(3)))
+            }
+        }
+        .font(.subheadline)
+        .foregroundColor(.gameLabel)
+        .padding(20)
+        .background(.thinMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+    }
+}
+
+private struct FlexibleBadgeRow: View {
+    let achievements: [ProgressAchievementId]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            ForEach(achievements, id: \.self) { achievement in
+                Label(Strings.achievementTitle(achievement), systemImage: "medal.fill")
+                    .font(.caption.weight(.semibold))
+                    .foregroundColor(.gamePrimaryLabel)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 6)
+                    .background(Color.gameSecondaryAccent.opacity(0.2))
+                    .clipShape(Capsule())
+            }
+        }
+    }
+}

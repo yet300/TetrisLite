@@ -1,4 +1,5 @@
 import Foundation
+import Shared
 
 enum Strings {
     // Common
@@ -28,6 +29,9 @@ enum Strings {
     static let difficulty = NSLocalizedString("difficulty", comment: "")
     static let keyboardHint = NSLocalizedString("keyboard_hint", comment: "")
     static let newGame = NSLocalizedString("new_game", comment: "")
+    static let progressTitle = NSLocalizedString("progress_title", comment: "")
+    static let careerSummaryTitle = NSLocalizedString("career_summary_title", comment: "")
+    static let historyEmptyFilter = NSLocalizedString("history_empty_filter", comment: "")
 
     // Game Screen
     static let hold = NSLocalizedString("hold", comment: "")
@@ -75,5 +79,64 @@ enum Strings {
 
     static func difficultyLabel(_ difficulty: String) -> String {
         String(format: NSLocalizedString("difficulty_label", comment: ""), difficulty)
+    }
+
+    static func bestScoreValue(_ score: Int) -> String {
+        String(format: NSLocalizedString("best_score_value", comment: ""), score)
+    }
+
+    static func highestLevelValue(_ level: Int) -> String {
+        String(format: NSLocalizedString("highest_level_value", comment: ""), level)
+    }
+
+    static func gamesPlayedValue(_ count: Int) -> String {
+        String(format: NSLocalizedString("games_played_value", comment: ""), count)
+    }
+
+    static func achievementsUnlockedValue(_ unlocked: Int, _ total: Int) -> String {
+        String(format: NSLocalizedString("achievements_unlocked_value", comment: ""), unlocked, total)
+    }
+
+    static func difficultyBestScoreValue(_ difficulty: String, _ score: Int) -> String {
+        String(format: NSLocalizedString("difficulty_best_score_value", comment: ""), difficulty, score)
+    }
+
+    static func difficultyBestLevelValue(_ difficulty: String, _ level: Int) -> String {
+        String(format: NSLocalizedString("difficulty_best_level_value", comment: ""), difficulty, level)
+    }
+
+    static func totalLinesValue(_ lines: Int) -> String {
+        String(format: NSLocalizedString("total_lines_value", comment: ""), lines)
+    }
+
+    static func totalTetrisesValue(_ tetrises: Int) -> String {
+        String(format: NSLocalizedString("total_tetrises_value", comment: ""), tetrises)
+    }
+
+    static func totalTSpinsValue(_ tspins: Int) -> String {
+        String(format: NSLocalizedString("total_tspins_value", comment: ""), tspins)
+    }
+
+    static func achievementTitle(_ achievement: ProgressAchievementId) -> String {
+        switch achievement {
+        case .firstGame:
+            return NSLocalizedString("achievement_first_game", comment: "")
+        case .score5000:
+            return NSLocalizedString("achievement_score_5000", comment: "")
+        case .score20000:
+            return NSLocalizedString("achievement_score_20000", comment: "")
+        case .firstTetris:
+            return NSLocalizedString("achievement_first_tetris", comment: "")
+        case .firstTspin:
+            return NSLocalizedString("achievement_first_tspin", comment: "")
+        case .combo5:
+            return NSLocalizedString("achievement_combo_5", comment: "")
+        case .perfectClear:
+            return NSLocalizedString("achievement_perfect_clear", comment: "")
+        case .tenGames:
+            return NSLocalizedString("achievement_ten_games", comment: "")
+        default:
+            return ""
+        }
     }
 }

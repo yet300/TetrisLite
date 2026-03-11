@@ -846,6 +846,8 @@ private struct WatchJuiceModifier: ViewModifier {
     }
 }
 
-#Preview {
-    WatchGameView(PreviewGameComponent())
+struct WatchGameView_Previews: PreviewProvider {
+    static var previews: some View {
+        WatchGameView(PreviewGameComponent())
+    }
 }
