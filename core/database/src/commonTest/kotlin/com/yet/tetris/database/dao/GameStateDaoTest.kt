@@ -1,11 +1,14 @@
 package com.yet.tetris.database.dao
 
 import app.cash.turbine.test
+import com.app.common.AppDispatchers
 import com.yet.tetris.database.BoardCells
 import com.yet.tetris.database.RobolectricTestRunner
 import com.yet.tetris.database.createTestDatabaseDriverFactory
 import com.yet.tetris.database.db.DatabaseManager
 import com.yet.tetris.domain.model.game.TetrominoType
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -19,11 +22,16 @@ import kotlin.test.assertTrue
 class GameStateDaoTest : RobolectricTestRunner() {
     private lateinit var dao: GameStateDao
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     @BeforeTest
     fun setup() {
-        val driverFactory = createTestDatabaseDriverFactory()
-        val databaseManager = DatabaseManager(driverFactory)
-        dao = GameStateDao(databaseManager)
+        val dispatchers = AppDispatchers(io = UnconfinedTestDispatcher())
+        val databaseManager =
+            DatabaseManager(
+                driverFactory = createTestDatabaseDriverFactory(),
+                dispatchers = dispatchers,
+            )
+        dao = GameStateDao(databaseManager, dispatchers)
     }
 
     @AfterTest
