@@ -43,14 +43,16 @@ class AudioCacheManager(
      * synthesizes and caches it before returning.
      */
     suspend fun getOrSynthesizeMusicPcm(theme: MusicTheme): FloatArray? = withContext(dispatchers.default) {
-        musicPcmCache[theme]?.let { return@withContext it }
+        cacheMutex.withLock {
+            musicPcmCache[theme]?.let { return@withContext it }
+        }
+
+        val sequence = getSequenceForTheme(theme) ?: return@withContext FloatArray(0)
+        val waveform = if (theme == MusicTheme.CLASSIC) WaveformType.SQUARE else WaveformType.TRIANGLE
+        val synthesized = AudioSynthesizer.synthesizeMusicSequence(sequence, waveform)
 
         cacheMutex.withLock {
-            musicPcmCache.getOrPut(theme) {
-                val sequence = getSequenceForTheme(theme) ?: return@getOrPut FloatArray(0)
-                val waveform = if (theme == MusicTheme.CLASSIC) WaveformType.SQUARE else WaveformType.TRIANGLE
-                AudioSynthesizer.synthesizeMusicSequence(sequence, waveform)
-            }
+            musicPcmCache.getOrPut(theme) { synthesized }
         }
     }
 

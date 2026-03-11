@@ -11,9 +11,11 @@ import com.yet.tetris.domain.model.audio.MusicTheme
 import com.yet.tetris.domain.model.audio.SoundEffect
 import com.yet.tetris.domain.repository.AudioRepository
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlin.math.min
 
@@ -27,7 +29,8 @@ class AndroidAudioRepositoryImpl(
 ) : AudioRepository {
     private val audioScope = CoroutineScope(dispatchers.io + SupervisorJob())
     private var musicTrack: AudioTrack? = null
-    private var isMusicPlaying = false
+    private var musicJob: Job? = null
+    private var musicPlaybackId = 0L
     private var currentSettings = AudioSettings()
 
     // Platform-specific audio configuration objects.
@@ -98,40 +101,51 @@ class AndroidAudioRepositoryImpl(
         if (pcmData.isEmpty()) return
 
         val bufferSize = AudioTrack.getMinBufferSize(audioFormat.sampleRate, audioFormat.channelMask, audioFormat.encoding)
-        musicTrack = AudioTrack(audioAttributes, audioFormat, bufferSize, AudioTrack.MODE_STREAM, 0)
-        musicTrack?.setVolume(currentSettings.musicVolume)
-
-        isMusicPlaying = true
-        musicTrack?.play()
+        val playbackId = ++musicPlaybackId
+        val track = AudioTrack(audioAttributes, audioFormat, bufferSize, AudioTrack.MODE_STREAM, 0)
+        track.setVolume(currentSettings.musicVolume)
+        musicTrack = track
+        track.play()
 
         // Start a coroutine to stream the music data in a loop.
-        audioScope.launch {
-            var writePosition = 0
-            while (isMusicPlaying) {
-                val chunkSize = min(bufferSize / Float.SIZE_BYTES, pcmData.size - writePosition)
-                if (chunkSize > 0) {
-                    musicTrack?.write(pcmData, writePosition, chunkSize, AudioTrack.WRITE_BLOCKING)
-                    writePosition += chunkSize
-                }
+        musicJob =
+            audioScope.launch {
+                try {
+                    var writePosition = 0
+                    while (isActive && playbackId == musicPlaybackId) {
+                        val chunkSize = min(bufferSize / Float.SIZE_BYTES, pcmData.size - writePosition)
+                        if (chunkSize > 0) {
+                            track.write(pcmData, writePosition, chunkSize, AudioTrack.WRITE_BLOCKING)
+                            writePosition += chunkSize
+                        }
 
-                // Loop the track when it reaches the end.
-                if (writePosition >= pcmData.size) {
-                    writePosition = 0
+                        // Loop the track when it reaches the end.
+                        if (writePosition >= pcmData.size) {
+                            writePosition = 0
+                        }
+                    }
+                } finally {
+                    if (musicTrack === track) {
+                        musicTrack = null
+                    }
+                    runCatching { track.pause() }
+                    runCatching { track.flush() }
+                    runCatching { track.release() }
                 }
             }
-        }
     }
 
     /**
      * Stops the currently playing music track and releases its resources.
      */
     override fun stopMusic() {
-        if (!isMusicPlaying) return
-        isMusicPlaying = false
-        musicTrack?.pause()
-        musicTrack?.flush()
-        musicTrack?.release()
-        musicTrack = null
+        musicPlaybackId++
+        musicJob?.cancel()
+        musicJob = null
+        musicTrack?.let { track ->
+            runCatching { track.pause() }
+            runCatching { track.flush() }
+        }
     }
 
     /**

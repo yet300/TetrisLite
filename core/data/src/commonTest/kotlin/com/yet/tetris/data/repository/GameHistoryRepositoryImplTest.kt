@@ -1,12 +1,15 @@
 package com.yet.tetris.data.repository
 
 import app.cash.turbine.test
+import com.app.common.AppDispatchers
 import com.yet.tetris.data.RobolectricTestRunner
 import com.yet.tetris.data.createTestDatabaseDriverFactory
 import com.yet.tetris.database.dao.GameHistoryDao
 import com.yet.tetris.database.db.DatabaseManager
 import com.yet.tetris.domain.model.game.Difficulty
 import com.yet.tetris.domain.model.history.GameRecord
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -23,10 +26,16 @@ class GameHistoryRepositoryImplTest : RobolectricTestRunner() {
     private lateinit var repository: GameHistoryRepositoryImpl
     private lateinit var dao: GameHistoryDao
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     @BeforeTest
     fun setup() {
-        val databaseManager = DatabaseManager(driverFactory = createTestDatabaseDriverFactory())
-        dao = GameHistoryDao(databaseManager)
+        val dispatchers = AppDispatchers(io = UnconfinedTestDispatcher())
+        val databaseManager =
+            DatabaseManager(
+                driverFactory = createTestDatabaseDriverFactory(),
+                dispatchers = dispatchers,
+            )
+        dao = GameHistoryDao(databaseManager, dispatchers)
         repository = GameHistoryRepositoryImpl(dao)
     }
 

@@ -15,7 +15,7 @@ data class AudioSettings(
  * Available procedurally generated music themes.
  */
 enum class MusicTheme {
-    CLASSIC, // 8-bit chiptune style, inspired by original Tetris
+    CLASSIC, // Chiptune-inspired lead with modern float PCM playback
     MODERN, // More contemporary electronic sound
     MINIMAL, // Ambient, minimal background music
     NONE, // No music

@@ -4,11 +4,14 @@ import com.yet.tetris.data.RobolectricTestRunner
 import com.yet.tetris.data.createTestDatabaseDriverFactory
 import com.yet.tetris.database.dao.GameStateDao
 import com.yet.tetris.database.db.DatabaseManager
+import com.app.common.AppDispatchers
 import com.yet.tetris.domain.model.game.GameBoard
 import com.yet.tetris.domain.model.game.GameState
 import com.yet.tetris.domain.model.game.Position
 import com.yet.tetris.domain.model.game.Tetromino
 import com.yet.tetris.domain.model.game.TetrominoType
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -23,10 +26,16 @@ class GameStateRepositoryImplTest : RobolectricTestRunner() {
     private lateinit var repository: GameStateRepositoryImpl
     private lateinit var dao: GameStateDao
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     @BeforeTest
     fun setup() {
-        val databaseManager = DatabaseManager(createTestDatabaseDriverFactory())
-        dao = GameStateDao(databaseManager)
+        val dispatchers = AppDispatchers(io = UnconfinedTestDispatcher())
+        val databaseManager =
+            DatabaseManager(
+                driverFactory = createTestDatabaseDriverFactory(),
+                dispatchers = dispatchers,
+            )
+        dao = GameStateDao(databaseManager, dispatchers)
         repository = GameStateRepositoryImpl(dao)
     }
 

@@ -21,15 +21,10 @@ class GameHistoryRepositoryImpl(
 
     override suspend fun saveGame(record: GameRecord) {
         try {
-            // Insert the new game
-            gameHistoryDao.insertGame(record.toEntity())
-
-            // Check if we need to delete old games
-            val count = gameHistoryDao.getGamesCount()
-            if (count > MAX_HISTORY_SIZE) {
-                val toDelete = count - MAX_HISTORY_SIZE
-                gameHistoryDao.deleteOldestGames(toDelete)
-            }
+            gameHistoryDao.insertGameRetainingLatest(
+                gameHistory = record.toEntity(),
+                maxHistorySize = MAX_HISTORY_SIZE,
+            )
         } catch (e: Exception) {
             throw e
         }

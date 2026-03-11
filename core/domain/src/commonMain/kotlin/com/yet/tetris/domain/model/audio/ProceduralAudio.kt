@@ -157,7 +157,7 @@ object SoundEffectPresets {
  */
 object MusicSequencePresets {
     /**
-     * Classic 8-bit chiptune style melody.
+     * Classic chiptune-inspired melody.
      * Original composition inspired by Russian folk music style.
      */
     val CLASSIC_THEME =

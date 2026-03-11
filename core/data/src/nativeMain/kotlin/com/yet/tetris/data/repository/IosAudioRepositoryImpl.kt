@@ -20,7 +20,6 @@ import kotlinx.cinterop.ptr
 import kotlinx.cinterop.usePinned
 import kotlinx.cinterop.value
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
@@ -82,20 +81,19 @@ class IosAudioRepositoryImpl(
      * platform-specific AVAudioPCMBuffers on the main thread.
      */
     override suspend fun initialize() {
-        val synthesizedCache = mutableMapOf<SoundEffect, AVAudioPCMBuffer>()
-        // Perform CPU-heavy synthesis on a background thread.
+        val synthesizedCache = mutableMapOf<SoundEffect, FloatArray>()
         withContext(dispatchers.default) {
             cacheManager.preheatSfxCache()
             SoundEffect.entries.forEach { effect ->
                 cacheManager.getSfxPcm(effect)?.let { pcmData ->
-                    val buffer = pcmDataToPcmBuffer(AudioEngine.audioFormat, pcmData)
-                    synthesizedCache[effect] = buffer
+                    synthesizedCache[effect] = pcmData
                 }
             }
         }
-        // Safely update the main-thread cache.
-        mainScope.launch {
-            AudioEngine.sfxCache.putAll(synthesizedCache)
+        withContext(dispatchers.main) {
+            synthesizedCache.forEach { (effect, pcmData) ->
+                AudioEngine.sfxCache[effect] = pcmDataToPcmBuffer(AudioEngine.audioFormat, pcmData)
+            }
         }
     }
 

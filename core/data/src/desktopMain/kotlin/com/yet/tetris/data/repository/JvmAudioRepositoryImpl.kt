@@ -8,13 +8,14 @@ import com.yet.tetris.domain.model.audio.MusicTheme
 import com.yet.tetris.domain.model.audio.SoundEffect
 import com.yet.tetris.domain.repository.AudioRepository
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import javax.sound.sampled.AudioFormat
 import javax.sound.sampled.AudioSystem
 import javax.sound.sampled.FloatControl
-import javax.sound.sampled.LineEvent
 import javax.sound.sampled.SourceDataLine
 import kotlin.math.log10
 import kotlin.math.min
@@ -29,7 +30,8 @@ class JvmAudioRepositoryImpl(
 ) : AudioRepository {
     private val audioScope = CoroutineScope(dispatchers.io + SupervisorJob())
     private var musicLine: SourceDataLine? = null
-    private var isMusicPlaying = false
+    private var musicJob: Job? = null
+    private var musicPlaybackId = 0L
     private var currentSettings = AudioSettings()
 
     // Platform-specific audio format.
@@ -60,7 +62,7 @@ class JvmAudioRepositoryImpl(
 
     /**
      * Asynchronously retrieves PCM data and plays it as a "fire-and-forget" sound.
-     * The SourceDataLine is closed automatically via a listener.
+     * Playback runs on the audio scope so draining does not block the caller.
      */
     override fun playSoundEffect(effect: SoundEffect) {
         if (!currentSettings.soundEffectsEnabled) return
@@ -74,14 +76,9 @@ class JvmAudioRepositoryImpl(
                 setLineVolume(sfxLine, currentSettings.sfxVolume)
                 sfxLine.start()
                 sfxLine.write(byteData, 0, byteData.size)
-
-                // Use a listener to close the line automatically when playback finishes,
-                // avoiding blocking the coroutine with drain().
-                sfxLine.addLineListener { event ->
-                    if (event.type == LineEvent.Type.STOP) {
-                        sfxLine.close()
-                    }
-                }
+                sfxLine.drain()
+                sfxLine.stop()
+                sfxLine.close()
             }
         }
     }
@@ -96,45 +93,57 @@ class JvmAudioRepositoryImpl(
         val pcmData = cacheManager.getOrSynthesizeMusicPcm(theme) ?: return
         if (pcmData.isEmpty()) return
 
-        audioScope.launch {
-            musicLine = AudioSystem.getSourceDataLine(audioFormat)
-            musicLine?.open(audioFormat)
-            musicLine?.let { line ->
-                setLineVolume(line, currentSettings.musicVolume)
-                isMusicPlaying = true
-                line.start()
+        val playbackId = ++musicPlaybackId
+        val line = AudioSystem.getSourceDataLine(audioFormat)
+        line.open(audioFormat)
+        musicLine = line
+        musicJob =
+            audioScope.launch {
+                try {
+                    if (musicLine !== line) {
+                        return@launch
+                    }
 
-                var readPosition = 0
-                val bufferSizeInSamples = 4096 // A reasonable chunk size
-                while (isMusicPlaying) {
-                    val remainingSamples = pcmData.size - readPosition
-                    val samplesToWrite = min(bufferSizeInSamples, remainingSamples)
-                    if (samplesToWrite > 0) {
-                        val chunk = pcmData.copyOfRange(readPosition, readPosition + samplesToWrite)
-                        line.write(floatPcmTo16Bit(chunk), 0, chunk.size * 2)
-                        readPosition += samplesToWrite
+                    setLineVolume(line, currentSettings.musicVolume)
+                    line.start()
+
+                    var readPosition = 0
+                    val bufferSizeInSamples = 4096
+                    while (isActive && playbackId == musicPlaybackId) {
+                        val remainingSamples = pcmData.size - readPosition
+                        val samplesToWrite = min(bufferSizeInSamples, remainingSamples)
+                        if (samplesToWrite > 0) {
+                            val chunk = pcmData.copyOfRange(readPosition, readPosition + samplesToWrite)
+                            val byteChunk = floatPcmTo16Bit(chunk)
+                            line.write(byteChunk, 0, byteChunk.size)
+                            readPosition += samplesToWrite
+                        }
+                        if (readPosition >= pcmData.size) {
+                            readPosition = 0
+                        }
                     }
-                    if (readPosition >= pcmData.size) {
-                        readPosition = 0
+                } finally {
+                    if (musicLine === line) {
+                        musicLine = null
                     }
+                    runCatching { line.stop() }
+                    runCatching { line.flush() }
+                    runCatching { line.close() }
                 }
-                // When the loop is broken by isMusicPlaying=false, clean up.
-                line.stop()
-                line.close()
             }
-        }
     }
 
     /**
      * Stops the currently playing music by breaking the streaming loop.
      */
     override fun stopMusic() {
-        if (!isMusicPlaying) return
-        isMusicPlaying = false
-        // The loop in playMusic will detect this change and stop.
-        // We can also call stop() for a more immediate halt.
-        musicLine?.stop()
-        musicLine?.flush()
+        musicPlaybackId++
+        musicJob?.cancel()
+        musicJob = null
+        musicLine?.let { line ->
+            runCatching { line.stop() }
+            runCatching { line.flush() }
+        }
     }
 
     /**
