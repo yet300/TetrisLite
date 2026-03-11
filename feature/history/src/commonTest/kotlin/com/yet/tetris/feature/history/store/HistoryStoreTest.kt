@@ -5,6 +5,7 @@ import com.arkivanov.mvikotlin.extensions.coroutines.labels
 import com.arkivanov.mvikotlin.main.store.DefaultStoreFactory
 import com.yet.tetris.domain.model.game.Difficulty
 import com.yet.tetris.domain.model.history.GameRecord
+import com.yet.tetris.domain.usecase.CalculateProgressionSummaryUseCase
 import com.yet.tetris.feature.history.DateFilter
 import com.yet.tetris.feature.history.store.HistoryStore.Intent
 import com.yet.tetris.feature.history.store.HistoryStore.Label
@@ -61,6 +62,7 @@ class HistoryStoreTest {
 
             assertEquals(games, store.state.games)
             assertEquals(games, store.state.filteredGames)
+            assertEquals(2, store.state.progression.totalGames)
             assertEquals(1, repository.getAllGamesCallCount)
         }
 
@@ -87,6 +89,23 @@ class HistoryStoreTest {
 
             assertEquals(DateFilter.ALL, store.state.dateFilter)
             assertEquals(games, store.state.filteredGames)
+        }
+
+    @Test
+    fun calculates_progression_from_loaded_games() =
+        runTest {
+            repository.setGames(
+                listOf(
+                    createGameRecord(id = "1", score = 7_000).copy(level = 6, tetrisesCleared = 1),
+                    createGameRecord(id = "2", score = 900),
+                ),
+            )
+
+            createStore()
+
+            assertEquals(7_000, store.state.progression.bestScore)
+            assertEquals(6, store.state.progression.highestLevel)
+            assertEquals(1, store.state.progression.totalTetrises)
         }
 
     @Test
@@ -340,6 +359,7 @@ class HistoryStoreTest {
         HistoryStoreFactory(
             storeFactory = DefaultStoreFactory(),
             gameHistoryRepository = repository,
+            calculateProgressionSummaryUseCase = CalculateProgressionSummaryUseCase(),
         )
 
     private fun createGameRecord(

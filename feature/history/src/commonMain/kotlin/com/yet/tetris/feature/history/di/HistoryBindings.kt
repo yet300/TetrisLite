@@ -2,6 +2,7 @@ package com.yet.tetris.feature.history.di
 
 import com.arkivanov.mvikotlin.core.store.StoreFactory
 import com.yet.tetris.domain.repository.GameHistoryRepository
+import com.yet.tetris.domain.usecase.CalculateProgressionSummaryUseCase
 import com.yet.tetris.feature.history.DefaultHistoryComponentFactory
 import com.yet.tetris.feature.history.HistoryComponent
 import com.yet.tetris.feature.history.store.HistoryStoreFactory
@@ -26,6 +27,7 @@ abstract class HistoryBindings {
             HistoryStoreFactory(
                 storeFactory = storeFactory,
                 gameHistoryRepository = gameHistoryRepository,
+                calculateProgressionSummaryUseCase = CalculateProgressionSummaryUseCase(),
             )
 
         @Provides

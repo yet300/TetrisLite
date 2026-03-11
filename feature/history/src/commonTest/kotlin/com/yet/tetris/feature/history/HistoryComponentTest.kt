@@ -5,6 +5,7 @@ import com.arkivanov.essenty.lifecycle.LifecycleRegistry
 import com.arkivanov.mvikotlin.main.store.DefaultStoreFactory
 import com.yet.tetris.domain.model.game.Difficulty
 import com.yet.tetris.domain.model.history.GameRecord
+import com.yet.tetris.domain.usecase.CalculateProgressionSummaryUseCase
 import com.yet.tetris.feature.history.store.FakeGameHistoryRepository
 import com.yet.tetris.feature.history.store.HistoryStoreFactory
 import kotlinx.coroutines.Dispatchers
@@ -66,6 +67,7 @@ class HistoryComponentTest {
             val model = component.model.value as HistoryComponent.Model.Content
             assertEquals(2, model.games.size)
             assertEquals(games, model.games)
+            assertEquals(2, model.totalGamesCount)
         }
 
     @Test
@@ -76,6 +78,23 @@ class HistoryComponentTest {
 
             val model = component.model.value as HistoryComponent.Model.Content
             assertEquals(DateFilter.ALL, model.currentFilter)
+        }
+
+    @Test
+    fun WHEN_created_with_history_THEN_progression_is_exposed() =
+        runTest {
+            repository.setGames(
+                listOf(
+                    createGameRecord(id = "1", score = 8_200).copy(level = 7, tSpinClears = 1),
+                ),
+            )
+
+            val component = createComponent()
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            val model = component.model.value as HistoryComponent.Model.Content
+            assertEquals(8_200, model.progression.bestScore)
+            assertEquals(1, model.progression.totalTSpins)
         }
 
     @Test
@@ -273,6 +292,7 @@ class HistoryComponentTest {
         HistoryStoreFactory(
             storeFactory = DefaultStoreFactory(),
             gameHistoryRepository = repository,
+            calculateProgressionSummaryUseCase = CalculateProgressionSummaryUseCase(),
         )
 
     private fun createGameRecord(

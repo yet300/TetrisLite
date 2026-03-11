@@ -3,6 +3,7 @@ package com.yet.tetris.feature.history
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.value.Value
 import com.yet.tetris.domain.model.history.GameRecord
+import com.yet.tetris.domain.model.progression.ProgressionSummary
 
 interface HistoryComponent {
     val model: Value<Model>
@@ -21,6 +22,8 @@ interface HistoryComponent {
         data class Content(
             val games: List<GameRecord>,
             val currentFilter: DateFilter,
+            val totalGamesCount: Int,
+            val progression: ProgressionSummary,
         ) : Model
     }
 
