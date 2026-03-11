@@ -74,7 +74,10 @@ fun GameOverDialog(
                         textAlign = TextAlign.Center,
                     )
                     Text(
-                        text = "Tetrises ${gameState.tetrisesCleared} • T-Spins ${gameState.tSpinClears} • Perfect clears ${gameState.perfectClears}",
+                        text =
+                            "Tetrises ${gameState.tetrisesCleared} • " +
+                                "T-Spins ${gameState.tSpinClears} • " +
+                                "Perfect clears ${gameState.perfectClears}",
                         style = MaterialTheme.typography.bodyMedium,
                         textAlign = TextAlign.Center,
                     )
