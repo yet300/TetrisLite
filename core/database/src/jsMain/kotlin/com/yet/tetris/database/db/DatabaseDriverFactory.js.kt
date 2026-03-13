@@ -14,8 +14,9 @@ actual class DatabaseDriverFactory {
             ),
         ).also { schema.create(it).await() }
 
-    private fun resolveWorkerScriptUrl(): String = js(
-        """(function() {
+    private fun resolveWorkerScriptUrl(): String =
+        js(
+            """(function() {
           var scripts = document.scripts;
           var i;
           for (i = 0; i < scripts.length; i++) {
@@ -40,6 +41,6 @@ actual class DatabaseDriverFactory {
               : "/";
 
           return new URL(githubPagesBase + "sqlite.worker.js", window.location.origin).toString();
-        })()"""
-    ) as String
+        })()""",
+        ) as String
 }
