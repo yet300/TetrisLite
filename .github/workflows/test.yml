@@ -1,6 +1,9 @@
 name: Test Suite
 
 on:
+  push:
+    branches:
+      - main
   schedule:
     # Run tests daily at 2 AM UTC
     - cron: '0 2 * * *'
@@ -53,6 +56,7 @@ jobs:
 
   android-instrumented-tests:
     name: Android Instrumented Tests
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 45
     
