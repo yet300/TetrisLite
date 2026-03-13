@@ -62,7 +62,7 @@ class GameHistoryDao(
                 softDropCells = gameHistory.softDropCells,
             )
 
-            val count = db.gameHistoryQueries.getGamesCount().executeAsOne()
+            val count = db.gameHistoryQueries.getGamesCount().awaitAsOne()
             if (count > maxHistorySize) {
                 db.gameHistoryQueries.deleteOldestGames(count - maxHistorySize)
             }
