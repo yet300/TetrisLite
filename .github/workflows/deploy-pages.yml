@@ -17,6 +17,7 @@ concurrency:
 
 env:
   PAGES_ARTIFACT_NAME: github-pages-${{ github.run_id }}-${{ github.run_attempt }}
+  PAGES_BASE_PATH: /TetrisLite/
 
 jobs:
   build-and-deploy:
@@ -45,6 +46,8 @@ jobs:
           cd app/webApp/build/dist/js/productionExecutable
           # Create .nojekyll to prevent GitHub Pages from ignoring files
           touch .nojekyll
+          # Inject the GitHub Pages repository base path into the built HTML.
+          sed -i '0,/<head>/s#<head>#<head>\n    <base href="${{ env.PAGES_BASE_PATH }}">#' index.html
           # Enable SPA fallback on GitHub Pages
           cp index.html 404.html
           # Copy CNAME if it exists

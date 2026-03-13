@@ -1,9 +1,15 @@
- importScripts("sqlite3.js");
+const workerBaseUrl = new URL("./", self.location.href);
+
+importScripts(new URL("./sqlite3.js", workerBaseUrl).toString());
 
  let db = null;
 
  async function createDatabase() {
-   const sqlite3 = await sqlite3InitModule();
+   const sqlite3 = await sqlite3InitModule({
+     locateFile(path) {
+       return new URL(path, workerBaseUrl).toString();
+     },
+   });
 
    // TODO: Parameterize storage location, and storage type
    db = new sqlite3.oo1.DB("file:database.db?vfs=opfs", "c");

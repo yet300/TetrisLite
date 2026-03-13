@@ -17,6 +17,12 @@ kotlin {
 
     sourceSets {
         jsMain.dependencies {
+            implementation(
+                project.dependencies.enforcedPlatform(
+                    libs.jetbrains.kotlinWrappers.kotlinWrappersBom
+                        .get(),
+                ),
+            )
             implementation(projects.shared)
 
             implementation(kotlinWrappers.react)
