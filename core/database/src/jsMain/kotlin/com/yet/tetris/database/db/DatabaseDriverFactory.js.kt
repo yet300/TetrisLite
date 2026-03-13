@@ -14,5 +14,32 @@ actual class DatabaseDriverFactory {
             ),
         ).also { schema.create(it).await() }
 
-    private fun resolveWorkerScriptUrl(): String = js("new URL('./sqlite.worker.js', document.baseURI).toString()") as String
+    private fun resolveWorkerScriptUrl(): String = js(
+        """(function() {
+          var scripts = document.scripts;
+          var i;
+          for (i = 0; i < scripts.length; i++) {
+            var src = scripts[i].src || "";
+            if (/\/webApp\.js(?:[?#].*)?$/.test(src)) {
+              return new URL("sqlite.worker.js", new URL("./", src)).toString();
+            }
+          }
+
+          var baseElement = document.querySelector("base");
+          var baseHref = baseElement ? baseElement.getAttribute("href") : null;
+          if (baseHref) {
+            return new URL("sqlite.worker.js", new URL(baseHref, window.location.origin + "/")).toString();
+          }
+
+          var pathSegments = window.location.pathname.split("/").filter(function(segment) {
+            return segment.length > 0;
+          });
+          var githubPagesBase =
+            window.location.hostname.indexOf(".github.io") >= 0 && pathSegments.length > 0
+              ? "/" + pathSegments[0] + "/"
+              : "/";
+
+          return new URL(githubPagesBase + "sqlite.worker.js", window.location.origin).toString();
+        })()"""
+    ) as String
 }
