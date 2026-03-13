@@ -2,17 +2,38 @@ const workerBaseUrl = new URL("./", self.location.href);
 
 importScripts(new URL("./sqlite3.js", workerBaseUrl).toString());
 
- let db = null;
+let db = null;
 
- async function createDatabase() {
-   const sqlite3 = await sqlite3InitModule({
-     locateFile(path) {
+async function createDatabase() {
+  const sqlite3 = await sqlite3InitModule({
+    locateFile(path) {
        return new URL(path, workerBaseUrl).toString();
      },
    });
 
-   // TODO: Parameterize storage location, and storage type
-   db = new sqlite3.oo1.DB("file:database.db?vfs=opfs", "c");
+  db = await openDatabase(sqlite3);
+}
+
+async function openDatabase(sqlite3) {
+  if (sqlite3.capi.sqlite3_vfs_find("opfs")) {
+    return new sqlite3.oo1.DB("file:database.db?vfs=opfs", "c");
+  }
+
+  if (typeof sqlite3.installOpfsSAHPoolVfs === "function") {
+    try {
+      const pool = await sqlite3.installOpfsSAHPoolVfs({
+        directory: "/tetrislite-opfs-sahpool",
+        initialCapacity: 8,
+      });
+
+      return new pool.OpfsSAHPoolDb("/database.db", "c");
+    } catch (error) {
+      console.warn("Persistent OPFS SAH pool storage is unavailable, falling back to in-memory storage.", error);
+    }
+  }
+
+  console.warn("Persistent OPFS storage is unavailable, falling back to in-memory storage.");
+  return new sqlite3.oo1.DB(":memory:", "c");
  }
 
  function handleMessage() {

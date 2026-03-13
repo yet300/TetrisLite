@@ -9,6 +9,7 @@ import com.arkivanov.essenty.lifecycle.stop
 import com.yet.tetris.di.createJsAppGraph
 import com.yet.tetris.di.createRootComponent
 import com.yet.tetris.feature.root.RootComponent
+import com.yet.tetris.feature.root.RootWebBasePath
 import com.yet.tetris.ui.theme.ThemeModule
 import com.yet.tetris.ui.view.root.RootContent
 import com.yet.tetris.utils.RProps
@@ -22,6 +23,8 @@ import web.dom.visible
 
 @OptIn(ExperimentalDecomposeApi::class)
 fun main() {
+    RootWebBasePath.configure(resolveWebBasePath())
+
     val appGraph = createJsAppGraph()
 
     val lifecycle = LifecycleRegistry()
@@ -74,3 +77,5 @@ private fun LifecycleRegistry.attachToDocument() {
 
     document.addEventListener("visibilitychange", { onVisibilityChanged() })
 }
+
+private fun resolveWebBasePath(): String = js("new URL(document.baseURI).pathname.replace(/^\\/+|\\/+$/g, '')") as String

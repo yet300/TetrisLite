@@ -37,6 +37,12 @@ internal class DefaultRootComponent(
             navigator = navigation,
             stack = stack,
             serializer = Configuration.serializer(),
+            pathMapper = { child ->
+                when (child.configuration) {
+                    Configuration.HomeScreen -> routePath()
+                    Configuration.GameScreen -> routePath("game")
+                }
+            },
             childSelector = {
                 when (val child = it.instance) {
                     is RootComponent.Child.Home -> null
@@ -84,6 +90,14 @@ internal class DefaultRootComponent(
 
         @Serializable
         data object GameScreen : Configuration()
+    }
+
+    private fun routePath(vararg segments: String): String {
+        val basePath = RootWebBasePath.current().takeIf { it.isNotEmpty() }
+        return buildList {
+            basePath?.let(::add)
+            addAll(segments.filter { it.isNotBlank() })
+        }.joinToString(separator = "/")
     }
 }
 

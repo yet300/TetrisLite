@@ -11,6 +11,7 @@ import com.arkivanov.essenty.lifecycle.stop
 import com.yet.tetris.App
 import com.yet.tetris.di.createJsAppGraph
 import com.yet.tetris.di.createRootComponent
+import com.yet.tetris.feature.root.RootWebBasePath
 import org.jetbrains.skiko.wasm.onWasmReady
 import web.dom.DocumentVisibilityState
 import web.dom.visible
@@ -19,6 +20,8 @@ import web.events.EventHandler
 
 @OptIn(ExperimentalDecomposeApi::class, ExperimentalComposeUiApi::class)
 fun main() {
+    RootWebBasePath.configure(resolveWebBasePath())
+
     val lifecycle = LifecycleRegistry()
     val appGraph = createJsAppGraph()
 
@@ -59,3 +62,5 @@ private fun LifecycleRegistry.attachToDocument() {
             onVisibilityChanged()
         }
 }
+
+private fun resolveWebBasePath(): String = js("new URL(document.baseURI).pathname.replace(/^\\/+|\\/+$/g, '')") as String
