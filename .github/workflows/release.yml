@@ -375,9 +375,8 @@ jobs:
       - name: Create web archive for release
         if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
         run: |
-          cd app/webApp/build/dist/js/productionExecutable
-          tar -czf ../../../../../web-release.tar.gz .
-
+          tar -czf web-release.tar.gz -C app/webApp/build/dist/js/productionExecutable .
+          
       - name: Upload Web Package to Release
         if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
         uses: actions/upload-release-asset@v1
