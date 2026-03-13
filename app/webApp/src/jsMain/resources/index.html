@@ -9,6 +9,20 @@
           name="description">
     <meta content="#667eea" name="theme-color">
     <link href="data:," rel="icon">
+    <script>
+        (function () {
+            var pathSegments = window.location.pathname.split('/').filter(function (segment) {
+                return segment.length > 0;
+            });
+            var baseHref =
+                window.location.hostname.indexOf('.github.io') >= 0 && pathSegments.length > 0
+                    ? '/' + pathSegments[0] + '/'
+                    : '/';
+            var baseElement = document.createElement('base');
+            baseElement.href = baseHref;
+            document.head.appendChild(baseElement);
+        })();
+    </script>
     <style>
         * {
             box-sizing: border-box;

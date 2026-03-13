@@ -355,6 +355,11 @@ jobs:
           cd app/webApp/build/dist/js/productionExecutable
           # Create .nojekyll to prevent GitHub Pages from ignoring files
           touch .nojekyll
+          # Inject the GitHub Pages repository base path into the built HTML.
+          sed -i '0,/<head>/s#<head>#<head>\n    <base href="/TetrisLite/">#' index.html
+          # Rewrite the entry script to an explicit repo-relative URL so it still resolves
+          # when GitHub Pages serves /TetrisLite without a trailing slash.
+          sed -i 's#<script src="webApp.js"></script>#<script src="/TetrisLite/webApp.js"></script>#' index.html
           # Enable SPA fallback on GitHub Pages
           cp index.html 404.html
           # Copy CNAME if it exists
