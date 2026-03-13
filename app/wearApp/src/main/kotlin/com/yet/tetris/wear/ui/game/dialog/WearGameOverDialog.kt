@@ -23,7 +23,7 @@ fun WearGameOverDialog(
     lines: Long,
     onRetry: () -> Unit,
     onQuit: () -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
 ) {
     WearOverlaySurface(
         title = stringResource(R.string.game_over),
@@ -37,20 +37,20 @@ fun WearGameOverDialog(
         Text(
             text = stringResource(R.string.lines_format, lines),
             style = MaterialTheme.typography.caption1,
-            color = MaterialTheme.colors.secondary
+            color = MaterialTheme.colors.secondary,
         )
         Spacer(modifier = Modifier.size(8.dp))
         Chip(
             label = { Text(stringResource(R.string.play_again)) },
             icon = { Icon(Icons.Default.Refresh, null) },
             onClick = onRetry,
-            colors = ChipDefaults.primaryChipColors()
+            colors = ChipDefaults.primaryChipColors(),
         )
         Chip(
             label = { Text(stringResource(R.string.exit)) },
             icon = { Icon(Icons.Default.Close, null) },
             onClick = onQuit,
-            colors = ChipDefaults.secondaryChipColors()
+            colors = ChipDefaults.secondaryChipColors(),
         )
     }
 }

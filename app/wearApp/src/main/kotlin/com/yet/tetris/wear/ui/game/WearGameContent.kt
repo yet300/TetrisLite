@@ -74,15 +74,17 @@ fun WearGamePlayingContent(
     }
 
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Black)
-            .wearGameInputHandlers(component, focusRequester),
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(Color.Black)
+                .wearGameInputHandlers(component, focusRequester),
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(CONTENT_PADDING),
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(CONTENT_PADDING),
             horizontalArrangement = Arrangement.spacedBy(CONTENT_SPACING),
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -98,17 +100,19 @@ private fun RowScope.WearBoardSection(
     model: GameComponent.Model,
 ) {
     Box(
-        modifier = Modifier
-            .weight(BOARD_WEIGHT)
-            .fillMaxHeight(),
+        modifier =
+            Modifier
+                .weight(BOARD_WEIGHT)
+                .fillMaxHeight(),
         contentAlignment = Alignment.Center,
     ) {
         Box(
-            modifier = Modifier
-                .fillMaxHeight()
-                .aspectRatio(BOARD_ASPECT_RATIO)
-                .clip(RoundedCornerShape(BOARD_CORNER_RADIUS))
-                .background(MaterialTheme.colors.surface.copy(alpha = BOARD_BACKGROUND_ALPHA)),
+            modifier =
+                Modifier
+                    .fillMaxHeight()
+                    .aspectRatio(BOARD_ASPECT_RATIO)
+                    .clip(RoundedCornerShape(BOARD_CORNER_RADIUS))
+                    .background(MaterialTheme.colors.surface.copy(alpha = BOARD_BACKGROUND_ALPHA)),
         ) {
             TetrisBoard(
                 modifier = Modifier.fillMaxSize(),
@@ -128,9 +132,10 @@ private fun RowScope.WearSidebarSection(
     onPauseClick: () -> Unit,
 ) {
     Column(
-        modifier = Modifier
-            .weight(SIDEBAR_WEIGHT)
-            .fillMaxHeight(),
+        modifier =
+            Modifier
+                .weight(SIDEBAR_WEIGHT)
+                .fillMaxHeight(),
         verticalArrangement = Arrangement.SpaceBetween,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
@@ -148,7 +153,10 @@ private fun RowScope.WearSidebarSection(
 }
 
 @Composable
-private fun WearNextPiece(nextPiece: Tetromino, settings: GameSettings) {
+private fun WearNextPiece(
+    nextPiece: Tetromino,
+    settings: GameSettings,
+) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
             text = stringResource(R.string.next_label),
@@ -173,7 +181,7 @@ private fun WearGameStats(
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(4.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         StatItem(stringResource(R.string.score_label), score.toString())
         StatItem(stringResource(R.string.level_label), level.toString())
@@ -182,7 +190,10 @@ private fun WearGameStats(
 }
 
 @Composable
-private fun StatItem(label: String, value: String) {
+private fun StatItem(
+    label: String,
+    value: String,
+) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
             text = label,
@@ -216,27 +227,29 @@ private fun CompactPauseButton(onClick: () -> Unit) {
 private fun Modifier.wearGameInputHandlers(
     component: GameComponent,
     focusRequester: FocusRequester,
-): Modifier = this
-    .onRotaryScrollEvent {
-        if (it.verticalScrollPixels > 0) component.onMoveRight()
-        else if (it.verticalScrollPixels < 0) component.onMoveLeft()
-        true
-    }
-    .focusRequester(focusRequester)
-    .focusable()
-    .pointerInput(Unit) {
-        detectTapGestures(
-            onTap = { component.onRotate() },
-            onLongPress = { component.onHardDrop() },
-        )
-    }
-    .pointerInput(Unit) {
-        detectDragGestures(
-            onDragStart = { component.onDragStarted() },
-            onDragEnd = component::onDragEnded,
-            onDrag = { change, dragAmount ->
-                change.consume()
-                component.onDragged(dragAmount.x, dragAmount.y)
-            },
-        )
-    }
+): Modifier =
+    this
+        .onRotaryScrollEvent {
+            if (it.verticalScrollPixels > 0) {
+                component.onMoveRight()
+            } else if (it.verticalScrollPixels < 0) {
+                component.onMoveLeft()
+            }
+            true
+        }.focusRequester(focusRequester)
+        .focusable()
+        .pointerInput(Unit) {
+            detectTapGestures(
+                onTap = { component.onRotate() },
+                onLongPress = { component.onHardDrop() },
+            )
+        }.pointerInput(Unit) {
+            detectDragGestures(
+                onDragStart = { component.onDragStarted() },
+                onDragEnd = component::onDragEnded,
+                onDrag = { change, dragAmount ->
+                    change.consume()
+                    component.onDragged(dragAmount.x, dragAmount.y)
+                },
+            )
+        }

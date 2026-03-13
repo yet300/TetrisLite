@@ -177,12 +177,13 @@ private data class SettingsCallbacks(
     val onSFXVolumeChanged: (Float) -> Unit,
 )
 
-private fun rememberCallbacks(component: SettingsComponent): SettingsCallbacks = SettingsCallbacks(
-    onVisualThemeChanged = component::onVisualThemeChanged,
-    onPieceStyleChanged = component::onPieceStyleChanged,
-    onMusicToggled = component::onMusicToggled,
-    onMusicVolumeChanged = component::onMusicVolumeChanged,
-    onMusicThemeChanged = component::onMusicThemeChanged,
-    onSoundEffectsToggled = component::onSoundEffectsToggled,
-    onSFXVolumeChanged = component::onSFXVolumeChanged,
-)
+private fun rememberCallbacks(component: SettingsComponent): SettingsCallbacks =
+    SettingsCallbacks(
+        onVisualThemeChanged = component::onVisualThemeChanged,
+        onPieceStyleChanged = component::onPieceStyleChanged,
+        onMusicToggled = component::onMusicToggled,
+        onMusicVolumeChanged = component::onMusicVolumeChanged,
+        onMusicThemeChanged = component::onMusicThemeChanged,
+        onSoundEffectsToggled = component::onSoundEffectsToggled,
+        onSFXVolumeChanged = component::onSFXVolumeChanged,
+    )

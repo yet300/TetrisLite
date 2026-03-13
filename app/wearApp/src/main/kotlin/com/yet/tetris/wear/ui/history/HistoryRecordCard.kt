@@ -48,7 +48,8 @@ fun HistoryRecordCard(
         primaryAction = {
             DeleteAction(
                 revealState = revealState,
-                onDelete = { onDelete(record.id) })
+                onDelete = { onDelete(record.id) },
+            )
         },
         onFullSwipe = { onDelete(record.id) },
     ) {
@@ -78,13 +79,13 @@ private fun DeleteAction(
 @Composable
 private fun HistoryRecordContent(record: GameRecord) {
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(
-                color = MaterialTheme.colors.surface,
-                shape = RoundedCornerShape(CARD_CORNER_RADIUS),
-            )
-            .padding(CARD_PADDING),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .background(
+                    color = MaterialTheme.colors.surface,
+                    shape = RoundedCornerShape(CARD_CORNER_RADIUS),
+                ).padding(CARD_PADDING),
     ) {
         HistoryRecordHeader(record = record)
         Spacer(Modifier.height(CARD_SPACING))

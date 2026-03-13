@@ -41,9 +41,10 @@ fun WearOverlaySurface(
     BackHandler(onBack = onDismiss)
 
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Black.copy(alpha = OVERLAY_ALPHA)),
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = OVERLAY_ALPHA)),
         contentAlignment = Alignment.Center,
     ) {
         Surface(
@@ -52,9 +53,10 @@ fun WearOverlaySurface(
             color = MaterialTheme.colors.surface,
         ) {
             Column(
-                modifier = Modifier
-                    .padding(12.dp)
-                    .verticalScroll(rememberScrollState()),
+                modifier =
+                    Modifier
+                        .padding(12.dp)
+                        .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 Row(
@@ -71,7 +73,7 @@ fun WearOverlaySurface(
                         IconButton(onClick = onDismiss) {
                             Icon(
                                 Icons.Default.Close,
-                                contentDescription = stringResource(R.string.close)
+                                contentDescription = stringResource(R.string.close),
                             )
                         }
                     }

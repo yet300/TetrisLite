@@ -14,7 +14,5 @@ actual class DatabaseDriverFactory {
             ),
         ).also { schema.create(it).await() }
 
-    private fun resolveWorkerScriptUrl(): String {
-        return js("new URL('./sqlite.worker.js', document.baseURI).toString()") as String
-    }
+    private fun resolveWorkerScriptUrl(): String = js("new URL('./sqlite.worker.js', document.baseURI).toString()") as String
 }

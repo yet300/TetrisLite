@@ -34,13 +34,13 @@ fun WearGameScreen(component: GameComponent) {
 
     Scaffold(
         timeText = { TimeText() },
-        vignette = { Vignette(VignettePosition.TopAndBottom) }
+        vignette = { Vignette(VignettePosition.TopAndBottom) },
     ) {
         when {
             model.isLoading -> {
                 Box(
                     modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
+                    contentAlignment = Alignment.Center,
                 ) {
                     CircularProgressIndicator()
                 }
@@ -62,7 +62,7 @@ fun WearGameScreen(component: GameComponent) {
                         WearGamePlayingContent(
                             model = model,
                             component = component,
-                            onPauseClick = component::onPause
+                            onPauseClick = component::onPause,
                         )
                     }
 
@@ -93,7 +93,7 @@ fun WearGameDialog(
                 WearPauseDialog(
                     onResume = component::onResume,
                     onSettings = component::onSettings,
-                    onQuit = component::onQuit
+                    onQuit = component::onQuit,
                 )
 
             is GameComponent.DialogChild.GameOver ->
@@ -102,13 +102,13 @@ fun WearGameDialog(
                     lines = model.finalLinesCleared,
                     onRetry = component::onRetry,
                     onQuit = component::onQuit,
-                    onDismiss = component::onDismissDialog
+                    onDismiss = component::onDismissDialog,
                 )
 
             is GameComponent.DialogChild.Error ->
                 WearErrorDialog(
                     message = child.message,
-                    onDismiss = component::onDismissDialog
+                    onDismiss = component::onDismissDialog,
                 )
         }
     }

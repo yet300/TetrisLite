@@ -59,13 +59,13 @@ fun WearHomeScreen(component: HomeComponent) {
     Scaffold(
         timeText = { TimeText() },
         vignette = { Vignette(VignettePosition.TopAndBottom) },
-        positionIndicator = { PositionIndicator(scalingLazyListState = listState) }
+        positionIndicator = { PositionIndicator(scalingLazyListState = listState) },
     ) {
         when (val state = model) {
             is HomeComponent.Model.Loading -> {
                 Box(
                     modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
+                    contentAlignment = Alignment.Center,
                 ) {
                     CircularProgressIndicator()
                 }
@@ -97,7 +97,7 @@ private fun WearHomeContent(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        autoCentering = AutoCenteringParams(itemIndex = 1)
+        autoCentering = AutoCenteringParams(itemIndex = 1),
     ) {
         item {
             Text(
@@ -105,7 +105,7 @@ private fun WearHomeContent(
                 style = MaterialTheme.typography.title3,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(top = 8.dp, bottom = 4.dp),
-                color = MaterialTheme.colors.primary
+                color = MaterialTheme.colors.primary,
             )
         }
 
@@ -119,9 +119,10 @@ private fun WearHomeContent(
         if (hasSavedGame) {
             item {
                 Chip(
-                    modifier = Modifier
-                        .height(32.dp)
-                        .width(140.dp),
+                    modifier =
+                        Modifier
+                            .height(32.dp)
+                            .width(140.dp),
                     label = {
                         Text(
                             text = stringResource(R.string.new_game),
@@ -163,11 +164,11 @@ private fun HomeActionsRow(
         Button(
             onClick = actions.onOpenHistory,
             colors = ButtonDefaults.secondaryButtonColors(),
-            modifier = Modifier.size(ButtonDefaults.SmallButtonSize)
+            modifier = Modifier.size(ButtonDefaults.SmallButtonSize),
         ) {
             Icon(
                 imageVector = Icons.Default.History,
-                contentDescription = stringResource(R.string.history)
+                contentDescription = stringResource(R.string.history),
             )
         }
 
@@ -177,16 +178,17 @@ private fun HomeActionsRow(
 
         Button(
             onClick = mainAction,
-            colors = ButtonDefaults.buttonColors(
-                backgroundColor = MaterialTheme.colors.primary,
-                contentColor = MaterialTheme.colors.onPrimary
-            ),
-            modifier = Modifier.size(ButtonDefaults.LargeButtonSize)
+            colors =
+                ButtonDefaults.buttonColors(
+                    backgroundColor = MaterialTheme.colors.primary,
+                    contentColor = MaterialTheme.colors.onPrimary,
+                ),
+            modifier = Modifier.size(ButtonDefaults.LargeButtonSize),
         ) {
             Icon(
                 imageVector = mainIcon,
                 contentDescription = stringResource(mainDesc),
-                modifier = Modifier.size(32.dp)
+                modifier = Modifier.size(32.dp),
             )
         }
 
@@ -194,29 +196,29 @@ private fun HomeActionsRow(
         Button(
             onClick = actions.onOpenSettings,
             colors = ButtonDefaults.secondaryButtonColors(),
-            modifier = Modifier.size(ButtonDefaults.SmallButtonSize)
+            modifier = Modifier.size(ButtonDefaults.SmallButtonSize),
         ) {
             Icon(
                 imageVector = Icons.Default.Settings,
-                contentDescription = stringResource(R.string.settings)
+                contentDescription = stringResource(R.string.settings),
             )
         }
     }
 }
 
-
 @Composable
 private fun DifficultySelector(
     difficulty: Difficulty,
-    onDifficultyChanged: (Difficulty) -> Unit
+    onDifficultyChanged: (Difficulty) -> Unit,
 ) {
     val sliderValue = difficulty.ordinal + 1f
 
-    val difficultyName = when (difficulty) {
-        Difficulty.EASY -> stringResource(R.string.difficulty_easy)
-        Difficulty.NORMAL -> stringResource(R.string.difficulty_medium)
-        Difficulty.HARD -> stringResource(R.string.difficulty_hard)
-    }
+    val difficultyName =
+        when (difficulty) {
+            Difficulty.EASY -> stringResource(R.string.difficulty_easy)
+            Difficulty.NORMAL -> stringResource(R.string.difficulty_medium)
+            Difficulty.HARD -> stringResource(R.string.difficulty_hard)
+        }
 
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
@@ -271,10 +273,11 @@ private data class HomeActions(
     val onDifficultyChanged: (Difficulty) -> Unit,
 )
 
-private fun rememberHomeActions(component: HomeComponent): HomeActions = HomeActions(
-    onOpenHistory = component::onOpenHistory,
-    onOpenSettings = component::onOpenSettings,
-    onStartNewGame = component::onStartNewGame,
-    onResumeGame = component::onResumeGame,
-    onDifficultyChanged = component::onDifficultyChanged,
-)
+private fun rememberHomeActions(component: HomeComponent): HomeActions =
+    HomeActions(
+        onOpenHistory = component::onOpenHistory,
+        onOpenSettings = component::onOpenSettings,
+        onStartNewGame = component::onStartNewGame,
+        onResumeGame = component::onResumeGame,
+        onDifficultyChanged = component::onDifficultyChanged,
+    )

@@ -17,7 +17,7 @@ import com.yet.tetris.wear.ui.components.WearOverlaySurface
 @Composable
 fun WearErrorDialog(
     message: String,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
 ) {
     WearOverlaySurface(
         title = stringResource(R.string.error),
@@ -27,13 +27,13 @@ fun WearErrorDialog(
         Text(
             text = message,
             style = MaterialTheme.typography.body2,
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
         )
         Spacer(modifier = Modifier.height(8.dp))
         Chip(
             label = { Text(stringResource(R.string.understood)) },
             onClick = onDismiss,
-            colors = ChipDefaults.secondaryChipColors()
+            colors = ChipDefaults.secondaryChipColors(),
         )
     }
 }

@@ -23,7 +23,7 @@ import com.yet.tetris.wear.ui.components.WearOverlaySurface
 fun WearPauseDialog(
     onResume: () -> Unit,
     onSettings: () -> Unit,
-    onQuit: () -> Unit
+    onQuit: () -> Unit,
 ) {
     WearOverlaySurface(
         title = stringResource(R.string.pause),
@@ -33,27 +33,26 @@ fun WearPauseDialog(
         Text(
             text = stringResource(R.string.game_paused),
             style = MaterialTheme.typography.body2,
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
         )
         Spacer(modifier = Modifier.size(4.dp))
         Chip(
             label = { Text(stringResource(R.string.resume_game)) },
             icon = { Icon(Icons.Default.PlayArrow, null) },
             onClick = onResume,
-            colors = ChipDefaults.primaryChipColors()
+            colors = ChipDefaults.primaryChipColors(),
         )
         Chip(
             label = { Text(stringResource(R.string.settings)) },
             icon = { Icon(Icons.Default.Settings, null) },
             onClick = onSettings,
-            colors = ChipDefaults.secondaryChipColors()
+            colors = ChipDefaults.secondaryChipColors(),
         )
         Chip(
             label = { Text(stringResource(R.string.exit)) },
             icon = { Icon(Icons.Default.Close, null) },
             onClick = onQuit,
-            colors = ChipDefaults.secondaryChipColors()
+            colors = ChipDefaults.secondaryChipColors(),
         )
     }
 }
-

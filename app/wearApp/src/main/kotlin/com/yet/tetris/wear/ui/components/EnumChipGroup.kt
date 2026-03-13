@@ -37,10 +37,10 @@ fun <T : Enum<T>> EnumChipGroup(
             icon = {
                 Icon(
                     imageVector = if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                    contentDescription = "Expand $label"
+                    contentDescription = "Expand $label",
                 )
             },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
         )
 
         if (expanded) {
@@ -56,10 +56,10 @@ fun <T : Enum<T>> EnumChipGroup(
                     toggleControl = {
                         RadioButton(
                             selected = value == selected,
-                            onClick = null
+                            onClick = null,
                         )
                     },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
                 )
             }
         }
