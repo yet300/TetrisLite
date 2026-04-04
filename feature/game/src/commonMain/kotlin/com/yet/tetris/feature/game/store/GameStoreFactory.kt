@@ -170,7 +170,7 @@ internal class GameStoreFactory
                             } catch (e: Exception) {
                                 publish(
                                     GameStore.Label.ShowError(
-                                        e.message ?: "Failed to save settings"
+                                        e.message ?: "Failed to save settings",
                                     ),
                                 )
                             }
