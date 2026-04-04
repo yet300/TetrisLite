@@ -32,6 +32,7 @@ internal data class GameInputActions(
     val onDragStarted: () -> Unit,
     val onDragged: (Float, Float) -> Unit,
     val onDragEnded: () -> Unit,
+    val onToggleMusic: (Boolean) -> Unit,
     val primaryRotateDirection: RotationDirection,
     val enable180Rotation: Boolean,
 )

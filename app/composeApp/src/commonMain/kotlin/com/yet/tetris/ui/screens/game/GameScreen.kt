@@ -43,6 +43,7 @@ fun GameScreen(component: GameComponent) {
                 onDragStarted = component::onDragStarted,
                 onDragged = component::onDragged,
                 onDragEnded = component::onDragEnded,
+                onToggleMusic = component::onToggleMusic,
                 primaryRotateDirection = model.settings.controlSettings.primaryRotateDirection,
                 enable180Rotation = model.settings.controlSettings.enable180Rotation,
             )

@@ -16,6 +16,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.VolumeOff
+import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.SwapHoriz
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
@@ -58,6 +60,8 @@ internal fun CompactGameLayout(
             onPause = actions.onPause,
             onHold = actions.onHold,
             buttonSize = metrics.buttonSize,
+            musicEnabled = model.settings.audioSettings.musicEnabled,
+            onToggleMusic = actions.onToggleMusic,
         )
 
         GameBoardPane(
@@ -128,6 +132,7 @@ internal fun CanonicalSupportingPaneGameLayout(
                 settings = model.settings,
                 onPause = actions.onPause,
                 onHold = actions.onHold,
+                onToggleMusic = actions.onToggleMusic,
                 holdPieceSize = metrics.holdPieceSize,
                 queuePieceSize = metrics.queuePieceSize,
                 buttonSize = metrics.buttonSize,
@@ -179,6 +184,8 @@ internal fun ExpandedGameLayout(
             GameActionButtons(
                 onPause = actions.onPause,
                 onHold = actions.onHold,
+                musicEnabled = model.settings.audioSettings.musicEnabled,
+                onToggleMusic = actions.onToggleMusic,
                 buttonSize = metrics.buttonSize,
             )
         }
@@ -230,6 +237,8 @@ private fun CompactHeaderPane(
     onPause: () -> Unit,
     onHold: () -> Unit,
     buttonSize: Dp,
+    musicEnabled: Boolean,
+    onToggleMusic: (Boolean) -> Unit,
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -239,6 +248,8 @@ private fun CompactHeaderPane(
         GameActionButtons(
             onPause = onPause,
             onHold = onHold,
+            musicEnabled = musicEnabled,
+            onToggleMusic = onToggleMusic,
             buttonSize = buttonSize,
         )
 
@@ -291,6 +302,7 @@ private fun MediumSupportingPane(
     settings: GameSettings,
     onPause: () -> Unit,
     onHold: () -> Unit,
+    onToggleMusic: (Boolean) -> Unit,
     holdPieceSize: Dp,
     queuePieceSize: Dp,
     buttonSize: Dp,
@@ -303,6 +315,8 @@ private fun MediumSupportingPane(
         GameActionButtons(
             onPause = onPause,
             onHold = onHold,
+            musicEnabled = settings.audioSettings.musicEnabled,
+            onToggleMusic = onToggleMusic,
             buttonSize = buttonSize,
         )
 
@@ -339,12 +353,19 @@ private fun MediumSupportingPane(
 private fun GameActionButtons(
     onPause: () -> Unit,
     onHold: () -> Unit,
+    musicEnabled: Boolean,
+    onToggleMusic: (Boolean) -> Unit,
     buttonSize: Dp,
 ) {
     Row(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
+        FrostedGlassButton(
+            onClick = { onToggleMusic(!musicEnabled) },
+            modifier = Modifier.size(buttonSize),
+            icon = if (musicEnabled) Icons.AutoMirrored.Filled.VolumeUp else Icons.AutoMirrored.Filled.VolumeOff,
+        )
         FrostedGlassButton(
             onClick = onPause,
             modifier = Modifier.size(buttonSize),
