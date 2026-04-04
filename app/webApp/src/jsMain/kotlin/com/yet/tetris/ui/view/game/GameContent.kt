@@ -27,6 +27,8 @@ import com.yet.tetris.utils.useAsState
 import js.objects.unsafeJso
 import kotlinx.browser.window
 import mui.icons.material.Pause
+import mui.icons.material.VolumeOff
+import mui.icons.material.VolumeUp
 import mui.material.Box
 import mui.material.Drawer
 import mui.material.DrawerAnchor
@@ -572,6 +574,26 @@ val GameContent =
                                                 backgroundColor = Color("rgba(255, 255, 255, 0.2)")
                                             }
                                         }
+                                        onClick = { props.component.onToggleMusic(!model.settings.audioSettings.musicEnabled) }
+                                        if (model.settings.audioSettings.musicEnabled) {
+                                            VolumeUp()
+                                        } else {
+                                            VolumeOff()
+                                        }
+                                    }
+
+                                    IconButton {
+                                        sx {
+                                            backgroundColor = Color("rgba(255, 255, 255, 0.1)")
+                                            backdropFilter = "blur(10px)".unsafeCast<BackdropFilter>()
+                                            border =
+                                                "1px solid rgba(255, 255, 255, 0.2)".unsafeCast<Border>()
+                                            padding = 0.42.rem
+                                            minWidth = "auto".unsafeCast<web.cssom.MinWidth>()
+                                            hover {
+                                                backgroundColor = Color("rgba(255, 255, 255, 0.2)")
+                                            }
+                                        }
                                         onClick = { props.component.onPause() }
                                         Pause()
                                     }
@@ -779,6 +801,26 @@ val GameContent =
                                                 backgroundColor = Color("rgba(255, 255, 255, 0.2)")
                                             }
                                         }
+                                        onClick = { props.component.onToggleMusic(!model.settings.audioSettings.musicEnabled) }
+                                        if (model.settings.audioSettings.musicEnabled) {
+                                            VolumeUp()
+                                        } else {
+                                            VolumeOff()
+                                        }
+                                    }
+
+                                    IconButton {
+                                        sx {
+                                            backgroundColor = Color("rgba(255, 255, 255, 0.1)")
+                                            backdropFilter = "blur(10px)".unsafeCast<BackdropFilter>()
+                                            border =
+                                                "1px solid rgba(255, 255, 255, 0.2)".unsafeCast<Border>()
+                                            padding = 0.45.rem
+                                            minWidth = "auto".unsafeCast<web.cssom.MinWidth>()
+                                            hover {
+                                                backgroundColor = Color("rgba(255, 255, 255, 0.2)")
+                                            }
+                                        }
                                         onClick = { props.component.onPause() }
                                         Pause()
                                     }
@@ -951,6 +993,26 @@ val GameContent =
                                         display = Display.flex
                                         alignItems = AlignItems.center
                                         gap = 0.5.rem
+                                    }
+
+                                    IconButton {
+                                        sx {
+                                            backgroundColor = Color("rgba(255, 255, 255, 0.1)")
+                                            backdropFilter = "blur(10px)".unsafeCast<BackdropFilter>()
+                                            border =
+                                                "1px solid rgba(255, 255, 255, 0.2)".unsafeCast<Border>()
+                                            padding = 0.5.rem
+                                            minWidth = "auto".unsafeCast<web.cssom.MinWidth>()
+                                            hover {
+                                                backgroundColor = Color("rgba(255, 255, 255, 0.2)")
+                                            }
+                                        }
+                                        onClick = { props.component.onToggleMusic(!model.settings.audioSettings.musicEnabled) }
+                                        if (model.settings.audioSettings.musicEnabled) {
+                                            VolumeUp()
+                                        } else {
+                                            VolumeOff()
+                                        }
                                     }
 
                                     IconButton {
