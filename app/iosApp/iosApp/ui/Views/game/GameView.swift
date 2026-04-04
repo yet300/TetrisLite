@@ -48,6 +48,9 @@ struct GameView: View {
                         onDragEnded: component.onDragEnded,
                         onBoardSizeChanged: { height in
                             component.onBoardSizeChanged(height: height)
+                        },
+                        onToggleMusic: { enabled in
+                            component.onToggleMusic(enabled: enabled)
                         }
                     )
 

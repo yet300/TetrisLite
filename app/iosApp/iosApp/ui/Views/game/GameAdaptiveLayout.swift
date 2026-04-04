@@ -9,6 +9,7 @@ struct GameInputActions {
     let onDragged: (Float, Float) -> Void
     let onDragEnded: () -> Void
     let onBoardSizeChanged: (Float) -> Void
+    let onToggleMusic: (Bool) -> Void
 }
 
 struct GameAdaptiveLayout: View {
@@ -95,6 +96,7 @@ private struct CompactGameLayout: View {
         VStack(spacing: metrics.sectionSpacing) {
             CompactHeaderPane(
                 gameState: gameState,
+                settings: settings,
                 elapsedTime: elapsedTime,
                 actions: actions,
                 metrics: metrics
@@ -152,6 +154,7 @@ private struct MediumGameLayout: View {
                 GameControlButtonsRow(
                     buttonSize: metrics.buttonSize,
                     iconSize: metrics.buttonIconSize,
+                    musicEnabled: settings.audioSettings.musicEnabled,
                     actions: actions
                 )
 
@@ -230,6 +233,7 @@ private struct ExpandedGameLayout: View {
                 GameControlButtonsRow(
                     buttonSize: metrics.buttonSize,
                     iconSize: metrics.buttonIconSize,
+                    musicEnabled: settings.audioSettings.musicEnabled,
                     actions: actions
                 )
             }
@@ -273,6 +277,7 @@ private struct ExpandedGameLayout: View {
 
 private struct CompactHeaderPane: View {
     let gameState: GameState
+    let settings: GameSettings
     let elapsedTime: Int64
     let actions: GameInputActions
     let metrics: GameAdaptiveMetrics
@@ -283,6 +288,7 @@ private struct CompactHeaderPane: View {
                 GameControlButtonsRow(
                     buttonSize: metrics.buttonSize,
                     iconSize: metrics.buttonIconSize,
+                    musicEnabled: settings.audioSettings.musicEnabled,
                     actions: actions
                 )
 
@@ -301,6 +307,7 @@ private struct CompactHeaderPane: View {
                 GameControlButtonsRow(
                     buttonSize: metrics.buttonSize,
                     iconSize: metrics.buttonIconSize,
+                    musicEnabled: settings.audioSettings.musicEnabled,
                     actions: actions
                 )
 
@@ -388,10 +395,23 @@ private struct QueueCompactRow: View {
 private struct GameControlButtonsRow: View {
     let buttonSize: CGFloat
     let iconSize: CGFloat
+    let musicEnabled: Bool
     let actions: GameInputActions
 
     var body: some View {
         HStack(spacing: 10) {
+            Button(action: { actions.onToggleMusic(!musicEnabled) }) {
+                Image(systemName: musicEnabled ? "speaker.wave.3.fill" : "speaker.slash.fill")
+                    .font(.system(size: iconSize, weight: .semibold))
+                    .foregroundStyle(GameHudPalette.label)
+                    .frame(width: buttonSize, height: buttonSize)
+                    .glassPanelStyle(cornerRadius: buttonSize / 2)
+                    .clipShape(.circle)
+            }
+            .buttonStyle(.plain)
+            .gameHoverEffect()
+            .accessibilityLabel(Strings.settings)
+
             Button(action: actions.onPause) {
                 Image(systemName: "pause.fill")
                     .font(.system(size: iconSize, weight: .semibold))
