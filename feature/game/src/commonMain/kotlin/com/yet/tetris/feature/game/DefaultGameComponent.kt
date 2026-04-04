@@ -203,6 +203,10 @@ internal class DefaultGameComponent(
         store.accept(GameStore.Intent.VisualEffectConsumed(sequence))
     }
 
+    override fun onToggleMusic(enabled: Boolean) {
+        store.accept(GameStore.Intent.ToggleMusic(enabled))
+    }
+
     private fun createDialogChild(
         config: DialogConfig,
         componentContext: ComponentContext,

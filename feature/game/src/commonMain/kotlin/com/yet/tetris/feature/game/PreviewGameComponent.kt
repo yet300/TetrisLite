@@ -116,4 +116,8 @@ class PreviewGameComponent :
     override fun onVisualEffectConsumed(sequence: Long) {
         TODO("Not yet implemented")
     }
+
+    override fun onToggleMusic(enabled: Boolean) {
+        TODO("Not yet implemented")
+    }
 }

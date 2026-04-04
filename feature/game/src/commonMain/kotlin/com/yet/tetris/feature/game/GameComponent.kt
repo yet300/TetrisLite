@@ -85,6 +85,8 @@ interface GameComponent : BackHandlerOwner {
 
     fun onVisualEffectConsumed(sequence: Long)
 
+    fun onToggleMusic(enabled: Boolean)
+
     sealed interface DialogChild {
         class Pause : DialogChild
 
