@@ -66,6 +66,10 @@ internal interface GameStore : Store<GameStore.Intent, GameStore.State, GameStor
 
         data object DragEnded : Intent()
 
+        class ToggleMusic(
+            val enabled: Boolean,
+        ) : Intent()
+
         data class VisualEffectConsumed(
             val sequence: Long,
         ) : Intent()

@@ -153,6 +153,36 @@ internal class GameStoreFactory
                     is GameStore.Intent.Hold -> hold(getState)
                     is GameStore.Intent.HandleSwipe -> handleSwipe(intent, getState)
 
+                    is GameStore.Intent.ToggleMusic -> {
+                        val currentState = state()
+                        val newSettings =
+                            currentState.settings.copy(
+                                audioSettings =
+                                    currentState.settings.audioSettings.copy(
+                                        musicEnabled = intent.enabled,
+                                    ),
+                            )
+                        dispatch(GameStore.Msg.SettingsUpdated(newSettings))
+
+                        scope.launch {
+                            try {
+                                gameSettingsRepository.saveSettings(newSettings)
+                            } catch (e: Exception) {
+                                publish(
+                                    GameStore.Label.ShowError(
+                                        e.message ?: "Failed to save settings"
+                                    ),
+                                )
+                            }
+                            persistGameAudioUseCase.applyAudioSettings(newSettings)
+                            if (intent.enabled) {
+                                persistGameAudioUseCase.playMusicIfEnabled(newSettings)
+                            } else {
+                                persistGameAudioUseCase.stopMusic()
+                            }
+                        }
+                    }
+
                     is GameStore.Intent.OnBoardSizeChanged -> {
                         boardHeightPx = intent.height
                     }
