@@ -43,7 +43,7 @@ jetbrainsKotlinWrappers = "2025.12.7"
 
 koin = "4.2.1"
 koin-annotation = "2.3.1"
-koin-compiler = "1.0.0-RC1"
+koin-compiler = "1.0.0"
 decompose = "3.5.0"
 essenty = "2.5.0"
 mvi = "4.4.0"

@@ -6,25 +6,29 @@ import com.yet.tetris.feature.game.di.GameFeatureModule
 import com.yet.tetris.feature.history.di.HistoryFeatureModule
 import com.yet.tetris.feature.home.di.HomeFeatureModule
 import com.yet.tetris.feature.settings.di.SettingsFeatureModule
-import org.koin.core.context.startKoin
+import org.koin.core.annotation.KoinApplication
 import org.koin.dsl.KoinAppDeclaration
-import org.koin.ksp.generated.module
+import org.koin.plugin.module.dsl.startKoin
 import kotlin.js.ExperimentalJsExport
 import kotlin.js.JsExport
+
+@KoinApplication(
+    modules = [
+        DomainModule::class,
+        DataModule::class,
+        CommonModule::class,
+        GameFeatureModule::class,
+        HomeFeatureModule::class,
+        HistoryFeatureModule::class,
+        SettingsFeatureModule::class,
+    ]
+)
+object TetrisApp
 
 @OptIn(ExperimentalJsExport::class)
 @JsExport
 fun InitKoin(config: KoinAppDeclaration? = null) {
-    startKoin {
-        modules(
-            DomainModule().module,
-            DataModule().module,
-            CommonModule().module,
-            GameFeatureModule().module,
-            HomeFeatureModule().module,
-            HistoryFeatureModule().module,
-            SettingsFeatureModule().module,
-        )
+    startKoin<TetrisApp> {
         config?.invoke(this)
     }
 }
