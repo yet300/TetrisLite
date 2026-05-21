@@ -10,7 +10,6 @@ class SqlDelightConventionPlugin : Plugin<Project> {
 
     override fun apply(target: Project): Unit = with(target) {
         with(pluginManager) {
-            apply(libs.findPlugin("ksp").get().get().pluginId)
             apply(libs.findPlugin("sqlDelight").get().get().pluginId)
         }
 

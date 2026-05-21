@@ -1,5 +1,3 @@
-import com.google.devtools.ksp.gradle.KspAATask
-
 plugins {
     alias(libs.plugins.local.kotlin.multiplatform)
     alias(libs.plugins.local.koin)
